@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loading / empty / error / access-denied states — Kam Ki Lead</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="proto-banner">Disposable design prototype — synthetic data only. <a href="screens.html">Screen index</a></div>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><span class="mark">K</span> Kam Ki Lead</a>
+  <nav class="nav-links"><a href="index.html">Home</a></nav>
+</div></header>
+
+<div class="wrap" style="padding:32px 20px 60px;">
+  <h1 style="font-size:24px;">State pattern library</h1>
+  <p style="color:var(--kkl-text-muted);max-width:640px;">These four states apply across every list/detail screen in the prototype (search results, marketplace, enquiries, KYC queue, etc.) — shown here once as the reusable pattern rather than duplicated on every page.</p>
+
+  <h2 style="font-size:16px;margin-top:32px;">1. Loading</h2>
+  <div class="card-grid">
+    <div class="p-card"><div class="thumb skeleton" style="color:transparent;">.</div><div class="body stack"><div class="skeleton" style="height:14px;width:60%;"></div><div class="skeleton" style="height:12px;width:80%;"></div><div class="skeleton" style="height:12px;width:40%;"></div></div></div>
+    <div class="p-card"><div class="thumb skeleton" style="color:transparent;">.</div><div class="body stack"><div class="skeleton" style="height:14px;width:60%;"></div><div class="skeleton" style="height:12px;width:80%;"></div><div class="skeleton" style="height:12px;width:40%;"></div></div></div>
+    <div class="p-card"><div class="thumb skeleton" style="color:transparent;">.</div><div class="body stack"><div class="skeleton" style="height:14px;width:60%;"></div><div class="skeleton" style="height:12px;width:80%;"></div><div class="skeleton" style="height:12px;width:40%;"></div></div></div>
+  </div>
+
+  <h2 style="font-size:16px;margin-top:32px;">2. Empty</h2>
+  <div class="empty-state">
+    <div class="icon">🏠</div>
+    <strong>No properties match these filters</strong>
+    <p style="color:var(--kkl-text-muted);">Try widening your budget range or choosing a nearby location.</p>
+    <a class="btn btn-outline btn-sm" href="search.html">Clear filters</a>
+  </div>
+  <div class="empty-state" style="margin-top:16px;">
+    <div class="icon">📭</div>
+    <strong>No enquiries yet</strong>
+    <p style="color:var(--kkl-text-muted);">Browse properties and enquire to start tracking them here.</p>
+    <a class="btn btn-primary btn-sm" href="index.html">Browse properties</a>
+  </div>
+
+  <h2 style="font-size:16px;margin-top:32px;">3. Error</h2>
+  <div class="error-state">
+    <div class="icon">⚠️</div>
+    <strong>Something went wrong loading this page</strong>
+    <p style="color:var(--kkl-danger);">Our server didn't respond in time. Your data is safe — nothing was charged or changed.</p>
+    <button class="btn btn-outline btn-sm">Try again</button>
+  </div>
+  <div class="error-state" style="margin-top:16px;">
+    <div class="icon">💳</div>
+    <strong>Payment could not be confirmed</strong>
+    <p style="color:var(--kkl-danger);">Razorpay didn't confirm this payment. No credits were added. If money was deducted, it will be auto-refunded within 5–7 days.</p>
+    <button class="btn btn-outline btn-sm">Retry recharge</button>
+  </div>
+
+  <h2 style="font-size:16px;margin-top:32px;">4. Access denied</h2>
+  <div class="denied-state">
+    <div class="icon">🔒</div>
+    <strong>Buyer accounts can't access the lead marketplace</strong>
+    <p style="color:#8a5a0f;">The lead marketplace is only available to verified Sellers and Builders. Track your own enquiries from your Buyer account instead.</p>
+    <a class="btn btn-outline btn-sm" href="buyer-account.html">Go to My Enquiries</a>
+  </div>
+  <div class="denied-state" style="margin-top:16px;">
+    <div class="icon">⏳</div>
+    <strong>Your KYC is still pending review</strong>
+    <p style="color:#8a5a0f;">Marketplace purchases, downloads and property listing unlock once an admin approves your KYC — usually within 24 hours.</p>
+    <a class="btn btn-outline btn-sm" href="seller-kyc.html">View KYC status</a>
+  </div>
+</div>
+
+<footer class="footer"><div class="wrap"><div><strong>Kam Ki Lead</strong> · Design-direction prototype</div><div>© 2026 Kam Ki Lead</div></div></footer>
+</body>
+</html>

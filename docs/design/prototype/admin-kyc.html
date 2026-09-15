@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · KYC queue — Kam Ki Lead</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="proto-banner">Disposable design prototype — synthetic data only. <a href="screens.html">Screen index</a></div>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><span class="mark">K</span> Kam Ki Lead Admin</a>
+  <nav class="nav-links">
+    <a href="#">Dashboard</a>
+    <a href="admin-kyc.html" class="active">KYC Queue</a>
+    <a href="#">Leads</a>
+    <a href="#">Properties</a>
+    <a href="#">Billing</a>
+    <a href="#">Support</a>
+    <a href="#">Audit Log</a>
+  </nav>
+  <div class="nav-actions"><span class="badge-pill badge-info">Anjali M. · Admin</span></div>
+</div></header>
+
+<div class="wrap" style="padding-top:20px;padding-bottom:40px;">
+  <h1 style="font-size:22px;margin:0 0 4px;">KYC verification queue</h1>
+  <p style="color:var(--kkl-text-muted);margin:0 0 20px;">24-hour review is an operational target, not automatic approval — every decision below requires explicit admin action.</p>
+
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="stat"><div class="n">8</div><div class="l">Pending review</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">Past 24h SLA</div></div>
+    <div class="stat"><div class="n">54</div><div class="l">Approved this month</div></div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><th>Applicant</th><th>Role</th><th>PAN / Aadhaar</th><th>Submitted</th><th>SLA</th><th></th></tr>
+      <tr>
+        <td><strong>Rohan Basak</strong><br><span style="font-size:12px;color:var(--kkl-text-faint);">Basak Realty Associates</span></td>
+        <td>Seller</td><td>ABCDE****F / XXXX-XXXX-8842</td><td>15 Sep, 6:40 PM</td>
+        <td><span class="badge-pill badge-pending">18h left</span></td>
+        <td class="row"><button class="btn btn-outline btn-sm">Reject</button><button class="btn btn-primary btn-sm">Approve</button></td>
+      </tr>
+      <tr>
+        <td><strong>Elysian Landmarks Pvt Ltd</strong><br><span style="font-size:12px;color:var(--kkl-text-faint);">Builder — Tanmoy Ghosh</span></td>
+        <td>Builder</td><td>FGHIJ****K / XXXX-XXXX-1190</td><td>14 Sep, 11:05 AM</td>
+        <td><span class="badge-pill badge-rejected">3h overdue</span></td>
+        <td class="row"><button class="btn btn-outline btn-sm">Reject</button><button class="btn btn-primary btn-sm">Approve</button></td>
+      </tr>
+      <tr>
+        <td><strong>Sourav Dutta</strong></td>
+        <td>Seller</td><td>KLMNO****P / XXXX-XXXX-3321</td><td>15 Sep, 2:15 PM</td>
+        <td><span class="badge-pill badge-pending">22h left</span></td>
+        <td class="row"><button class="btn btn-outline btn-sm">Reject</button><button class="btn btn-primary btn-sm">Approve</button></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<footer class="footer"><div class="wrap"><div><strong>Kam Ki Lead</strong> · Design-direction prototype</div><div>© 2026 Kam Ki Lead</div></div></footer>
+</body>
+</html>

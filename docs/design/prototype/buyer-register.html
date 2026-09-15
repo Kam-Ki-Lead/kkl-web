@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in / Register — Kam Ki Lead</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="proto-banner">Disposable design prototype — synthetic data only. <a href="screens.html">Screen index</a></div>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><span class="mark">K</span> Kam Ki Lead</a>
+  <nav class="nav-links"><a href="index.html">Buy a Home</a></nav>
+  <div class="nav-actions"></div>
+</div></header>
+
+<div class="wrap" style="max-width:420px;padding:56px 20px;">
+  <span class="eyebrow">Buyer account</span>
+  <h1 style="font-size:24px;margin:6px 0 4px;">Log in or register</h1>
+  <p style="color:var(--kkl-text-muted);margin:0 0 24px;">Free. Mobile number and OTP only — no password, no KYC needed to browse and enquire.</p>
+
+  <div class="card stack" id="step-phone">
+    <div class="field"><label>Mobile number</label><input type="tel" placeholder="+91 98XXXXXX21"></div>
+    <button class="btn btn-primary btn-block">Send OTP</button>
+    <p style="font-size:12px;color:var(--kkl-text-faint);text-align:center;margin:0;">By continuing you agree to be contacted about your enquiries. No lead-marketplace or seller access is ever granted to a Buyer account.</p>
+  </div>
+
+  <div class="card stack" style="margin-top:16px;">
+    <label style="font-size:13px;font-weight:700;color:var(--kkl-text-faint);">— OTP verification screen (state preview) —</label>
+    <div class="field"><label>Enter the 6-digit code sent to +91 98XXXXXX21</label>
+      <div class="otp-boxes"><input maxlength="1" value="4"><input maxlength="1" value="2"><input maxlength="1"><input maxlength="1"><input maxlength="1"><input maxlength="1"></div>
+    </div>
+    <a class="btn btn-primary btn-block" href="buyer-account.html">Verify &amp; continue</a>
+    <p style="font-size:12px;color:var(--kkl-text-faint);text-align:center;margin:0;">Didn't get a code? Resend in 00:28</p>
+  </div>
+
+  <div class="card" style="margin-top:16px;text-align:center;">
+    <p style="margin:0 0 8px;font-size:14px;color:var(--kkl-text-muted);">Registering as a Seller or Builder?</p>
+    <div class="row" style="justify-content:center;gap:8px;">
+      <a class="btn btn-outline btn-sm" href="seller-kyc.html">Seller sign-up</a>
+      <a class="btn btn-outline btn-sm" href="builder-subscription.html">Builder sign-up</a>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"><div class="wrap"><div><strong>Kam Ki Lead</strong> · Design-direction prototype</div><div>© 2026 Kam Ki Lead</div></div></footer>
+</body>
+</html>

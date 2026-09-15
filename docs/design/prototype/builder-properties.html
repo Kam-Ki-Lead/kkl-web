@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Property Management — Kam Ki Lead</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="proto-banner">Disposable design prototype — synthetic data only. <a href="screens.html">Screen index</a></div>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><span class="mark">K</span> Kam Ki Lead</a>
+  <nav class="nav-links"><a href="builder-properties.html" class="active">Properties</a><a href="builder-enquiries.html">Enquiries</a><a href="builder-subscription.html">Subscription</a></nav>
+  <div class="nav-actions"><span class="badge-pill badge-approved">Elysian Landmarks · Builder</span></div>
+</div></header>
+
+<div class="wrap" style="padding-top:20px;">
+  <div class="row" style="justify-content:space-between;align-items:center;">
+    <h1 style="font-size:22px;margin:0;">Property Management</h1>
+    <button class="btn btn-primary btn-sm">+ Add new listing</button>
+  </div>
+</div>
+
+<div class="wrap" style="padding:20px 20px 40px;">
+  <div class="card">
+    <table>
+      <tr><th>Project</th><th>Location</th><th>Config / Price</th><th>Status</th><th>Views</th><th></th></tr>
+      <tr>
+        <td><strong>Greenview Residency</strong></td><td>Action Area II, New Town</td><td>2–3 BHK · ₹78L–₹1.4Cr</td>
+        <td><span class="badge-pill badge-approved">Published</span></td><td>2,340</td>
+        <td><a class="btn btn-outline btn-sm" href="property-detail.html">Edit</a></td>
+      </tr>
+      <tr>
+        <td><strong>Willow Court</strong></td><td>Action Area II, New Town</td><td>2 BHK · ₹65L–₹90L</td>
+        <td><span class="badge-pill badge-pending">Draft</span></td><td>0</td>
+        <td><a class="btn btn-outline btn-sm" href="property-detail.html">Edit</a></td>
+      </tr>
+      <tr>
+        <td><strong>Riverside Court (Ph. 1)</strong></td><td>Salt Lake</td><td>3 BHK · ₹1.1Cr–₹1.5Cr</td>
+        <td><span class="badge-pill badge-muted">Unpublished — subscription inactive</span></td><td>612</td>
+        <td><a class="btn btn-outline btn-sm" href="property-detail.html">Edit</a></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;font-size:15px;">New listing — property details</h3>
+    <div class="grid-2">
+      <div class="field"><label>Project name</label><input type="text" placeholder="e.g. Willow Court"></div>
+      <div class="field"><label>Location (New Town → Action Area → Project)</label><select><option>Action Area I</option><option>Action Area II</option><option>Action Area III</option></select></div>
+      <div class="field"><label>Configuration</label><input type="text" placeholder="2, 3 BHK"></div>
+      <div class="field"><label>Price range</label><input type="text" placeholder="₹65L – ₹90L"></div>
+      <div class="field"><label>Possession</label><input type="text" placeholder="Jun 2028"></div>
+      <div class="field"><label>RERA number</label><input type="text" placeholder="WB/RERA/P/KOL/..."></div>
+    </div>
+    <div class="field"><label>Description</label><textarea rows="3" placeholder="Describe the project..."></textarea></div>
+    <div class="field"><label>Images / video</label><div class="thumb" style="aspect-ratio:16/6;border:1px dashed var(--kkl-border);background:var(--kkl-bg-subtle);font-size:13px;">Drop images or a video link</div></div>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn btn-outline">Save draft</button>
+      <button class="btn btn-primary">Publish listing</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer"><div class="wrap"><div><strong>Kam Ki Lead</strong> · Design-direction prototype</div><div>© 2026 Kam Ki Lead</div></div></footer>
+</body>
+</html>
