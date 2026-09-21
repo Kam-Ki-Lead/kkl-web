@@ -127,7 +127,10 @@ const propertyService: PropertyService = {
         p.configurations.some((c) => requirement.configurations.includes(c));
       return localityOk && configOk;
     }).map((property) => {
-      let score = 60;
+      // Budget carries the most weight of the soft signals: a project well over
+      // what someone can spend should not read as a strong match just because the
+      // locality and configuration line up.
+      let score = 45;
 
       const low = property.price.minInr ?? 0;
       const high = property.price.maxInr ?? Number.MAX_SAFE_INTEGER;
@@ -135,7 +138,7 @@ const propertyService: PropertyService = {
       const wantMin = requirement.minBudgetInr;
       const budgetOverlaps =
         (wantMax === null || low <= wantMax) && (wantMin === null || high >= wantMin);
-      if (budgetOverlaps) score += 25;
+      if (budgetOverlaps) score += 30;
 
       const ready = property.construction === "ready_to_move";
       if (requirement.handoverTiming === "Ready to move" && ready) score += 15;
