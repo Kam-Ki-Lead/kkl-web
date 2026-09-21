@@ -1,121 +1,153 @@
 # Approved Baseline — Phase 2
 
-Record of the design approval that authorises Phase 2 frontend implementation, and the gap
-analysis between what exists in this repository and what was approved.
+Record of the design approval authorising Phase 2, and of the baseline actually used.
 
 ## 1. Approval of record
 
 | Field | Value |
 |---|---|
 | Approval | Phase 1 designs approved by the client |
-| Approved baseline named | **"KKL - Screen 7 - Admin"** |
-| Implementation target named | `KKL Component and State Library.dc.html` |
-| Declared dependencies of that file | `image-slot.js`, `support.js` |
-| Source | Claude Design project `b0950068-96de-4bdd-aff2-8e66216ef895` |
+| Source package named | **"KKL - Screen 7 - Admin"** |
+| Baseline repository | `github.com/Kam-Ki-Lead/kkl-design` |
+| **Baseline commit** | **`5bc3512ecaae0a1af3c31871e7a1c629cba054fc`** ("Archive approved Phase 1 design baseline") |
 | Recorded on | 21 Sep 2026 |
-| Recorded by | Phase 2 implementation session |
 
-This supersedes the Phase 1 status recorded in `delivery-plan.md`, which gated Phase 2 on written
-design approval. Phase 2 is now authorised.
+The kkl-design README records the approval: reported by the project owner in the project
+conversation on 21 September 2026; the original written approval is not held in that repository.
+Wording such as "ready for client review" and "not approved" inside the preserved export reflects
+its pre-approval creation state.
 
-## 2. Access status of the approved artifacts — **BLOCKED**
+**Approval covers the design baseline only.** It does not resolve the pending business rules
+(C-12 — sixteen decisions, six blocking launch), and it does not certify technical checks,
+production readiness, security or accessibility.
 
-**The approved design files could not be retrieved in this session.** Four routes were attempted:
+### "Screen 7 — Admin" ambiguity: resolved
 
-| Route | Result |
-|---|---|
-| `DesignSync` MCP (`get_project`) | Rejected — design-system authorization not granted; `/design-login` cannot run in a non-interactive session |
-| Workspace seeding ("Send to Claude Code Web") | No `.dc.html`, `image-slot.js` or `support.js` anywhere on the filesystem |
-| Session uploads | Contains only the two original Phase 0 PDFs |
-| Direct fetch of the project URL | HTTP 403 (authenticated URL) |
+A previous session flagged that the baseline is named after an Admin screen while the
+implementation order starts with the homepage, and that "Screen 7" did not map onto the brief's
+own 1–16 numbering.
 
-**Consequence:** the approved appearance cannot be read, and therefore cannot be preserved. Any
-visual foundation, component styling, layout or screen markup written before these files are
-available would be invention, not implementation — which is precisely what the Phase 1 rejection
-was about. No visual work has been done for that reason. See §5.
+**Resolved.** "KKL - Screen 7 - Admin" is the name of the *export*, taken from the last screen
+worked on in the design project. The exported package contains the whole design system — public
+homepage, Buyer, Seller, Builder and Admin consoles, the component library and the screen
+inventory. The baseline is the package, not that one screen, and the public portal is present at
+the same approval status. The design package uses its own `P-/S-/B-/A-/C-` ID scheme, which is
+what `implementation-checklist.md` now maps against; the brief's 1–16 priority numbering is
+superseded by it.
 
-### How to unblock
+## 2. Access — resolved
 
-Any one of these is sufficient:
+The previous session recorded this as **BLOCKED**: the approved files could not be retrieved, so
+no visual work was done. That blocker is cleared. The baseline is cloned at the commit above and
+was read *and run*, not just read.
 
-1. Run `/design-login` once from an interactive Claude Code session on this machine — headless and
-   subsequent runs reuse that authorization.
-2. Use Claude Design's **"Send to Claude Code Web"**, which seeds the project into the workspace.
-3. Attach the three files directly to the session: `KKL Component and State Library.dc.html`,
-   `image-slot.js`, `support.js`.
+### Running the baseline locally
 
-Option 2 or 3 is likely fastest given this is a cloud session.
+The prototypes are Claude Design canvas files (`x-dc` with `sc-for` templating) expanded at
+runtime by `support.js`. Reading the source is genuinely insufficient — the markup is templates
+until the runtime resolves them.
 
-## 3. What exists in this repository today
+They need one HTTP origin (`python3 -m http.server 8080`) and React, which `support.js` pulls
+from `unpkg.com`. That CDN is blocked by this environment's egress policy, so the prototypes
+render blank here until React is mirrored:
 
-| Artifact | Location | Status |
+```
+npm install react@18.3.1 react-dom@18.3.1 @babel/standalone@7.29.0   # registry.npmjs.org is reachable
+# copy the UMD builds beside a *copy* of the design repo, repoint the three unpkg URLs in that
+# copy's support.js at them, and serve the copy. kkl-design itself stays untouched.
+```
+
+`images.unsplash.com` is blocked too, so the baseline's illustrative photography does not load
+here. That does not affect layout comparison, and the imagery is placeholder regardless — the
+baseline states every image must be replaced with licensed project photography before launch.
+
+Viewport width alone does not reflow the prototypes: the 360/390/768/1024/1440 tabs are reviewer
+controls that resize an inner frame. To see the approved mobile layout, click the width tab.
+
+## 3. What was read
+
+`README.md`, `HANDOFF.md`, `CONTINUATION.md`; `KKL Phase 1 - Screen Inventory.dc.html` (113 rows
+with a route path per ID); `KKL Component and State Library.dc.html` (C-01 to C-12, rendered
+section by section); `KKL Homepage - Portal Layout.dc.html` at 1440, 768 and 390; and the Buyer,
+Seller, Builder and Admin console prototypes.
+
+## 4. Values taken from the baseline
+
+C-01 colour tokens and the C-02 type scale are transcribed exactly into `src/app/globals.css`.
+Logo geometry and the header, hero and footer values were measured from the rendered DOM rather
+than estimated from screenshots.
+
+| Token | Value | Role (C-01) |
 |---|---|---|
-| Rejected Phase 1 prototype | `docs/design/prototype/` | Preserved, unchanged. Workflow reference only — its **visual direction was rejected** and must not be used as a styling basis (`design-brief/06-rejected-visual-direction.md`). |
-| Design brief package | `design-brief/` | Current. Written to commission the approved designs. |
-| Sitemap / screen inventory / journeys | `docs/design/`, `design-brief/03-…` | Current. |
-| **Application code** | — | **None existed before this session.** kkl-web was documentation-only. |
+| Brand blue | `#1B3BB3` | Primary actions, active navigation, links |
+| Deep blue | `#0F2478` | Hover on primary, dashboard rail |
+| Saffron | `#F2A20C` | Accent rule, focus ring, count badges **only** |
+| Ink | `#12182B` | Headings, admin rail, primary text |
+| Body | `#2A3250` | Paragraph and value text |
+| Muted | `#5A6480` | Labels and secondary text |
+| Surface | `#F4F6FB` | Page background behind cards |
+| Tint | `#F6F8FD` | Inset panels and fact blocks |
+| Line | `#E1E4EE` | Card borders and dividers |
+| Success | `#0E6B45` | Approved, delivered, consent given |
+| Warning | `#8A4A08` | Pending, ageing, unresolved rules |
+| Danger | `#B3261E` | Rejected, failed, destructive |
 
-## 4. Differences between existing code and the approved designs
+Type: Archivo (headings, numbers), Public Sans (body), IBM Plex Mono (references, masked values),
+eight steps. Focus ring 3px saffron at 2px offset on every interactive element. Minimum target
+44px, 48px where a thumb is likely.
 
-**There was no application code to differ.** The gap is total by construction: Phase 2 starts from
-an empty application. The meaningful comparison is between the *rejected prototype* and the
-*approved designs*, and that comparison cannot be made until §2 is unblocked.
+## 5. Implementation decisions
 
-What can be stated now:
+Recorded because they are departures from, or judgements about, the baseline.
 
-- The rejected prototype's visual language (placeholder green, flat cards, blur-masking, reflow-only
-  mobile) is **known not to be the approved design**, so nothing in it is a valid starting point for
-  appearance.
-- The prototype's **workflows and screen content** were accepted as a functional inventory and are
-  expected to survive into the approved designs, but this is an expectation, not a verified fact.
+1. **Reviewer chrome is excluded.** The round badge, width tabs, "Viewing: guest" switcher,
+   review-notes panel and "Prototype · synthetic listings" caption are review tooling, not
+   product. None of it is implemented.
 
-### Open discrepancy to reconcile once the designs are readable
+2. **Exported HTML is not copied.** The designs are reimplemented as routes, layouts and reusable
+   components. Values measured from the export appear as tokens and component styles.
 
-The approved baseline is named **"Screen 7 - Admin"**. The screen inventory in
-`design-brief/03-sitemap-screens-journeys.md` numbers screens 1–16 in priority order, where **#7 is
-"Buyer — my enquiries"** and the Admin KYC queue is **#16**. The design project therefore uses its
-own screen numbering, which does not map onto the brief's numbering.
+3. **Fonts are self-hosted** via `next/font` rather than the baseline's Google Fonts `<link>`, so
+   the application makes no runtime CDN request.
 
-**Action required on unblock:** build an explicit mapping between the design project's screen
-numbers/names and the brief's screen inventory, and record it here. Do not assume the numbering
-matches. Until that mapping exists, a reference to "Screen N" is ambiguous between the two
-documents.
+4. **No stock photography ships.** Every card and gallery renders the designed no-image fallback
+   until kkl-backend serves real builder media.
 
-### Note on baseline choice
+5. **Listing counts are derived from the fixtures, not carried over.** The baseline shows
+   illustrative totals (244 listings, 128 in New Town) against a much smaller sample set. Copying
+   them would have the homepage claim 128 listings that search to six. Layout is unchanged; only
+   the magnitudes follow the data.
 
-The approved baseline is an **Admin** screen, while the requested implementation order starts with
-the homepage and Buyer journey. This is workable — the baseline's role is to fix the visual system,
-and the implementation target is the component and state library rather than the Admin screen
-itself — but it means the public-portal appearance is defined by the library and by the public
-screens in the design project, not by the named baseline. Confirm on unblock that the public
-portal screens exist in the design project at the same approval status.
+6. **Mobile follows the approved mobile layout, not a reflow.** Compact dark hero, location full
+   width with BHK and budget paired, property type behind a "+ More filters" disclosure,
+   two-column locality grid.
 
-## 5. Work done in this session under the blocker
+7. **Masking is a content state, never a blur.** `MarketplaceLead` carries no contact fields at
+   all, so an unpurchased lead's contact details cannot reach HTML, client state or a network
+   response by mistake.
 
-Implemented — design-independent, unaffected by the approved appearance:
+8. **Sample mode fails closed.** `NEXT_PUBLIC_KKL_ENV=production` with sample data throws at
+   module load, as does `api` without a base URL. `NEXT_PUBLIC_KKL_ENV` is deliberately separate
+   from `NODE_ENV` so a local production build still works.
 
-- Next.js / React / TypeScript / Tailwind application configuration.
-- Domain types derived from the approved requirements.
-- Business-rules configuration module (confirmed rules configurable; unresolved rules explicitly
-  unresolved and non-defaulting).
-- Sample-data service layer behind an interface, clearly separated from the real API boundary.
-- API client boundary that holds no secrets, no payment authority, and no permissions enforcement.
+9. **ESLint config repaired.** The inherited `FlatCompat` setup threw "Converting circular
+   structure to JSON" on load, so lint could not run at all. `eslint-config-next` 16 flat configs
+   are now imported directly.
 
-Deliberately **not** implemented pending §2:
+## 6. Baseline defect observed — not inherited
 
-- Design tokens (colour, type, spacing, radii, elevation).
-- Any component styling or reusable visual control.
-- Page layouts, navigation chrome, or screen markup.
-- The homepage and Buyer journey UI.
+The baseline README records an unresolved defect: the homepage emits console entries that
+serialise to empty objects. Run here, it instead throws a visible
+`TypeError: Cannot read properties of undefined (reading 'frame')` from the prototype runtime's
+`componentDidUpdate`. That may be the same defect through a different runtime, or an artifact of
+this environment's blocked image loads; it was not pursued further because it is a defect of the
+prototype runtime, not of the product.
 
-## 6. Carried-forward checks — not passed by design approval
+The application's own console output is checked independently — see `verification.md`.
 
-Design approval does not discharge these. They remain open and are tracked in
-`implementation-checklist.md`:
+## 7. Carried-forward checks — not discharged by design approval
 
-- Accessibility: contrast, focus visibility, form labelling, touch target sizing, keyboard paths,
-  screen-reader semantics.
-- Responsive behaviour verified on real breakpoints, not assumed from the design files.
-- Loading, empty, error and access-denied states present on every data-backed screen.
-- No simulated payment, authentication or messaging presented as live.
-- Server-side authorization treated as authoritative; UI state is never the access control.
+Tracked in `verification.md`: screen-reader testing (none performed), individual status-chip
+contrast measurement, and native browser zoom / Firefox text-only zoom. The baseline's simulated
+200% text enlargement was **Partial**; none of these may be reported as passed without performing
+them.
