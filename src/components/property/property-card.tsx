@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { PropertySummary } from "@/lib/domain/types";
 import { formatConfigurations, formatPriceRange } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
+import { ButtonLink } from "@/components/ui/button";
 import { PropertyImage } from "./property-image";
 
 /**
@@ -10,7 +11,14 @@ import { PropertyImage } from "./property-image";
  *
  * Construction status is never colour alone — it always carries its word.
  */
-export function PropertyCard({ property }: { property: PropertySummary }) {
+export function PropertyCard({
+  property,
+  actions = "link",
+}: {
+  property: PropertySummary;
+  /** "link" on the homepage, "buttons" in search results — both are approved. */
+  actions?: "link" | "buttons";
+}) {
   const price = formatPriceRange(property.price);
   const locality = property.locationPath.slice(-2).join(", ");
   const area = property.areaSummary;
@@ -45,37 +53,55 @@ export function PropertyCard({ property }: { property: PropertySummary }) {
           {area ? ` · ${area}` : ""}
         </p>
 
-        <ConstructionLine
-          construction={property.construction}
-          possession={property.possession}
-        />
+        <ConstructionLine property={property} />
 
-        <Link
-          href={`/property/${property.slug}`}
-          className="mt-[10px] text-[15px] font-semibold text-brand hover:text-brand-deep"
-        >
-          View details <span aria-hidden="true">→</span>
-        </Link>
+        {actions === "buttons" ? (
+          <div className="mt-[12px] grid grid-cols-2 gap-[10px]">
+            <ButtonLink href={`/property/${property.slug}`} size="sm">
+              View details
+            </ButtonLink>
+            <ButtonLink
+              href={`/property/${property.slug}/enquiry`}
+              size="sm"
+              variant="secondary"
+            >
+              Enquire
+            </ButtonLink>
+          </div>
+        ) : (
+          <Link
+            href={`/property/${property.slug}`}
+            className="mt-[10px] text-[15px] font-semibold text-brand hover:text-brand-deep"
+          >
+            View details <span aria-hidden="true">→</span>
+          </Link>
+        )}
       </div>
     </article>
   );
 }
 
-function ConstructionLine({
-  construction,
-  possession,
-}: {
-  construction: PropertySummary["construction"];
-  possession: string | null;
-}) {
-  const ready = construction === "ready_to_move";
+function ConstructionLine({ property }: { property: PropertySummary }) {
+  const ready = property.construction === "ready_to_move";
+
+  // Three states, each with its own mark and word — status is never colour alone.
+  const { mark, word, tone } = property.newLaunch
+    ? { mark: "◆", word: "New launch", tone: "text-brand" }
+    : ready
+      ? { mark: "✓", word: "Ready to move", tone: "text-success" }
+      : { mark: "◐", word: "Under construction", tone: "text-warning" };
+
+  const trailer = property.possession
+    ? `Possession ${property.possession}`
+    : ready
+      ? "Handover complete"
+      : null;
+
   return (
-    <p
-      className={`t-caption mt-[6px] font-semibold ${ready ? "text-success" : "text-warning"}`}
-    >
-      <span aria-hidden="true">{ready ? "✓ " : "◐ "}</span>
-      {ready ? "Ready to move" : "Under construction"}
-      {possession ? ` · ${ready ? "Handover complete" : `Possession ${possession}`}` : ""}
+    <p className={`t-caption mt-[6px] font-semibold ${tone}`}>
+      <span aria-hidden="true">{mark} </span>
+      {word}
+      {trailer ? ` · ${trailer}` : ""}
     </p>
   );
 }

@@ -90,11 +90,21 @@ export type PropertySummary = {
   readonly coverImage: PropertyMedia | null;
 };
 
+export type ConfigurationPrice = {
+  readonly configuration: string;
+  readonly carpetArea: string;
+  /** Null when the builder has not published a price for this configuration. */
+  readonly priceInr: number | null;
+};
+
 export type PropertyDetail = PropertySummary & {
   readonly description: string;
   readonly media: readonly PropertyMedia[];
+  /** Floor plans are a separate media set; empty until the builder supplies them. */
+  readonly floorPlans: readonly PropertyMedia[];
   readonly amenities: readonly string[];
   readonly specifications: ReadonlyArray<{ readonly label: string; readonly value: string }>;
+  readonly pricingByConfiguration: readonly ConfigurationPrice[];
   readonly address: string;
   readonly builderName: string;
   readonly status: PropertyStatus;
@@ -107,6 +117,7 @@ export type PropertySearchFilters = {
   readonly minBudgetInr?: number;
   readonly maxBudgetInr?: number;
   readonly construction?: PropertySummary["construction"];
+  readonly newLaunchOnly?: boolean;
   readonly reraOnly?: boolean;
 };
 

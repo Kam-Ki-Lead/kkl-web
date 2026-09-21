@@ -157,51 +157,68 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
 ];
 
-const DETAIL_EXTRAS: Record<string, Omit<PropertyDetail, keyof PropertySummary>> = {
-  default: {
-    description:
-      "A landscaped development a short drive from the Biswa Bangla Convention Centre, with a sample flat open on site. This description is synthetic sample copy for development and review.",
-    media: [],
-    amenities: [
-      "Swimming pool",
-      "Gymnasium",
-      "Landscaped garden",
-      "Covered parking",
-      "24×7 security",
-      "Children's play area",
-      "Power backup",
-      "Clubhouse",
-    ],
-    specifications: [
-      { label: "Carpet area", value: "985–1,420 sq ft" },
-      { label: "Towers", value: "4 towers, G+14" },
-      { label: "Total units", value: "312" },
-      { label: "Land area", value: "2.4 acres" },
-    ],
-    address: "Action Area II, New Town, Kolkata 700156",
-    builderName: "Elysian Landmarks",
-    status: "published",
-  },
-};
-
+/**
+ * Detail-only content. Specifications and pricing rows are synthesised from the
+ * summary so every listing is internally consistent — the carpet areas in the
+ * pricing table are the ends of the listing's own area range, and the prices are
+ * the ends of its own price range.
+ */
 export function sampleDetailFor(summary: PropertySummary): PropertyDetail {
-  const extras = DETAIL_EXTRAS[summary.slug] ?? DETAIL_EXTRAS.default;
+  // "985–1,420 sq ft" → ["985 sq ft", "1,420 sq ft"]; the unit sits on the high
+  // end only, so the low end has to carry it over.
+  const [rawLow, areaHigh] = (summary.areaSummary ?? "").split("–");
+  const unit = (areaHigh ?? "").replace(/^[\d,.\s]+/, "").trim();
+  const areaLow = rawLow && unit ? `${rawLow.trim()} ${unit}` : rawLow?.trim();
+  const configs = summary.configurations;
+
+  const pricingByConfiguration = configs.map((config, index) => {
+    const isFirst = index === 0;
+    const isLast = index === configs.length - 1;
+    const price = isFirst
+      ? summary.price.minInr
+      : isLast
+        ? summary.price.maxInr
+        : null;
+    return {
+      configuration: `${config} BHK`,
+      carpetArea: (isFirst ? areaLow : isLast ? areaHigh : "") || "—",
+      priceInr: price,
+    };
+  });
+
   return {
     ...summary,
-    ...(extras as Omit<PropertyDetail, keyof PropertySummary>),
-    specifications: [
-      ...(extras as Omit<PropertyDetail, keyof PropertySummary>).specifications.filter(
-        (s) => s.label !== "Carpet area",
-      ),
-      ...(summary.areaSummary
-        ? [{ label: "Carpet area", value: summary.areaSummary }]
-        : []),
-      ...(summary.reraRegistered
-        ? [{ label: "RERA", value: "Registered — number issued by the builder" }]
-        : []),
-      ...(summary.possession ? [{ label: "Possession", value: summary.possession }] : []),
+    description:
+      "Synthetic sample copy for development and review. A landscaped development within reach of the Biswa Bangla Convention Centre, with a sample flat open on site.",
+    media: [],
+    floorPlans: [],
+    amenities: [
+      "Lift",
+      "Power backup",
+      "Covered parking",
+      "Children's play area",
+      "Community hall",
+      "Rainwater harvesting",
+      "24×7 security",
+      "Landscaped garden",
     ],
+    specifications: [
+      { label: "Configuration", value: formatConfigList(configs) },
+      { label: "Carpet area", value: summary.areaSummary ?? "Not published" },
+      { label: "Total units", value: "184" },
+      { label: "Towers", value: "3" },
+      { label: "Floors", value: "G+14" },
+      { label: "Facing", value: "East, North-east" },
+    ],
+    pricingByConfiguration,
+    address: `Plot 22, Street 8, ${summary.locationPath.slice(-1)[0]}, ${summary.locationPath.slice(-2, -1)[0] ?? "New Town"}, Kolkata 700161`,
+    builderName: "Sample Builders Pvt Ltd",
+    status: "published",
   };
+}
+
+function formatConfigList(configs: readonly string[]): string {
+  return configs.length ? `${configs.join(", ")} BHK` : "Not published";
 }
 
 /**

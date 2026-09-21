@@ -12,14 +12,15 @@ const controlBase =
 
 export function Field({
   label,
-  htmlFor,
+  id,
   helper,
   error,
   children,
   className = "",
 }: {
   label: string;
-  htmlFor: string;
+  /** Must match the control's id — it wires the label and the error message. */
+  id: string;
   /** Helper sits below, in the same column as the field. */
   helper?: ReactNode;
   error?: string;
@@ -28,16 +29,16 @@ export function Field({
 }) {
   return (
     <div className={`flex flex-col gap-[6px] ${className}`}>
-      <label htmlFor={htmlFor} className="t-label text-ink">
+      <label htmlFor={id} className="t-label text-ink">
         {label}
       </label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="t-caption text-danger">
+        <p id={`${id}-error`} className="t-caption text-danger">
           {error}
         </p>
       ) : helper ? (
-        <p id={`${htmlFor}-helper`} className="t-caption text-muted">
+        <p id={`${id}-helper`} className="t-caption text-muted">
           {helper}
         </p>
       ) : null}
@@ -105,7 +106,8 @@ export function ChoiceChip({
       aria-pressed={selected}
       {...props}
       className={
-        "min-h-[44px] rounded-full border-[1.5px] px-[18px] text-[15px] font-semibold transition-colors " +
+        "min-h-[44px] rounded-full border-[1.5px] px-[18px] text-[15px] font-semibold " +
+        "transition-[background-color,border-color,color] " +
         (selected
           ? "border-brand bg-brand text-white"
           : "border-line bg-white text-ink hover:border-[#C3C9DA]")

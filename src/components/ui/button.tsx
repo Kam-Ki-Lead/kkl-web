@@ -10,7 +10,8 @@ export type ButtonSize = "md" | "sm";
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-[8px] font-semibold " +
-  "transition-colors disabled:cursor-not-allowed select-none text-center";
+  "transition-[background-color,border-color,color] disabled:cursor-not-allowed " +
+  "select-none text-center";
 
 const sizes: Record<ButtonSize, string> = {
   md: "min-h-[44px] px-[18px] text-[15px]",

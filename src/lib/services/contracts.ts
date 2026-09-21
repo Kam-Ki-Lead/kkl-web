@@ -1,5 +1,7 @@
 import type {
   BuyerEnquiry,
+  BuyerRequirement,
+  MatchedProperty,
   PropertyDetail,
   PropertySearchFilters,
   PropertySortKey,
@@ -66,6 +68,8 @@ export interface PropertyService {
   }): Promise<Paged<PropertySummary>>;
   getBySlug(slug: string): Promise<PropertyDetail>;
   countMatching(filters: PropertySearchFilters): Promise<number>;
+  /** Scores published listings against a buyer requirement. Server-side only. */
+  match(requirement: BuyerRequirement): Promise<readonly MatchedProperty[]>;
 }
 
 /**

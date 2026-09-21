@@ -38,7 +38,7 @@ export function HomeSearchCard({
 
   const [locality, setLocality] = useState(localities[0]?.id ?? "");
   const [propertyType, setPropertyType] = useState(TYPES[0] as string);
-  const [configuration, setConfiguration] = useState(CONFIGURATIONS[0] as string);
+  const [configuration, setConfiguration] = useState("");
   const [budgetLabel, setBudgetLabel] = useState(BUDGETS[0]?.label as string);
   const [count, setCount] = useState(initialCount);
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
@@ -50,7 +50,7 @@ export function HomeSearchCard({
     const filters = {
       locationId: locality || undefined,
       propertyType,
-      configurations: configuration === "Any BHK" ? undefined : [configuration],
+      configurations: configuration ? [configuration] : undefined,
       minBudgetInr: budget?.minInr,
       maxBudgetInr: budget?.maxInr,
     };
@@ -70,15 +70,16 @@ export function HomeSearchCard({
     event.preventDefault();
     const params = new URLSearchParams();
     if (locality) params.set("locality", locality);
-    if (propertyType) params.set("type", propertyType);
-    if (configuration !== "Any BHK") params.set("bhk", configuration.replace(/\D/g, ""));
-    if (budget?.maxInr) params.set("maxBudget", String(budget.maxInr));
-    if (budget?.minInr) params.set("minBudget", String(budget.minInr));
-    startTransition(() => router.push(`/search?${params.toString()}`));
+    if (propertyType && propertyType !== "Apartment") params.set("type", propertyType);
+    if (configuration) params.set("bhk", configuration);
+    if (budgetLabel !== "Any budget") params.set("budget", budgetLabel);
+    startTransition(() => router.push(params.size ? `/search?${params}` : "/search"));
   }
 
   return (
     <form
+      action="/search"
+      method="get"
       onSubmit={submit}
       className="relative z-10 mx-[20px] -mt-[62px] rounded-[10px] border border-line bg-white p-[20px] shadow-[0_8px_28px_rgba(16,26,64,0.10)] max-[900px]:mx-0 max-[900px]:-mt-[32px]"
     >
@@ -94,6 +95,7 @@ export function HomeSearchCard({
       <div className="grid grid-cols-4 gap-[12px] max-[900px]:grid-cols-2">
         <SearchField
           id="home-locality"
+          name="locality"
           label="Location"
           value={locality}
           onChange={setLocality}
@@ -102,6 +104,7 @@ export function HomeSearchCard({
         />
         <SearchField
           id="home-type"
+          name="type"
           label="Property type"
           value={propertyType}
           onChange={setPropertyType}
@@ -110,13 +113,18 @@ export function HomeSearchCard({
         />
         <SearchField
           id="home-bhk"
+          name="bhk"
           label="BHK"
           value={configuration}
           onChange={setConfiguration}
-          options={CONFIGURATIONS.map((c) => ({ value: c, label: c }))}
+          options={CONFIGURATIONS.map((c) => ({
+            value: c === "Any BHK" ? "" : c.replace(/\D/g, ""),
+            label: c,
+          }))}
         />
         <SearchField
           id="home-budget"
+          name="budget"
           label="Budget"
           value={budgetLabel}
           onChange={setBudgetLabel}
@@ -150,6 +158,7 @@ export function HomeSearchCard({
 
 function SearchField({
   id,
+  name,
   label,
   value,
   onChange,
@@ -157,6 +166,7 @@ function SearchField({
   className = "",
 }: {
   id: string;
+  name: string;
   label: string;
   value: string;
   onChange: (next: string) => void;
@@ -170,6 +180,7 @@ function SearchField({
       </label>
       <select
         id={id}
+        name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="min-h-[48px] w-full cursor-pointer rounded-[8px] border border-line bg-white px-[13px] text-[15px] text-ink"

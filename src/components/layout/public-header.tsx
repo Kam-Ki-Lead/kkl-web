@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
 
@@ -18,21 +18,54 @@ import { Wordmark } from "@/components/brand/wordmark";
  * every request independently of what this renders.
  */
 
+/**
+ * The approved public header carries Buy, Projects and New launches, but the
+ * approved inventory defines exactly one search screen (P-02). "Projects" and
+ * "Buy" therefore resolve to the same search until a distinct projects view is
+ * specified; "New launches" is a real filtered view of it.
+ */
 const NAV = [
-  { href: "/search", label: "Buy" },
-  { href: "/search?type=project", label: "Projects" },
-  { href: "/search?launch=new", label: "New launches" },
-  { href: "/find-my-match", label: "Find my match" },
+  { href: "/search", label: "Buy", match: (p: string, q: URLSearchParams) => p === "/search" && !q.has("possession") },
+  { href: "/search", label: "Projects", match: () => false },
+  {
+    href: "/search?possession=new_launch",
+    label: "New launches",
+    match: (p: string, q: URLSearchParams) => p === "/search" && q.get("possession") === "new_launch",
+  },
+  { href: "/find-my-match", label: "Find my match", match: (p: string) => p === "/find-my-match" },
 ];
+
+/** The header without active-state marking, used while the query string resolves. */
+export function PublicHeaderFallback() {
+  return (
+    <header className="border-b border-line bg-white">
+      <div className="mx-auto flex max-w-[1280px] items-center gap-[22px] px-[32px] py-[14px] max-[1060px]:px-[18px]">
+        <Link href="/" aria-label="Kam Ki Lead — home" className="flex-none">
+          <Wordmark />
+        </Link>
+        <CitySelector />
+        <nav aria-label="Main" className="flex gap-[24px] whitespace-nowrap max-[1060px]:hidden">
+          {NAV.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="text-[16px] font-medium text-body hover:text-brand"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </header>
+  );
+}
 
 export function PublicHeader({ shortlistCount = 0 }: { shortlistCount?: number }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const isCurrent = (href: string) => {
-    const path = href.split("?")[0] ?? href;
-    return path === "/search" ? pathname === "/search" : pathname === path;
-  };
+  const isCurrent = (item: (typeof NAV)[number]) => item.match(pathname, searchParams);
 
   return (
     <header className="border-b border-line bg-white">
@@ -45,7 +78,7 @@ export function PublicHeader({ shortlistCount = 0 }: { shortlistCount?: number }
 
         <nav aria-label="Main" className="flex gap-[24px] whitespace-nowrap max-[1060px]:hidden">
           {NAV.map((item) => {
-            const current = isCurrent(item.href);
+            const current = isCurrent(item);
             return (
               <Link
                 key={item.label}
@@ -106,9 +139,9 @@ export function PublicHeader({ shortlistCount = 0 }: { shortlistCount?: number }
                 key={item.label}
                 href={item.href}
                 onClick={() => setDrawerOpen(false)}
-                aria-current={isCurrent(item.href) ? "page" : undefined}
+                aria-current={isCurrent(item) ? "page" : undefined}
                 className={`flex min-h-[44px] items-center border-b border-line text-[16px] ${
-                  isCurrent(item.href) ? "font-bold text-brand" : "font-medium text-body"
+                  isCurrent(item) ? "font-bold text-brand" : "font-medium text-body"
                 }`}
               >
                 {item.label}

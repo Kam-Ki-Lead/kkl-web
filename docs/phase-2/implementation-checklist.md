@@ -38,8 +38,8 @@ exists. Selecting `api` fails closed rather than falling back to fixtures.
 | C-02 | Typography | `[V]` | `src/app/globals.css` `.t-*`, `src/app/layout.tsx` |
 | C-03 | Navigation systems | `[S]` public header/footer + drawer · `[ ]` dashboard rails | `src/components/layout/` |
 | C-04 | Form controls | `[S]` | `src/components/ui/button.tsx`, `field.tsx` |
-| C-05 | Filters, tables, pagination | `[ ]` filter chip only | `src/components/ui/chip.tsx` |
-| C-06 | Cards | `[S]` property + project · `[ ]` lead card | `src/components/property/property-card.tsx` |
+| C-05 | Filters, tables, pagination | `[S]` filters, applied chips, sort, tables · `[ ]` pagination controls | `src/components/search/`, `chip.tsx` |
+| C-06 | Cards | `[S]` property (both action variants) + project · `[ ]` lead card | `src/components/property/property-card.tsx` |
 | C-07 | Dialogs, uploads, notifications | `[ ]` | — |
 | C-08 | Content states | `[S]` | `src/components/ui/states.tsx` |
 | C-09 | Access & session states | `[S]` | `src/components/ui/states.tsx` |
@@ -52,26 +52,26 @@ exists. Selecting `api` fails closed rather than falling back to fixtures.
 | ID | Screen | Route | Status |
 |---|---|---|---|
 | P-01 | Homepage | `/` | `[V]` at 1440 · 768 · 390 |
-| P-02 | Search results | `/search` | `[ ]` |
-| P-03 | Property / project detail | `/property/:id` | `[ ]` |
-| P-04 | Enquiry form | `/property/:id/enquiry` | `[ ]` |
-| P-05 | Site-visit request | `/property/:id/site-visit` | `[ ]` |
-| P-06 | Mobile OTP sign-in / register | `/auth` | `[ ]` |
-| P-07 | Enquiry confirmation | `/enquiry/:id/confirmed` | `[ ]` |
-| P-08 | Requirement capture (5 steps) | `/find-my-match` | `[ ]` |
-| P-09 | Requirement review | `/find-my-match/review` | `[ ]` |
-| P-10 | Matched properties | `/matches` | `[ ]` |
-| P-11 | Shortlist | `/account/shortlist` | `[ ]` |
-| P-12 | Buyer dashboard | `/account` | `[ ]` |
-| P-13 | My enquiries | `/account/enquiries` | `[ ]` |
-| P-14 | Enquiry detail | `/account/enquiries/:id` | `[ ]` |
+| P-02 | Search results | `/search` | `[V]` |
+| P-03 | Property / project detail | `/property/:slug` | `[V]` |
+| P-04 | Enquiry form | `/property/:slug/enquiry` | `[V]` |
+| P-05 | Site-visit request | `/property/:slug/site-visit` | `[S]` |
+| P-06 | Mobile OTP sign-in / register | `/auth` | `[V]` simulated, labelled |
+| P-07 | Enquiry confirmation | `/enquiry/:id/confirmed` | `[V]` |
+| P-08 | Requirement capture (5 steps) | `/find-my-match` | `[S]` URL-driven, works without JS |
+| P-09 | Requirement review | `/find-my-match/review` | `[S]` |
+| P-10 | Matched properties | `/matches` | `[S]` |
+| P-11 | Shortlist | `/account/shortlist` | `[S]` signed-out state only — saving needs accounts |
+| P-12 | Buyer dashboard | `/account` | `[S]` |
+| P-13 | My enquiries | `/account/enquiries` | `[V]` |
+| P-14 | Enquiry detail | `/account/enquiries/:id` | `[V]` |
 | P-15 | Profile & settings | `/account/profile` | `[ ]` |
 | P-16 | Notifications | `/account/notifications` | `[ ]` |
-| P-17 | For builders | `/builders` | `[ ]` |
-| P-18 | For brokers | `/brokers` | `[ ]` |
-| P-19 | Contact & support | `/support` | `[ ]` |
-| P-20 | Policy page template | `/legal/:slug` | `[ ]` |
-| P-21 | System states | *nested — within C-08 / C-09* | `[S]` components exist, not yet wired to routes |
+| P-17 | For builders | `/builders` | `[S]` |
+| P-18 | For brokers | `/brokers` | `[S]` |
+| P-19 | Contact & support | `/support` | `[S]` form not connected, says so |
+| P-20 | Policy page template | `/legal/:slug` | `[S]` copy-pending state |
+| P-21 | System states | *nested — within C-08 / C-09* | `[S]` 404, empty, error, access-denied and expired all reachable |
 
 ## S — Seller / broker
 
@@ -191,11 +191,16 @@ Neither is faked at the component layer, and neither is presented as connected t
 
 | Area | Routes | Not started | Sample | Verified |
 |---|---|---|---|---|
-| C library | — | 3 groups | 7 groups | 2 groups |
-| P public + Buyer | 20 | 19 | 1 | 1 |
+| C library | — | 2 groups | 8 groups | 2 groups |
+| P public + Buyer | 20 | 2 (P-15, P-16) | 11 | 7 |
 | S Seller | 24 | 24 | 0 | 0 |
 | B Builder | 21 | 21 | 0 | 0 |
 | A Admin | 30 | 30 | 0 | 0 |
 
-**Phase 2 is not close to complete.** The shared foundation and one route are done; 94 routes
-remain, and none of them are connected to a real service.
+**Phase 2 is not complete.** The shared foundation and the public portal plus the Buyer journey
+are implemented against sample services; 75 routes across Seller, Builder and Admin have not been
+started, **and nothing is connected to a real service** because kkl-backend has not published its
+API. Screens rendering is not the same as Phase 2 being done.
+
+Remaining in this area: P-15 profile & settings and P-16 notifications, both of which need an
+authenticated account that does not exist yet.
