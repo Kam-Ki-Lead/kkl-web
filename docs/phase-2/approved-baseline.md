@@ -110,12 +110,42 @@ Recorded because they are departures from, or judgements about, the baseline.
 3. **Fonts are self-hosted** via `next/font` rather than the baseline's Google Fonts `<link>`, so
    the application makes no runtime CDN request.
 
-4. **No stock photography ships.** Every card and gallery renders the designed no-image fallback
-   until kkl-backend serves real builder media.
+4. **Photography — an outstanding asset dependency, not a settled decision.**
+
+   The baseline vendors no photography of its own. Its only local images are
+   `uploads/pasted-*.png` (reference screenshots of other sites) and
+   `screenshots/inventory.png`. Every property image in the approved prototype
+   is one of **seven Unsplash photographs referenced by URL**, credited per slot
+   to Felicia Montenegro, Bohdan Loik, Haberdoedas, Sebastian Schuster, Aalo
+   Lens, Zulfugar Karimov and Anton Ryazanov. The baseline states that every one
+   must be replaced with licensed project photography before launch.
+
+   Those URLs and credits are reproduced in
+   `src/lib/services/sample/review-imagery.ts`, switched on with
+   `NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on`, with each photograph's attribution drawn
+   over the image and alt text saying it is a stand-in rather than claiming it
+   depicts the project. The flag is deliberately separate from sample mode, so
+   running with fixtures does not hotlink a third party by accident. Two
+   listings (The Pinnacle, Willow Court) are excluded so the missing-media state
+   stays visible in review.
+
+   **Three things are open:**
+
+   - *It is hotlinked, not vendored.* Nothing is stored in this repository.
+   - *It is unverified.* This build environment blocks `images.unsplash.com`
+     (403 on CONNECT), so the rendered result has never been seen from here. It
+     is wired and it builds; the images themselves are unconfirmed.
+   - *Licensed project photography does not exist.* Until it does, neither the
+     fallback state nor the stand-ins are what will ship.
+
+   Consequence, stated plainly: **the visual match against the baseline cannot
+   be called complete while primary imagery differs.** Default builds show the
+   designed fallback everywhere, which is honest about the data and is not the
+   approved appearance.
 
 5. **Listing counts are derived from the fixtures, not carried over.** The baseline shows
    illustrative totals (244 listings, 128 in New Town) against a much smaller sample set. Copying
-   them would have the homepage claim 128 listings that search to six. Layout is unchanged; only
+   them would have the homepage claim 128 listings that search to nine. Layout is unchanged; only
    the magnitudes follow the data.
 
 6. **Mobile follows the approved mobile layout, not a reflow.** Compact dark hero, location full
@@ -126,9 +156,20 @@ Recorded because they are departures from, or judgements about, the baseline.
    all, so an unpurchased lead's contact details cannot reach HTML, client state or a network
    response by mistake.
 
-8. **Sample mode fails closed.** `NEXT_PUBLIC_KKL_ENV=production` with sample data throws at
-   module load, as does `api` without a base URL. `NEXT_PUBLIC_KKL_ENV` is deliberately separate
+8. **Sample mode fails closed, at build time and at run time.**
+   `NEXT_PUBLIC_KKL_ENV=production` with sample data throws at module load, as
+   does `api` without a base URL. `NEXT_PUBLIC_KKL_ENV` is deliberately separate
    from `NODE_ENV` so a local production build still works.
+
+   The build-time check alone was not enough. `NEXT_PUBLIC_*` values are inlined
+   into the bundle, so a review build deployed with
+   `NEXT_PUBLIC_KKL_ENV=production` set on the *server* still reported "review"
+   and served simulated sign-in and payment — verified to happen. `src/proxy.ts`
+   now runs ahead of every request, reads the unprefixed `KKL_ENV` and
+   `KKL_DATA_SOURCE` from the process, and returns 503 on the unsafe combination
+   or on any disagreement between what the bundle was built as and what the
+   server claims to be. Both directions are checked by
+   `scripts/verify-sample-mode-guard.sh`.
 
 9. **ESLint config repaired.** The inherited `FlatCompat` setup threw "Converting circular
    structure to JSON" on load, so lint could not run at all. `eslint-config-next` 16 flat configs

@@ -16,157 +16,187 @@ The inventory has **113 rows. They are not 113 pages.** The distinction matters:
 The inventory marks nested rows with `—` or `within …` in its route column. Building those as
 separate pages would contradict the design.
 
-## Status vocabulary
+## Status: four separate dimensions
 
-| Mark | Meaning |
+One mark per row hid more than it showed. A screen can be built and look right
+while its sample service does nothing, or work perfectly against fixtures and be
+nowhere near a real backend. Each row therefore carries four independent columns:
+
+| Column | Question it answers |
 |---|---|
-| `[ ]` | **Not started** |
-| `[S]` | **Implemented with sample services** — renders from fixtures; no real backend |
-| `[R]` | **Connected to real services** — reads/writes kkl-backend |
-| `[V]` | **Verified** — with the scope of the check named in `verification.md` |
+| **Screen** | Is the screen built — layout, states, responsive behaviour, matching the approved design? |
+| **Sample** | Does it behave through a typed sample service, including validation, empty, error and confirmation states? |
+| **Real** | Is it reading or writing kkl-backend? |
+| **Verified** | Has it been checked, at the scope named in `verification.md`? |
 
-Nothing is `[R]`: kkl-backend has not published its versioned OpenAPI spec, so no API client
-exists. Selecting `api` fails closed rather than falling back to fixtures.
+Marks: `✓` done · `~` partial, with the gap named · `·` not started ·
+`n/a` not applicable to this row.
+
+**Every row in the Real column is `·`.** kkl-backend has not published its
+versioned OpenAPI spec, so no API client exists. Selecting `api` fails closed
+rather than falling back to fixtures. No screen in this repository has ever
+talked to a real service, and none of the marks below should be read as
+suggesting otherwise.
+
+A `✓` in **Verified** means the checks listed in `verification.md` were run and
+passed at the stated widths and states. It does not mean screen-reader tested,
+per-chip contrast measured, or zoom checked — those three remain outstanding for
+every row (C-11).
 
 ---
 
 ## C — shared components and states (the library)
 
-| ID | Group | Status | Where |
-|---|---|---|---|
-| C-01 | Colour tokens | `[V]` | `src/app/globals.css` `@theme` |
-| C-02 | Typography | `[V]` | `src/app/globals.css` `.t-*`, `src/app/layout.tsx` |
-| C-03 | Navigation systems | `[S]` public header/footer + drawer · `[ ]` dashboard rails | `src/components/layout/` |
-| C-04 | Form controls | `[S]` | `src/components/ui/button.tsx`, `field.tsx` |
-| C-05 | Filters, tables, pagination | `[S]` filters, applied chips, sort, tables · `[ ]` pagination controls | `src/components/search/`, `chip.tsx` |
-| C-06 | Cards | `[S]` property (both action variants) + project · `[ ]` lead card | `src/components/property/property-card.tsx` |
-| C-07 | Dialogs, uploads, notifications | `[ ]` | — |
-| C-08 | Content states | `[S]` | `src/components/ui/states.tsx` |
-| C-09 | Access & session states | `[S]` | `src/components/ui/states.tsx` |
-| C-10 | Journey map | n/a — design artefact | — |
-| C-11 | Verification report | carried into `verification.md` | — |
-| C-12 | Client decision list | `[S]` encoded as unresolved rules | `src/lib/config/business-rules.ts` |
+| ID | Group | Screen | Sample | Real | Verified | Where |
+|---|---|---|---|---|---|---|
+| C-01 | Colour tokens | ✓ | n/a | · | ✓ values transcribed and compared | `src/app/globals.css` `@theme` |
+| C-02 | Typography | ✓ | n/a | · | ✓ scale compared | `src/app/globals.css` `.t-*`, `src/app/layout.tsx` |
+| C-03 | Navigation systems | ~ public header/footer/drawer only; dashboard rails not built | ✓ | · | ~ public nav only | `src/components/layout/` |
+| C-04 | Form controls | ✓ | ✓ | · | ~ keyboard and focus checked; not screen-reader tested | `src/components/ui/button.tsx`, `field.tsx` |
+| C-05 | Filters, tables, pagination | ~ pagination controls not built | ✓ | · | ~ filters, chips, sort | `src/components/search/`, `chip.tsx` |
+| C-06 | Cards | ~ lead card not built | ✓ | · | ~ property and project cards | `src/components/property/property-card.tsx` |
+| C-07 | Dialogs, uploads, notifications | · | · | · | · | — |
+| C-08 | Content states | ✓ | ✓ | · | ✓ | `src/components/ui/states.tsx` |
+| C-09 | Access & session states | ✓ | ✓ | · | ✓ | `src/components/ui/states.tsx` |
+| C-10 | Journey map | n/a design artefact | n/a | n/a | n/a | — |
+| C-11 | Verification report | n/a | n/a | n/a | carried into `verification.md` | — |
+| C-12 | Client decision list | ✓ | ✓ encoded as unresolved rules | · | ✓ | `src/lib/config/business-rules.ts` |
 
 ## P — public portal and Buyer
 
-| ID | Screen | Route | Status |
-|---|---|---|---|
-| P-01 | Homepage | `/` | `[V]` at 1440 · 768 · 390 |
-| P-02 | Search results | `/search` | `[V]` |
-| P-03 | Property / project detail | `/property/:slug` | `[V]` |
-| P-04 | Enquiry form | `/property/:slug/enquiry` | `[V]` |
-| P-05 | Site-visit request | `/property/:slug/site-visit` | `[S]` |
-| P-06 | Mobile OTP sign-in / register | `/auth` | `[V]` simulated, labelled |
-| P-07 | Enquiry confirmation | `/enquiry/:id/confirmed` | `[V]` |
-| P-08 | Requirement capture (5 steps) | `/find-my-match` | `[S]` URL-driven, works without JS |
-| P-09 | Requirement review | `/find-my-match/review` | `[S]` |
-| P-10 | Matched properties | `/matches` | `[S]` |
-| P-11 | Shortlist | `/account/shortlist` | `[S]` signed-out state only — saving needs accounts |
-| P-12 | Buyer dashboard | `/account` | `[S]` |
-| P-13 | My enquiries | `/account/enquiries` | `[V]` |
-| P-14 | Enquiry detail | `/account/enquiries/:id` | `[V]` |
-| P-15 | Profile & settings | `/account/profile` | `[ ]` |
-| P-16 | Notifications | `/account/notifications` | `[ ]` |
-| P-17 | For builders | `/builders` | `[S]` |
-| P-18 | For brokers | `/brokers` | `[S]` |
-| P-19 | Contact & support | `/support` | `[S]` form not connected, says so |
-| P-20 | Policy page template | `/legal/:slug` | `[S]` copy-pending state |
-| P-21 | System states | *nested — within C-08 / C-09* | `[S]` 404, empty, error, access-denied and expired all reachable |
+| ID | Screen | Route | Screen | Sample | Real | Verified |
+|---|---|---|---|---|---|---|
+| P-01 | Homepage | `/` | ✓ | ✓ | · | ✓ 1440 · 768 · 390 |
+| P-02 | Search results | `/search` | ✓ | ✓ | · | ✓ filters, sort, empty |
+| P-03 | Property / project detail | `/property/:slug` | ✓ | ✓ | · | ✓ |
+| P-04 | Enquiry form | `/property/:slug/enquiry` | ✓ | ✓ | · | ✓ incl. 20 edge-case checks |
+| P-05 | Site-visit request | `/property/:slug/site-visit` | ✓ | ✓ | · | ~ happy path only |
+| P-06 | Mobile OTP sign-in / register | `/auth` | ✓ | ✓ simulated, labelled | · | ✓ incl. rejected code, no-JS |
+| P-07 | Enquiry confirmation | `/enquiry/:receipt/confirmed` | ✓ | ✓ | · | ✓ reload, replay, two tabs, two sessions |
+| P-08 | Requirement capture (5 steps) | `/find-my-match` | ✓ | ✓ URL-driven, works without JS | · | ✓ |
+| P-09 | Requirement review | `/find-my-match/review` | ✓ | ✓ | · | ✓ |
+| P-10 | Matched properties | `/matches` | ✓ | ✓ | · | ✓ scoring checked after budget fix |
+| P-11 | Shortlist | `/account/shortlist` | ~ signed-out state only | ~ saving needs accounts | · | ~ |
+| P-12 | Buyer dashboard | `/account` | ✓ | ✓ | · | ✓ |
+| P-13 | My enquiries | `/account/enquiries` | ✓ | ✓ | · | ✓ incl. session-submitted enquiries appearing |
+| P-14 | Enquiry detail | `/account/enquiries/:id` | ✓ | ✓ | · | ✓ |
+| P-15 | Profile & settings | `/account/profile` | ✓ | ✓ edit, validation, cross-field rule, confirmation | · | ~ states exercised; not compared to baseline at both widths |
+| P-16 | Notifications | `/account/notifications` | ✓ | ✓ read/unread, mark one, mark all, empty | · | ~ states exercised; not compared to baseline at both widths |
+| P-17 | For builders | `/builders` | ✓ | ✓ | · | ✓ |
+| P-18 | For brokers | `/brokers` | ✓ | ✓ | · | ✓ |
+| P-19 | Contact & support | `/support` | ✓ | ~ form not connected, says so | · | ~ |
+| P-20 | Policy page template | `/legal/:slug` | ✓ | ~ copy-pending state | · | ✓ |
+| P-21 | System states | *nested — within C-08 / C-09* | ✓ | ✓ | · | ✓ 404, empty, error, access-denied, expired |
+
+### P-15 and P-16 — what "Sample ✓" does and does not mean
+
+Both screens are built and behave, through `ProfileService` and
+`NotificationService`. Saving a profile validates server-side and returns the
+stored value; marking a notification read changes what the list and the unread
+count show.
+
+None of it is an account. `account-store.ts` is one object in the server
+process, shared by every visitor and lost on restart. There is no sign-in, so
+there is nothing to scope it to. The mobile number is deliberately not editable,
+because changing a verified identifier is a re-verification flow that does not
+exist. Both screens carry the sample disclosure, the save confirmation says the
+change is held in memory, and the form shows a "Not connected to an account"
+chip. **Do not read these rows as account integration.**
 
 ## S — Seller / broker
 
-| ID | Screen | Route | Status |
-|---|---|---|---|
-| S-01 | Seller registration | `/seller/register` | `[ ]` |
-| S-02 | Onboarding — business details | `/seller/onboarding` | `[ ]` |
-| S-03 | KYC submission (PAN, Aadhaar) | `/seller/kyc` | `[ ]` |
-| S-04 | KYC status | `/seller/kyc/status` | `[ ]` |
-| S-05 | Restricted / suspended account | `/seller/restricted` | `[ ]` |
-| S-06 | Seller dashboard | `/seller` | `[ ]` |
-| S-07 | Lead marketplace | `/seller/leads` | `[ ]` |
-| S-08 | Lead preview (masked) | `/seller/leads/:id` | `[ ]` |
-| S-09 | Purchase review & confirm | `/seller/leads/:id/buy` | `[ ]` |
-| S-10 | Purchase failure states | *nested — within S-09 / S-11* | `[ ]` |
-| S-11 | Purchase success & contact reveal | `/seller/leads/:id/purchased` | `[ ]` |
-| S-12 | Purchased leads | `/seller/purchased` | `[ ]` |
-| S-13 | Purchased lead detail | `/seller/purchased/:id` | `[ ]` |
-| S-14 | Credits & balance | `/seller/billing` | `[ ]` |
-| S-15 | Recharge credits | `/seller/billing/recharge` | `[ ]` |
-| S-16 | Payment handoff & result | `/seller/billing/payment` | `[ ]` |
-| S-17 | Transactions & usage history | `/seller/billing/history` | `[ ]` |
-| S-18 | Credit expiry & renewal | `/seller/billing/expiry` | `[ ]` **gated on D-04** |
-| S-19 | Invoices | `/seller/billing/invoices` | `[ ]` |
-| S-20 | Invoice detail | `/seller/billing/invoices/:id` | `[ ]` **GST open, D-13** |
-| S-21 | Billing information | `/seller/billing/details` | `[ ]` |
-| S-22 | Support tickets | `/seller/support` | `[ ]` |
-| S-23 | New ticket | `/seller/support/new` | `[ ]` *disconnected step 2* |
-| S-24 | Ticket detail & replies | `/seller/support/:id` | `[ ]` |
-| S-25 | Profile & settings | `/seller/profile` | `[ ]` |
+| ID | Screen | Route | Screen | Sample | Real | Verified |
+|---|---|---|---|---|---|---|
+| S-01 | Seller registration | `/seller/register` | · | · | · | · |
+| S-02 | Onboarding — business details | `/seller/onboarding` | · | · | · | · |
+| S-03 | KYC submission (PAN, Aadhaar) | `/seller/kyc` | · | · | · | · |
+| S-04 | KYC status | `/seller/kyc/status` | · | · | · | · |
+| S-05 | Restricted / suspended account | `/seller/restricted` | · | · | · | · |
+| S-06 | Seller dashboard | `/seller` | · | · | · | · |
+| S-07 | Lead marketplace | `/seller/leads` | · | · | · | · |
+| S-08 | Lead preview (masked) | `/seller/leads/:id` | · | · | · | · |
+| S-09 | Purchase review & confirm | `/seller/leads/:id/buy` | · | · | · | · |
+| S-10 | Purchase failure states | *nested — within S-09 / S-11* | · | · | · | · |
+| S-11 | Purchase success & contact reveal | `/seller/leads/:id/purchased` | · | · | · | · |
+| S-12 | Purchased leads | `/seller/purchased` | · | · | · | · |
+| S-13 | Purchased lead detail | `/seller/purchased/:id` | · | · | · | · |
+| S-14 | Credits & balance | `/seller/billing` | · | · | · | · |
+| S-15 | Recharge credits | `/seller/billing/recharge` | · | · | · | · |
+| S-16 | Payment handoff & result | `/seller/billing/payment` | · | · | · | · |
+| S-17 | Transactions & usage history | `/seller/billing/history` | · | · | · | · |
+| S-18 | Credit expiry & renewal | `/seller/billing/expiry` | · **gated on D-04** | · | · | · |
+| S-19 | Invoices | `/seller/billing/invoices` | · | · | · | · |
+| S-20 | Invoice detail | `/seller/billing/invoices/:id` | · **GST open, D-13** | · | · | · |
+| S-21 | Billing information | `/seller/billing/details` | · | · | · | · |
+| S-22 | Support tickets | `/seller/support` | · | · | · | · |
+| S-23 | New ticket | `/seller/support/new` | · *disconnected step 2* | · | · | · |
+| S-24 | Ticket detail & replies | `/seller/support/:id` | · | · | · | · |
+| S-25 | Profile & settings | `/seller/profile` | · | · | · | · |
 
 ## B — Builder
 
-| ID | Screen | Route | Status |
-|---|---|---|---|
-| B-01 | Builder registration | `/builder/register` | `[ ]` |
-| B-02 | Builder KYC & verification | `/builder/kyc` | `[ ]` **documents open, D-15** |
-| B-03 | Subscription overview | `/builder/subscription` | `[ ]` **price open, D-01** |
-| B-04 | Subscription payment result | `/builder/subscription/payment` | `[ ]` |
-| B-05 | Renewal & expiry | `/builder/subscription/renewal` | `[ ]` **listing outcome open, D-02** |
-| B-06 | Builder dashboard | `/builder` | `[ ]` |
-| B-07 | My properties | `/builder/properties` | `[ ]` |
-| B-08 | Create listing — basics | `/builder/properties/new` | `[ ]` |
-| B-09 | Create listing — location | `…/new/location` | `[ ]` |
-| B-10 | Create listing — pricing & configuration | `…/new/pricing` | `[ ]` |
-| B-11 | Create listing — specifications & amenities | `…/new/specs` | `[ ]` |
-| B-12 | Create listing — media | `…/new/media` | `[ ]` |
-| B-13 | Create listing — preview & publish | `…/new/preview` | `[ ]` *disconnected step 1* |
-| B-14 | Listing actions | *nested — within B-07* | `[ ]` |
-| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/edit` | `[ ]` |
-| B-16 | Enquiries on my listings | `/builder/enquiries` | `[ ]` |
-| B-17 | Enquiry detail | `/builder/enquiries/:id` | `[ ]` **contact disclosure open, D-05** |
-| B-18 | New-enquiry notification | *nested* | `[ ]` **D-05** |
-| B-19 | Access restrictions | *nested* | `[ ]` |
-| B-20 | Lead marketplace (Builder) | `/builder/marketplace` | `[ ]` **lead prices open, D-03** |
-| B-21 | Purchased leads (Builder) | `/builder/leads` | `[ ]` |
-| B-22 | Billing & credits (Builder) | `/builder/billing` | `[ ]` |
-| B-23 | Support (Builder) | `/builder/support` | `[ ]` |
-| B-24 | Profile & settings (Builder) | `/builder/profile` | `[ ]` **dual role open, D-08** |
+| ID | Screen | Route | Screen | Sample | Real | Verified |
+|---|---|---|---|---|---|---|
+| B-01 | Builder registration | `/builder/register` | · | · | · | · |
+| B-02 | Builder KYC & verification | `/builder/kyc` | · **documents open, D-15** | · | · | · |
+| B-03 | Subscription overview | `/builder/subscription` | · **price open, D-01** | · | · | · |
+| B-04 | Subscription payment result | `/builder/subscription/payment` | · | · | · | · |
+| B-05 | Renewal & expiry | `/builder/subscription/renewal` | · **listing outcome open, D-02** | · | · | · |
+| B-06 | Builder dashboard | `/builder` | · | · | · | · |
+| B-07 | My properties | `/builder/properties` | · | · | · | · |
+| B-08 | Create listing — basics | `/builder/properties/new` | · | · | · | · |
+| B-09 | Create listing — location | `…/new/location` | · | · | · | · |
+| B-10 | Create listing — pricing & configuration | `…/new/pricing` | · | · | · | · |
+| B-11 | Create listing — specifications & amenities | `…/new/specs` | · | · | · | · |
+| B-12 | Create listing — media | `…/new/media` | · | · | · | · |
+| B-13 | Create listing — preview & publish | `…/new/preview` | · *disconnected step 1* | · | · | · |
+| B-14 | Listing actions | *nested — within B-07* | · | · | · | · |
+| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/edit` | · | · | · | · |
+| B-16 | Enquiries on my listings | `/builder/enquiries` | · | · | · | · |
+| B-17 | Enquiry detail | `/builder/enquiries/:id` | · **contact disclosure open, D-05** | · | · | · |
+| B-18 | New-enquiry notification | *nested* | · **D-05** | · | · | · |
+| B-19 | Access restrictions | *nested* | · | · | · | · |
+| B-20 | Lead marketplace (Builder) | `/builder/marketplace` | · **lead prices open, D-03** | · | · | · |
+| B-21 | Purchased leads (Builder) | `/builder/leads` | · | · | · | · |
+| B-22 | Billing & credits (Builder) | `/builder/billing` | · | · | · | · |
+| B-23 | Support (Builder) | `/builder/support` | · | · | · | · |
+| B-24 | Profile & settings (Builder) | `/builder/profile` | · **dual role open, D-08** | · | · | · |
 
 ## A — Admin
 
-| ID | Screen | Route | Status |
-|---|---|---|---|
-| A-01 | Admin sign-in | `/admin/login` | `[ ]` **MFA open, D-16** |
-| A-02 | Admin dashboard | `/admin` | `[ ]` |
-| A-03 | Users | `/admin/users` | `[ ]` |
-| A-04 | User detail | `/admin/users/:id` | `[ ]` |
-| A-05 | KYC queue | `/admin/kyc` | `[ ]` |
-| A-06 | KYC applicant review | `/admin/kyc/:id` | `[ ]` |
-| A-07 | KYC decision | *nested — within A-06* | `[ ]` |
-| A-08 | Property review queue | `/admin/properties` | `[ ]` **pre/post publish open, D-10** |
-| A-09 | Property detail & moderation | `/admin/properties/:id` | `[ ]` |
-| A-10 | Lead intake overview | `/admin/leads/intake` | `[ ]` |
-| A-11 | Intake results & failures | `/admin/leads/intake/:id` | `[ ]` |
-| A-12 | Leads | `/admin/leads` | `[ ]` |
-| A-13 | Lead detail & history | `/admin/leads/:id` | `[ ]` |
-| A-14 | Lead pricing & aging rules | `/admin/settings/pricing` | `[ ]` **D-03** |
-| A-15 | Platform settings | `/admin/settings` | `[ ]` |
-| A-16 | Orders & purchases | `/admin/orders` | `[ ]` |
-| A-17 | Delivery & download records | `/admin/orders/:id/delivery` | `[ ]` |
-| A-18 | Wallet & credit oversight | `/admin/wallets` | `[ ]` |
-| A-19 | Credit adjustment | `/admin/wallets/:id/adjust` | `[ ]` |
-| A-20 | Refund review | `/admin/refunds` | `[ ]` **refund policy open, D-06** |
-| A-21 | Subscriptions & billing | `/admin/subscriptions` | `[ ]` |
-| A-22 | Support queue | `/admin/support` | `[ ]` |
-| A-23 | Ticket conversation | `/admin/support/:id` | `[ ]` |
-| A-24 | Voice qualification overview | `/admin/voice` | `[ ]` |
-| A-25 | Call detail | `/admin/voice/:id` | `[ ]` |
-| A-26 | WhatsApp funnel | `/admin/whatsapp` | `[ ]` |
-| A-27 | Notification delivery | `/admin/notifications` | `[ ]` |
-| A-28 | Consent & suppression | `/admin/consent` | `[ ]` **D-14** |
-| A-29 | Analytics & reports | `/admin/reports` | `[ ]` |
-| A-30 | Audit log | `/admin/audit` | `[ ]` |
-| A-31 | Jobs & integration status | `/admin/system` | `[ ]` |
+| ID | Screen | Route | Screen | Sample | Real | Verified |
+|---|---|---|---|---|---|---|
+| A-01 | Admin sign-in | `/admin/login` | · **MFA open, D-16** | · | · | · |
+| A-02 | Admin dashboard | `/admin` | · | · | · | · |
+| A-03 | Users | `/admin/users` | · | · | · | · |
+| A-04 | User detail | `/admin/users/:id` | · | · | · | · |
+| A-05 | KYC queue | `/admin/kyc` | · | · | · | · |
+| A-06 | KYC applicant review | `/admin/kyc/:id` | · | · | · | · |
+| A-07 | KYC decision | *nested — within A-06* | · | · | · | · |
+| A-08 | Property review queue | `/admin/properties` | · **pre/post publish open, D-10** | · | · | · |
+| A-09 | Property detail & moderation | `/admin/properties/:id` | · | · | · | · |
+| A-10 | Lead intake overview | `/admin/leads/intake` | · | · | · | · |
+| A-11 | Intake results & failures | `/admin/leads/intake/:id` | · | · | · | · |
+| A-12 | Leads | `/admin/leads` | · | · | · | · |
+| A-13 | Lead detail & history | `/admin/leads/:id` | · | · | · | · |
+| A-14 | Lead pricing & aging rules | `/admin/settings/pricing` | · **D-03** | · | · | · |
+| A-15 | Platform settings | `/admin/settings` | · | · | · | · |
+| A-16 | Orders & purchases | `/admin/orders` | · | · | · | · |
+| A-17 | Delivery & download records | `/admin/orders/:id/delivery` | · | · | · | · |
+| A-18 | Wallet & credit oversight | `/admin/wallets` | · | · | · | · |
+| A-19 | Credit adjustment | `/admin/wallets/:id/adjust` | · | · | · | · |
+| A-20 | Refund review | `/admin/refunds` | · **refund policy open, D-06** | · | · | · |
+| A-21 | Subscriptions & billing | `/admin/subscriptions` | · | · | · | · |
+| A-22 | Support queue | `/admin/support` | · | · | · | · |
+| A-23 | Ticket conversation | `/admin/support/:id` | · | · | · | · |
+| A-24 | Voice qualification overview | `/admin/voice` | · | · | · | · |
+| A-25 | Call detail | `/admin/voice/:id` | · | · | · | · |
+| A-26 | WhatsApp funnel | `/admin/whatsapp` | · | · | · | · |
+| A-27 | Notification delivery | `/admin/notifications` | · | · | · | · |
+| A-28 | Consent & suppression | `/admin/consent` | · **D-14** | · | · | · |
+| A-29 | Analytics & reports | `/admin/reports` | · | · | · | · |
+| A-30 | Audit log | `/admin/audit` | · | · | · | · |
+| A-31 | Jobs & integration status | `/admin/system` | · | · | · | · |
 
 ---
 
@@ -189,18 +219,33 @@ Neither is faked at the component layer, and neither is presented as connected t
 
 ## Progress
 
-| Area | Routes | Not started | Sample | Verified |
-|---|---|---|---|---|
-| C library | — | 2 groups | 8 groups | 2 groups |
-| P public + Buyer | 20 | 2 (P-15, P-16) | 11 | 7 |
-| S Seller | 24 | 24 | 0 | 0 |
-| B Builder | 21 | 21 | 0 | 0 |
-| A Admin | 30 | 30 | 0 | 0 |
+Counted per dimension, because they are not the same question.
 
-**Phase 2 is not complete.** The shared foundation and the public portal plus the Buyer journey
-are implemented against sample services; 75 routes across Seller, Builder and Admin have not been
-started, **and nothing is connected to a real service** because kkl-backend has not published its
-API. Screens rendering is not the same as Phase 2 being done.
+| Area | Rows | Screen built | Sample behaviour | Real integration | Verified |
+|---|---|---|---|---|---|
+| C library | 12 | 9 (2 partial) | 8 | **0** | 6 (4 partial) |
+| P public + Buyer | 21 | 21 (2 partial) | 19 (3 partial) | **0** | 16 (5 partial) |
+| S Seller | 25 | 0 | 0 | **0** | 0 |
+| B Builder | 24 | 0 | 0 | **0** | 0 |
+| A Admin | 31 | 0 | 0 | **0** | 0 |
 
-Remaining in this area: P-15 profile & settings and P-16 notifications, both of which need an
-authenticated account that does not exist yet.
+**Phase 2 is not complete.** The shared foundation and the public portal plus
+the Buyer journey are built and behave against sample services. Seller, Builder
+and Admin — 80 rows — have not been started. Nothing anywhere is connected to a
+real service.
+
+Three things that a "screens are done" reading would miss:
+
+1. **No real integration exists at all.** Not partial, not stubbed against a
+   staging API: zero. kkl-backend has not published its API, so authentication,
+   authorization, lead ownership, contact disclosure, credits and payments are
+   all simulated. Every screen that touches one says so on the screen.
+2. **Three accessibility checks are outstanding for every row** — screen-reader
+   testing, per-chip contrast measurement, and native plus text-only zoom. They
+   were outstanding at design approval (C-11) and design approval did not
+   discharge them. No row's Verified mark includes them.
+3. **The visual comparison against the baseline is not complete.** Primary
+   property imagery still differs: the baseline shows photography, this
+   implementation shows it only when the review-imagery flag is on, and that
+   path has never been seen rendered because the build environment blocks
+   `images.unsplash.com`. See `approved-baseline.md`.
