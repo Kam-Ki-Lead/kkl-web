@@ -22,9 +22,11 @@ either way: every client-side check in this project was run against
 
 ```bash
 npm install
-npx next build
+
 NEXT_PUBLIC_KKL_ENV=review \
 NEXT_PUBLIC_KKL_DATA_SOURCE=sample \
+npx next build
+
 KKL_ENV=review \
 KKL_DATA_SOURCE=sample \
 npx next start -p 3811
@@ -32,12 +34,28 @@ npx next start -p 3811
 
 Then open <http://127.0.0.1:3811>.
 
-**All four are required.** The `NEXT_PUBLIC_*` pair is frozen into the bundle at
-build time; the unprefixed pair is read from the process on every request. A
-served build that does not set `KKL_ENV` and `KKL_DATA_SOURCE` refuses to serve
-at all, and the guard also refuses when the two pairs disagree — a bundle built
-for one environment and deployed as another is not the bundle that environment
-asked for.
+**All four are required, and which line each pair goes on is not cosmetic.**
+The `NEXT_PUBLIC_*` pair must be set on the **build**, because those values are
+inlined into the bundle and frozen there; setting them on `next start` does
+nothing at all. The unprefixed pair must be set on the **start**, because those
+are read from the process on every request.
+
+An earlier version of this document put all four on the start line. That build
+defaults `NEXT_PUBLIC_KKL_ENV` to `development` while the server declares
+`review`, and the run-time guard refuses the mismatch:
+
+```
+Refusing to serve: built with NEXT_PUBLIC_KKL_ENV=development but deployed
+with KKL_ENV=review. NEXT_PUBLIC_* values are frozen at build time, so this
+bundle is not the one this environment asked for.
+```
+
+That is the guard doing its job on its own documentation, and it is recorded
+here rather than quietly corrected: a reviewer following the old instructions
+got a 503, and the 503 was right.
+
+A served build that sets neither `KKL_ENV` nor `KKL_DATA_SOURCE` refuses to
+serve at all.
 
 ### With the baseline's review photography
 
@@ -122,25 +140,85 @@ balance".
 None of these approves a document, authorises an account or moves money. They
 set which designed screen renders.
 
+## Reaching the Builder states a reviewer cannot otherwise get to
+
+The same position, for the same reason. B-02's verification states, B-03 and
+B-05's subscription states, B-04's payment outcomes and B-19's restrictions all
+depend on an administrator or a gateway.
+
+```
+/builder/review-state?reset=1                    restore every seed value
+/builder/review-state?kyc=pending                B-02, B-19 — also not_submitted, approved, rejected
+/builder/review-state?account=suspended          B-19
+/builder/review-state?subscription=none          B-03, B-05 — also active, due, grace, expired
+/builder/review-state?subscriptionOutcome=failed B-04 — also active, pending
+/builder/review-state?contact=unlock             B-17 — also included; the two D-05 alternatives
+/builder/review-state?payment=failed             B-22 recharge result — also success, pending
+/builder/review-state?balance=0                  B-20 insufficient credits
+/builder/review-state?reconcile=1                returns the ledger reconciliation as JSON
+/builder/review-state                            prints the full list
+```
+
+`contact=` is the one switch here that is not a state an administrator would
+set. D-05 — whether a Builder sees an enquirer's number with the subscription
+or unlocks it with credits — is **open**, so both designs are built and this
+chooses which renders. It is a review switch for an undecided rule, not a
+permission.
+
+`&to=/builder/properties` lands somewhere specific, and reset is applied first,
+exactly as on the Seller route.
+
+**The two reset switches are separate.** `/seller/review-state?reset=1` does not
+touch the Builder's records and `/builder/review-state?reset=1` does not touch
+the Seller's, because the two accounts hold separate balances, ledgers, leads
+and support queues. Resetting one while reviewing the other will look like
+nothing happened, and that is correct.
+
+Neither route approves a document, authorises an account, starts a subscription
+or moves money.
+
 ## Verifying the flows
 
 ```bash
-PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-enquiry-flow.mjs
-PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-seller-flow.mjs
+export PLAYWRIGHT=/path/to/playwright/index.mjs
+export BASE_URL=http://127.0.0.1:3811
+
+node scripts/verify-route-sweep.mjs      # 74 routes x 2 widths
+node scripts/verify-enquiry-flow.mjs     # 17 behaviour + 3 limitations
+node scripts/verify-seller-flow.mjs      # 26 behaviour + 2 limitations
+node scripts/verify-builder-flow.mjs     # 28 behaviour + 2 limitations
+node scripts/verify-no-javascript.mjs    # 36 forms
 ```
 
 ```bash
-PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-no-javascript.mjs
+./scripts/verify-sample-mode-guard.sh    # 8 scenarios; starts its own servers
 ```
 
-The enquiry harness runs seventeen behaviour checks covering reload, direct access, replay,
-two tabs, two independent browser sessions, expired and missing drafts, and
-personal data in URLs. The Seller harness runs twenty-six covering mask
-containment, deduction and the ledger, a replayed idempotency key, a sold lead,
-insufficient credits, unverified and suspended accounts, all three payment
-outcomes, direct access to both result screens, the CSV export, reset
-determinism and ledger reconciliation. The third drives twenty-one form
-submissions with JavaScript disabled.
+The **route sweep** loads every route at 1440px and 390px and asserts a 200, no
+page error, no console error, no failed sub-resource and no horizontal
+overflow. Overflow is in the list because it is the responsive failure a
+screenshot at a fixed width hides.
+
+The **enquiry** harness covers reload, direct access, replay, two tabs, two
+independent browser sessions, expired and missing drafts, and personal data in
+URLs.
+
+The **Seller** harness covers mask containment, deduction and the ledger, a
+replayed idempotency key, a sold lead, insufficient credits, unverified and
+suspended accounts, all three payment outcomes, direct access to both result
+screens, the CSV export, reset determinism and ledger reconciliation.
+
+The **Builder** harness covers publish/unpublish continuity to the public
+portal, a Buyer enquiry reaching the Builder, both contact-disclosure
+alternatives with a mask-containment check, the six-section editor and its
+publish blockers, subscription and verification gating, the separation of
+Builder and Seller records, and Builder ledger reconciliation.
+
+The **no-JavaScript** harness drives 36 form submissions across both consoles
+with scripting disabled.
+
+Run the guard script last, or in its own shell: it starts and stops its own
+servers and will take down one you started on the same port.
 
 Behaviour checks and **known limitations are counted separately**. Reproducing
 an OTP bypass or shared-account state is not a control passing — it is a control
@@ -148,4 +226,12 @@ that does not exist, confirmed still absent. A limitation that stops reproducing
 fails the run, so closing one is noticed rather than silently absorbed.
 
 Run the Seller suite twice against the same server: the results are identical,
-which is what makes the reset claim mean something.
+which is what makes the reset claim mean something. The same holds for the
+Builder suite, over its own records.
+
+**The suites share one server and therefore share state.** The Builder suite
+publishes and unpublishes portal listings; the enquiry suite enquires about
+portal properties. They are written to leave the seed state behind them, but if
+a run fails part-way the next suite may start from a mutated portal. Reset both
+consoles (`/seller/review-state?reset=1`, `/builder/review-state?reset=1`) or
+restart the server before reading a second run's results as clean.

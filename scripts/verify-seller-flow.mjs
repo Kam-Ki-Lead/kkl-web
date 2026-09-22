@@ -7,9 +7,12 @@
  * rewritten.
  *
  * Run:
- *   npx next build
- *   NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample \
+ *   NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample npx next build
  *   KKL_ENV=review KKL_DATA_SOURCE=sample npx next start -p 3811
+ *
+ * The NEXT_PUBLIC_* pair goes on the BUILD (inlined into the bundle); the
+ * unprefixed pair goes on the START (read per request). Swapping them makes the
+ * run-time guard refuse the mismatch.
  *   PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-seller-flow.mjs
  */
 const { chromium } = await import(process.env.PLAYWRIGHT ?? 'playwright');

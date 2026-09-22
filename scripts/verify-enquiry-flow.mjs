@@ -15,9 +15,14 @@
  * rewrite it as an assertion.
  *
  * Run:
- *   npx next build
- *   NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample npx next start -p 3811
+ *   NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample npx next build
+ *   KKL_ENV=review KKL_DATA_SOURCE=sample npx next start -p 3811
  *   node scripts/verify-enquiry-flow.mjs            # or BASE_URL=… node scripts/…
+ *
+ * The NEXT_PUBLIC_* pair goes on the BUILD — those values are inlined into the
+ * bundle and setting them on `next start` does nothing. The unprefixed pair
+ * goes on the START. Getting it the other way round makes the run-time guard
+ * refuse the bundle/server mismatch, which is the guard working correctly.
  *
  * Playwright is not a dependency of this package; point PLAYWRIGHT at an
  * install if it is not resolvable.
@@ -187,7 +192,7 @@ ok('14. The same property enquired by two people yields two distinct enquiries',
 
 // ------------------------------------------------------- expired / missing
 const E = await browser.newContext();
-const pageE = await makeDraft(E, { name: 'Sunil Bose', mobile: '9611122233', slug: 'sundew-enclave' });
+await makeDraft(E, { name: 'Sunil Bose', mobile: '9611122233', slug: 'sundew-enclave' });
 const draftE = (await E.cookies()).find(c => c.name === DRAFT);
 const stale = JSON.parse(decodeURIComponent(draftE.value));
 stale.createdAt = Date.now() - 31 * 60 * 1000;
@@ -216,7 +221,12 @@ ok('17. Expired and missing show different copy, not one generic error',
 
 // ------------------------------------------------------------ OTP behaviour
 const O = await browser.newContext();
-const pageO = await makeDraft(O, { name: 'Kabir Nath', mobile: '9500011122', slug: 'orchid-grove' });
+// willow-court, not orchid-grove. Orchid Grove belongs to the sample Builder
+// and is seeded UNPUBLISHED, so since portal-bridge.ts joined the Builder's
+// listings to the portal it is correctly absent from /search and has no
+// enquiry form. This check needs a property that is on the portal and stays
+// there whatever the Builder console does.
+const pageO = await makeDraft(O, { name: 'Kabir Nath', mobile: '9500011122', slug: 'willow-court' });
 await pageO.fill('#auth-code', '000000');
 await pageO.click("button:has-text(\"Verify and continue\")");
 await pageO.waitForSelector('#auth-code-error', { timeout: 10000 });

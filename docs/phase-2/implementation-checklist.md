@@ -51,11 +51,11 @@ every row (C-11).
 |---|---|---|---|---|---|---|
 | C-01 | Colour tokens | ✓ | n/a | · | ✓ values transcribed and compared | `src/app/globals.css` `@theme` |
 | C-02 | Typography | ✓ | n/a | · | ✓ scale compared | `src/app/globals.css` `.t-*`, `src/app/layout.tsx` |
-| C-03 | Navigation systems | ~ public header/footer/drawer only; dashboard rails not built | ✓ | · | ~ public nav only | `src/components/layout/` |
+| C-03 | Navigation systems | ✓ public header/footer/drawer and the dashboard rail, shared by both consoles | ✓ | · | ✓ public nav, Seller rail, Builder rail, at both widths | `src/components/layout/` |
 | C-04 | Form controls | ✓ | ✓ | · | ~ keyboard and focus checked; not screen-reader tested | `src/components/ui/button.tsx`, `field.tsx` |
-| C-05 | Filters, tables, pagination | ~ pagination controls not built | ✓ | · | ~ filters, chips, sort | `src/components/search/`, `chip.tsx` |
-| C-06 | Cards | ~ lead card not built | ✓ | · | ~ property and project cards | `src/components/property/property-card.tsx` |
-| C-07 | Dialogs, uploads, notifications | · | · | · | · | — |
+| C-05 | Filters, tables, pagination | ~ pagination controls not built — no sample list is long enough to need them | ✓ | · | ~ filters, chips, sort | `src/components/search/`, `chip.tsx` |
+| C-06 | Cards | ✓ property, project and lead cards | ✓ | · | ✓ property, project and lead cards, both consoles | `src/components/property/property-card.tsx`, `src/components/console/lead-card.tsx` |
+| C-07 | Dialogs, uploads, notifications | ~ file-choice fields and notification lists built; **no dialog component** | ~ a file is named, never uploaded | · | ~ the file fields and notification lists; no dialog to check | `src/components/builder/section-forms.tsx`, `src/app/*/notifications` |
 | C-08 | Content states | ✓ | ✓ | · | ✓ | `src/components/ui/states.tsx` |
 | C-09 | Access & session states | ✓ | ✓ | · | ✓ | `src/components/ui/states.tsx` |
 | C-10 | Journey map | n/a design artefact | n/a | n/a | n/a | — |
@@ -107,9 +107,9 @@ chip. **Do not read these rows as account integration.**
 
 | ID | Screen | Route | Screen | Sample | Real | Verified |
 |---|---|---|---|---|---|---|
-| S-01 | Seller registration | `/seller/register` | ✓ | ~ validates and advances; creates no account | · | ~ both phases driven; no-JS path not re-checked |
-| S-02 | Onboarding — business details | `/seller/onboarding` | ✓ | ✓ saves, validates, GSTIN format-checked | · | ~ states exercised |
-| S-03 | KYC submission (PAN, Aadhaar) | `/seller/kyc` | ✓ | ~ records that files were chosen; **uploads nothing** | · | ~ validation exercised |
+| S-01 | Seller registration | `/seller/register` | ✓ | ~ validates and advances; creates no account | · | ✓ both phases, incl. no-JS (validation, rejected code, completion) |
+| S-02 | Onboarding — business details | `/seller/onboarding` | ✓ | ✓ saves, validates, GSTIN format-checked | · | ✓ states exercised, incl. no-JS |
+| S-03 | KYC submission (PAN, Aadhaar) | `/seller/kyc` | ✓ | ~ records that files were chosen; **uploads nothing** | · | ✓ validation exercised, incl. no-JS |
 | S-04 | KYC status | `/seller/kyc/status` | ✓ | ✓ all four states, timeline, rejection reason | · | ✓ four states via review route |
 | S-05 | Restricted / suspended account | `/seller/restricted` | ✓ | ✓ suspension and verification as separate axes | · | ✓ |
 | S-06 | Seller dashboard | `/seller` | ✓ | ✓ | · | ✓ |
@@ -127,11 +127,11 @@ chip. **Do not read these rows as account integration.**
 | S-18 | Credit expiry & renewal | `/seller/billing/expiry` | ✓ proposed states only | n/a — **gated on D-04** | · | ✓ renders as unresolved |
 | S-19 | Invoices | `/seller/billing/invoices` | ✓ | ✓ | · | ✓ |
 | S-20 | Invoice detail | `/seller/billing/invoices/:id` | ✓ | ✓ no tax line — **GST open, D-13** | · | ✓ |
-| S-21 | Billing information | `/seller/billing/details` | ✓ | ✓ | · | ~ states exercised |
+| S-21 | Billing information | `/seller/billing/details` | ✓ | ✓ | · | ✓ states exercised, incl. no-JS |
 | S-22 | Support tickets | `/seller/support` | ✓ | ✓ four statuses, empty state | · | ✓ |
-| S-23 | New ticket | `/seller/support/new` | ✓ | ✓ **creates a real ticket** — *disconnected step 2 closed in sample* | · | ~ creation driven; attachments absent by design |
-| S-24 | Ticket detail & replies | `/seller/support/:id` | ✓ | ✓ reply and resolve | · | ~ states exercised |
-| S-25 | Profile & settings | `/seller/profile` | ✓ | ✓ | · | ~ states exercised |
+| S-23 | New ticket | `/seller/support/new` | ✓ | ✓ **creates a real ticket** — *disconnected step 2 closed in sample* | · | ✓ creation driven, incl. no-JS; attachments absent by design |
+| S-24 | Ticket detail & replies | `/seller/support/:id` | ✓ | ✓ reply and resolve | · | ✓ states exercised, incl. no-JS |
+| S-25 | Profile & settings | `/seller/profile` | ✓ | ✓ | · | ✓ states exercised, incl. no-JS |
 
 ### Not a screen: `/seller/review-state`
 
@@ -175,30 +175,66 @@ screens where money, identity and lead ownership appear:
 
 | ID | Screen | Route | Screen | Sample | Real | Verified |
 |---|---|---|---|---|---|---|
-| B-01 | Builder registration | `/builder/register` | · | · | · | · |
-| B-02 | Builder KYC & verification | `/builder/kyc` | · **documents open, D-15** | · | · | · |
-| B-03 | Subscription overview | `/builder/subscription` | · **price open, D-01** | · | · | · |
-| B-04 | Subscription payment result | `/builder/subscription/payment` | · | · | · | · |
-| B-05 | Renewal & expiry | `/builder/subscription/renewal` | · **listing outcome open, D-02** | · | · | · |
-| B-06 | Builder dashboard | `/builder` | · | · | · | · |
-| B-07 | My properties | `/builder/properties` | · | · | · | · |
-| B-08 | Create listing — basics | `/builder/properties/new` | · | · | · | · |
-| B-09 | Create listing — location | `…/new/location` | · | · | · | · |
-| B-10 | Create listing — pricing & configuration | `…/new/pricing` | · | · | · | · |
-| B-11 | Create listing — specifications & amenities | `…/new/specs` | · | · | · | · |
-| B-12 | Create listing — media | `…/new/media` | · | · | · | · |
-| B-13 | Create listing — preview & publish | `…/new/preview` | · *disconnected step 1* | · | · | · |
-| B-14 | Listing actions | *nested — within B-07* | · | · | · | · |
-| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/edit` | · | · | · | · |
-| B-16 | Enquiries on my listings | `/builder/enquiries` | · | · | · | · |
-| B-17 | Enquiry detail | `/builder/enquiries/:id` | · **contact disclosure open, D-05** | · | · | · |
-| B-18 | New-enquiry notification | *nested* | · **D-05** | · | · | · |
-| B-19 | Access restrictions | *nested* | · | · | · | · |
-| B-20 | Lead marketplace (Builder) | `/builder/marketplace` | · **lead prices open, D-03** | · | · | · |
-| B-21 | Purchased leads (Builder) | `/builder/leads` | · | · | · | · |
-| B-22 | Billing & credits (Builder) | `/builder/billing` | · | · | · | · |
-| B-23 | Support (Builder) | `/builder/support` | · | · | · | · |
-| B-24 | Profile & settings (Builder) | `/builder/profile` | · **dual role open, D-08** | · | · | · |
+| B-01 | Builder registration | `/builder/register` | ✓ | ~ validates and advances; creates no account | · | ✓ both phases, incl. no-JS |
+| B-02 | Builder KYC & verification | `/builder/verification` | ✓ | ~ records that files were chosen; **uploads nothing**; **document list open, D-15** | · | ✓ validation and four states, incl. no-JS |
+| B-03 | Subscription overview | `/builder/subscription` | ✓ | ✓ four states; **no price shown — D-01** | · | ✓ incl. an assertion that no figure appears |
+| B-04 | Subscription payment result | `/builder/subscription/payment` | ✓ | ✓ active, pending, failed | · | ✓ all three, plus direct access refused |
+| B-05 | Renewal & expiry | `/builder/subscription/renewal` | ✓ | ✓ expiry blocks publishing; **live-listing outcome open, D-02** | · | ✓ expiry blocks publishing and does *not* hide live listings |
+| B-06 | Builder dashboard | `/builder` | ✓ | ✓ counts derived from listings and enquiries | · | ✓ 1440 · 390 |
+| B-07 | My properties | `/builder/properties` | ✓ | ✓ published, draft, empty | · | ✓ incl. unpublish and republish |
+| B-08 | Create listing — basics | `/builder/properties/:id/basics` | ✓ | ✓ saves and validates | · | ✓ save and advance, incl. no-JS |
+| B-09 | Create listing — location | `…/:id/location` | ✓ | ✓ | · | ✓ |
+| B-10 | Create listing — pricing & configuration | `…/:id/pricing` | ✓ | ✓ | · | ✓ |
+| B-11 | Create listing — specifications & amenities | `…/:id/specs` | ✓ | ✓ | · | ✓ |
+| B-12 | Create listing — media | `…/:id/media` | ✓ | ~ records that photographs were chosen; **stores no bytes** | · | ✓ the limitation is asserted, not the upload |
+| B-13 | Create listing — preview & publish | `…/:id/preview` | ✓ | ✓ blockers per section, publish, **portal continuity — *disconnected step 1 closed in sample*** | · | ✓ blockers named, publish reaches `/search`, incl. no-JS |
+| B-14 | Listing actions | *nested — within B-07* | ✓ | ✓ edit, unpublish, republish, delete a draft | · | ✓ |
+| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/basics` *(same editor)* | ✓ | ✓ | · | ~ save and navigate checked; no unsaved-changes prompt — see below |
+| B-16 | Enquiries on my listings | `/builder/enquiries` | ✓ | ✓ seeded **plus Buyer enquiries from the portal** | · | ✓ a portal enquiry reaches the console |
+| B-17 | Enquiry detail | `/builder/enquiries/:id` | ✓ | ✓ both alternatives; **disclosure rule open, D-05** | · | ✓ incl. a mask-containment check over the whole HTML |
+| B-18 | New-enquiry notification | `/builder/enquiries/notifications` | ✓ | ✓ read/unread; **D-05** | · | ✓ |
+| B-19 | Access restrictions | `/builder/restrictions` | ✓ | ✓ suspension and verification as separate axes | · | ✓ suspension does not rewrite verification |
+| B-20 | Lead marketplace (Builder) | `/builder/marketplace` | ✓ | ✓ the Builder's own lead pool; **prices open, D-03** | · | ✓ separate pool from the Seller's |
+| B-21 | Purchased leads (Builder) | `/builder/leads` | ✓ | ✓ + server-generated CSV | · | ✓ export, and 404 for a lead not owned |
+| B-22 | Billing & credits (Builder) | `/builder/billing` | ✓ | ✓ separate balance, ledger, invoices | · | ✓ reconciliation and separation from the Seller wallet |
+| B-23 | Support (Builder) | `/builder/support` | ✓ | ✓ separate queue, creation and replies | · | ✓ incl. a check that a Builder ticket stays out of the Seller queue |
+| B-24 | Profile & settings (Builder) | `/builder/profile` | ✓ | ✓ edit, validation, confirmation; **dual role open, D-08** | · | ✓ incl. no-JS |
+
+### Not a screen: `/builder/review-state`
+
+The same reviewer-tooling position as `/seller/review-state`, and the same
+caveat: it sets which designed state renders — subscription, verification,
+suspension, payment outcome — and it authenticates nothing, approves nothing and
+moves no money. It returns 404 outside sample mode, and that 404 path is
+**untestable for the same reason**: no non-sample build can be produced.
+
+### B-15 — what is and is not built
+
+The editor is one route (`/builder/properties/:id/:section`) reached both by
+creating a listing and by editing one, which is what the prototype shows: B-08
+to B-13 are the same six sections, and B-15 is that editor opened on an existing
+listing. There is no separate edit screen and building one would duplicate it.
+
+**The unsaved-changes prompt in B-15 is not built.** Each section saves on
+submit and navigation between sections goes through that save, so the state the
+prompt guards against — leaving with unsaved edits — arises only by using the
+browser's own Back or by closing the tab. Guarding it needs a client-side
+`beforeunload` and a router interception; it is a real gap and is recorded as
+one rather than marked partial-and-forgotten.
+
+### What "Sample ✓" does not mean for Builder
+
+Everything under the Seller heading above applies unchanged — no
+authentication, no authorization, no KYC, no money, nothing durable — and two
+more, specific to this area:
+
+- **Publishing is not moderation.** In sample mode a published listing reaches
+  `/search` immediately. Whether a real listing is reviewed before or after it
+  goes live is **D-10 and is open**; A-08's queue does not exist. The
+  continuity demonstrated here is the mechanism, not the policy.
+- **A published listing is not a verified project.** RERA registration is a
+  field the editor collects and the portal displays. Nothing checks it against a
+  register. The same is true of every specification, price and possession date.
 
 ## A — Admin
 
@@ -240,20 +276,38 @@ screens where money, identity and lead ownership appear:
 
 ## The two deliberately disconnected steps
 
-The design prototype leaves these unconnected and says so in C-10. They are represented through
-the service interfaces so they connect once, at the right layer:
+The design prototype leaves these unconnected and says so in C-10. Both are now
+connected in sample mode, at the service layer rather than at the component
+layer.
 
-1. **Builder publish → public portal visibility.** In the prototype, publishing in B-13 does not
-   reach the portal, which uses fixed sample listings. Here it belongs to the property service:
-   publishing changes a listing's status, and public search reads published listings through the
-   same service. The sample implementation will demonstrate it end to end; the real behaviour is
-   kkl-backend's and stays **pending** until the API exists.
+1. **Builder publish → public portal visibility.** *Closed in sample.*
+   Publishing in B-13 changes a listing's status; `/search` and the portal read
+   published listings through `portal-bridge.ts`, which joins the Builder's
+   listings to the portal's properties. Verified end to end: publish, see it on
+   `/search`, unpublish, see it gone, republish, see it back — with JavaScript
+   and without.
 
-2. **Seller ticket creation → Admin support queue.** In the prototype, S-23 opens the existing
-   thread rather than creating a queue item. Here both surfaces read one support service, so a
-   created ticket appears in the Admin queue. Demonstrated in sample, **pending** for real.
+   **The rule applied is the defined one, and only that one.** A listing is on
+   the portal because it is published. Whether a listing is reviewed before or
+   after it goes live is **D-10 and open**; whether a live listing comes down
+   when a subscription lapses is **D-02 and open**. Nothing here decides either:
+   subscription gates *publishing*, not continued visibility, and B-05 puts the
+   three alternatives to the client. Real behaviour is kkl-backend's and stays
+   **pending**.
 
-Neither is faked at the component layer, and neither is presented as connected to a real system.
+2. **Seller ticket creation → Admin support queue.** *Half closed.* S-23 creates
+   a real ticket through the support service instead of opening the existing
+   thread, so the created ticket is in the queue the service exposes. The Admin
+   side of the join (A-22) is not built, so nothing reads that queue as an
+   administrator yet. Demonstrated as far as it can be, **pending** for real.
+
+A third join was not in C-10 and is implemented for the same reason: a Buyer's
+enquiry from the public portal reaches the Builder who owns that listing
+(`buyerEnquiriesForBuilder`), joined by listing ownership rather than by "every
+enquiry in the process".
+
+Neither is faked at the component layer, and none is presented as connected to a
+real system.
 
 ## Progress
 
@@ -261,16 +315,16 @@ Counted per dimension, because they are not the same question.
 
 | Area | Rows | Screen built | Sample behaviour | Real integration | Verified |
 |---|---|---|---|---|---|
-| C library | 12 | 9 (2 partial) | 8 | **0** | 6 (4 partial) |
+| C library | 12 | 11 (2 partial) | 9 (1 partial) | **0** | 8 (3 partial) |
 | P public + Buyer | 21 | 21 (2 partial) | 19 (3 partial) | **0** | 16 (5 partial) |
 | S Seller | 25 | 25 (1 partial) | 22 (3 partial) | **0** | 25 (8 partial) |
-| B Builder | 24 | 0 | 0 | **0** | 0 |
+| B Builder | 24 | 24 (1 partial) | 24 (3 partial) | **0** | 24 (1 partial) |
 | A Admin | 31 | 0 | 0 | **0** | 0 |
 
-**Phase 2 is not complete.** The shared foundation, the public portal, the Buyer
-journey and the Seller journey are built and behave against sample services.
-Builder and Admin — 55 rows — have not been started. Nothing anywhere is
-connected to a real service.
+**Phase 2 is not complete.** The shared foundation, the public portal, the
+Buyer journey, the Seller journey and the Builder journey are built and behave
+against sample services. Admin — 31 rows — has not been started. Nothing
+anywhere is connected to a real service.
 
 Three things that a "screens are done" reading would miss:
 
