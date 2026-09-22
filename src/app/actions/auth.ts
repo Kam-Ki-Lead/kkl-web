@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { runtimeConfig } from "@/lib/config/runtime";
+import { confirmEnquiryDestination } from "@/app/actions/enquiry";
 
 /**
  * P-06 verification, as a server action.
@@ -10,6 +11,12 @@ import { runtimeConfig } from "@/lib/config/runtime";
  * or without — client JavaScript. A form that silently degrades to a GET loses
  * the `next` target and the entered number, which would drop a half-finished
  * enquiry on the floor.
+ *
+ * `otpStep` is one action handling both phases, because progressive enhancement
+ * needs the form's action to BE a server action. Wrapping two actions in a
+ * client closure and passing that to useActionState looks equivalent and is
+ * not: the closure only exists once JavaScript has run, so the form does
+ * nothing at all before hydration.
  *
  * **This does not authenticate anyone.** In sample mode no message is sent and
  * no session is created; the step exists so the journey can be reviewed end to
@@ -25,6 +32,19 @@ export type OtpState = {
 
 function safeNext(raw: string): string {
   return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/account/enquiries";
+}
+
+/** The pending-enquiry handoff, recognised so the submission happens here. */
+const ENQUIRY_CONFIRM = "/enquiry/confirm";
+
+/**
+ * Single entry point for both phases, so the form can post to a real server
+ * action and work before hydration.
+ */
+export async function otpStep(previous: OtpState, formData: FormData): Promise<OtpState> {
+  return String(formData.get("phase")) === "request"
+    ? requestCode(previous, formData)
+    : verifyCode(previous, formData);
 }
 
 export async function requestCode(_previous: OtpState, formData: FormData): Promise<OtpState> {
@@ -70,5 +90,9 @@ export async function verifyCode(previous: OtpState, formData: FormData): Promis
     };
   }
 
-  redirect(next);
+  // A Server Action must not redirect to a Route Handler — the client router
+  // asks the target for an RSC payload, gets a plain redirect instead, and
+  // abandons the navigation, leaving the enquiry unrecorded. So the enquiry is
+  // completed here and the redirect goes to the screen that shows the outcome.
+  redirect(next === ENQUIRY_CONFIRM ? await confirmEnquiryDestination() : next);
 }

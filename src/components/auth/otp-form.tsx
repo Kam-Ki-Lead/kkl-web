@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { requestCode, verifyCode, type OtpState } from "@/app/actions/auth";
+import { otpStep, type OtpState } from "@/app/actions/auth";
 import { Field, TextInput } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/states";
@@ -9,8 +9,11 @@ import { StateMessage } from "@/components/ui/states";
 /**
  * P-06 — mobile OTP sign-in / register.
  *
- * Both steps post to server actions, so the flow survives a page without
+ * Both steps post to one server action, so the flow survives a page without
  * JavaScript instead of degrading to a GET that would drop the pending enquiry.
+ * The action passed to useActionState has to be the server action itself: a
+ * client closure that picks between two of them only exists after hydration, so
+ * the form would do nothing until then.
  *
  * Nothing here authenticates. See src/app/actions/auth.ts.
  */
@@ -28,8 +31,7 @@ export function OtpForm({
     : { step: "mobile", mobile: "" };
 
   const [state, action, pending] = useActionState<OtpState, FormData>(
-    async (prev, formData) =>
-      (formData.get("phase") === "request" ? requestCode : verifyCode)(prev, formData),
+    otpStep,
     initial,
   );
 
@@ -59,7 +61,9 @@ export function OtpForm({
               placeholder="10-digit mobile number"
               defaultValue={state.mobile}
               invalid={Boolean(state.error)}
-              aria-describedby={state.error ? "auth-mobile-error" : "auth-mobile-helper"}
+              aria-describedby={
+                state.error ? "auth-mobile-error" : "auth-mobile-helper"
+              }
             />
           </Field>
           <Button type="submit" disabled={pending}>
@@ -67,41 +71,52 @@ export function OtpForm({
           </Button>
         </form>
       ) : (
-        <form action={action} className="flex flex-col gap-[16px]">
-          <input type="hidden" name="phase" value="verify" />
-          <input type="hidden" name="mobile" value={state.mobile} />
-          <input type="hidden" name="next" value={next} />
+        <div className="flex flex-col gap-[16px]">
+          {/*
+            "Change number" is its own form rather than a second submit inside
+            the code form. In one form it was the first submit button, which
+            makes it the implicit default: typing the code and pressing Enter
+            discarded the code and went back to step one.
+          */}
+          <form action={action}>
+            <input type="hidden" name="phase" value="verify" />
+            <input type="hidden" name="mobile" value={state.mobile} />
+            <input type="hidden" name="intent" value="change-number" />
+            <p className="text-[15px] text-body">
+              Enter the six-digit code for{" "}
+              <span className="t-mono text-ink">+91 {state.mobile}</span>.{" "}
+              <button
+                type="submit"
+                className="font-semibold text-brand underline underline-offset-2"
+              >
+                Change number
+              </button>
+            </p>
+          </form>
 
-          <p className="text-[15px] text-body">
-            Enter the six-digit code for{" "}
-            <span className="t-mono text-ink">+91 {state.mobile}</span>.{" "}
-            <button
-              type="submit"
-              name="intent"
-              value="change-number"
-              className="font-semibold text-brand underline underline-offset-2"
-            >
-              Change number
-            </button>
-          </p>
+          <form action={action} className="flex flex-col gap-[16px]">
+            <input type="hidden" name="phase" value="verify" />
+            <input type="hidden" name="mobile" value={state.mobile} />
+            <input type="hidden" name="next" value={next} />
 
-          <Field id="auth-code" label="Verification code" error={state.error}>
-            <TextInput
-              id="auth-code"
-              name="code"
-              inputMode="numeric"
-              maxLength={6}
-              autoComplete="one-time-code"
-              placeholder="6 digits"
-              invalid={Boolean(state.error)}
-              aria-describedby={state.error ? "auth-code-error" : undefined}
-            />
-          </Field>
+            <Field id="auth-code" label="Verification code" error={state.error}>
+              <TextInput
+                id="auth-code"
+                name="code"
+                inputMode="numeric"
+                maxLength={6}
+                autoComplete="one-time-code"
+                placeholder="6 digits"
+                invalid={Boolean(state.error)}
+                aria-describedby={state.error ? "auth-code-error" : undefined}
+              />
+            </Field>
 
-          <Button type="submit" disabled={pending}>
-            {pending ? "Verifying…" : "Verify and continue"}
-          </Button>
-        </form>
+            <Button type="submit" disabled={pending}>
+              {pending ? "Verifying…" : "Verify and continue"}
+            </Button>
+          </form>
+        </div>
       )}
     </div>
   );
@@ -111,8 +126,8 @@ export function OtpForm({
 export function NothingToVerify() {
   return (
     <StateMessage title="There is nothing waiting to be confirmed">
-      Your verification link has expired or was already used. Start from the property you were
-      enquiring about.
+      Your verification link has expired or was already used. Start from the
+      property you were enquiring about.
     </StateMessage>
   );
 }

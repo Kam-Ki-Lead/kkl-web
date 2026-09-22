@@ -101,8 +101,16 @@ export interface EnquiryService {
   }): Promise<{ readonly enquiryId: string; readonly duplicate: boolean }>;
   listMine(): Promise<readonly BuyerEnquiry[]>;
   getMine(id: string): Promise<BuyerEnquiry>;
-  /** A recorded enquiry by reference, for the confirmation screen. */
-  getByReference(id: string): Promise<BuyerEnquiry | null>;
+  /**
+   * The enquiry a submission receipt refers to, for the confirmation screen.
+   *
+   * The receipt is the submission token, not the human reference. References are
+   * for people to quote; they are short and predictable, so addressing the
+   * confirmation screen by one would let anyone read another person's enquiry by
+   * guessing. Implementations must still authorize the read — an unguessable
+   * identifier is not permission.
+   */
+  getByReceipt(receipt: string): Promise<BuyerEnquiry | null>;
 }
 
 /**

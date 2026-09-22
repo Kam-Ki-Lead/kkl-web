@@ -14,12 +14,16 @@ export default async function EnquiryConfirmedPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id: receipt } = await params;
 
-  // The reference in the URL is not trusted: the screen only confirms an enquiry
-  // the service actually holds, so a guessed or stale reference cannot render as
-  // a successful submission.
-  const enquiry = await getServices().enquiries.getByReference(id);
+  // The URL carries the submission receipt, not the enquiry reference. The
+  // reference is sequential — addressing this screen by one would let anyone read
+  // another person's confirmation by counting. The receipt is random and was only
+  // ever held in the submitting browser's httpOnly draft cookie.
+  //
+  // It is still not trusted as permission: the screen confirms only an enquiry
+  // the service actually holds, and real authorization is kkl-backend's.
+  const enquiry = await getServices().enquiries.getByReceipt(receipt);
   if (!enquiry) notFound();
 
   return (

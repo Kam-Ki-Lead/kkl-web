@@ -19,10 +19,13 @@ import { SAMPLE_PROPERTIES } from "./fixtures";
  *    idempotency guarantee would not hold across them.
  * 3. It has no eviction. Fine for a review session; it would grow without bound
  *    under sustained use.
- * 4. It is not partitioned by account, because sample mode has no accounts. Any
- *    caller who knows a reference can read that enquiry through `getByReference`.
- *    Real per-account isolation is kkl-backend's to enforce and is NOT
- *    demonstrated here.
+ * 4. It is not partitioned by account, because sample mode has no accounts. What
+ *    keeps one browser out of another's enquiry is that the confirmation screen
+ *    is addressed by the submission token — an unguessable value only the
+ *    browser that created the draft ever held — and not by the human reference,
+ *    which is sequential and would be trivially enumerable. That is obscurity
+ *    plus an httpOnly cookie, not authorization. Real per-account isolation is
+ *    kkl-backend's to enforce and is NOT demonstrated here.
  *
  * None of this is a model for production. Real idempotency belongs in
  * kkl-backend, keyed in the database inside the same transaction that records
@@ -83,8 +86,27 @@ export function submit(input: SubmitInput): { enquiryId: string; duplicate: bool
   return { enquiryId: reference, duplicate: false };
 }
 
+/**
+ * Lookup by human reference, for the account's own enquiry list and detail.
+ *
+ * Only ever reached through a screen that is already scoped to an account. It is
+ * not what the public confirmation URL resolves — see `findByReceipt`.
+ */
 export function findByReference(reference: string): BuyerEnquiry | null {
   return byReference.get(reference) ?? null;
+}
+
+/**
+ * The enquiry a submission token receipt refers to.
+ *
+ * Deliberately not `findByReference`. References are sequential, so looking one
+ * up from the URL would let anyone walk the list by counting. The token is
+ * random and was only ever held in the submitting browser's httpOnly draft
+ * cookie.
+ */
+export function findByReceipt(token: string): BuyerEnquiry | null {
+  const reference = byToken.get(token);
+  return reference === undefined ? null : (byReference.get(reference) ?? null);
 }
 
 /** Enquiries submitted in this process, newest first. */

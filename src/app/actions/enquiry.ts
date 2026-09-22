@@ -144,13 +144,13 @@ export async function pendingVerificationMobile(): Promise<string | null> {
  * creating another one.
  */
 export async function completeEnquiry(): Promise<
-  { ok: true; enquiryId: string } | { ok: false; problem: DraftProblem }
+  { ok: true; receipt: string } | { ok: false; problem: DraftProblem }
 > {
   const result = await readEnquiryDraft();
   if (!result.ok) return result;
 
   const { draft } = result;
-  const { enquiryId } = await getServices().enquiries.submitEnquiry({
+  await getServices().enquiries.submitEnquiry({
     idempotencyKey: draft.submissionToken,
     propertyId: draft.propertyId,
     kind: draft.kind,
@@ -163,5 +163,25 @@ export async function completeEnquiry(): Promise<
   const jar = await cookies();
   jar.delete(DRAFT_COOKIE);
 
-  return { ok: true, enquiryId };
+  // The confirmation screen is addressed by the submission token, not by the
+  // enquiry reference: references are sequential and would be enumerable in a
+  // URL. The reference is shown on the screen, where it belongs.
+  return { ok: true, receipt: draft.submissionToken };
+}
+
+/**
+ * Where a completed verification should land, having recorded the enquiry.
+ *
+ * Returns a page path, never the /enquiry/confirm handoff. A Server Action that
+ * redirects to a Route Handler leaves the client router stranded: it asks the
+ * target for an RSC payload, gets a plain redirect response instead, aborts the
+ * navigation, and the person sits on the verification screen with the enquiry
+ * unrecorded. So the effect happens here and the redirect goes straight to the
+ * screen that shows the result.
+ */
+export async function confirmEnquiryDestination(): Promise<string> {
+  const result = await completeEnquiry();
+  return result.ok
+    ? `/enquiry/${result.receipt}/confirmed`
+    : `/enquiry/unavailable?reason=${result.problem}`;
 }

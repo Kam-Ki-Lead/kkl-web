@@ -182,8 +182,8 @@ const enquiryService: EnquiryService = {
     return found;
   },
 
-  async getByReference(id) {
-    return enquiryStore.findByReference(id) ?? SAMPLE_ENQUIRIES.find((e) => e.id === id) ?? null;
+  async getByReceipt(receipt) {
+    return enquiryStore.findByReceipt(receipt);
   },
 };
 
