@@ -29,7 +29,7 @@ export default async function AdminPricingPage() {
   return (
     <AdminShell title="Pricing & aging" subtitle="Lead prices, aging discount and Sale window">
       <div className="flex max-w-[820px] flex-col gap-[16px]">
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-warning">Nothing here is set, and nothing is editable</h2>
           <p className="t-body mt-[6px] text-body">
             {DECISIONS["D-03"].question} — <strong>D-03</strong>. Every figure below is a

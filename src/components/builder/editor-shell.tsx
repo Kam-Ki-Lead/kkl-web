@@ -82,7 +82,7 @@ export function EditorShell({
                   className={`flex min-h-[40px] items-center gap-[8px] rounded-[8px] border-[1.5px] px-[13px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                     active
                       ? "border-brand bg-chip-neutral-bg text-brand"
-                      : "border-line bg-white text-body hover:border-[#C3C9DA]"
+                      : "border-line bg-white text-body hover:border-[#C6CCE0]"
                   }`}
                 >
                   <span className="t-mono text-[12px] text-muted">

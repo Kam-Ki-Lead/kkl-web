@@ -60,7 +60,7 @@ export default async function AdminAuditPage({
                 className={`min-h-[40px] rounded-full border-[1.5px] px-[14px] py-[9px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   active
                     ? "border-brand bg-brand text-white"
-                    : "border-line bg-white text-body hover:border-[#C3C9DA]"
+                    : "border-line bg-white text-body hover:border-[#C6CCE0]"
                 }`}
               >
                 {option.label}
@@ -98,7 +98,7 @@ export default async function AdminAuditPage({
                   </span>
                 </summary>
 
-                <div className="border-t border-[#EDEFF6] bg-[#FAFBFE] px-[18px] py-[16px]">
+                <div className="border-t border-[#EDEFF6] bg-[#F6F8FD] px-[18px] py-[16px]">
                   <dl className="grid grid-cols-2 gap-x-[18px] gap-y-[9px] max-[700px]:grid-cols-1">
                     <Row label="Actor">
                       {entry.actor.name} · staff ID {entry.actor.staffId} · {entry.actor.team}

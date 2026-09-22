@@ -143,7 +143,7 @@ export default async function PropertyDetailPage({
 
           <Section title="Location">
             <Card className="overflow-hidden">
-              <div className="flex h-[180px] items-center justify-center bg-[#E8ECF6]">
+              <div className="flex h-[180px] items-center justify-center bg-[#EFF1F7]">
                 <p className="t-caption text-muted">Map — tile provider not yet chosen</p>
               </div>
               <div className="border-t border-line p-[14px]">
@@ -226,7 +226,7 @@ function Gallery({ property }: { property: PropertyDetail }) {
             label="Further photographs pending"
           />
         </div>
-        <div className="flex flex-col items-center justify-center rounded-[10px] border border-line bg-[#E8ECF6] p-[14px] text-center">
+        <div className="flex flex-col items-center justify-center rounded-[10px] border border-line bg-[#EFF1F7] p-[14px] text-center">
           <p className="t-card-title text-ink">Floor plans</p>
           <p className="t-caption mt-[2px] text-muted">
             {property.floorPlans.length === 0

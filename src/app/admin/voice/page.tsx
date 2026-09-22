@@ -29,7 +29,10 @@ export default async function AdminVoicePage() {
         <div className="grid grid-cols-4 gap-[14px] max-[1060px]:grid-cols-2">
           {stats.map((stat) => (
             <Card key={stat.label} className="p-[18px]">
-              <p className="t-figure text-ink">{stat.value}</p>
+              {/* 26px, as the approved design declares for these stat blocks. */}
+              <p className="font-[family-name:var(--font-heading)] text-[26px] font-extrabold leading-[1.2] tracking-[-0.03em] text-ink">
+                {stat.value}
+              </p>
               <p className="mt-[5px] text-[14px] font-semibold text-ink">{stat.label}</p>
               <p className="t-caption mt-[2px] text-muted">{stat.note}</p>
             </Card>

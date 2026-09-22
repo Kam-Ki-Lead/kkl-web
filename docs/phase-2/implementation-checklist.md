@@ -189,7 +189,7 @@ screens where money, identity and lead ownership appear:
 | B-12 | Create listing — media | `…/:id/media` | ✓ | ~ records that photographs were chosen; **stores no bytes** | · | ✓ the limitation is asserted, not the upload |
 | B-13 | Create listing — preview & publish | `…/:id/preview` | ✓ | ✓ blockers per section, publish, **portal continuity — *disconnected step 1 closed in sample*** | · | ✓ blockers named, publish reaches `/search`, incl. no-JS |
 | B-14 | Listing actions | *nested — within B-07* | ✓ | ✓ edit, unpublish, republish, delete a draft | · | ✓ |
-| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/basics` *(same editor)* | ✓ | ✓ | · | ~ save and navigate checked; no unsaved-changes prompt — see below |
+| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/basics` *(same editor)* | ✓ | ✓ dirty mark, exit dialog, reload warning | · | ✓ 15 checks, incl. rail and section interception |
 | B-16 | Enquiries on my listings | `/builder/enquiries` | ✓ | ✓ seeded **plus Buyer enquiries from the portal** | · | ✓ a portal enquiry reaches the console |
 | B-17 | Enquiry detail | `/builder/enquiries/:id` | ✓ | ✓ both alternatives; **disclosure rule open, D-05** | · | ✓ incl. a mask-containment check over the whole HTML |
 | B-18 | New-enquiry notification | `/builder/enquiries/notifications` | ✓ | ✓ read/unread; **D-05** | · | ✓ |
@@ -215,12 +215,27 @@ creating a listing and by editing one, which is what the prototype shows: B-08
 to B-13 are the same six sections, and B-15 is that editor opened on an existing
 listing. There is no separate edit screen and building one would duplicate it.
 
-**The unsaved-changes prompt in B-15 is not built.** Each section saves on
-submit and navigation between sections goes through that save, so the state the
-prompt guards against — leaving with unsaved edits — arises only by using the
-browser's own Back or by closing the tab. Guarding it needs a client-side
-`beforeunload` and a router interception; it is a real gap and is recorded as
-one rather than marked partial-and-forgotten.
+**The unsaved-changes experience is now built**, to the approved design: the
+"Unsaved changes" mark in the header, a save control whose label settles to
+"Draft saved", and the three-way dialog on the way out — save and close,
+discard, keep editing — plus the browser's own warning on reload or tab close.
+
+Two things about it are worth recording rather than leaving to be rediscovered:
+
+- **Dirtiness is read from the DOM against each control's own default**, not
+  from a snapshot taken at mount. That is exactly the state `form.reset()`
+  restores, so "discard" and "is it dirty" cannot disagree. It also means typing
+  a value back to what was saved clears the mark rather than latching.
+- **File inputs are excluded.** In sample mode nothing is uploaded and
+  `photoCount` is what actually saves, so a chosen file could never become
+  "saved" — counting it would leave the editor permanently dirty with no way for
+  a Builder to clear it.
+
+**None of it works without JavaScript**, and the screen says so rather than
+implying otherwise. What still works there is the part a Builder would actually
+lose work to: every control that leaves a section is a submit button, so moving
+through the editor saves on the way. Recorded as limitation L3 of the Builder
+suite — a reproduction, not a pass.
 
 ### What "Sample ✓" does not mean for Builder
 
@@ -240,37 +255,113 @@ more, specific to this area:
 
 | ID | Screen | Route | Screen | Sample | Real | Verified |
 |---|---|---|---|---|---|---|
-| A-01 | Admin sign-in | `/admin/login` | · **MFA open, D-16** | · | · | · |
-| A-02 | Admin dashboard | `/admin` | · | · | · | · |
-| A-03 | Users | `/admin/users` | · | · | · | · |
-| A-04 | User detail | `/admin/users/:id` | · | · | · | · |
-| A-05 | KYC queue | `/admin/kyc` | · | · | · | · |
-| A-06 | KYC applicant review | `/admin/kyc/:id` | · | · | · | · |
-| A-07 | KYC decision | *nested — within A-06* | · | · | · | · |
-| A-08 | Property review queue | `/admin/properties` | · **pre/post publish open, D-10** | · | · | · |
-| A-09 | Property detail & moderation | `/admin/properties/:id` | · | · | · | · |
-| A-10 | Lead intake overview | `/admin/leads/intake` | · | · | · | · |
-| A-11 | Intake results & failures | `/admin/leads/intake/:id` | · | · | · | · |
-| A-12 | Leads | `/admin/leads` | · | · | · | · |
-| A-13 | Lead detail & history | `/admin/leads/:id` | · | · | · | · |
-| A-14 | Lead pricing & aging rules | `/admin/settings/pricing` | · **D-03** | · | · | · |
-| A-15 | Platform settings | `/admin/settings` | · | · | · | · |
-| A-16 | Orders & purchases | `/admin/orders` | · | · | · | · |
-| A-17 | Delivery & download records | `/admin/orders/:id/delivery` | · | · | · | · |
-| A-18 | Wallet & credit oversight | `/admin/wallets` | · | · | · | · |
-| A-19 | Credit adjustment | `/admin/wallets/:id/adjust` | · | · | · | · |
-| A-20 | Refund review | `/admin/refunds` | · **refund policy open, D-06** | · | · | · |
-| A-21 | Subscriptions & billing | `/admin/subscriptions` | · | · | · | · |
-| A-22 | Support queue | `/admin/support` | · | · | · | · |
-| A-23 | Ticket conversation | `/admin/support/:id` | · | · | · | · |
-| A-24 | Voice qualification overview | `/admin/voice` | · | · | · | · |
-| A-25 | Call detail | `/admin/voice/:id` | · | · | · | · |
-| A-26 | WhatsApp funnel | `/admin/whatsapp` | · | · | · | · |
-| A-27 | Notification delivery | `/admin/notifications` | · | · | · | · |
-| A-28 | Consent & suppression | `/admin/consent` | · **D-14** | · | · | · |
-| A-29 | Analytics & reports | `/admin/reports` | · | · | · | · |
-| A-30 | Audit log | `/admin/audit` | · | · | · | · |
-| A-31 | Jobs & integration status | `/admin/system` | · | · | · | · |
+| A-01 | Admin sign-in | `/admin/login` | ✓ **fields disabled — authenticates nobody; MFA open, D-16** | n/a — nothing to implement | · | ✓ asserted disabled and self-declaring |
+| A-02 | Admin dashboard | `/admin` | ✓ | ✓ queue tiles counted from the queues | · | ✓ 1440 · 390 |
+| A-03 | Users | `/admin/users` | ✓ | ✓ two rows read live state from their console | · | ✓ filters, search, empty |
+| A-04 | User detail | `/admin/users/:id` | ✓ | ✓ suspend/reinstate, reason-gated | · | ✓ incl. two negative checks and no-JS |
+| A-05 | KYC queue | `/admin/kyc` | ✓ | ✓ decided applications leave the queue | · | ✓ four filters |
+| A-06 | KYC applicant review | `/admin/kyc/:id` | ✓ | ✓ documents, checklist, decision | · | ✓ checklist gate, incl. no-JS |
+| A-07 | KYC decision | *nested — within A-06* | ✓ | ✓ three outcomes, each writing to the account | · | ✓ approve, reject, resubmit |
+| A-08 | Property review queue | `/admin/properties` | ✓ | ✓ **no approve action — D-10 open** | · | ✓ asserted absent, with the reason on screen |
+| A-09 | Property detail & moderation | `/admin/properties/:id` | ✓ | ✓ unpublish and dismiss, reason-gated | · | ✓ |
+| A-10 | Lead intake overview | `/admin/leads/intake` | ✓ | ~ **fixtures — no intake pipeline exists** | · | ✓ renders; the limitation is asserted |
+| A-11 | Intake results & failures | `/admin/leads/intake/:id` | ✓ | ~ fixtures; numbers masked in the data | · | ✓ |
+| A-12 | Leads | `/admin/leads` | ✓ | ~ fixtures; six lifecycle states | · | ✓ filters, search |
+| A-13 | Lead detail & history | `/admin/leads/:id` | ✓ | ~ fixtures; **no contact detail on the screen at all** | · | ✓ eligible and ineligible cases |
+| A-14 | Lead pricing & aging rules | `/admin/settings/pricing` | ✓ **fields disabled — D-03** | n/a — gated on D-03 | · | ✓ asserted not editable |
+| A-15 | Platform settings | `/admin/settings` | ✓ **read-only — D-09, calling hours** | n/a | · | ✓ |
+| A-16 | Orders & purchases | `/admin/orders` | ✓ | ✓ **live purchases from both consoles** | · | ✓ a Seller purchase appears here |
+| A-17 | Delivery & download records | `/admin/orders/:id/delivery` | ✓ | ✓ delivered and reversed-failure cases | · | ✓ both |
+| A-18 | Wallet & credit oversight | `/admin/wallets` | ✓ | ✓ **balances derived from the consoles' own ledgers** | · | ✓ Admin and Seller agree |
+| A-19 | Credit adjustment | `/admin/wallets/:id/adjust` | ✓ | ✓ posts a traceable entry with a mandatory reason | · | ✓ both gates, incl. no-JS |
+| A-20 | Refund review | `/admin/refunds` | ✓ | ✓ decision recorded; **moves nothing — D-06** | · | ✓ asserted that nothing moves |
+| A-21 | Subscriptions & billing | `/admin/subscriptions` | ✓ | ✓ live Builder row; **no amount shown — D-01** | · | ✓ asserted no figure appears |
+| A-22 | Support queue | `/admin/support` | ✓ | ✓ **both consoles' tickets in one queue** | · | ✓ |
+| A-23 | Ticket conversation | `/admin/support/:id` | ✓ | ✓ reply routing and internal notes | · | ✓ 5 checks incl. 3 negative, and no-JS |
+| A-24 | Voice qualification overview | `/admin/voice` | ✓ | ~ **fixtures — kkl-voice is not connected** | · | ✓ |
+| A-25 | Call detail | `/admin/voice/:id` | ✓ | ~ fixtures; no audio player | · | ✓ transcript and no-transcript cases |
+| A-26 | WhatsApp funnel | `/admin/whatsapp` | ✓ | ~ fixtures | · | ✓ |
+| A-27 | Notification delivery | `/admin/notifications` | ✓ | ~ fixtures; **read-only, no resend** | · | ✓ |
+| A-28 | Consent & suppression | `/admin/consent` | ✓ | ✓ **read-only; the service has no remove method** | · | ✓ asserted absent |
+| A-29 | Analytics & reports | `/admin/reports` | ~ one report, no picker or date range | ~ synthetic figures, labelled | · | ✓ incl. server-generated CSV |
+| A-30 | Audit log | `/admin/audit` | ✓ | ✓ **append-only; every action here writes one** | · | ✓ incl. unchanged-field pairs |
+| A-31 | Jobs & integration status | `/admin/system` | ✓ | ~ fixtures; **no credential field anywhere** | · | ✓ asserted |
+
+### Not a screen: `/admin/review-state`
+
+The same position as the Seller's and Builder's, with one difference: the
+Admin console needs almost no state switches, because its queues are reached by
+acting on them. What it needs is a **reset**, because staff decisions are
+one-way — an approved application leaves the queue.
+
+Its reset is the whole platform, not just the Admin store. A verification
+decision writes into the Seller or Builder console, so resetting Admin alone
+would leave those two carrying the last pass's decisions while this console
+showed a fresh queue.
+
+### A-07 is not a route
+
+The screen inventory marks it as a nested state within A-06's review flow, and
+it is built that way: the decision panel sits below the checklist on A-06 and
+the outcome replaces it in place. A reviewer who has just read four documents
+should not be sent to another page to say what they concluded.
+
+### Identity in the service interfaces
+
+Admin is the first role that acts *on* accounts rather than as one, so the
+account a service operates on became a parameter rather than an ambient
+assumption. `src/lib/domain/identity.ts` introduces `AccountRef` and
+`StaffRef`, and every mutating `AdminService` method takes an actor and a
+subject explicitly.
+
+**This is modelling, not authorization**, and the distinction is worth
+repeating because the shape invites the confusion:
+
+- The actor is supplied by the server — a constant this process owns — and is
+  never read from a form. No field in any Admin form can name who acted.
+- The console-scope field the Seller and Builder actions carry is **untrusted
+  input**. It is validated to one of two known values so a junk value cannot
+  select no service at all. That is a validator, not a check: it does not
+  establish that a caller may act as a Builder, because in this build nothing
+  can. A real implementation reads the role from the authenticated identity and
+  ignores what the form said.
+
+### What "Sample ✓" does not mean for Admin
+
+Everything under the Seller and Builder headings applies, and three more that
+are specific to a staff console — the surface where a screen most invites being
+read as authoritative, because it looks like the inside of the system:
+
+- **Nobody is signed in, and there are no staff roles.** A-01 authenticates no
+  one; anything that reaches `/admin` gets the entire console. Who may approve a
+  document, adjust a balance or read a transcript are kkl-backend's to decide
+  and enforce, and nothing here is separated by permission. Asserted as
+  limitation L1 of the Admin suite — a reproduction, not a pass.
+- **The operational screens read fixtures.** There is no intake pipeline, no
+  qualification caller, no WhatsApp journey and no notification sender anywhere
+  in this repository. A-10 to A-13 and A-24 to A-27 exist so their layout and
+  states can be reviewed, and each says so on its own face.
+- **A recorded decision is not an enforced one.** The cross-role joins below are
+  real reads and writes through the sample service layer. They demonstrate that
+  the surfaces agree; they demonstrate nothing about whether a real Seller could
+  be stopped from purchasing, which is a server-side check that does not exist.
+
+### The cross-role joins, and what each one proves
+
+| Join | Direction | Asserted by |
+|---|---|---|
+| KYC decision → Seller/Builder verification | write | Admin checks 5–9, 15; no-JS 40–43 |
+| Suspension → account status, **not** verification | write | Admin checks 10–14, 15; no-JS 37–39 |
+| Credit adjustment → the account's own ledger, with the reason | write | Admin checks 16–19; no-JS 44–46 |
+| Public reply → the requester's own thread | write | Admin checks 20–22, 26–27; no-JS 47–49 |
+| Internal note → **nowhere but Admin** | containment | Admin checks 23–25 |
+| Purchases and credit activity → Admin records | read | Admin check 28 |
+| Live account state → A-03, A-18, A-21 | read | Admin checks 11, 19; A-21 reads B-03's state |
+
+Five of those seven checks are **negative** — they assert that something does
+*not* happen. A staff console's interesting failures are a reply reaching the
+wrong person, a note reaching anyone, or a suspension quietly revoking a
+verification, and a suite that only walks happy paths cannot see any of them.
 
 ---
 
@@ -318,25 +409,39 @@ Counted per dimension, because they are not the same question.
 | C library | 12 | 11 (2 partial) | 9 (1 partial) | **0** | 8 (3 partial) |
 | P public + Buyer | 21 | 21 (2 partial) | 19 (3 partial) | **0** | 16 (5 partial) |
 | S Seller | 25 | 25 (1 partial) | 22 (3 partial) | **0** | 25 (8 partial) |
-| B Builder | 24 | 24 (1 partial) | 24 (3 partial) | **0** | 24 (1 partial) |
-| A Admin | 31 | 0 | 0 | **0** | 0 |
+| B Builder | 24 | 24 | 24 (3 partial) | **0** | 24 |
+| A Admin | 31 | 31 (1 partial) | 22 (10 partial, 3 n/a) | **0** | 31 |
 
-**Phase 2 is not complete.** The shared foundation, the public portal, the
-Buyer journey, the Seller journey and the Builder journey are built and behave
-against sample services. Admin — 31 rows — has not been started. Nothing
-anywhere is connected to a real service.
+**Every screen in the inventory is now built.** The shared foundation, the
+public portal, the Buyer journey, the Seller journey, the Builder journey and
+the Admin console all behave against sample services.
 
-Three things that a "screens are done" reading would miss:
+**That is not the same as Phase 2 being complete**, and the gap is not a
+formality:
 
-1. **No real integration exists at all.** Not partial, not stubbed against a
-   staging API: zero. kkl-backend has not published its API, so authentication,
-   authorization, lead ownership, contact disclosure, credits and payments are
-   all simulated. Every screen that touches one says so on the screen.
-2. **Three accessibility checks are outstanding for every row** — screen-reader
+- **Nothing is connected to a real service.** Not partially, not against a
+  staging API: zero. Every authentication, authorization, verification,
+  ownership, contact-disclosure, credit and payment decision in this repository
+  is simulated.
+- **Ten of the 31 Admin rows carry a partial Sample mark**, and three are `n/a`.
+  A-10 to A-13 and A-24 to A-27 render fixtures for pipelines that do not exist;
+  A-01, A-14 and A-15 have nothing to implement because the decisions behind
+  them are open.
+- **Sixteen client decisions are still open** (D-01 to D-16). Several of them
+  are the reason a screen is deliberately inert rather than unfinished — no
+  approve action on A-08, no amount on A-21, no movement on A-20, no editable
+  price on A-14.
+- **The visual comparison is incomplete and the accessibility work is
+  outstanding**, as below.
+
+Two of those deserve spelling out, because a "screens are done" reading walks
+straight past them:
+
+1. **Three accessibility checks are outstanding for every row** — screen-reader
    testing, per-chip contrast measurement, and native plus text-only zoom. They
    were outstanding at design approval (C-11) and design approval did not
-   discharge them. No row's Verified mark includes them.
-3. **The visual comparison against the baseline is not complete.** Primary
+   discharge them. No row's Verified mark includes them, on any of the 113 rows.
+2. **The visual comparison against the baseline is not complete.** Primary
    property imagery still differs: the baseline shows photography, this
    implementation shows it only when the review-imagery flag is on, and that
    path has never been seen rendered because the build environment blocks

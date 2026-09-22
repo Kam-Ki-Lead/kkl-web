@@ -60,7 +60,7 @@ export function RechargeForm({
                 className={`min-h-[48px] rounded-[8px] border-[1.5px] text-[16px] font-bold transition-[background-color,border-color,color] duration-150 ${
                   selected
                     ? "border-brand bg-chip-neutral-bg text-brand"
-                    : "border-line bg-white text-ink hover:border-[#C3C9DA]"
+                    : "border-line bg-white text-ink hover:border-[#C6CCE0]"
                 }`}
               >
                 {formatExactInr(pack)}

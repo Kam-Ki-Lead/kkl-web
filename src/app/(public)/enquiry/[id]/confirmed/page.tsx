@@ -28,7 +28,7 @@ export default async function EnquiryConfirmedPage({
 
   return (
     <div className="mx-auto max-w-[660px] px-[32px] pb-[60px] pt-[36px] max-[1060px]:px-[18px]">
-      <Card className="border-[#C9E4D6] bg-chip-success-bg p-[24px]">
+      <Card className="border-[#BFE0CE] bg-chip-success-bg p-[24px]">
         <div className="flex flex-wrap items-center gap-[12px]">
           <Chip tone="success">Enquiry sent</Chip>
           <h1 className="t-heading text-success">The builder has your enquiry</h1>

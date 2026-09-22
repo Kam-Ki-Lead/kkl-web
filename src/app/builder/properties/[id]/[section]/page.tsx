@@ -116,7 +116,7 @@ async function PreviewSection({
   return (
     <div className="flex flex-col gap-[18px]">
       {blockers.length > 0 ? (
-        <Card className="border-[#F3D5D3] bg-chip-danger-bg p-[18px]">
+        <Card className="border-[#F3C4BF] bg-chip-danger-bg p-[18px]">
           <h3 className="t-card-title text-danger">This listing cannot be published yet</h3>
           <ul className="mt-[8px] flex flex-col gap-[4px]">
             {blockers.map((blocker) => (
@@ -135,7 +135,7 @@ async function PreviewSection({
       ) : null}
 
       {accountBlocked ? (
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h3 className="t-card-title text-warning">Publishing is not available</h3>
           <p className="t-body mt-[6px] text-body">{accountBlocked}</p>
           <p className="t-caption mt-[8px] text-muted">

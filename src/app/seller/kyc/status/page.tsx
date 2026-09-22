@@ -58,7 +58,7 @@ export default async function KycStatusPage() {
       <p className="t-body mt-[8px] text-body">{panel.body}</p>
 
       {rejected ? (
-        <Card className="mt-[16px] border-[#F3D5D3] bg-chip-danger-bg p-[18px]">
+        <Card className="mt-[16px] border-[#F3C4BF] bg-chip-danger-bg p-[18px]">
           <h2 className="t-card-title text-danger">Why it was rejected</h2>
           <p className="t-body mt-[6px] text-body">
             The Aadhaar upload was not readable. Re-upload both sides in one file, or the
@@ -108,7 +108,7 @@ export default async function KycStatusPage() {
       </Card>
 
       {/* D-08. The prototype records this question on this screen. */}
-      <Card className="mt-[16px] border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+      <Card className="mt-[16px] border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
         <h2 className="t-card-title text-ink">Unresolved</h2>
         <p className="t-body mt-[6px] text-body">
           {DECISIONS["D-08"].question} — whether one person may hold both Broker and Builder roles

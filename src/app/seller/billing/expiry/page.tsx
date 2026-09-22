@@ -31,7 +31,7 @@ export default async function CreditExpiryPage() {
   return (
     <SellerShell title="Credit expiry" subtitle="Proposed states — rules not yet set">
       <div className="flex flex-col gap-[18px]">
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[22px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[22px]">
           <h2 className="t-card-title text-ink">Unresolved: credit expiry and renewal</h2>
           <p className="t-body mt-[6px] max-w-[80ch] text-body">
             The account-roles specification states that credits have an expiry date, and nothing

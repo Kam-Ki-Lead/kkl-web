@@ -62,7 +62,7 @@ export default async function BuilderEnquiryPage({
             </Card>
           ) : null}
 
-          <Card className={enquiry.contactPhone ? "border-[#C9E4D6] p-[22px]" : "bg-tint p-[22px]"}>
+          <Card className={enquiry.contactPhone ? "border-[#BFE0CE] p-[22px]" : "bg-tint p-[22px]"}>
             <h3 className={`t-card-title ${enquiry.contactPhone ? "text-success" : "text-ink"}`}>
               Contact details
             </h3>
@@ -109,7 +109,7 @@ export default async function BuilderEnquiryPage({
         </div>
 
         <aside className="flex flex-col gap-[16px]">
-          <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+          <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
             <h3 className="t-card-title text-ink">Unresolved ambiguity</h3>
             <p className="t-body mt-[6px] text-body">
               The account-roles specification says a Builder is notified of enquiries on their own

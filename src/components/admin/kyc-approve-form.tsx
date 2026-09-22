@@ -32,6 +32,7 @@ export function KycApproveForm({ applicationId }: { applicationId: string }) {
       {state.error ? (
         <p
           role="alert"
+          id="approve-error"
           className="max-w-[420px] rounded-[8px] bg-chip-danger-bg px-[13px] py-[10px] text-[14px] font-semibold text-danger"
         >
           {state.error}

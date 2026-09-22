@@ -215,7 +215,7 @@ function spellSmallNumber(n: number): string {
 
 function FindMyMatchPanel() {
   return (
-    <section className="rounded-[12px] border border-[#F2DFBC] bg-[#FFF9EE] p-[24px]">
+    <section className="rounded-[12px] border border-[#F3DFB4] bg-[#FFF7E8] p-[24px]">
       <span className="t-eyebrow text-warning">Find my match</span>
       <h2 className="t-heading mt-[8px] max-w-[22ch] text-ink">
         Not sure where to start? Tell us what you need.

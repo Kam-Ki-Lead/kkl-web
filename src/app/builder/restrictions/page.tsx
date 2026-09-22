@@ -106,7 +106,7 @@ export default async function BuilderRestrictionsPage() {
     <BuilderShell title="Access restrictions" subtitle="What each state allows and how to recover">
       <div className="flex max-w-[1000px] flex-col gap-[16px]">
         {current === null ? (
-          <Card className="border-[#C9E4D6] bg-chip-success-bg p-[18px]">
+          <Card className="border-[#BFE0CE] bg-chip-success-bg p-[18px]">
             <p className="text-[15px] font-semibold text-success">
               Nothing is restricted on this account right now.
             </p>
@@ -173,7 +173,7 @@ export default async function BuilderRestrictionsPage() {
           ))}
         </div>
 
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-ink">Three independent axes</h2>
           <p className="t-body mt-[6px] text-body">
             Verification, subscription and administrative status move independently. Suspending an

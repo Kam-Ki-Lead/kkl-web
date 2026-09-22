@@ -68,7 +68,7 @@ export default async function AdminRefundsPage({
   return (
     <AdminShell title="Refunds" subtitle="Requests, decisions and audit trail">
       <div className="flex max-w-[900px] flex-col gap-[16px]">
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-warning">No refund moves anything here</h2>
           <p className="t-body mt-[6px] text-body">
             {DECISIONS["D-06"].question} — <strong>D-06</strong>. Both halves are open: whether a

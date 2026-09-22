@@ -128,7 +128,7 @@ export default async function BuilderSubscriptionPage() {
         </div>
 
         <aside>
-          <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+          <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
             <h2 className="t-card-title text-ink">Renewal &amp; expiry</h2>
             <p className="t-body mt-[6px] text-body">
               What happens to listings that are already live when a subscription lapses is not

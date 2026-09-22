@@ -54,7 +54,7 @@ export function TicketReplyForm({
               className={`min-h-[40px] rounded-[8px] border-[1.5px] px-[14px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                 internal === option.key
                   ? "border-brand bg-brand text-white"
-                  : "border-line bg-white text-body hover:border-[#C3C9DA]"
+                  : "border-line bg-white text-body hover:border-[#C6CCE0]"
               }`}
             >
               {option.label}
@@ -77,6 +77,7 @@ export function TicketReplyForm({
         {state.error ? (
           <p
             role="alert"
+            id="reply-error"
             className="rounded-[8px] bg-chip-danger-bg px-[13px] py-[10px] text-[14px] font-semibold text-danger"
           >
             {state.error}
@@ -112,6 +113,7 @@ export function TicketReplyForm({
           {resolveState.error ? (
             <p
               role="alert"
+              id="resolve-error"
               className="rounded-[8px] bg-chip-danger-bg px-[13px] py-[10px] text-[14px] font-semibold text-danger"
             >
               {resolveState.error}

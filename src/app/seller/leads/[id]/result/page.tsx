@@ -60,7 +60,7 @@ export default async function PurchaseResultPage({
             {formatCreditBalance(wallet.balanceCredits)}.
           </p>
 
-          <Card className="mt-[18px] border-[#C9E4D6] p-[22px]">
+          <Card className="mt-[18px] border-[#BFE0CE] p-[22px]">
             <h3 className="t-card-title text-success">Contact details</h3>
             <dl className="mt-[12px] grid grid-cols-2 gap-[14px] max-[560px]:grid-cols-1">
               <Detail label="Name" value={lead.contact.name} />

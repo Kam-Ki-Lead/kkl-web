@@ -112,7 +112,7 @@ export default async function LeadMarketplacePage({
               className={`min-h-[36px] rounded-[8px] border-[1.5px] px-[13px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                 sort === option.value
                   ? "border-brand bg-chip-neutral-bg text-brand"
-                  : "border-line bg-white text-body hover:border-[#C3C9DA]"
+                  : "border-line bg-white text-body hover:border-[#C6CCE0]"
               }`}
             >
               {option.label}

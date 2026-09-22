@@ -30,7 +30,7 @@ export default async function ProfilePage() {
       </Card>
 
       {runtimeConfig.isSampleMode ? (
-        <Card className="mt-[14px] border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="mt-[14px] border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-label text-warning">This is not a real account</h2>
           <p className="t-caption mt-[6px] text-body">
             Saving changes a value held in the server&rsquo;s memory for this review session. It

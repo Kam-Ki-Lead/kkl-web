@@ -28,16 +28,25 @@
   --color-rail-admin-label: #9aa3be;
   --color-rail-admin-item: #9aa3be;
 
-  /* Status chip surfaces, read from the approved chips in C-06 and C-08. */
+  /*
+   * Status chip surfaces, from C-06 and C-08.
+   *
+   * Three of these were wrong until `scripts/verify-design-tokens.mjs` was
+   * written. The success, danger and muted surfaces held values that appear
+   * nowhere in the approved design — near-misses of the real ones, which is
+   * exactly the difference a person comparing two lists of hex codes does not
+   * see. That check now compares them mechanically, and it also scans every
+   * hex literal written into a component, which found nine more.
+   */
   --color-chip-neutral-bg: #eef2fd;
   --color-chip-neutral-fg: #1b3bb3;
   --color-chip-warning-bg: #fff4e2;
   --color-chip-warning-fg: #8a4a08;
-  --color-chip-success-bg: #e4f3ec;
+  --color-chip-success-bg: #e3f3ea;
   --color-chip-success-fg: #0e6b45;
-  --color-chip-danger-bg: #fbeceb;
+  --color-chip-danger-bg: #fdecea;
   --color-chip-danger-fg: #b3261e;
-  --color-chip-muted-bg: #eceef4;
+  --color-chip-muted-bg: #f0f2f9;
   --color-chip-muted-fg: #5a6480;
 
   --font-heading: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;

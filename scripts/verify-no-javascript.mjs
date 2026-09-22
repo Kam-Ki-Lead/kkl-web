@@ -349,6 +349,133 @@ ok('36. That ticket did not land in the Seller queue',
    !(await sellerQueue.textContent('body')).includes('scripting off'),
    'the two queues stay separate even on the no-JavaScript path');
 
+// ------------------------------------------------------------------- ADMIN
+//
+// Staff decisions are the forms where scripting-off matters most: an internal
+// tool is exactly where somebody is running a locked-down browser, and a
+// reason gate that only worked with JavaScript would be no gate at all.
+
+await reset();
+
+// A-04 — the reason gate, with and without a reason.
+const suspend = await ctx.newPage();
+await suspend.goto(`${BASE}/admin/users/U-10442?action=suspend`, { waitUntil: 'load' });
+await suspend.click('button:has-text("Suspend account")');
+await suspend.waitForTimeout(400);
+ok('37. A-04 refuses a decision with no reason without JavaScript',
+   (await suspend.textContent('body')).includes('A reason is required'),
+   'the gate is in the store, so it holds on a plain form post');
+
+await suspend.fill('#reason', 'Three buyer complaints, recorded without scripting');
+await suspend.click('button:has-text("Suspend account")');
+await suspend.waitForTimeout(600);
+ok('38. A-04 records the suspension without JavaScript',
+   (await suspend.textContent('body')).includes('Recorded'),
+   'and the confirmation says verification was not changed');
+
+const suspendedAccount = await ctx.newPage();
+await suspendedAccount.goto(`${BASE}/admin/users/U-10442`, { waitUntil: 'load' });
+const accountBody = await suspendedAccount.textContent('body');
+ok('39. The suspension did not rewrite verification, without JavaScript either',
+   accountBody.includes('Account suspended') && accountBody.includes('Verification approved'),
+   'the two axes stay separate on the no-JavaScript path');
+
+// A-06 — the checklist and the approval gate.
+await reset();
+const adminKyc = await ctx.newPage();
+await adminKyc.goto(`${BASE}/admin/kyc/K-3322`, { waitUntil: 'load' });
+await adminKyc.click('button:has-text("Approve verification")');
+await adminKyc.waitForTimeout(500);
+ok('40. A-06 refuses an approval with an incomplete checklist, without JavaScript',
+   (await adminKyc.textContent('body')).includes('Work through the checklist first'),
+   'each checklist line is its own form post, and the gate is server-side');
+
+for (let i = 0; i < 6; i++) {
+  const box = await adminKyc.$('button[data-check][aria-pressed="false"]');
+  if (!box) break;
+  await box.click();
+  await adminKyc.waitForTimeout(400);
+}
+ok('41. A-06\'s checklist can be completed without JavaScript',
+   (await adminKyc.$$('button[data-check][aria-pressed="false"]')).length === 0,
+   'four separate posts, each one persisted');
+
+await adminKyc.click('button:has-text("Approve verification")');
+await adminKyc.waitForTimeout(700);
+ok('42. A-06 approves once the checklist is complete, without JavaScript',
+   (await adminKyc.textContent('body')).includes('Decision recorded'),
+   'and the decision reaches the Seller console');
+
+const sellerKyc = await ctx.newPage();
+await sellerKyc.goto(`${BASE}/seller/kyc/status`, { waitUntil: 'load' });
+ok('43. That decision reached the Seller console, without JavaScript',
+   /approved/i.test(await sellerKyc.textContent('body')),
+   'the cross-role join does not depend on the client either');
+
+// A-19 — the adjustment, both gates.
+const adjust = await ctx.newPage();
+await adjust.goto(`${BASE}/admin/wallets/U-10442/adjust`, { waitUntil: 'load' });
+await adjust.click('button:has-text("Record this adjustment")');
+await adjust.waitForTimeout(500);
+ok('44. A-19 refuses an adjustment with no amount, without JavaScript',
+   (await adjust.textContent('body')).includes('whole number of credits'),
+   'both gates are in the store');
+
+await adjust.fill('#amount', '500');
+await adjust.fill('#reason', 'Goodwill credit recorded without scripting');
+await adjust.click('button:has-text("Record this adjustment")');
+await adjust.waitForTimeout(800);
+ok('45. A-19 records the adjustment without JavaScript',
+   adjust.url().includes('/admin/wallets?adjusted='),
+   `landed on ${adjust.url().replace(BASE, '')}`);
+
+const sellerHistory = await ctx.newPage();
+await sellerHistory.goto(`${BASE}/seller/billing/history`, { waitUntil: 'load' });
+ok('46. The adjustment reached the Seller\'s ledger with its reason, without JavaScript',
+   (await sellerHistory.textContent('body')).includes('Goodwill credit recorded without scripting'),
+   'the reason travels with the entry, not only into the audit log');
+
+// A-23 — the reply, and the one control that decides where text lands.
+//
+// The mode toggle is a client control, so with scripting off the hidden field
+// keeps its rendered value: "public". That is the right default to fail to,
+// and these two checks assert it rather than assuming it.
+const reply = await ctx.newPage();
+const marker = `No-JS reply ${Date.now()}`;
+await reply.goto(`${BASE}/admin/support/T-2291`, { waitUntil: 'load' });
+await reply.fill('#body', marker);
+await reply.click('button:has-text("Send reply")');
+await reply.waitForTimeout(800);
+ok('47. A-23 sends a reply without JavaScript',
+   (await reply.textContent('body')).includes(marker),
+   'and the mode field keeps its rendered default rather than becoming undefined');
+
+const sellerThread = await ctx.newPage();
+await sellerThread.goto(`${BASE}/seller/support/T-2291`, { waitUntil: 'load' });
+ok('48. That reply reached the requester\'s thread, without JavaScript',
+   (await sellerThread.textContent('body')).includes(marker),
+   'delivered by the ticket\'s recorded console');
+
+const builderQueueNoJs = await ctx.newPage();
+await builderQueueNoJs.goto(`${BASE}/builder/support`, { waitUntil: 'load' });
+ok('49. And did not reach the Builder console, without JavaScript',
+   !(await builderQueueNoJs.textContent('body')).includes(marker),
+   'the negative check holds on the plain-form path too');
+
+// A-29 — the export.
+//
+// Fetched rather than navigated to: the handler sets a download disposition,
+// so page.goto refuses it. This is the one place a plain request is the right
+// tool, because what is being checked is the response, not a rendered page.
+const csvResponse = await ctx.request.get(`${BASE}/admin/reports/funnel.csv`);
+const csvBody = await csvResponse.text();
+ok('50. A-29 exports its CSV without JavaScript',
+   csvResponse.status() === 200 &&
+     (csvResponse.headers()['content-type'] ?? '').includes('text/csv') &&
+     csvBody.includes('Stage,Count') &&
+     csvBody.includes('No performance claim is made'),
+   'a Route Handler, so the file comes from the same figures the chart reads — and carries the same caveat');
+
 await reset();
 await browser.close();
 

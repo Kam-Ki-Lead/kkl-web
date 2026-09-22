@@ -65,7 +65,7 @@ export default function RenewalPage() {
   return (
     <BuilderShell title="Renewal & expiry" subtitle="Proposed alternatives — decision needed">
       <div className="flex max-w-[1000px] flex-col gap-[18px]">
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[22px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[22px]">
           <h2 className="t-card-title text-ink">
             Unresolved: what happens to live listings on expiry
           </h2>

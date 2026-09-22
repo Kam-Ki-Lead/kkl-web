@@ -46,7 +46,7 @@ export function BusinessDetailsForm({ account }: { account: SellerAccount }) {
 
   if (state.status === "saved") {
     return (
-      <div className="rounded-[10px] border border-[#C9E4D6] bg-chip-success-bg p-[20px]">
+      <div className="rounded-[10px] border border-[#BFE0CE] bg-chip-success-bg p-[20px]">
         <h2 className="t-card-title text-success">Business details saved</h2>
         <p className="t-body mt-[6px] text-body">
           Next: PAN and Aadhaar, which an administrator reviews before you can buy leads.
@@ -100,7 +100,7 @@ export function BusinessDetailsForm({ account }: { account: SellerAccount }) {
                 className={`inline-flex min-h-[40px] cursor-pointer items-center gap-[8px] rounded-full border-[1.5px] px-[14px] text-[15px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   selected
                     ? "border-brand bg-chip-neutral-bg text-brand"
-                    : "border-line bg-white text-body hover:border-[#C3C9DA]"
+                    : "border-line bg-white text-body hover:border-[#C6CCE0]"
                 }`}
               >
                 <input

@@ -52,7 +52,7 @@ export default async function FindMyMatchPage({
         {Array.from({ length: REQUIREMENT_STEPS }, (_, i) => (
           <span
             key={i}
-            className={`h-[4px] flex-1 rounded-full ${i < step ? "bg-brand" : "bg-[#DDE2EF]"}`}
+            className={`h-[4px] flex-1 rounded-full ${i < step ? "bg-brand" : "bg-[#D4DBF3]"}`}
           />
         ))}
       </div>

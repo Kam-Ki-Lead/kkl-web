@@ -129,7 +129,7 @@ export function AdjustmentForm({
         </Field>
 
         {live ? null : (
-          <p className="t-caption rounded-[8px] bg-[#FFF9EE] px-[13px] py-[10px] text-body">
+          <p className="t-caption rounded-[8px] bg-[#FFF7E8] px-[13px] py-[10px] text-body">
             This account has no console in this build, so there is no ledger to post into. The
             adjustment will be recorded in the audit log only, and the screen will say so rather
             than implying an entry the account holder can see.

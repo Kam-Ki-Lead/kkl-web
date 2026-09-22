@@ -110,7 +110,7 @@ export function ChoiceChip({
         "transition-[background-color,border-color,color] " +
         (selected
           ? "border-brand bg-brand text-white"
-          : "border-line bg-white text-ink hover:border-[#C3C9DA]")
+          : "border-line bg-white text-ink hover:border-[#C6CCE0]")
       }
     >
       {children}

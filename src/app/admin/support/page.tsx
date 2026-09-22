@@ -61,7 +61,7 @@ export default async function AdminSupportPage({
                 className={`min-h-[40px] rounded-full border-[1.5px] px-[14px] py-[9px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   active
                     ? "border-brand bg-brand text-white"
-                    : "border-line bg-white text-body hover:border-[#C3C9DA]"
+                    : "border-line bg-white text-body hover:border-[#C6CCE0]"
                 }`}
               >
                 {option.label}

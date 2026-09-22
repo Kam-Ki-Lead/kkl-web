@@ -38,7 +38,7 @@ export default async function MaskedLeadPage({
     if (purchased) {
       return (
         <BuilderShell title={`Lead ${id}`} subtitle="Already purchased">
-          <Card className="border-[#C9E4D6] bg-chip-success-bg p-[22px]">
+          <Card className="border-[#BFE0CE] bg-chip-success-bg p-[22px]">
             <Chip tone="success">Purchased</Chip>
             <h2 className="t-heading mt-[8px] text-success">You already own this lead</h2>
             <p className="t-body mt-[6px] text-body">

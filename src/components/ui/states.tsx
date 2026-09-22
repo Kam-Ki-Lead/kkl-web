@@ -32,7 +32,7 @@ export function SkeletonRows({ rows = 3, className = "" }: { rows?: number; clas
       {Array.from({ length: rows }, (_, i) => (
         <span
           key={i}
-          className="block h-[13px] animate-pulse rounded-[4px] bg-[#E6E9F2]"
+          className="block h-[13px] animate-pulse rounded-[4px] bg-[#EFF1F7]"
           style={{ width: `${100 - i * 14}%` }}
         />
       ))}
@@ -41,15 +41,15 @@ export function SkeletonRows({ rows = 3, className = "" }: { rows?: number; clas
 }
 
 export function SkeletonBlock({ className = "" }: { className?: string }) {
-  return <span aria-hidden="true" className={`block animate-pulse rounded-[8px] bg-[#E6E9F2] ${className}`} />;
+  return <span aria-hidden="true" className={`block animate-pulse rounded-[8px] bg-[#EFF1F7] ${className}`} />;
 }
 
 type MessageTone = "plain" | "error" | "success";
 
 const messageSurface: Record<MessageTone, string> = {
   plain: "bg-white",
-  error: "bg-chip-danger-bg border-[#F3D5D3]",
-  success: "bg-chip-success-bg border-[#C9E4D6]",
+  error: "bg-chip-danger-bg border-[#F3C4BF]",
+  success: "bg-chip-success-bg border-[#BFE0CE]",
 };
 
 const messageHeading: Record<MessageTone, string> = {
@@ -90,9 +90,9 @@ export type AccessTone = "neutral" | "denied" | "restricted" | "suspended";
 
 const accessSurface: Record<AccessTone, string> = {
   neutral: "bg-white border-line",
-  denied: "bg-chip-danger-bg border-[#F3D5D3]",
-  restricted: "bg-[#FFF9EE] border-[#F2DFBC]",
-  suspended: "bg-chip-danger-bg border-[#F3D5D3]",
+  denied: "bg-chip-danger-bg border-[#F3C4BF]",
+  restricted: "bg-[#FFF7E8] border-[#F3DFB4]",
+  suspended: "bg-chip-danger-bg border-[#F3C4BF]",
 };
 
 const accessHeading: Record<AccessTone, string> = {

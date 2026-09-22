@@ -42,7 +42,7 @@ export default async function BillingPage() {
 
           {/* D-04. The panel says what is undecided rather than showing a date or
               a countdown that nobody has agreed. */}
-          <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[22px]">
+          <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[22px]">
             <h2 className="t-card-title text-ink">Expiry &amp; renewal</h2>
             <p className="t-body mt-[6px] text-body">
               The specification says credits expire, but the period, the renewal route and whether

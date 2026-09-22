@@ -61,7 +61,7 @@ export default async function AdminPropertiesPage({
                 className={`min-h-[40px] rounded-full border-[1.5px] px-[14px] py-[9px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   active
                     ? "border-brand bg-brand text-white"
-                    : "border-line bg-white text-body hover:border-[#C3C9DA]"
+                    : "border-line bg-white text-body hover:border-[#C6CCE0]"
                 }`}
               >
                 {option.label}
@@ -114,7 +114,7 @@ export default async function AdminPropertiesPage({
           </div>
         )}
 
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[16px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
           <h2 className="t-card-title text-warning">There is no approve action here</h2>
           <p className="t-body mt-[6px] text-body">
             {DECISIONS["D-10"].question} — <strong>D-10</strong>, and it is not decided. A listing

@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
           </Field>
         </div>
 
-        <div className="mt-[18px] rounded-[10px] border border-[#F2DFBC] bg-[#FFF9EE] p-[16px]">
+        <div className="mt-[18px] rounded-[10px] border border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
           <h2 className="t-card-title text-warning">These fields do nothing</h2>
           <p className="t-body mt-[6px] text-body">
             No password is checked, no session is created and no second factor is asked for.

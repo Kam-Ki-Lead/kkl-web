@@ -37,7 +37,7 @@ export default function AdminSettingsPage() {
   return (
     <AdminShell title="Platform settings" subtitle="Taxonomy, calling hours and templates">
       <div className="flex max-w-[820px] flex-col gap-[16px]">
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-warning">Read-only</h2>
           <p className="t-body mt-[6px] text-body">
             Nothing on this screen can be changed. The property-type list is a design proposal

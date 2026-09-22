@@ -21,7 +21,7 @@ const FLAG_TONES = {
 
 const ALERT_TONES = {
   danger: "border-[#F3C4BF] bg-chip-danger-bg text-danger",
-  warning: "border-[#F3DFB4] bg-[#FFF9EE] text-warning",
+  warning: "border-[#F3DFB4] bg-[#FFF7E8] text-warning",
 } as const;
 
 /**
@@ -45,7 +45,11 @@ export default async function AdminDashboardPage() {
               className={`rounded-[12px] border bg-white p-[18px] transition-[border-color] duration-150 hover:border-brand ${TILE_TONES[queue.tone]}`}
             >
               <span className="flex items-baseline gap-[9px]">
-                <span className="t-figure text-ink">{queue.value}</span>
+                {/* 28px, as the approved A-02 declares. .t-figure is the shared
+                    21px step the Seller and Builder tiles use. */}
+                <span className="font-[family-name:var(--font-heading)] text-[28px] font-extrabold leading-[1.2] tracking-[-0.03em] text-ink">
+                  {queue.value}
+                </span>
                 {queue.flag ? (
                   <span
                     className={`rounded-full px-[8px] py-[3px] text-[12px] font-bold ${FLAG_TONES[queue.tone]}`}

@@ -25,7 +25,7 @@ export default async function AdminConsentPage() {
   return (
     <AdminShell title="Consent & suppression" subtitle="Who may be contacted, and on what basis">
       <div className="flex max-w-[860px] flex-col gap-[16px]">
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-warning">Staff cannot change this list</h2>
           <p className="t-body mt-[6px] text-body">
             A suppression is created by the person who refused. Taking one off is not an

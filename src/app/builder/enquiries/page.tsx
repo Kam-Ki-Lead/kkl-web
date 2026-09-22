@@ -122,7 +122,7 @@ export default async function BuilderEnquiriesPage({
         )}
 
         {/* D-05. The screen says which alternative is showing, every time. */}
-        <Card className="border-[#F2DFBC] bg-[#FFF9EE] p-[18px]">
+        <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-ink">
             Showing alternative {mode === "included" ? "A" : "B"}
           </h2>

@@ -59,6 +59,20 @@ const ROUTES = [
   '/builder/billing/history', '/builder/billing/invoices',
   '/builder/billing/invoices/INV-2026-0903', '/builder/support',
   '/builder/support/new', '/builder/support/T-3140', '/builder/profile',
+  // Admin
+  '/admin/login', '/admin', '/admin/users', '/admin/users/U-10442',
+  '/admin/users/U-10501', '/admin/kyc', '/admin/kyc?filter=all', '/admin/kyc/K-3318',
+  '/admin/properties', '/admin/properties?filter=all', '/admin/properties/P-2204',
+  '/admin/leads/intake', '/admin/leads/intake/INT-2291', '/admin/leads',
+  '/admin/leads/LD-88104', '/admin/leads/LD-88066', '/admin/settings/pricing',
+  '/admin/settings', '/admin/orders', '/admin/orders/ORD-10233/delivery',
+  '/admin/orders/ORD-10402/delivery', '/admin/wallets',
+  '/admin/wallets?account=U-10455', '/admin/wallets/U-10442/adjust',
+  '/admin/refunds', '/admin/subscriptions', '/admin/support',
+  '/admin/support?filter=all', '/admin/support/T-2291', '/admin/voice',
+  '/admin/voice/C-7741', '/admin/voice/C-7722', '/admin/whatsapp',
+  '/admin/notifications', '/admin/consent', '/admin/reports', '/admin/audit',
+  '/admin/system',
 ];
 
 const WIDTHS = [

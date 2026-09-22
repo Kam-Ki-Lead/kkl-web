@@ -21,10 +21,10 @@ const sizes: Record<ButtonSize, string> = {
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-brand text-white hover:bg-brand-deep disabled:bg-[#AEB6CE] disabled:text-white",
   secondary:
-    "bg-white text-ink border-[1.5px] border-line hover:border-[#C3C9DA] disabled:text-muted",
+    "bg-white text-ink border-[1.5px] border-line hover:border-[#C6CCE0] disabled:text-muted",
   quiet: "bg-transparent text-brand underline underline-offset-2 hover:text-brand-deep px-1",
   destructive:
-    "bg-white text-danger border-[1.5px] border-danger hover:bg-[#FBECEB] disabled:border-line disabled:text-muted",
+    "bg-white text-danger border-[1.5px] border-danger hover:bg-chip-danger-bg disabled:border-line disabled:text-muted",
 };
 
 type Common = {

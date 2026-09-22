@@ -41,7 +41,7 @@ export function PropertyImage({
       <div
         role="img"
         aria-label={`No photograph available — ${label}`}
-        className={`flex items-center justify-center bg-[#E8ECF6] ${className}`}
+        className={`flex items-center justify-center bg-[#EFF1F7] ${className}`}
         style={sizing}
       >
         {quiet ? null : (
