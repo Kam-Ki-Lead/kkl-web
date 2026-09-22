@@ -32,6 +32,7 @@ run against `next start`.
 | Lint | `npx eslint .` | Pass, 0 errors, 0 warnings |
 | Production build | `npx next build` | Pass — 24 routes compiled |
 | Enquiry flow, 20 checks | `node scripts/verify-enquiry-flow.mjs` | Pass — all 20 behaved as expected |
+| Seller flow, 22 checks | `node scripts/verify-seller-flow.mjs` | Pass — all 22 behaved as expected |
 | Sample-mode guard, both directions | `./scripts/verify-sample-mode-guard.sh` | Pass — build-time and run-time |
 | Unit / integration tests | — | **None written. No test runner is configured.** |
 
@@ -184,6 +185,92 @@ control is kkl-backend's and is not demonstrated here.**
 
 **Does not hold:** the sample OTP step is not a control. A valid draft reaches
 confirmation without a code being entered at all (check 19).
+
+## Seller journey (S-01 to S-25)
+
+Run with `node scripts/verify-seller-flow.mjs` against a production build. All
+22 behaved as expected; two of them assert a limitation rather than a guarantee.
+
+### Route sweep
+
+All 23 Seller routes at 1440 and 390: **HTTP 200, exactly one `h1`, no console
+errors, no page errors, no horizontal overflow.**
+
+Aborted `?_rsc=` prefetches are excluded. Next prefetches every `<Link>` as an
+RSC payload and closing the page cancels the in-flight ones; counting those as
+failures made every screen in the console look broken when nothing was.
+
+### Mask containment
+
+The strongest check in this area, because it is the one a mistake would be
+invisible in. The full HTML of S-08 — including the RSC payload, not just the
+visible text — contains none of the seed lead's name, mobile or email. The
+values are not sent, so there is nothing in the client to reveal.
+
+This holds because `MarketplaceLead` has no contact fields. The sample store
+keeps them on a seed type the masked screens cannot reach, and `toMasked` lists
+the fields it copies explicitly rather than spreading and deleting, so adding a
+contact field to the seed cannot leak it by default.
+
+### Purchase and credits
+
+| Check | Result |
+|---|---|
+| A purchase deducts exactly the lead price | ✅ ₹4,200 → ₹3,250 for a ₹950 lead |
+| The deduction is a ledger entry, not an edited balance | ✅ one row appended; the balance column derives from it |
+| Contact details are released only after purchase | ✅ the result screen shows what S-08 never received |
+| A sold lead cannot be bought again | ✅ no confirm control on revisit, balance unchanged |
+| Replaying a used idempotency key does not deduct twice | ✅ re-posted the same key; balance unchanged |
+| Each purchase gets its own key | ✅ per-visit `randomUUID`, not a per-lead hash |
+| Balance below price blocks before the button | ✅ confirm control absent, shortfall named, recharge offered |
+| An unverified account cannot reach the confirm control | ✅ and browsing stays available |
+| Suspension names what is blocked and what still works | ✅ C-09 — and does not rewrite verification |
+| All three payment outcomes render their own screen | ✅ credited adds credits; pending and failed add none |
+| A result screen opened directly cannot claim a purchase | ✅ redirected; no outcome was recorded for that browser |
+| A payment result cannot be reached without an outcome | ✅ redirected to billing |
+| CSV export is server-generated and attached | ✅ `text/csv`, `content-disposition: attachment` |
+| Exporting a lead not owned | ✅ 404, not an empty file |
+
+### Limitations asserted, not passed
+
+- **A second browser sees the first browser's purchase.** Sample mode has one
+  Seller and no sign-in, so state is shared across browsers. Per-account
+  isolation is kkl-backend's and is not demonstrated.
+- **`/seller/review-state` is reachable in sample mode.** It is how S-04, S-05,
+  S-10 and S-16 are reached without an administrator or a gateway. It returns
+  404 outside sample mode — **and that path is untestable today**, because a
+  build with `DATA_SOURCE=api` fails at build time, so no non-sample build
+  exists for the route to be absent from. Recorded as untestable, not verified.
+
+### The sample storage mechanism, and a defect it hid
+
+Seller state lives in `seller-store.ts`, held on `globalThis` via
+`process-state.ts`. Limitations: memory only, one process, no eviction, one
+Seller with no account partitioning, and deduct-then-release as two statements
+rather than a transaction.
+
+It was module-scope `let` first, and that was wrong in a way worth recording.
+Route handlers, pages and server actions are bundled separately in Next, so the
+same source module is instantiated more than once per server and each copy keeps
+its own variables. The review route set the balance to zero, returned 200, and
+every page went on rendering ₹4,200. The same hazard sat under the enquiry
+store's idempotency guarantee, where it would have held only within whichever
+bundle served a given request. All three sample stores now share one instance
+per process by construction.
+
+### Not verified in this area
+
+- No screen-by-screen measured comparison against the baseline. The rail,
+  header, stat tiles, lead cards, tables and state panels line up on a reading
+  of screenshots at 1440 and 390; that is not a measurement.
+- Two deliberate departures, both consistent with the Buyer journey: figures are
+  derived from fixtures rather than carried over as illustrative totals (so the
+  dashboard shows 4 new leads, not 12), and recent activity shows dates rather
+  than relative times, because a relative time computed server-side is wrong as
+  soon as it is cached.
+- No no-JavaScript pass over the Seller forms. The OTP-shaped registration form
+  follows the pattern fixed in the Buyer flow, but that has not been re-driven
+  with JavaScript disabled here.
 
 ## Accessibility — checked
 

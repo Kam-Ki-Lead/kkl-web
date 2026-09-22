@@ -74,12 +74,47 @@ Verify both directions with:
 ./scripts/verify-sample-mode-guard.sh
 ```
 
-## Verifying the enquiry flow
+## Reaching the Seller states a reviewer cannot otherwise get to
+
+S-04's four verification states, S-05's suspension, S-16's three payment
+outcomes and S-10's insufficient balance all depend on decisions taken
+elsewhere — by an administrator, or by a payment gateway. The approved prototype
+reached them with a reviewer bar across the top of every screen; that bar is
+tooling and is not in the application.
+
+Instead, visit these directly. Nothing in the interface links to them, and they
+return 404 outside sample mode.
+
+```
+/seller/review-state?reset=1                     restore every seed value
+/seller/review-state?kyc=pending                 S-04, S-05 — also not_submitted, approved, rejected
+/seller/review-state?account=suspended           S-05
+/seller/review-state?payment=failed              S-16 — also success, pending
+/seller/review-state?balance=0                   S-10 insufficient credits
+/seller/review-state                             prints the full list
+```
+
+Add `&to=/seller/leads` to land somewhere specific. Reset is applied before the
+other parameters, so `?reset=1&balance=0` means "start clean, then set the
+balance".
+
+None of these approves a document, authorises an account or moves money. They
+set which designed screen renders.
+
+## Verifying the flows
 
 ```bash
 PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-enquiry-flow.mjs
+PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-seller-flow.mjs
 ```
 
-Twenty checks covering reload, direct access, replay, two tabs, two independent
-browser sessions, expired and missing drafts, and personal data in URLs. Three
-of them assert a limitation rather than a guarantee — see the file header.
+The enquiry harness runs twenty checks covering reload, direct access, replay,
+two tabs, two independent browser sessions, expired and missing drafts, and
+personal data in URLs. The Seller harness runs twenty-two covering mask
+containment, deduction and the ledger, a replayed idempotency key, a sold lead,
+insufficient credits, unverified and suspended accounts, all three payment
+outcomes, direct access to both result screens, and the CSV export.
+
+Five checks across the two assert a **limitation** rather than a guarantee —
+they pass while the limitation is present, so closing one shows up as a failure
+instead of going unnoticed. Each file's header says which.

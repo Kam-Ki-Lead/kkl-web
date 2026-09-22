@@ -107,31 +107,69 @@ chip. **Do not read these rows as account integration.**
 
 | ID | Screen | Route | Screen | Sample | Real | Verified |
 |---|---|---|---|---|---|---|
-| S-01 | Seller registration | `/seller/register` | · | · | · | · |
-| S-02 | Onboarding — business details | `/seller/onboarding` | · | · | · | · |
-| S-03 | KYC submission (PAN, Aadhaar) | `/seller/kyc` | · | · | · | · |
-| S-04 | KYC status | `/seller/kyc/status` | · | · | · | · |
-| S-05 | Restricted / suspended account | `/seller/restricted` | · | · | · | · |
-| S-06 | Seller dashboard | `/seller` | · | · | · | · |
-| S-07 | Lead marketplace | `/seller/leads` | · | · | · | · |
-| S-08 | Lead preview (masked) | `/seller/leads/:id` | · | · | · | · |
-| S-09 | Purchase review & confirm | `/seller/leads/:id/buy` | · | · | · | · |
-| S-10 | Purchase failure states | *nested — within S-09 / S-11* | · | · | · | · |
-| S-11 | Purchase success & contact reveal | `/seller/leads/:id/purchased` | · | · | · | · |
-| S-12 | Purchased leads | `/seller/purchased` | · | · | · | · |
-| S-13 | Purchased lead detail | `/seller/purchased/:id` | · | · | · | · |
-| S-14 | Credits & balance | `/seller/billing` | · | · | · | · |
-| S-15 | Recharge credits | `/seller/billing/recharge` | · | · | · | · |
-| S-16 | Payment handoff & result | `/seller/billing/payment` | · | · | · | · |
-| S-17 | Transactions & usage history | `/seller/billing/history` | · | · | · | · |
-| S-18 | Credit expiry & renewal | `/seller/billing/expiry` | · **gated on D-04** | · | · | · |
-| S-19 | Invoices | `/seller/billing/invoices` | · | · | · | · |
-| S-20 | Invoice detail | `/seller/billing/invoices/:id` | · **GST open, D-13** | · | · | · |
-| S-21 | Billing information | `/seller/billing/details` | · | · | · | · |
-| S-22 | Support tickets | `/seller/support` | · | · | · | · |
-| S-23 | New ticket | `/seller/support/new` | · *disconnected step 2* | · | · | · |
-| S-24 | Ticket detail & replies | `/seller/support/:id` | · | · | · | · |
-| S-25 | Profile & settings | `/seller/profile` | · | · | · | · |
+| S-01 | Seller registration | `/seller/register` | ✓ | ~ validates and advances; creates no account | · | ~ both phases driven; no-JS path not re-checked |
+| S-02 | Onboarding — business details | `/seller/onboarding` | ✓ | ✓ saves, validates, GSTIN format-checked | · | ~ states exercised |
+| S-03 | KYC submission (PAN, Aadhaar) | `/seller/kyc` | ✓ | ~ records that files were chosen; **uploads nothing** | · | ~ validation exercised |
+| S-04 | KYC status | `/seller/kyc/status` | ✓ | ✓ all four states, timeline, rejection reason | · | ✓ four states via review route |
+| S-05 | Restricted / suspended account | `/seller/restricted` | ✓ | ✓ suspension and verification as separate axes | · | ✓ |
+| S-06 | Seller dashboard | `/seller` | ✓ | ✓ | · | ✓ |
+| S-07 | Lead marketplace | `/seller/leads` | ✓ | ✓ filters, sort, Sale tab, withheld count | · | ✓ incl. empty state |
+| S-08 | Lead preview (masked) | `/seller/leads/:id` | ✓ | ✓ | · | ✓ mask containment asserted against the full HTML |
+| S-09 | Purchase review & confirm | `/seller/leads/:id/buy` | ✓ | ✓ idempotency key per visit | · | ✓ |
+| S-10 | Purchase failure states | *nested — within `/seller/leads/:id/result`* | ✓ | ✓ five outcomes | · | ✓ insufficient, sold, unverified, suspended |
+| S-11 | Purchase success & contact reveal | `/seller/leads/:id/result` | ✓ | ✓ | · | ✓ incl. direct access refused |
+| S-12 | Purchased leads | `/seller/purchased` | ✓ | ✓ empty and populated | · | ✓ |
+| S-13 | Purchased lead detail | `/seller/purchased/:id` | ✓ | ✓ + server-generated CSV | · | ✓ export, and 404 for a lead not owned |
+| S-14 | Credits & balance | `/seller/billing` | ✓ | ✓ | · | ✓ |
+| S-15 | Recharge credits | `/seller/billing/recharge` | ✓ | ~ no payment is taken or simulated as taken | · | ✓ |
+| S-16 | Payment handoff & result | `/seller/billing/payment` | ✓ | ✓ credited, pending, failed | · | ✓ all three, plus direct access refused |
+| S-17 | Transactions & usage history | `/seller/billing/history` | ✓ | ✓ ledger with derived balances | · | ✓ incl. filters |
+| S-18 | Credit expiry & renewal | `/seller/billing/expiry` | ✓ proposed states only | n/a — **gated on D-04** | · | ✓ renders as unresolved |
+| S-19 | Invoices | `/seller/billing/invoices` | ✓ | ✓ | · | ✓ |
+| S-20 | Invoice detail | `/seller/billing/invoices/:id` | ✓ | ✓ no tax line — **GST open, D-13** | · | ✓ |
+| S-21 | Billing information | `/seller/billing/details` | ✓ | ✓ | · | ~ states exercised |
+| S-22 | Support tickets | `/seller/support` | ✓ | ✓ four statuses, empty state | · | ✓ |
+| S-23 | New ticket | `/seller/support/new` | ✓ | ✓ **creates a real ticket** — *disconnected step 2 closed in sample* | · | ~ creation driven; attachments absent by design |
+| S-24 | Ticket detail & replies | `/seller/support/:id` | ✓ | ✓ reply and resolve | · | ~ states exercised |
+| S-25 | Profile & settings | `/seller/profile` | ✓ | ✓ | · | ~ states exercised |
+
+### Not a screen: `/seller/review-state`
+
+The approved prototype reached S-04's four verification states, S-05's
+suspension, S-16's three payment outcomes and S-10's insufficient balance
+through a reviewer bar across the top of every screen. That bar is reviewer
+tooling and is not in the application, so those switches live at
+`/seller/review-state` — a URL nothing links to, which returns 404 outside
+sample mode.
+
+It sets which designed screen renders. It does not authenticate, authorise,
+approve a document, take a payment or move money.
+
+**Its 404 path is currently untestable**, not verified: a build with
+`NEXT_PUBLIC_KKL_DATA_SOURCE=api` fails at build time because the API client
+does not exist, so no non-sample build can be produced for the route to be
+absent from. That is a stronger position than the 404 — the route cannot exist
+outside sample mode — but it is not the same claim, and the check is recorded as
+untestable rather than passed.
+
+### What "Sample ✓" does not mean in this area
+
+More strongly than anywhere else in the application, because these are the
+screens where money, identity and lead ownership appear:
+
+- **No authentication.** There is no sign-in. One sample Seller is shared by
+  every visitor to the process, so a purchase made in one browser is visible in
+  another. Verified as check 19 of `verify-seller-flow.mjs` — it asserts the
+  limitation.
+- **No authorization.** Nothing checks whether a caller may buy a lead.
+  `kycStatus` and `accountStatus` decide what the screens say.
+- **No KYC.** Documents are not uploaded, stored, scanned or seen. Submitting
+  moves the account to `pending` and never approves it.
+- **No money.** The balance is a number in the server's memory. No gateway is
+  contacted, no payment is captured, no invoice is issued to anyone.
+- **Not durable or transactional.** Restarting loses every purchase, ledger
+  entry and ticket. Deduct-then-release is two statements in one process, not a
+  transaction.
 
 ## B — Builder
 
@@ -225,14 +263,14 @@ Counted per dimension, because they are not the same question.
 |---|---|---|---|---|---|
 | C library | 12 | 9 (2 partial) | 8 | **0** | 6 (4 partial) |
 | P public + Buyer | 21 | 21 (2 partial) | 19 (3 partial) | **0** | 16 (5 partial) |
-| S Seller | 25 | 0 | 0 | **0** | 0 |
+| S Seller | 25 | 25 (1 partial) | 22 (3 partial) | **0** | 25 (8 partial) |
 | B Builder | 24 | 0 | 0 | **0** | 0 |
 | A Admin | 31 | 0 | 0 | **0** | 0 |
 
-**Phase 2 is not complete.** The shared foundation and the public portal plus
-the Buyer journey are built and behave against sample services. Seller, Builder
-and Admin — 80 rows — have not been started. Nothing anywhere is connected to a
-real service.
+**Phase 2 is not complete.** The shared foundation, the public portal, the Buyer
+journey and the Seller journey are built and behave against sample services.
+Builder and Admin — 55 rows — have not been started. Nothing anywhere is
+connected to a real service.
 
 Three things that a "screens are done" reading would miss:
 
