@@ -1,5 +1,6 @@
 import type { BuyerEnquiry } from "@/lib/domain/types";
 import { SAMPLE_PROPERTIES } from "./fixtures";
+import { processState } from "./process-state";
 
 /**
  * In-process store for enquiries submitted during a review session.
@@ -34,14 +35,23 @@ import { SAMPLE_PROPERTIES } from "./fixtures";
 
 type StoredEnquiry = BuyerEnquiry & { readonly mobile: string; readonly name: string };
 
-const byToken = new Map<string, string>();
-const byReference = new Map<string, StoredEnquiry>();
-
-let sequence = 50_000;
+/**
+ * Process-scoped, not module-scoped.
+ *
+ * Route handlers, pages and server actions are bundled separately, so a
+ * module-scope `let` here can be instantiated more than once per server — and
+ * the idempotency guarantee would then hold only within whichever bundle
+ * happened to serve the request. See process-state.ts.
+ */
+const state = processState("enquiry", () => ({
+  byToken: new Map<string, string>(),
+  byReference: new Map<string, StoredEnquiry>(),
+  sequence: 50_000,
+}));
 
 function nextReference(): string {
-  sequence += 1;
-  return `e-${sequence}`;
+  state.sequence += 1;
+  return `e-${state.sequence}`;
 }
 
 export type SubmitInput = {
@@ -61,7 +71,7 @@ export type SubmitInput = {
  * people enquiring about the same property must get two references.
  */
 export function submit(input: SubmitInput): { enquiryId: string; duplicate: boolean } {
-  const existing = byToken.get(input.idempotencyKey);
+  const existing = state.byToken.get(input.idempotencyKey);
   if (existing !== undefined) {
     return { enquiryId: existing, duplicate: true };
   }
@@ -69,7 +79,7 @@ export function submit(input: SubmitInput): { enquiryId: string; duplicate: bool
   const property = SAMPLE_PROPERTIES.find((p) => p.id === input.propertyId);
   const reference = nextReference();
 
-  byReference.set(reference, {
+  state.byReference.set(reference, {
     id: reference,
     propertyId: input.propertyId,
     propertyTitle: property?.title ?? "Unknown project",
@@ -81,7 +91,7 @@ export function submit(input: SubmitInput): { enquiryId: string; duplicate: bool
     name: input.name,
     mobile: input.mobile,
   });
-  byToken.set(input.idempotencyKey, reference);
+  state.byToken.set(input.idempotencyKey, reference);
 
   return { enquiryId: reference, duplicate: false };
 }
@@ -93,7 +103,7 @@ export function submit(input: SubmitInput): { enquiryId: string; duplicate: bool
  * not what the public confirmation URL resolves — see `findByReceipt`.
  */
 export function findByReference(reference: string): BuyerEnquiry | null {
-  return byReference.get(reference) ?? null;
+  return state.byReference.get(reference) ?? null;
 }
 
 /**
@@ -105,11 +115,11 @@ export function findByReference(reference: string): BuyerEnquiry | null {
  * cookie.
  */
 export function findByReceipt(token: string): BuyerEnquiry | null {
-  const reference = byToken.get(token);
-  return reference === undefined ? null : (byReference.get(reference) ?? null);
+  const reference = state.byToken.get(token);
+  return reference === undefined ? null : (state.byReference.get(reference) ?? null);
 }
 
 /** Enquiries submitted in this process, newest first. */
 export function submittedEnquiries(): readonly BuyerEnquiry[] {
-  return [...byReference.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return [...state.byReference.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

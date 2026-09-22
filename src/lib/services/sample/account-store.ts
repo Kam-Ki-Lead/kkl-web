@@ -1,5 +1,6 @@
 import type { BuyerNotification, BuyerProfile } from "@/lib/domain/types";
 import { ValidationError } from "@/lib/services/contracts";
+import { processState } from "./process-state";
 
 /**
  * In-process store for the sample Buyer profile (P-15) and notifications (P-16).
@@ -26,10 +27,10 @@ const DEFAULT_PROFILE: BuyerProfile = {
   notifyByEmail: false,
 };
 
-let profile: BuyerProfile = DEFAULT_PROFILE;
+
 
 export function getProfile(): BuyerProfile {
-  return profile;
+  return state.profile;
 }
 
 export function saveProfile(input: {
@@ -57,15 +58,15 @@ export function saveProfile(input: {
 
   if (Object.keys(fields).length > 0) throw new ValidationError(fields);
 
-  profile = {
-    ...profile,
+  state.profile = {
+    ...state.profile,
     fullName,
     email,
     preferredLocalityId: input.preferredLocalityId,
     notifyByWhatsApp: input.notifyByWhatsApp,
     notifyByEmail: input.notifyByEmail,
   };
-  return profile;
+  return state.profile;
 }
 
 const SEED_NOTIFICATIONS: readonly BuyerNotification[] = [
@@ -107,23 +108,31 @@ const SEED_NOTIFICATIONS: readonly BuyerNotification[] = [
   },
 ];
 
-let notifications: BuyerNotification[] = SEED_NOTIFICATIONS.map((n) => ({ ...n }));
+/**
+ * Process-scoped, not module-scoped — see process-state.ts. Separate bundles
+ * for route handlers and pages otherwise each get their own copy, and a profile
+ * saved through an action is invisible to the page that renders it.
+ */
+const state = processState("account", () => ({
+  profile: DEFAULT_PROFILE,
+  notifications: SEED_NOTIFICATIONS.map((n) => ({ ...n })) as BuyerNotification[],
+}));
 
 export function listNotifications(): readonly BuyerNotification[] {
-  return [...notifications].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return [...state.notifications].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export function markRead(id: string): void {
-  notifications = notifications.map((n) =>
+  state.notifications = state.notifications.map((n) =>
     n.id === id && n.readAt === null ? { ...n, readAt: new Date().toISOString() } : n,
   );
 }
 
 export function markAllRead(): void {
   const now = new Date().toISOString();
-  notifications = notifications.map((n) => (n.readAt === null ? { ...n, readAt: now } : n));
+  state.notifications = state.notifications.map((n) => (n.readAt === null ? { ...n, readAt: now } : n));
 }
 
 export function unreadCount(): number {
-  return notifications.filter((n) => n.readAt === null).length;
+  return state.notifications.filter((n) => n.readAt === null).length;
 }
