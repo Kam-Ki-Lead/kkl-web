@@ -1,5 +1,7 @@
 import type {
   BuyerEnquiry,
+  BuyerNotification,
+  BuyerProfile,
   BuyerRequirement,
   MatchedProperty,
   PropertyDetail,
@@ -80,21 +82,71 @@ export interface PropertyService {
  * it contains, is the backend's business and is not implied by the UI.
  */
 export interface EnquiryService {
+  /**
+   * Records an enquiry.
+   *
+   * `idempotencyKey` identifies the attempt, not the content: submitting the same
+   * key twice must return the first result and record nothing new, while two
+   * different people enquiring about the same property must produce two distinct
+   * enquiries. Implementations must not derive the reference from the payload.
+   */
   submitEnquiry(input: {
+    idempotencyKey: string;
     propertyId: string;
     kind: "enquiry" | "site_visit";
     name: string;
     mobile: string;
     message?: string;
     preferredDate?: string;
-  }): Promise<{ readonly enquiryId: string }>;
+  }): Promise<{ readonly enquiryId: string; readonly duplicate: boolean }>;
   listMine(): Promise<readonly BuyerEnquiry[]>;
   getMine(id: string): Promise<BuyerEnquiry>;
+  /** A recorded enquiry by reference, for the confirmation screen. */
+  getByReference(id: string): Promise<BuyerEnquiry | null>;
+}
+
+/**
+ * Buyer profile (P-15).
+ *
+ * `save` returns the stored profile so the screen renders what was actually
+ * kept, not what was typed. Field-level problems come back as `ValidationError`
+ * rather than a thrown string, because the form has to place them.
+ */
+export type FieldErrors = Readonly<Record<string, string>>;
+
+export class ValidationError extends Error {
+  readonly fields: FieldErrors;
+  constructor(fields: FieldErrors) {
+    super("The details could not be saved.");
+    this.name = "ValidationError";
+    this.fields = fields;
+  }
+}
+
+export interface ProfileService {
+  get(): Promise<BuyerProfile>;
+  save(input: {
+    fullName: string;
+    email: string | null;
+    preferredLocalityId: string | null;
+    notifyByWhatsApp: boolean;
+    notifyByEmail: boolean;
+  }): Promise<BuyerProfile>;
+}
+
+/** Notifications (P-16). */
+export interface NotificationService {
+  list(): Promise<readonly BuyerNotification[]>;
+  markRead(id: string): Promise<void>;
+  markAllRead(): Promise<void>;
+  unreadCount(): Promise<number>;
 }
 
 export type Services = {
   readonly properties: PropertyService;
   readonly enquiries: EnquiryService;
+  readonly profile: ProfileService;
+  readonly notifications: NotificationService;
   /** True when these are fixtures. Screens use it to label simulated actions. */
   readonly isSample: boolean;
 };

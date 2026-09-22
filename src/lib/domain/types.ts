@@ -64,6 +64,12 @@ export type PropertyMedia = {
   readonly url: string;
   readonly kind: "image" | "video";
   readonly alt: string;
+  /**
+   * Credit line to display over the image, when the source requires or deserves
+   * one. Null for ordinary builder uploads; set for the illustrative stand-in
+   * photography used in review.
+   */
+  readonly attribution?: string | null;
 };
 
 export type PriceRange = {
@@ -161,6 +167,31 @@ export type BuilderEnquiry = {
   readonly createdAt: string;
   readonly buyerName: string | null;
   readonly buyerContact: string | null;
+};
+
+// -------------------------------------------------- profile & notifications --
+
+export type BuyerProfile = {
+  readonly fullName: string;
+  /** Verified by OTP at registration, so it is changed through re-verification. */
+  readonly mobile: string;
+  readonly email: string | null;
+  readonly preferredLocalityId: string | null;
+  readonly notifyByWhatsApp: boolean;
+  readonly notifyByEmail: boolean;
+};
+
+export type NotificationCategory = "enquiry" | "match" | "account";
+
+export type BuyerNotification = {
+  readonly id: string;
+  readonly category: NotificationCategory;
+  readonly title: string;
+  readonly body: string;
+  readonly createdAt: string;
+  readonly readAt: string | null;
+  /** In-app destination, when the notification points somewhere. */
+  readonly href: string | null;
 };
 
 // -------------------------------------------- buyer requirement & shortlist --

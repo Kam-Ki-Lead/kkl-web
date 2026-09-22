@@ -2,11 +2,15 @@ import type { PropertySummary } from "@/lib/domain/types";
 import {
   ServiceError,
   type EnquiryService,
+  type NotificationService,
+  type ProfileService,
   type HomepageContent,
   type Paged,
   type PropertyService,
   type Services,
 } from "@/lib/services/contracts";
+import * as accountStore from "./account-store";
+import * as enquiryStore from "./enquiry-store";
 import {
   SAMPLE_ENQUIRIES,
   SAMPLE_LOCALITIES,
@@ -156,30 +160,68 @@ const propertyService: PropertyService = {
 };
 
 /**
- * Enquiry writes are simulated. The returned reference is synthetic and derived
- * from the input so a refresh or a repeat submit does not invent a second one.
+ * Enquiry writes are simulated: nothing is sent to a builder and no notification
+ * is delivered. They are, however, genuinely idempotent — see enquiry-store.ts,
+ * which also documents the limits of an in-process store.
  */
 const enquiryService: EnquiryService = {
-  async submitEnquiry({ propertyId, kind }) {
-    const seed = `${propertyId}:${kind}`;
-    let hash = 0;
-    for (const ch of seed) hash = (hash * 31 + ch.charCodeAt(0)) % 90000;
-    return { enquiryId: `e-${10000 + hash}` };
+  async submitEnquiry(input) {
+    return enquiryStore.submit(input);
   },
 
   async listMine() {
-    return SAMPLE_ENQUIRIES;
+    // Fixtures for the populated state, plus anything submitted this session so
+    // the journey stays coherent from confirmation through to tracking.
+    return [...enquiryStore.submittedEnquiries(), ...SAMPLE_ENQUIRIES];
   },
 
   async getMine(id) {
-    const found = SAMPLE_ENQUIRIES.find((e) => e.id === id);
+    const found =
+      enquiryStore.findByReference(id) ?? SAMPLE_ENQUIRIES.find((e) => e.id === id);
     if (!found) throw new ServiceError("not_found", `No enquiry ${id} on this account.`);
     return found;
+  },
+
+  async getByReference(id) {
+    return enquiryStore.findByReference(id) ?? SAMPLE_ENQUIRIES.find((e) => e.id === id) ?? null;
+  },
+};
+
+/**
+ * Profile (P-15) and notifications (P-16).
+ *
+ * Saving changes a value in this process. It does not update a real account, and
+ * it does not change any preference at WhatsApp or an email provider — the
+ * screens say so rather than implying the change took effect anywhere.
+ */
+const profileService: ProfileService = {
+  async get() {
+    return accountStore.getProfile();
+  },
+  async save(input) {
+    return accountStore.saveProfile(input);
+  },
+};
+
+const notificationService: NotificationService = {
+  async list() {
+    return accountStore.listNotifications();
+  },
+  async markRead(id) {
+    accountStore.markRead(id);
+  },
+  async markAllRead() {
+    accountStore.markAllRead();
+  },
+  async unreadCount() {
+    return accountStore.unreadCount();
   },
 };
 
 export const sampleServices: Services = {
   properties: propertyService,
   enquiries: enquiryService,
+  profile: profileService,
+  notifications: notificationService,
   isSample: true,
 };

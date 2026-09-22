@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getServices } from "@/lib/services";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -14,6 +16,12 @@ export default async function EnquiryConfirmedPage({
 }) {
   const { id } = await params;
 
+  // The reference in the URL is not trusted: the screen only confirms an enquiry
+  // the service actually holds, so a guessed or stale reference cannot render as
+  // a successful submission.
+  const enquiry = await getServices().enquiries.getByReference(id);
+  if (!enquiry) notFound();
+
   return (
     <div className="mx-auto max-w-[660px] px-[32px] pb-[60px] pt-[36px] max-[1060px]:px-[18px]">
       <Card className="border-[#C9E4D6] bg-chip-success-bg p-[24px]">
@@ -22,7 +30,8 @@ export default async function EnquiryConfirmedPage({
           <h1 className="t-heading text-success">The builder has your enquiry</h1>
         </div>
         <p className="t-body mt-[10px] text-body">
-          Your reference is <span className="t-mono text-ink">{id}</span>. It is saved to your
+          Your enquiry about <strong className="text-ink">{enquiry.propertyTitle}</strong> has a
+          reference of <span className="t-mono text-ink">{enquiry.id}</span>. It is saved to your
           account, and any reply appears there.
         </p>
         {runtimeConfig.isSampleMode ? (

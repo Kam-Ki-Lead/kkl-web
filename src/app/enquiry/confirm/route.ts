@@ -8,14 +8,15 @@ import { completeEnquiry } from "@/app/actions/enquiry";
  * the enquiry and clearing the server-held draft — and Next only permits cookie
  * writes in a Server Action or Route Handler.
  *
- * Repeat-safe: the draft is cleared once consumed, so a refresh or a second
- * visit cannot record the same enquiry twice. It lands on the expired state
- * instead of silently enquiring again.
+ * Repeat safety does NOT come from clearing the draft. The draft carries a
+ * submission token that the service treats as an idempotency key, so a replay
+ * resolves to the enquiry already recorded. Clearing the cookie afterwards only
+ * stops this browser asking again.
  */
 export async function GET(request: NextRequest) {
   const result = await completeEnquiry();
-  const target = result
+  const target = result.ok
     ? `/enquiry/${result.enquiryId}/confirmed`
-    : "/enquiry/expired";
+    : `/enquiry/unavailable?reason=${result.problem}`;
   return NextResponse.redirect(new URL(target, request.url));
 }
