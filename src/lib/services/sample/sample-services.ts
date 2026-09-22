@@ -2,8 +2,12 @@ import type { PropertySummary } from "@/lib/domain/types";
 import {
   ServiceError,
   type EnquiryService,
+  type CreditService,
+  type LeadMarketService,
   type NotificationService,
   type ProfileService,
+  type SellerAccountService,
+  type SupportService,
   type HomepageContent,
   type Paged,
   type PropertyService,
@@ -11,6 +15,7 @@ import {
 } from "@/lib/services/contracts";
 import * as accountStore from "./account-store";
 import * as enquiryStore from "./enquiry-store";
+import * as sellerStore from "./seller-store";
 import {
   SAMPLE_ENQUIRIES,
   SAMPLE_LOCALITIES,
@@ -218,10 +223,133 @@ const notificationService: NotificationService = {
   },
 };
 
+/**
+ * Seller area (S-01 to S-25).
+ *
+ * Everything below is a thin pass-through to seller-store.ts, which documents
+ * what it is: process memory with one Seller, no sign-in and no money. These
+ * methods are not authentication, KYC, ownership or wallet operations, and the
+ * screens that call them say so.
+ */
+const sellerAccountService: SellerAccountService = {
+  async get() {
+    return sellerStore.getAccount();
+  },
+  async saveBusiness(input) {
+    return sellerStore.saveBusiness(input);
+  },
+  async submitKyc(input) {
+    return sellerStore.submitKyc(input);
+  },
+  async kycTimeline() {
+    return sellerStore.kycTimeline();
+  },
+  async saveProfile(input) {
+    return sellerStore.saveProfile(input);
+  },
+  async billingDetails() {
+    return sellerStore.getBilling();
+  },
+  async saveBillingDetails(input) {
+    return sellerStore.saveBilling(input);
+  },
+};
+
+const leadMarketService: LeadMarketService = {
+  async list(query) {
+    return sellerStore.listLeads(query);
+  },
+  async get(id) {
+    return sellerStore.getLead(id);
+  },
+  async purchase(input) {
+    return sellerStore.purchaseLead(input);
+  },
+  async listPurchased() {
+    return sellerStore.listPurchased();
+  },
+  async getPurchased(id) {
+    return sellerStore.getPurchased(id);
+  },
+  async exportPurchased({ ids }) {
+    return {
+      filename: `kkl-purchased-leads-${new Date().toISOString().slice(0, 10)}.csv`,
+      contentType: "text/csv; charset=utf-8",
+      body: sellerStore.exportPurchasedCsv(ids),
+    };
+  },
+};
+
+const creditService: CreditService = {
+  async wallet() {
+    return sellerStore.wallet();
+  },
+  async usageByMonth() {
+    return sellerStore.usageByMonth();
+  },
+  async ledger(filter) {
+    return sellerStore.getLedger(filter);
+  },
+  async recharge(input) {
+    return sellerStore.recharge(input);
+  },
+  async invoices() {
+    return sellerStore.listInvoices();
+  },
+  async invoice(id) {
+    return sellerStore.getInvoice(id);
+  },
+};
+
+const supportService: SupportService = {
+  async listTickets() {
+    return sellerStore.listTickets();
+  },
+  async getThread(reference) {
+    return sellerStore.getThread(reference);
+  },
+  async createTicket(input) {
+    return sellerStore.createTicket(input);
+  },
+  async reply(input) {
+    const thread = sellerStore.replyToTicket(input);
+    if (!thread) throw new ServiceError("not_found", `No ticket ${input.reference}.`);
+    return thread;
+  },
+  async resolve(reference) {
+    const thread = sellerStore.resolveTicket(reference);
+    if (!thread) throw new ServiceError("not_found", `No ticket ${reference}.`);
+    return thread;
+  },
+};
+
+/**
+ * Sample-only review controls, exported from here rather than reached by
+ * importing seller-store directly.
+ *
+ * Route handlers and pages are bundled separately, so two import paths to the
+ * same module can end up as two module instances with two copies of the state.
+ * That is exactly what happened: the review route set a balance and the pages
+ * kept showing the old one. Everything that mutates sample state now travels
+ * the one path the pages already use — @/lib/services — so there is a single
+ * instance by construction.
+ */
+export const sampleReviewControls = {
+  setKycStatus: sellerStore.setKycStatusForReview,
+  setAccountStatus: sellerStore.setAccountStatusForReview,
+  setPaymentOutcome: sellerStore.setPaymentOutcomeForReview,
+  setBalance: sellerStore.setBalanceForReview,
+  reset: sellerStore.resetForReview,
+} as const;
+
 export const sampleServices: Services = {
   properties: propertyService,
   enquiries: enquiryService,
   profile: profileService,
   notifications: notificationService,
+  sellerAccount: sellerAccountService,
+  leadMarket: leadMarketService,
+  credits: creditService,
+  support: supportService,
   isSample: true,
 };

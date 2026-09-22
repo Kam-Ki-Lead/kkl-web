@@ -250,6 +250,34 @@ export type MarketplaceLead = {
   readonly priceCredits: number;
   /** Present only when the aging discount applies; the server computes it. */
   readonly originalPriceCredits: number | null;
+  /**
+   * A display-only placeholder for the withheld contact, composed by the server.
+   *
+   * This is a string to render, not data to unmask. The unmasked values are
+   * never sent for an unpurchased lead, so there is nothing in the client to
+   * reverse. How much a mask may reveal is a disclosure policy that belongs to
+   * kkl-backend, not to this layer — kkl-web renders whatever string it is
+   * given and cannot widen it.
+   */
+  readonly contactMask: string;
+  /** Requirement summary line — configuration and budget, as one phrase. */
+  readonly requirement: string;
+};
+
+/** Qualification-call detail, shown on the masked lead screen (S-08). */
+export type LeadQualification = {
+  readonly summary: string;
+  readonly intentScore: number;
+  /** D-14: absent consent is never presented as present. */
+  readonly consentCaptured: boolean;
+  readonly channel: string;
+  readonly timeline: string;
+  readonly purpose: string;
+  readonly financing: string;
+};
+
+export type MarketplaceLeadDetail = MarketplaceLead & {
+  readonly qualification: LeadQualification;
 };
 
 /** A lead the viewer has purchased. Contact details exist only on this type. */
@@ -263,11 +291,15 @@ export type PurchasedLead = {
   readonly intentBand: LeadIntentBand;
   readonly intentScore: number;
   readonly pricePaidCredits: number;
+  readonly requirement: string;
   readonly contact: {
     readonly name: string;
     readonly phone: string;
     readonly email: string | null;
+    /** Free text the buyer gave during qualification, or null. */
+    readonly bestTimeToCall: string | null;
   };
+  readonly qualification: LeadQualification;
 };
 
 export type MarketplaceFilters = {
@@ -306,6 +338,14 @@ export type LedgerEntry = {
 export type WalletSummary = {
   readonly balanceCredits: number;
   readonly expiringSoonCredits: number | null;
+  /**
+   * Credits past their validity date, held apart from the usable balance.
+   *
+   * Null — not zero — while D-04 is open. Zero would assert that no credits have
+   * expired, which nobody can assert without an expiry period to measure
+   * against. The screens render the unresolved state instead.
+   */
+  readonly expiredCredits: number | null;
 };
 
 // ----------------------------------------------------------------- billing --
@@ -316,6 +356,39 @@ export type Invoice = {
   readonly issuedAt: string;
   readonly amountInr: number;
   readonly status: "paid" | "pending" | "failed";
+  readonly description: string;
+};
+
+export type InvoiceParty = {
+  readonly name: string;
+  readonly addressLines: readonly string[];
+  /** Null when not provided; never invented. */
+  readonly gstin: string | null;
+};
+
+export type InvoiceDetail = Invoice & {
+  readonly billedTo: InvoiceParty;
+  readonly issuedBy: InvoiceParty;
+  readonly lines: readonly {
+    readonly description: string;
+    readonly quantity: number;
+    readonly amountInr: number;
+  }[];
+  /**
+   * Null while D-13 is open. A zero tax line would be a claim about GST
+   * treatment that has not been made, so no tax row is rendered at all.
+   */
+  readonly taxInr: number | null;
+  readonly totalInr: number;
+};
+
+/** The billing details that appear on an invoice (S-21). */
+export type BillingDetails = {
+  readonly billingName: string;
+  readonly gstin: string | null;
+  readonly addressLines: readonly string[];
+  readonly invoiceEmail: string | null;
+  readonly contactName: string | null;
 };
 
 // ----------------------------------------------------------------- support --
@@ -324,9 +397,69 @@ export type SupportTicket = {
   readonly id: string;
   readonly reference: string;
   readonly subject: string;
-  readonly status: "open" | "awaiting_reply" | "resolved";
+  readonly status: "open" | "awaiting_reply" | "replied" | "resolved";
+  readonly topic: string;
   readonly createdAt: string;
   readonly updatedAt: string;
+};
+
+export type TicketMessage = {
+  readonly id: string;
+  readonly author: "you" | "support";
+  readonly authorLabel: string;
+  readonly body: string;
+  readonly sentAt: string;
+};
+
+export type SupportThread = SupportTicket & {
+  readonly messages: readonly TicketMessage[];
+};
+
+// ------------------------------------------------------------ seller account --
+
+export type SellerBusinessType =
+  | "individual_broker"
+  | "proprietorship"
+  | "partnership"
+  | "private_limited";
+
+export type SellerAccountStatus = "active" | "suspended";
+
+/**
+ * The signed-in Seller's account.
+ *
+ * `kycStatus` and `accountStatus` are separate axes on purpose: the approved
+ * prototype notes that suspending an account never rewrites its verification
+ * state. An approved Seller can be suspended, and a suspended Seller keeps their
+ * approval.
+ *
+ * None of this is authoritative in kkl-web. Whether an account may purchase is
+ * decided by kkl-backend on every request; the flags here only decide what the
+ * screens say.
+ */
+export type SellerAccount = {
+  readonly id: string;
+  readonly contactName: string;
+  readonly agencyName: string;
+  readonly mobile: string;
+  readonly businessType: SellerBusinessType;
+  readonly areas: readonly string[];
+  readonly gstin: string | null;
+  readonly kycStatus: KycStatus;
+  readonly accountStatus: SellerAccountStatus;
+  readonly alerts: SellerAlertPreferences;
+};
+
+export type SellerAlertPreferences = {
+  readonly newLeadsInMyAreas: boolean;
+  readonly viewedLeadOnSale: boolean;
+  readonly lowBalance: boolean;
+};
+
+/** One step of the verification timeline shown on S-04. */
+export type KycTimelineEntry = {
+  readonly label: string;
+  readonly at: string | null;
 };
 
 // --------------------------------------------------------------------- kyc --

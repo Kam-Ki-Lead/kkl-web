@@ -1,7 +1,23 @@
 import type {
+  BillingDetails,
   BuyerEnquiry,
   BuyerNotification,
   BuyerProfile,
+  Invoice,
+  InvoiceDetail,
+  KycStatus,
+  KycSubmission,
+  KycTimelineEntry,
+  LedgerEntry,
+  MarketplaceLead,
+  MarketplaceLeadDetail,
+  PurchasedLead,
+  SellerAccount,
+  SellerAlertPreferences,
+  SellerBusinessType,
+  SupportThread,
+  SupportTicket,
+  WalletSummary,
   BuyerRequirement,
   MatchedProperty,
   PropertyDetail,
@@ -150,11 +166,157 @@ export interface NotificationService {
   unreadCount(): Promise<number>;
 }
 
+// ------------------------------------------------------------------ seller --
+
+/**
+ * The Seller's own account (S-01 to S-05, S-21, S-25).
+ *
+ * Nothing here authenticates or authorises. `get()` returns the account the
+ * request is already scoped to; in sample mode there is only one and no sign-in
+ * gate in front of it. KYC state is reported, never decided: an implementation
+ * must not let a client-supplied value change whether an account is verified.
+ */
+export interface SellerAccountService {
+  get(): Promise<SellerAccount>;
+  /** S-02. Returns the stored account so the screen shows what was kept. */
+  saveBusiness(input: {
+    agencyName: string;
+    businessType: SellerBusinessType;
+    areas: readonly string[];
+    gstin: string | null;
+  }): Promise<SellerAccount>;
+  /**
+   * S-03. Submitting moves the account to `pending`; it never approves it.
+   *
+   * Document bytes are deliberately not part of this contract. Uploads go
+   * straight to kkl-backend, which is the only thing that should ever hold a PAN
+   * or Aadhaar image, and this returns only the resulting status.
+   */
+  submitKyc(input: { panNumber: string; hasPanDocument: boolean; hasAadhaarDocument: boolean }): Promise<KycSubmission>;
+  /** S-04 timeline. Entries the server has, with no invented timestamps. */
+  kycTimeline(): Promise<readonly KycTimelineEntry[]>;
+  saveProfile(input: {
+    contactName: string;
+    agencyName: string;
+    alerts: SellerAlertPreferences;
+  }): Promise<SellerAccount>;
+  billingDetails(): Promise<BillingDetails>;
+  saveBillingDetails(input: BillingDetails): Promise<BillingDetails>;
+}
+
+export type LeadSort = "newest" | "price" | "score";
+
+export type LeadMarketQuery = {
+  readonly area?: string;
+  readonly budgetBand?: string;
+  readonly configuration?: string;
+  readonly minScore?: number;
+  readonly sort?: LeadSort;
+  /** The "Sale · aged leads" tab. */
+  readonly onSaleOnly?: boolean;
+};
+
+export type LeadMarketPage = {
+  readonly leads: readonly MarketplaceLead[];
+  readonly total: number;
+  /**
+   * Qualified leads the server refused to list, and why, as a sentence.
+   *
+   * The approved design surfaces this rather than silently shortening the list:
+   * a lead whose qualification call captured no consent cannot be sold (D-14),
+   * and the Seller is told the count without being told which.
+   */
+  readonly withheld: { readonly count: number; readonly reason: string } | null;
+  readonly filterOptions: {
+    readonly areas: readonly string[];
+    readonly budgetBands: readonly string[];
+    readonly configurations: readonly string[];
+  };
+};
+
+/** The outcome of asking to buy a lead. Every case is a designed screen. */
+export type PurchaseOutcome =
+  | { readonly kind: "purchased"; readonly lead: PurchasedLead; readonly duplicate: boolean }
+  | { readonly kind: "insufficient_credits"; readonly priceCredits: number; readonly balanceCredits: number }
+  | { readonly kind: "already_sold" }
+  | { readonly kind: "not_verified"; readonly kycStatus: KycStatus }
+  | { readonly kind: "account_suspended" }
+  | { readonly kind: "deduction_failed"; readonly message: string };
+
+/**
+ * The lead marketplace and purchase (S-07 to S-13).
+ *
+ * `purchase` takes an idempotency key for the same reason the enquiry flow does:
+ * a retried request, a second tab or a double submit must not spend credits
+ * twice. One lead is released to one purchaser only, so a second caller must get
+ * `already_sold` rather than a second copy.
+ *
+ * The ordering matters and belongs to kkl-backend, inside one transaction:
+ * deduct, then release. A failed deduction must release nothing. kkl-web cannot
+ * enforce that and does not pretend to — it renders whichever outcome it is
+ * handed.
+ */
+export interface LeadMarketService {
+  list(query: LeadMarketQuery): Promise<LeadMarketPage>;
+  /** Masked view. Contact values are not in the response at all. */
+  get(id: string): Promise<MarketplaceLeadDetail | null>;
+  purchase(input: { leadId: string; idempotencyKey: string }): Promise<PurchaseOutcome>;
+  listPurchased(): Promise<readonly PurchasedLead[]>;
+  getPurchased(id: string): Promise<PurchasedLead | null>;
+  /** Export of the caller's own purchased leads, as a file body. */
+  exportPurchased(input: { format: "csv"; ids?: readonly string[] }): Promise<{
+    readonly filename: string;
+    readonly contentType: string;
+    readonly body: string;
+  }>;
+}
+
+export type RechargeOutcome =
+  | { readonly kind: "credited"; readonly amountInr: number; readonly balanceCredits: number; readonly paymentReference: string; readonly invoiceId: string; readonly duplicate: boolean }
+  | { readonly kind: "pending"; readonly paymentReference: string }
+  | { readonly kind: "failed"; readonly message: string };
+
+export type UsageMonth = { readonly label: string; readonly spentInr: number };
+
+/**
+ * Credits, ledger and invoices (S-14 to S-21).
+ *
+ * Read-only for balances. kkl-web never computes an authoritative balance: every
+ * figure is derived server-side from the append-only ledger, which is why
+ * `ledger` returns `balanceAfterCredits` per entry rather than leaving the client
+ * to add up.
+ *
+ * `recharge` simulates nothing about money in sample mode — it moves a number in
+ * a process. Real payment capture, reconciliation and invoice issue are
+ * kkl-backend's, behind a gateway, and must never be initiated from here.
+ */
+export interface CreditService {
+  wallet(): Promise<WalletSummary>;
+  usageByMonth(): Promise<readonly UsageMonth[]>;
+  ledger(filter?: { readonly type?: "recharge" | "purchase" }): Promise<readonly LedgerEntry[]>;
+  recharge(input: { amountInr: number; idempotencyKey: string }): Promise<RechargeOutcome>;
+  invoices(): Promise<readonly Invoice[]>;
+  invoice(id: string): Promise<InvoiceDetail | null>;
+}
+
+/** Support tickets (S-22 to S-24). */
+export interface SupportService {
+  listTickets(): Promise<readonly SupportTicket[]>;
+  getThread(reference: string): Promise<SupportThread | null>;
+  createTicket(input: { topic: string; subject: string; body: string }): Promise<SupportTicket>;
+  reply(input: { reference: string; body: string }): Promise<SupportThread>;
+  resolve(reference: string): Promise<SupportThread>;
+}
+
 export type Services = {
   readonly properties: PropertyService;
   readonly enquiries: EnquiryService;
   readonly profile: ProfileService;
   readonly notifications: NotificationService;
+  readonly sellerAccount: SellerAccountService;
+  readonly leadMarket: LeadMarketService;
+  readonly credits: CreditService;
+  readonly support: SupportService;
   /** True when these are fixtures. Screens use it to label simulated actions. */
   readonly isSample: boolean;
 };

@@ -1,0 +1,112 @@
+"use client";
+
+import { useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import { useHydrated } from "@/lib/use-hydrated";
+import { Field, Select } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+
+/**
+ * S-07 marketplace filters: area, budget band, configuration, qualification.
+ *
+ * A real GET form, not a router push. Filter state belongs in the URL — Back,
+ * sharing and reload all depend on it — and a plain form gets that for free and
+ * keeps working before hydration.
+ *
+ * The approved design shows no Apply button: changing a select applies it. That
+ * needs JavaScript, so the button is rendered server-side and hidden once this
+ * component mounts. Without JavaScript the selects still work and the button is
+ * the thing that submits them; with it, the change handler submits and the
+ * button is redundant. Neither path loses a choice.
+ */
+export function LeadFilters({
+  options,
+}: {
+  options: {
+    readonly areas: readonly string[];
+    readonly budgetBands: readonly string[];
+    readonly configurations: readonly string[];
+  };
+}) {
+  const params = useSearchParams();
+  const form = useRef<HTMLFormElement>(null);
+  const enhanced = useHydrated();
+
+  const value = (key: string, fallback: string) => params.get(key) ?? fallback;
+  const submit = () => {
+    if (enhanced) form.current?.requestSubmit();
+  };
+
+  return (
+    <form
+      ref={form}
+      method="GET"
+      action="/seller/leads"
+      className="grid grid-cols-4 gap-[14px] max-[1060px]:grid-cols-2 max-[560px]:grid-cols-1"
+    >
+      {/* The tab and sort are part of the view, not of this form's fields, so
+          they ride along rather than resetting when a filter changes. */}
+      {params.get("tab") ? <input type="hidden" name="tab" value={params.get("tab") as string} /> : null}
+      {params.get("sort") ? (
+        <input type="hidden" name="sort" value={params.get("sort") as string} />
+      ) : null}
+
+      <Field id="lead-area" label="Area">
+        <Select id="lead-area" name="area" defaultValue={value("area", "All areas")} onChange={submit}>
+          {options.areas.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field id="lead-budget" label="Budget band">
+        <Select
+          id="lead-budget"
+          name="budget"
+          defaultValue={value("budget", "All budgets")}
+          onChange={submit}
+        >
+          {options.budgetBands.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field id="lead-config" label="Configuration">
+        <Select
+          id="lead-config"
+          name="config"
+          defaultValue={value("config", "All configurations")}
+          onChange={submit}
+        >
+          {options.configurations.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field id="lead-score" label="Qualification">
+        <Select id="lead-score" name="score" defaultValue={value("score", "")} onChange={submit}>
+          <option value="">Any score</option>
+          <option value="80">80 and above</option>
+          <option value="65">65 and above</option>
+          <option value="50">50 and above</option>
+        </Select>
+      </Field>
+
+      {enhanced ? null : (
+        <div className="flex items-end">
+          <Button type="submit" variant="secondary">
+            Apply filters
+          </Button>
+        </div>
+      )}
+    </form>
+  );
+}

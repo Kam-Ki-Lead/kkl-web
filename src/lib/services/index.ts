@@ -1,6 +1,6 @@
 import { runtimeConfig } from "@/lib/config/runtime";
 import type { Services } from "./contracts";
-import { sampleServices } from "./sample/sample-services";
+import { sampleReviewControls, sampleServices } from "./sample/sample-services";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -24,6 +24,20 @@ export function getServices(): Services {
       "It is blocked on kkl-backend publishing its versioned OpenAPI spec. kkl-web does not " +
       "fall back to sample data.",
   );
+}
+
+/**
+ * Review-only state controls, or null outside sample mode.
+ *
+ * Deliberately not part of the `Services` contract: a real implementation has no
+ * equivalent and should not be asked to declare one. It is exported from here,
+ * rather than imported from the sample store directly, because route handlers
+ * and pages are bundled separately — two import paths to the same module gave
+ * two module instances, and the review route's writes were invisible to the
+ * pages. One path, one instance.
+ */
+export function getSampleReviewControls(): typeof sampleReviewControls | null {
+  return runtimeConfig.isSampleMode ? sampleReviewControls : null;
 }
 
 export { ServiceError } from "./contracts";
