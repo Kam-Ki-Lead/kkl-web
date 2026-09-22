@@ -49,10 +49,11 @@ every row (C-11).
 
 | ID | Group | Screen | Sample | Real | Verified | Where |
 |---|---|---|---|---|---|---|
-| C-01 | Colour tokens | ✓ | n/a | · | ✓ values transcribed and compared | `src/app/globals.css` `@theme` |
+| C-01 | Colour tokens | ✓ | n/a | · | ✓ **26/26 tokens and 37/37 literals checked mechanically** — three were wrong until then | `src/app/globals.css` `@theme` |
 | C-02 | Typography | ✓ | n/a | · | ✓ scale compared | `src/app/globals.css` `.t-*`, `src/app/layout.tsx` |
 | C-03 | Navigation systems | ✓ public header/footer/drawer and the dashboard rail, shared by both consoles | ✓ | · | ✓ public nav, Seller rail, Builder rail, at both widths | `src/components/layout/` |
 | C-04 | Form controls | ✓ | ✓ | · | ~ keyboard and focus checked; not screen-reader tested | `src/components/ui/button.tsx`, `field.tsx` |
+| C-06a | Card overrides | ✓ **fixed** — the base surface beat every caller's colour | n/a | · | ✓ asserted by the visual-values check | `src/components/ui/card.tsx` |
 | C-05 | Filters, tables, pagination | ~ pagination controls not built — no sample list is long enough to need them | ✓ | · | ~ filters, chips, sort | `src/components/search/`, `chip.tsx` |
 | C-06 | Cards | ✓ property, project and lead cards | ✓ | · | ✓ property, project and lead cards, both consoles | `src/components/property/property-card.tsx`, `src/components/console/lead-card.tsx` |
 | C-07 | Dialogs, uploads, notifications | ~ file-choice fields and notification lists built; **no dialog component** | ~ a file is named, never uploaded | · | ~ the file fields and notification lists; no dialog to check | `src/components/builder/section-forms.tsx`, `src/app/*/notifications` |

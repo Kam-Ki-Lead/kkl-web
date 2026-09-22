@@ -3,7 +3,10 @@
 What has actually been checked in kkl-web, and what has not. Carries forward the outstanding
 items from C-11 of the approved baseline, which design approval did **not** discharge.
 
-A check is only recorded here once it has been performed. "It renders" is not verification.
+A check is only recorded here once it has been performed. "It renders" is not
+verification — and, as the visual section below records, a route sweep passing
+224/224 sat alongside every coloured panel in the application rendering the
+wrong colour.
 
 ## How these checks are run
 
@@ -30,23 +33,31 @@ run against `next start`.
 |---|---|---|
 | Type check | `npx tsc --noEmit` | Pass, 0 errors |
 | Lint | `npx eslint .` | Pass, 0 errors, 0 warnings |
-| Production build | `npx next build` | Pass — 82 routes compiled |
-| Route sweep | `node scripts/verify-route-sweep.mjs` | 148/148 — 74 routes × 2 widths |
+| Production build | `npx next build` | Pass — 120 routes compiled |
+| Design tokens | `node scripts/verify-design-tokens.mjs ../kkl-design` | 26/26 tokens and 37/37 component literals appear in the approved design |
+| Visual values | `node scripts/verify-visual-baseline.mjs` | 22/22 measured values match the baseline's declared values |
+| Route sweep | `node scripts/verify-route-sweep.mjs` | 224/224 — 112 routes × 2 widths |
 | Enquiry flow | `node scripts/verify-enquiry-flow.mjs` | 17/17 behaviour checks pass; 3 limitations reproduce |
 | Seller flow | `node scripts/verify-seller-flow.mjs` | 26/26 behaviour checks pass; 2 limitations reproduce |
-| Builder flow | `node scripts/verify-builder-flow.mjs` | 28/28 behaviour checks pass; 2 limitations reproduce |
-| Forms without JavaScript | `node scripts/verify-no-javascript.mjs` | 36/36 forms work with scripting disabled |
+| Builder flow | `node scripts/verify-builder-flow.mjs` | 43/43 behaviour checks pass; 3 limitations reproduce |
+| Admin flow | `node scripts/verify-admin-flow.mjs` | 36/36 behaviour checks pass; 3 limitations reproduce |
+| Forms without JavaScript | `node scripts/verify-no-javascript.mjs` | 50/50 forms work with scripting disabled |
 | Sample-mode guard | `./scripts/verify-sample-mode-guard.sh` | 8/8 — build time and run time, both directions |
 | Unit / integration tests | — | **None written. No test runner is configured.** |
 
-All six scripts are committed and repeatable, against one production build
-served by `next start`. Everything outside that table — the visual comparison
-and the accessibility work below — was done by hand.
+All nine scripts are committed and repeatable, against one production build
+served by `next start`. **The whole set was run twice in a row against one
+server with identical results**, which is what makes the reset claims mean
+something rather than being an artifact of a fresh process.
 
-**There are still no unit or integration tests.** Six browser-driven harnesses
+`verify-design-tokens.mjs` is the only one that needs no browser and no server,
+and the only one that compares this repository to the **design** rather than to
+itself. Everything else compares the implementation with its own expectations.
+
+**There are still no unit or integration tests.** Nine browser-driven harnesses
 are not a substitute: they cover the journeys, not the functions, and a
-reconciliation invariant that is asserted through a web page is asserted more
-slowly and less precisely than it could be.
+reconciliation invariant asserted through a web page is asserted more slowly
+and less precisely than it could be.
 
 The ESLint flat config was broken on arrival (`FlatCompat` threw "Converting circular structure
 to JSON"); lint could not run at all until it was repaired. Any earlier claim of a lint pass in
@@ -54,12 +65,12 @@ this repository predates a working config.
 
 ## Route sweep
 
-`scripts/verify-route-sweep.mjs` loads **74 routes at 1440px and 390px** — 148
+`scripts/verify-route-sweep.mjs` loads **112 routes at 1440px and 390px** — 224
 renders — and asserts five things on each: HTTP 200, no uncaught page error, no
 console error, no failed sub-resource, and no horizontal overflow
 (`scrollWidth > clientWidth + 1`).
 
-**148/148 clean.**
+**224/224 clean.**
 
 Overflow is in that list deliberately. It is the responsive failure a screenshot
 at a fixed width hides: the page looks correct and scrolls sideways, and nobody
@@ -307,8 +318,8 @@ of a fresh process.
 
 ### Forms without JavaScript
 
-`scripts/verify-no-javascript.mjs` drives **36 submissions across both
-consoles** with `javaScriptEnabled: false`. All 36 work.
+`scripts/verify-no-javascript.mjs` drives **50 submissions across all three
+consoles** with `javaScriptEnabled: false`. All 50 work.
 
 Seller (checks 1–21): registration through both phases including the rejected
 code, business details with GSTIN format checking, KYC validation, ticket
@@ -320,6 +331,21 @@ validation, creating a listing, saving an editor section, advancing between
 sections, publishing, **the published listing reaching `/search`**,
 unpublishing, unlocking a contact (credit deduction and reveal on a plain form
 post), starting a subscription, the profile form, and raising a support ticket.
+
+Admin (checks 37–50): the A-04 reason gate refusing and then accepting, the two
+axes staying separate on the plain-form path, the A-06 checklist gate, four
+checklist ticks as four separate posts, the approval reaching the Seller
+console, the A-19 amount and reason gates, **the adjustment landing in the
+Seller's own ledger with its reason**, an A-23 reply reaching the right thread
+and not the other one, and the A-29 CSV export.
+
+The Admin forms matter most here. A reason gate that only worked with
+JavaScript on would be no gate at all, and an internal tool is exactly where
+somebody is running a locked-down browser. One detail is asserted rather than
+assumed: A-23's reply-mode toggle is a client control, so with scripting off the
+hidden field keeps its rendered value — `public`. That is the right default to
+fail to, because a staff note shown to a user is a leak while a reply also
+visible to staff is not.
 
 This matters because the defect it guards against shipped once: an action passed
 to `useActionState` must be the server action itself, and a client closure that
@@ -373,12 +399,12 @@ per process by construction.
 ## Builder journey (B-01 to B-24)
 
 Run with `node scripts/verify-builder-flow.mjs` against the same production
-build. **28 behaviour checks pass; 2 known limitations reproduce.** The two
+build. **43 behaviour checks pass; 3 known limitations reproduce.** The two
 registers are kept apart for the reason set out above.
 
 ### Route sweep
 
-All 33 Builder routes are in the 148-render sweep at 1440px and 390px. Clean.
+All 33 Builder routes are in the 224-render sweep at 1440px and 390px. Clean.
 
 ### The two joins
 
@@ -488,6 +514,56 @@ world to add to a subscription screen and the hardest thing to notice later.
   file was named. No bytes are stored, scanned or served. The count is a review
   stand-in and the screen says so.
 
+### B-15 — unsaved changes (checks 27–41)
+
+Fifteen checks over the approved experience: the header mark, the exit dialog's
+three ways out, and the browser-level warning.
+
+- **27–29 — the mark is a comparison, not a flag.** An untouched section is
+  clean; a keystroke marks it; **typing a value back to what was saved clears
+  it again**. Dirtiness is read from the DOM against each control's own
+  `defaultValue`, which is exactly what `form.reset()` restores, so "discard"
+  and "is it dirty" cannot disagree.
+- **30–33 — the dialog, and all three ways out.** Leaving opens it instead of
+  navigating; "keep editing" preserves what was typed and keeps the mark up;
+  "discard" leaves without saving, confirmed by reopening; "save draft and
+  close" saves *and* lands where the Builder was going.
+- **36–38 — every anchor, not just the obvious one.** The console rail and the
+  section rail are both intercepted, by one capture-phase listener. Check 37
+  matters most: moving to section 2 would otherwise have discarded section 1
+  silently.
+- **39 — the preview section is not guarded**, because it has no fields and
+  nothing to lose. Asserted by the absence of a save control and of a dialog.
+- **40–41 — the reload warning is armed and disarmed.** A synthetic
+  `beforeunload` cannot open a browser's own prompt, but it does run the page's
+  handler, and a handler that calls `preventDefault` is precisely what makes a
+  real browser prompt. Check 40 asserts it is cancelled while dirty; check 41
+  asserts it is not once saved, so a clean editor does not nag.
+
+**Browser limitations, stated rather than glossed:**
+
+- **No browser has honoured a custom `beforeunload` string since 2017.** Every
+  one shows its own wording. The code sets `returnValue` for browsers that
+  still require it and the comment says why; nothing in this application
+  controls what that dialog says.
+- **The prompt can be suppressed entirely.** A browser may skip it if the user
+  has not interacted with the page, and some will not show it on a programmatic
+  navigation at all. It is a courtesy, not a guarantee, and the in-app dialog is
+  the part that is actually reliable.
+- **Browser Back within the application is not intercepted.** The capture-phase
+  click listener covers links; a Back press is a history event, and guarding it
+  needs a `popstate` trap that pushes a state entry back, which trades one
+  surprise for another. Not built, and recorded here rather than left to be
+  discovered.
+- **File inputs are excluded from dirty detection.** In sample mode nothing is
+  uploaded and `photoCount` is what saves, so a chosen file could never become
+  "saved" — counting it would leave the editor permanently dirty with no way to
+  clear it. A consequence of limitation L2, not an independent choice.
+- **None of it works without JavaScript**, and limitation L3 asserts the screen
+  says so. What still works there: every control that leaves a section is a
+  submit button, so moving through the editor saves on the way. The exposure
+  that remains is Back and closing the tab, and the notice names both.
+
 ### A cross-journey consequence, recorded rather than smoothed over
 
 Joining the Builder's listings to the portal changed what the portal contains,
@@ -510,17 +586,118 @@ next.
   were compared by reading screenshots at 1440 and 390 against the approved
   baseline; the rail, header, stat tiles, cards, the six-section editor stepper,
   tables and state panels line up. That is a reading, not a measurement.
-- **B-15's unsaved-changes prompt is not built.** Each section saves on submit
-  and navigation between sections goes through that save, so the state the
-  prompt guards — leaving with unsaved edits — arises only through the browser's
-  own Back or closing the tab. Guarding it needs a `beforeunload` handler and a
-  router interception. Not built, not verified, not marked partial-and-forgotten.
+- ~~B-15's unsaved-changes prompt is not built.~~ **Closed** — see the section
+  below.
 - **Publishing is not moderation.** A published listing reaches `/search`
   immediately. Whether a real listing is reviewed before or after going live is
   **D-10 and open**, and A-08's queue does not exist. What is demonstrated is
   the mechanism, not the policy.
 - The three accessibility checks below are outstanding for these screens as for
   every other.
+
+## Admin console (A-01 to A-31)
+
+Run with `node scripts/verify-admin-flow.mjs` against the same production
+build. **36 behaviour checks pass; 3 known limitations reproduce.**
+
+**Most of this suite is negative, deliberately.** A staff console's interesting
+failures are things that must *not* happen — a reply reaching the wrong person,
+an internal note reaching anyone, a suspension quietly revoking a verification —
+and a suite that only walks happy paths cannot see one of them.
+
+### Route sweep
+
+All 38 Admin routes are in the 224-render sweep at 1440px and 390px. Clean.
+
+### A-01 authenticates nobody, and says so
+
+Checks 1–2. Every field on the sign-in screen is asserted `disabled`, and the
+screen is asserted to say in its own words that no password is checked, no
+session is created and no second factor is asked for. D-16 is named as open, so
+no MFA step is drawn.
+
+That is the opposite of most verification: the check exists to confirm the
+screen does **not** work.
+
+### Reasons are enforced where the record changes
+
+Checks 3–4, 16. Every staff decision refuses an empty reason *before* it changes
+anything, and the refusal is asserted along with the fact that nothing moved.
+The gate lives in the store rather than in each form, so a new screen reaching
+for the same service cannot skip it — and, as checks 37, 40 and 44 of the
+no-JavaScript suite show, it still holds with scripting off.
+
+Approval on A-06 has a second gate: the full checklist. Check 5 asserts the
+refusal, check 6 completes the checklist, check 7 asserts the approval then
+succeeds.
+
+### The cross-role joins, asserted in both directions
+
+| What | Checks | The negative half |
+|---|---|---|
+| KYC decision → Seller verification | 5–9 | — |
+| Suspension → status, **not** verification | 10–14 | 11, 12: verification unchanged, both surfaces |
+| KYC decision → **not** account status | 15 | the reverse of 11 |
+| Credit adjustment → the account's own ledger | 16–19 | — |
+| Public reply → the requester's thread | 20–21, 26 | 22, 27: absent from the other console |
+| Internal note → Admin only | 23 | 24, 25: absent from the thread *and* the HTML |
+| Purchases → Admin orders | 28 | — |
+
+Two of those deserve spelling out.
+
+**Suspension and verification are independent, and the audit log proves it.**
+Check 11 asserts both chips on A-04, check 12 asserts the Seller console agrees,
+check 14 asserts the audit entry carries `kyc_status` as a before/after pair
+that is deliberately *unchanged*. Check 15 runs the same assertion the other
+way: a rejection does not un-suspend an account. The log records what was not
+touched, not only what was.
+
+**Internal notes are contained structurally, not filtered.** Check 24 asserts
+the note is absent from the requester's thread; check 25 asserts it is absent
+from the whole served document, including the RSC payload. It is not hidden
+there — it is not there, because the console's `TicketMessage` type has no field
+that could carry one and no Seller- or Builder-facing service reads the Admin
+store. A filter is the thing a future screen forgets.
+
+### Nothing is invented
+
+Checks 29–34, one per open decision:
+
+- **A-21 shows no subscription amount.** D-01 is open; the column reads
+  "Sample". A plausible figure on a staff screen is how an unapproved price
+  becomes a fact somebody quotes.
+- **A-08 has no approve action**, and says why. D-10 is open and the Builder
+  console publishes straight to the portal; an approve step here would settle
+  that by implication. Dismissing a report is recorded as *not* an approval.
+- **A-20 moves nothing.** D-06 leaves the eligibility rule and the destination
+  both open, so approving writes no ledger entry at all.
+- **A-28 has no remove control**, and the service interface has no method for
+  one. A suppression is created by the person who refused.
+- **A-31 has no credential field**, anywhere in the console.
+- **A-14's price fields are disabled.** D-03 is open.
+
+### Limitations reproduced, not passed
+
+- **The whole console is reachable without signing in.** A-01 authenticates
+  nobody; anything that reaches `/admin` gets everything. Staff authentication
+  is kkl-backend's and is not demonstrated. **This is not an access-control
+  pass** — it is the absence of one, confirmed.
+- **The operational screens read fixtures.** There is no intake pipeline, no
+  qualification caller, no WhatsApp journey and no notification sender anywhere
+  in this repository. A-10 to A-13 and A-24 to A-27 exist so their layout and
+  states can be reviewed.
+- **Balances are numbers in one process.** No gateway, no reconciliation, lost
+  on restart.
+
+### Not verified in this area
+
+- **No staff roles exist, so none were tested.** Who may approve a document,
+  adjust a balance or read a transcript is not modelled at all. Nothing here
+  says anything about whether a real staff member could be stopped.
+- **No four-eyes rule on money.** A-19 and A-20 are single-actor in this build.
+  Whether a real adjustment or refund needs a second approver is not decided
+  and is not represented.
+- **No screenshot comparison against the Admin prototype** — see below.
 
 ## Accessibility — checked
 
@@ -552,43 +729,92 @@ Carried forward from C-11. None of these may be reported as passed without being
 
 ## Visual comparison against the approved baseline
 
-**This comparison is not complete, and the implementation should not be
-described as matching the baseline.** Primary property imagery differs: the
-baseline shows photography in every media slot, this implementation shows the
-designed no-image fallback unless the review-imagery flag is on — and that path
-has never been seen rendered, because the build environment blocks
-`images.unsplash.com`. Structure, type, colour and copy were compared and line
-up; the photographs, which are the most visually dominant element on the
-homepage, search results and detail screens, were not.
+**The approved prototypes cannot be rendered in this environment.** They boot
+React from `unpkg.com`, which the sandbox's proxy refuses
+(`ERR_TUNNEL_CONNECTION_FAILED`), so the pages stay as unexpanded
+`{{ template }}` placeholders. Google Fonts is blocked too.
 
-Method: baseline prototype and application screenshotted at matching widths and compared. The
-baseline's own width tabs are used to obtain its true responsive layouts — a browser viewport
-alone does not reflow it.
+That has a consequence worth stating before anything else: **no screenshot
+comparison of the Seller, Builder or Admin consoles was possible in this
+session, and none is claimed.** The three rows compared that way (P-01, P-02,
+P-03) were done in an earlier session on an environment where the homepage
+prototype did render.
 
-| Screen | Widths | Result |
+### What was done instead, and what it is worth
+
+The baseline declares every colour, size and weight as an inline style in its
+own source. Those values can be read out and compared to what a browser
+actually computes for the implementation. Two committed scripts do that:
+
+| Check | What it compares | Result |
 |---|---|---|
-| P-01 Homepage | 1440, 768, 390 | Structure, order, type scale, colour and copy match, including the distinct mobile layout |
-| P-02 Search results | 1440 | Filter row, possession chips, applied-filter bar, sort set, card grid and count line match |
-| P-03 Property detail | 1440 | Gallery split, spec grid, pricing table, amenities, location, possession panel and sidebar match in layout; gallery contents differ |
-| S-06 Seller dashboard | 1440, 390 | Rail, header, stat tiles, lead list and credits panel match; rail collapses to the drawer as designed |
-| S-07 Lead marketplace | 1440, 390 | Tabs, filter row, sort set and masked lead cards match |
-| B-06 Builder dashboard | 1440, 390 | Rail, header, stat tiles, enquiry list and the two side cards match |
-| B-07 My properties | 1440, 390 | Listing rows, status chips, per-listing action set and enquiry counts match |
-| B-13 Listing editor — preview & publish | 1440, 390 | Six-section stepper, preview card and the blocker list match |
-| B-17 Enquiry detail | 1440, 390 | Enquiry panel, contact block in both D-05 alternatives, and the reply area match |
+| `verify-design-tokens.mjs` | every `--color-*` token, and every hex literal in `src/` | 26/26 and 37/37 appear in the approved design |
+| `verify-visual-baseline.mjs` | computed styles on representative screens of all three consoles, at 1440 and 390 | 22/22 match the declared values |
 
-**Those six console rows are reading comparisons, and the mark they earn is
-weaker than the first three.** Homepage, search and property detail were
-compared screenshot against screenshot at matching widths. The Seller and
-Builder rows were compared by opening the baseline screen beside the
-implementation and checking structure, order, type scale, colour and copy agree.
-Nothing was measured in either case, and no pixel diff was taken anywhere.
+**This is a measurement, and it is better than an eyeball in one direction and
+much worse in the other.** It catches near-misses a person comparing two screens
+never would. It says nothing about layout, spacing rhythm, or whether a screen
+reads well — which is exactly what a screenshot would show. Both scripts say so
+in their own output.
 
-Not compared at all: P-05, P-08 to P-11, P-15 to P-20, S-01 to S-05, S-08 to
-S-25, B-01 to B-05, B-08 to B-12, B-14 to B-16, B-18 to B-24, and every screen
-at 768 except the homepage.
+### Three defects it found, which had shipped
 
-Differences, recorded in `approved-baseline.md` §5:
+1. **Three colour tokens appear nowhere in the approved design.**
+   `--color-chip-success-bg`, `-danger-bg` and `-muted-bg` held `#E4F3EC`,
+   `#FBECEB` and `#ECEEF4`; the baseline uses `#E3F3EA`, `#FDECEA` and
+   `#F0F2F9`, 31, 16 and 13 times respectively in the component library alone.
+
+   An earlier version of this document recorded C-01 as "values transcribed and
+   compared". They were transcribed. The comparison was a person reading two
+   lists of hex codes, which is the one comparison a near-miss survives intact.
+
+2. **Nine more near-misses were written directly into components**, including
+   the warning panel's surface and border — `#FFF9EE`/`#F2DFBC` against the
+   baseline's `#FFF7E8`/`#F3DFB4` — used across 27 files.
+
+3. **`Card` overrode its callers.** Tailwind emits `bg-white` and
+   `bg-[#FFF7E8]` as two rules of equal specificity, so which wins is decided
+   by their order in the generated stylesheet, not by the order in a `class`
+   attribute. **Every warning, success and danger panel in this application was
+   rendering white with a grey hairline** instead of its approved colour.
+
+   A route sweep could never have seen this. The page loads, nothing errors,
+   and the panel is simply the wrong colour.
+
+All three are fixed, and the checks that found them are committed so they
+cannot come back quietly.
+
+### Screens compared by screenshot, and how
+
+| Screen | Widths | Method | Result |
+|---|---|---|---|
+| P-01 Homepage | 1440, 768, 390 | screenshot vs prototype | Structure, order, type scale, colour and copy match, including the distinct mobile layout |
+| P-02 Search results | 1440 | screenshot vs prototype | Filter row, possession chips, applied-filter bar, sort set, card grid and count line match |
+| P-03 Property detail | 1440 | screenshot vs prototype | Gallery split, spec grid, pricing table, amenities, location, possession panel and sidebar match in layout; gallery contents differ |
+
+### Screens compared by measurement, and how
+
+| Screen | Widths | Method | Result |
+|---|---|---|---|
+| S-06 Seller dashboard | 1440, 390 | computed styles vs declared values | Rail surface, figure step, hairline, rail collapse |
+| S-07 Lead marketplace | 1440 | computed styles | Neutral chip surface |
+| B-06 Builder dashboard | 1440, 390 | computed styles | Rail surface, rail collapse, drawer toggle |
+| A-02 Admin dashboard | 1440, 390 | computed styles | Rail surface, active rail item, queue-tile figure at 28px, warning chip, rail collapse, drawer toggle |
+| A-03 Users | 1440 | computed styles | Success chip, hairline |
+| A-05 KYC queue | 1440 | computed styles | Warning and muted chips |
+| A-08 Property review | 1440 | computed styles | Danger chip |
+| A-20 Refunds | 1440 | computed styles | Warning panel surface and border |
+
+**Not compared at all, by either method:** P-05, P-08 to P-11, P-15 to P-20,
+S-01 to S-05, S-08 to S-25, B-01 to B-05, B-07 to B-24, A-01, A-04, A-06,
+A-07, A-09 to A-19, A-21 to A-31, and every screen at 768 except the homepage.
+
+That is most of the application. What the measurement establishes is that the
+**values** are right everywhere they are shared — the tokens, the chips, the
+rails, the panels — because those are shared components rather than per-screen
+decisions. It establishes nothing about the layout of a screen nobody looked at.
+
+### Other differences, recorded in `approved-baseline.md` §5
 
 - **Photography (open, not deliberate).** The baseline vendors no images of its
   own; it references seven Unsplash photographs by URL and credits each, and
@@ -597,19 +823,25 @@ Differences, recorded in `approved-baseline.md` §5:
   with their credits drawn over the images, and two listings are deliberately
   excluded so the missing-media state stays visible. **The flag path is
   unverified** — it typechecks and builds, and the images have never loaded
-  here. This is the specific outstanding asset dependency.
+  here, because the same proxy blocks `images.unsplash.com`. This is the
+  specific outstanding asset dependency.
 - **Listing counts (deliberate).** Derived from fixtures rather than the
   baseline's illustrative 244/128, because a homepage claiming 128 listings that
   searches to nine is incoherent.
+- **Figures (corrected).** The baseline declares three different figure sizes —
+  28px for A-02's queue tiles, 26px for the other Admin stat blocks, 21px for
+  the shared Seller and Builder tiles. `.t-figure` is the 21px step; the other
+  two are set where they apply.
 
-Defects found by comparison and fixed: hero fallback caption colliding with hero copy; project
-card image overlapping its content; "1 listings"; three nav items marking themselves active at
-once; carpet-area unit dropped from the first pricing row.
+Defects found by the earlier screenshot comparison and fixed: hero fallback
+caption colliding with hero copy; project card image overlapping its content;
+"1 listings"; three nav items marking themselves active at once; carpet-area
+unit dropped from the first pricing row.
 
 ## Console output
 
 The application's console is checked on every route of every sweep, separately
-from the baseline's own console state. **Clean on all 74 routes at both
+from the baseline's own console state. **Clean on all 112 routes at both
 widths** — no console errors, no uncaught page errors, no failed sub-resources.
 That assertion is now part of `scripts/verify-route-sweep.mjs` rather than
 something a person watched for, so it cannot quietly stop being true.
@@ -619,30 +851,57 @@ The baseline's unresolved homepage console defect is not inherited — see
 
 ## Not claimed
 
-- No screen is connected to a real service. Everything renders from sample
+- **No screen is connected to a real service.** Everything renders from sample
   fixtures. Authentication, authorization, KYC, lead ownership, contact
   disclosure, credits and payments are all simulated, and every screen that
   touches one says so on the screen.
-- No accessibility conformance claim at any level. Screen-reader behaviour,
-  per-chip contrast and native/text-only zoom are unverified.
-- No performance or load testing.
-- No cross-browser testing; every check ran in headless Chromium.
-- **No unit or component tests, and no test runner.** Six committed browser
+- **There is no staff sign-in and there are no staff roles.** Anything that
+  reaches `/admin` gets the whole console. Who may approve a document, adjust a
+  balance or read a transcript is not modelled at all. Reproducing that is
+  limitation L1 of the Admin suite, and reproducing it is not a pass.
+- **No four-eyes rule on money.** A-19 and A-20 are single-actor here, and
+  whether a real adjustment or refund needs a second approver is undecided.
+- **The Admin operational screens read fixtures.** There is no intake pipeline,
+  qualification caller, WhatsApp journey or notification sender anywhere in this
+  repository.
+- **No accessibility conformance claim at any level.** Screen-reader behaviour,
+  per-chip contrast and native/text-only zoom are unverified on all 113 rows.
+- **No performance or load testing.**
+- **No cross-browser testing**; every check ran in headless Chromium.
+- **No unit or component tests, and no test runner.** Nine committed browser
   harnesses cover the journeys end to end; they are not a substitute for tests
-  of the functions underneath, and the visual comparison and accessibility work
-  above were done by hand this session and are not regression tests.
-- The visual match is not complete. Primary imagery differs, the review-imagery
-  path has never been seen rendered, six console screens were compared by
-  reading rather than measuring, and most screens were not compared at all.
-- `/seller/review-state` and `/builder/review-state` returning 404 outside
-  sample mode is **untestable, not verified**: a build with
+  of the functions underneath.
+- **The visual comparison is by measurement, not by screenshot, for everything
+  except P-01 to P-03.** The approved prototypes cannot be rendered in this
+  environment — they boot React from a blocked CDN. What is established is that
+  the shared *values* are right; nothing is established about the layout of any
+  screen nobody looked at, which is most of them. The full list of what was
+  compared and how is above.
+- **Primary imagery still differs**, and the review-imagery path has never been
+  seen rendered, because the same proxy blocks `images.unsplash.com`.
+- **`/seller/review-state`, `/builder/review-state` and `/admin/review-state`
+  returning 404 outside sample mode is untestable, not verified**: a build with
   `NEXT_PUBLIC_KKL_DATA_SOURCE=api` fails at build time because no API client
   exists, so no non-sample build can be produced for the routes to be absent
   from. The guard was not weakened to make one.
-- The deployment guard **cannot detect that it is running in production.**
-  It requires the deployment to declare itself and refuses to serve when it has
+- **The deployment guard cannot detect that it is running in production.** It
+  requires the deployment to declare itself and refuses to serve when it has
   not. A deployment that declares `KKL_ENV=review` while serving real users is
   not detectable here, and nothing in a frontend could detect it. That residual
   risk is operational, not a code control.
-- The dev-server hydration failure has no established cause.
-- Admin (A-01 to A-31) does not exist. Nothing in this document covers it.
+- **B-15's guard does not cover browser Back**, and cannot control what the
+  browser's own reload prompt says. Both are recorded in the B-15 section.
+- **The dev-server hydration failure has no established cause.**
+
+### One thing this document got wrong, and how
+
+An earlier version recorded C-01 as "values transcribed and compared" and
+reported a clean route sweep on the same page. Three colour tokens were wrong,
+nine component literals were wrong, and every coloured panel in the application
+was rendering white — all of it while 224 route renders passed and the console
+was clean.
+
+The lesson is not that the sweep was useless. It is that **a check which only
+asks "did this load without complaining" cannot see a wrong colour**, and that
+a comparison performed by a person reading two lists is the one comparison a
+near-miss survives. Both gaps now have scripts.

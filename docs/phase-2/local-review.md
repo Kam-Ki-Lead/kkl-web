@@ -177,17 +177,43 @@ nothing happened, and that is correct.
 Neither route approves a document, authorises an account, starts a subscription
 or moves money.
 
+## Resetting the Admin console
+
+The Admin console needs no state switches — its queues are reached by acting on
+them — but it does need a reset, because staff decisions are one-way: an
+approved application leaves the queue.
+
+```
+/admin/review-state?reset=1     restore every seed value, across all three consoles
+/admin/review-state&to=/admin   where to go afterwards
+/admin/review-state             prints the list
+```
+
+**The reset is the whole platform, not just the Admin store.** A verification
+decision writes into the Seller or Builder console, so resetting Admin alone
+would leave those two carrying the last pass's decisions while this console
+showed a fresh queue. The Seller and Builder resets do the same in the other
+direction.
+
+Nothing here authenticates anybody, because there is nobody to authenticate.
+
 ## Verifying the flows
 
 ```bash
 export PLAYWRIGHT=/path/to/playwright/index.mjs
 export BASE_URL=http://127.0.0.1:3811
 
-node scripts/verify-route-sweep.mjs      # 74 routes x 2 widths
+node scripts/verify-route-sweep.mjs      # 112 routes x 2 widths
 node scripts/verify-enquiry-flow.mjs     # 17 behaviour + 3 limitations
 node scripts/verify-seller-flow.mjs      # 26 behaviour + 2 limitations
-node scripts/verify-builder-flow.mjs     # 28 behaviour + 2 limitations
-node scripts/verify-no-javascript.mjs    # 36 forms
+node scripts/verify-builder-flow.mjs     # 43 behaviour + 3 limitations
+node scripts/verify-admin-flow.mjs       # 36 behaviour + 3 limitations
+node scripts/verify-no-javascript.mjs    # 50 forms
+node scripts/verify-visual-baseline.mjs  # 22 measured values
+```
+
+```bash
+node scripts/verify-design-tokens.mjs ../kkl-design   # no browser needed
 ```
 
 ```bash
@@ -214,11 +240,53 @@ alternatives with a mask-containment check, the six-section editor and its
 publish blockers, subscription and verification gating, the separation of
 Builder and Seller records, and Builder ledger reconciliation.
 
-The **no-JavaScript** harness drives 36 form submissions across both consoles
-with scripting disabled.
+The **Admin** harness covers the reason gate on every decision, the KYC
+checklist gate, and the cross-role joins in both directions — a verification
+decision reaching the Seller console, a suspension *not* rewriting verification,
+a credit adjustment landing in the account's own ledger, a reply reaching the
+right thread and not the other one, and an internal note reaching neither. Most
+of it is negative: a staff console's interesting failures are things that must
+not happen.
+
+The **no-JavaScript** harness drives 50 form submissions across all three
+consoles with scripting disabled.
+
+**`verify-design-tokens.mjs` is the only check that compares this repository to
+the design** rather than to itself, and the only one that needs no browser and
+no server. Point it at a checkout of kkl-design. It found three wrong colour
+tokens and nine wrong component literals that a human comparison had passed.
+
+**`verify-visual-baseline.mjs` measures computed styles against the values the
+baseline declares.** It is not a screenshot comparison — the approved
+prototypes cannot be rendered here, because they boot React from a CDN the
+sandbox blocks — and it says so in its own output. It establishes that the
+values are right; it establishes nothing about layout.
 
 Run the guard script last, or in its own shell: it starts and stops its own
 servers and will take down one you started on the same port.
+
+## What the Admin console is not
+
+It is the one surface in this build most likely to be read as authoritative,
+because it looks like the inside of the system. Four things it is not:
+
+1. **Nobody is signed in.** `/admin/login` collects an address and a password
+   and authenticates no one; its fields are disabled and the screen says so.
+   Anything that reaches `/admin` gets the entire console.
+2. **There are no staff roles.** Nothing is separated by permission. Who may
+   approve a document, adjust a balance or read a transcript is kkl-backend's
+   to decide and enforce.
+3. **No money moves.** A credit adjustment posts an entry in an in-memory
+   ledger. A refund decision is recorded and moves nothing at all, because the
+   policy and the destination are both undecided (D-06).
+4. **The operational screens read fixtures.** There is no intake pipeline, no
+   qualification caller, no WhatsApp journey and no notification sender.
+
+What *is* connected: decisions on the two accounts whose consoles exist here —
+verification, suspension, credit adjustments, support replies — reach those
+consoles through the sample service layer. That demonstrates the join. It
+demonstrates nothing about whether a real account could be stopped from doing
+anything.
 
 Behaviour checks and **known limitations are counted separately**. Reproducing
 an OTP bypass or shared-account state is not a control passing — it is a control

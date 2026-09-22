@@ -2,6 +2,26 @@
 
 Record of the design approval authorising Phase 2, and of the baseline actually used.
 
+## 0. The prototypes cannot be rendered in this environment
+
+First, because it changes how every claim below should be read.
+
+The `.dc.html` files boot React from `unpkg.com` and load fonts from Google
+Fonts. Both are refused by this sandbox's proxy
+(`ERR_TUNNEL_CONNECTION_FAILED`, `ERR_CERT_AUTHORITY_INVALID`), so a prototype
+opened here renders as unexpanded `{{ template }}` placeholders rather than as
+a screen.
+
+**Screenshot comparison against the Seller, Builder and Admin prototypes was
+therefore not possible.** What was done instead — reading the values the
+baseline declares in its own source and measuring them against the
+implementation — is recorded in `verification.md`, along with what that does
+and does not establish. Three colour tokens and nine component literals were
+wrong, and a comparison by eye had passed them.
+
+The design source itself is fully readable, which is why the measurement works
+at all: every colour, size and weight is an inline style in the file.
+
 ## 1. Approval of record
 
 | Field | Value |
@@ -73,9 +93,18 @@ Seller, Builder and Admin console prototypes.
 
 ## 4. Values taken from the baseline
 
-C-01 colour tokens and the C-02 type scale are transcribed exactly into `src/app/globals.css`.
-Logo geometry and the header, hero and footer values were measured from the rendered DOM rather
-than estimated from screenshots.
+C-01 colour tokens and the C-02 type scale are transcribed into
+`src/app/globals.css`. Logo geometry and the header, hero and footer values
+were measured from the rendered DOM rather than estimated from screenshots.
+
+**An earlier version of this section said "transcribed exactly". It was not
+true.** Three of the chip surfaces held values that appear nowhere in the
+approved design — near-misses of the real ones, which is precisely the
+difference a person comparing two lists of hex codes does not see. Nine more
+near-misses were written directly into components. All twelve are fixed, and
+`scripts/verify-design-tokens.mjs` now compares every token and every hex
+literal in `src/` against the design's own source, so the claim is mechanical
+rather than a recollection. The table below is the corrected set.
 
 | Token | Value | Role (C-01) |
 |---|---|---|
@@ -91,6 +120,15 @@ than estimated from screenshots.
 | Success | `#0E6B45` | Approved, delivered, consent given |
 | Warning | `#8A4A08` | Pending, ageing, unresolved rules |
 | Danger | `#B3261E` | Rejected, failed, destructive |
+| Neutral chip | `#EEF2FD` / `#1B3BB3` | Listed, informational |
+| Success chip | `#E3F3EA` / `#0E6B45` | Approved, delivered, live |
+| Warning chip | `#FFF4E2` / `#8A4A08` | Pending, ageing, needs a decision |
+| Danger chip | `#FDECEA` / `#B3261E` | Rejected, failed, suspended |
+| Muted chip | `#F0F2F9` / `#5A6480` | Closed, not submitted, unpublished |
+| Warning panel | `#FFF7E8` on `#F3DFB4` | Unresolved rules, sample disclosures |
+| Success panel | border `#BFE0CE` | Recorded, confirmed |
+| Danger panel | border `#F3C4BF` | Blockers, refusals |
+| Control border | `#C6CCE0` | Inputs and secondary buttons |
 
 Type: Archivo (headings, numbers), Public Sans (body), IBM Plex Mono (references, masked values),
 eight steps. Focus ring 3px saffron at 2px offset on every interactive element. Minimum target
