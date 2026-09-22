@@ -1,3 +1,33 @@
+import type { StaffRef } from "@/lib/domain/identity";
+import type {
+  AdminAccount,
+  AdminActionResult,
+  AdminLead,
+  AdminLedgerRow,
+  AdminOrder,
+  AdminSubscription,
+  AdminThread,
+  AdminTicket,
+  AdminTicketFilter,
+  AdminWallet,
+  AuditCategory,
+  AuditEntry,
+  ConsentBasis,
+  DashboardAlert,
+  Integration,
+  IntakeRejection,
+  IntakeRun,
+  JobFailure,
+  KycApplication,
+  ModeratedListing,
+  NotificationRecord,
+  QueueTile,
+  RefundRequest,
+  SuppressionEntry,
+  VoiceCall,
+  WhatsAppConversation,
+  WhatsAppStep,
+} from "@/lib/domain/admin";
 import type {
   BillingDetails,
   BuyerEnquiry,
@@ -440,6 +470,163 @@ export type Services = {
     readonly credits: CreditService;
     readonly support: SupportService;
   };
+  /**
+   * The staff console (A-01 to A-31).
+   *
+   * One service rather than a tree, because Admin is one role looking at every
+   * other role's records — splitting it by area would only mirror the
+   * navigation, and the joins run across those areas anyway.
+   */
+  readonly admin: AdminService;
   /** True when these are fixtures. Screens use it to label simulated actions. */
   readonly isSample: boolean;
 };
+
+// ------------------------------------------------------------------- admin --
+
+/**
+ * The staff console (A-01 to A-31).
+ *
+ * Every method that changes something takes the **actor** and the **subject**
+ * explicitly. That is the shape the brief asks for and it is worth saying what
+ * it does and does not buy:
+ *
+ * - It makes the account a service operates on a parameter rather than an
+ *   ambient assumption, so a call site names whose records are about to change.
+ * - It does **not** authorize anything. A `StaffRef` is a value, not a proven
+ *   claim. A real implementation derives the actor from an authenticated
+ *   session on the server and checks permissions on every call; it must never
+ *   accept one from a request body, which is exactly what this signature would
+ *   otherwise invite. See `src/lib/domain/identity.ts`.
+ *
+ * Mutations return a result rather than throwing, because every one of them can
+ * fail for a reason the person can fix — usually that they did not say why.
+ */
+export interface AdminService {
+  // A-02
+  dashboard(): Promise<{
+    readonly queues: readonly QueueTile[];
+    readonly volumes: readonly { label: string; value: string }[];
+    readonly alerts: readonly DashboardAlert[];
+  }>;
+
+  // A-03, A-04
+  listAccounts(): Promise<readonly AdminAccount[]>;
+  getAccount(accountId: string): Promise<AdminAccount | null>;
+  setSuspension(input: {
+    actor: StaffRef;
+    accountId: string;
+    suspended: boolean;
+    reason: string;
+    reasonCategory?: string;
+  }): Promise<AdminActionResult>;
+
+  // A-05, A-06, A-07
+  listApplications(filter?: "pending" | "resubmitted" | "ageing"): Promise<readonly KycApplication[]>;
+  getApplication(id: string): Promise<KycApplication | null>;
+  setDocumentVerdict(input: {
+    applicationId: string;
+    documentKey: string;
+    verdict: "ok" | "problem";
+  }): Promise<void>;
+  toggleCheck(input: { applicationId: string; checkKey: string }): Promise<void>;
+  decideApplication(input: {
+    actor: StaffRef;
+    applicationId: string;
+    decision: "approved" | "rejected" | "resubmit";
+    reason: string;
+  }): Promise<AdminActionResult>;
+
+  // A-08, A-09
+  listListings(filter?: "reported" | "published" | "unpublished"): Promise<readonly ModeratedListing[]>;
+  getListing(id: string): Promise<ModeratedListing | null>;
+  moderateListing(input: {
+    actor: StaffRef;
+    listingId: string;
+    action: "unpublish" | "dismiss_report";
+    reason: string;
+  }): Promise<AdminActionResult>;
+
+  // A-10 to A-14
+  intake(): Promise<{
+    readonly sources: readonly { value: number; label: string; note: string }[];
+    readonly runs: readonly IntakeRun[];
+  }>;
+  getIntakeRun(id: string): Promise<{
+    readonly run: IntakeRun;
+    readonly rejections: readonly IntakeRejection[];
+  } | null>;
+  listLeads(state?: AdminLead["state"]): Promise<readonly AdminLead[]>;
+  getLead(id: string): Promise<AdminLead | null>;
+  priceBands(): Promise<readonly { band: string; priceInr: number; saleInr: number }[]>;
+
+  // A-16 to A-21
+  listOrders(filter?: "delivered" | "failed"): Promise<readonly AdminOrder[]>;
+  getOrder(id: string): Promise<AdminOrder | null>;
+  listWallets(): Promise<readonly AdminWallet[]>;
+  walletLedger(accountId: string): Promise<readonly AdminLedgerRow[]>;
+  adjustCredits(input: {
+    actor: StaffRef;
+    accountId: string;
+    direction: "credit" | "debit";
+    amountInr: number;
+    reason: string;
+  }): Promise<AdminActionResult>;
+  listRefunds(): Promise<readonly RefundRequest[]>;
+  decideRefund(input: {
+    actor: StaffRef;
+    refundId: string;
+    decision: "approved" | "declined";
+    reason: string;
+  }): Promise<AdminActionResult>;
+  listSubscriptions(filter?: AdminSubscription["state"]): Promise<readonly AdminSubscription[]>;
+
+  // A-22, A-23
+  listTickets(filter?: AdminTicketFilter): Promise<readonly AdminTicket[]>;
+  getThread(reference: string): Promise<AdminThread | null>;
+  replyToTicket(input: {
+    actor: StaffRef;
+    reference: string;
+    body: string;
+    internal: boolean;
+  }): Promise<AdminActionResult>;
+  resolveTicket(input: {
+    actor: StaffRef;
+    reference: string;
+    reason: string;
+  }): Promise<AdminActionResult>;
+
+  // A-24 to A-28
+  voice(): Promise<{
+    readonly stats: readonly { value: number; label: string; note: string }[];
+    readonly calls: readonly VoiceCall[];
+  }>;
+  getCall(id: string): Promise<VoiceCall | null>;
+  whatsapp(): Promise<{
+    readonly funnel: readonly WhatsAppStep[];
+    readonly conversations: readonly WhatsAppConversation[];
+  }>;
+  /**
+   * A-28. Read-only, and there is no writing counterpart in this interface.
+   *
+   * The approved design makes consent and suppression a record staff consult,
+   * not one they edit: a suppression is created by the person who refused, and
+   * removing one is not a staff decision. There is deliberately no
+   * `removeSuppression` here for a screen to reach for later.
+   */
+  consent(): Promise<{
+    readonly suppression: readonly SuppressionEntry[];
+    readonly effects: readonly string[];
+    readonly bases: readonly ConsentBasis[];
+  }>;
+  listNotifications(filter?: NotificationRecord["state"]): Promise<readonly NotificationRecord[]>;
+
+  // A-29 to A-31
+  funnelReport(): Promise<readonly { label: string; value: number; percent: number }[]>;
+  listAudit(category?: AuditCategory): Promise<readonly AuditEntry[]>;
+  getAudit(id: string): Promise<AuditEntry | null>;
+  system(): Promise<{
+    readonly integrations: readonly Integration[];
+    readonly failures: readonly JobFailure[];
+  }>;
+}

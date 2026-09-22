@@ -15,9 +15,11 @@ import {
   type Paged,
   type PropertyService,
   type Services,
+  AdminService,
 } from "@/lib/services/contracts";
 import * as accountStore from "./account-store";
 import * as enquiryStore from "./enquiry-store";
+import * as adminStore from "./admin-store";
 import * as sellerStore from "./seller-store";
 import * as builderStore from "./builder-store";
 import {
@@ -358,12 +360,164 @@ const supportService: SupportService = {
  * the one path the pages already use — @/lib/services — so there is a single
  * instance by construction.
  */
+/**
+ * The staff console, over the Admin store.
+ *
+ * Every method is a thin pass-through. The rules that matter — a reason on
+ * every decision, the checklist before an approval, which console a reply is
+ * delivered to — live in the store, not here, so a second caller cannot skip
+ * them by going round this object.
+ */
+const adminService: AdminService = {
+  async dashboard() {
+    return {
+      queues: adminStore.queueTiles(),
+      volumes: adminStore.dashboardVolumes(),
+      alerts: adminStore.dashboardAlerts(),
+    };
+  },
+
+  async listAccounts() {
+    return adminStore.listAccounts();
+  },
+  async getAccount(accountId) {
+    return adminStore.getAccount(accountId);
+  },
+  async setSuspension(input) {
+    return adminStore.setAccountSuspension(input);
+  },
+
+  async listApplications(filter) {
+    return adminStore.listApplications(filter);
+  },
+  async getApplication(id) {
+    return adminStore.getApplication(id);
+  },
+  async setDocumentVerdict(input) {
+    adminStore.setDocumentVerdict(input);
+  },
+  async toggleCheck(input) {
+    adminStore.toggleCheck(input);
+  },
+  async decideApplication(input) {
+    return adminStore.decideApplication(input);
+  },
+
+  async listListings(filter) {
+    return adminStore.listModeratedListings(filter);
+  },
+  async getListing(id) {
+    return adminStore.getModeratedListing(id);
+  },
+  async moderateListing(input) {
+    return adminStore.moderateListing(input);
+  },
+
+  async intake() {
+    return { sources: adminStore.intakeSources(), runs: adminStore.intakeRuns() };
+  },
+  async getIntakeRun(id) {
+    const run = adminStore.intakeRun(id);
+    return run ? { run, rejections: adminStore.intakeRejections() } : null;
+  },
+  async listLeads(state) {
+    return adminStore.listLeads(state);
+  },
+  async getLead(id) {
+    return adminStore.getLead(id);
+  },
+  async priceBands() {
+    return adminStore.priceBands();
+  },
+
+  async listOrders(filter) {
+    return adminStore.listOrders(filter);
+  },
+  async getOrder(id) {
+    return adminStore.getOrder(id);
+  },
+  async listWallets() {
+    return adminStore.listWallets();
+  },
+  async walletLedger(accountId) {
+    return adminStore.walletLedger(accountId);
+  },
+  async adjustCredits(input) {
+    return adminStore.adjustCredits(input);
+  },
+  async listRefunds() {
+    return adminStore.listRefunds();
+  },
+  async decideRefund(input) {
+    return adminStore.decideRefund(input);
+  },
+  async listSubscriptions(filter) {
+    return adminStore.listSubscriptions(filter);
+  },
+
+  async listTickets(filter) {
+    return adminStore.listTickets(filter);
+  },
+  async getThread(reference) {
+    return adminStore.getThread(reference);
+  },
+  async replyToTicket(input) {
+    return adminStore.replyToTicket(input);
+  },
+  async resolveTicket(input) {
+    return adminStore.resolveTicket(input);
+  },
+
+  async voice() {
+    return { stats: adminStore.voiceStats(), calls: adminStore.listCalls() };
+  },
+  async getCall(id) {
+    return adminStore.getCall(id);
+  },
+  async whatsapp() {
+    return {
+      funnel: adminStore.whatsappFunnel(),
+      conversations: adminStore.whatsappConversations(),
+    };
+  },
+  async consent() {
+    return {
+      suppression: adminStore.suppressionList(),
+      effects: adminStore.suppressionEffects(),
+      bases: adminStore.consentBases(),
+    };
+  },
+  async listNotifications(filter) {
+    return adminStore.listNotifications(filter);
+  },
+
+  async funnelReport() {
+    return adminStore.funnel();
+  },
+  async listAudit(category) {
+    return adminStore.listAudit(category);
+  },
+  async getAudit(id) {
+    return adminStore.getAudit(id);
+  },
+  async system() {
+    return { integrations: adminStore.integrations(), failures: adminStore.jobFailures() };
+  },
+};
+
 export const sampleReviewControls = {
   setKycStatus: sellerStore.setKycStatusForReview,
   setAccountStatus: sellerStore.setAccountStatusForReview,
   setPaymentOutcome: sellerStore.setPaymentOutcomeForReview,
   setBalance: sellerStore.setBalanceForReview,
-  reset: sellerStore.resetForReview,
+  reset: () => {
+    sellerStore.resetForReview();
+    // The Admin console reads the Seller's verification, status and wallet, and
+    // writes decisions back into them. Resetting one without the other would
+    // leave the two views disagreeing, which is exactly what this console is
+    // supposed to make impossible.
+    adminStore.resetForReview();
+  },
   /** The ledger invariant, so a test can assert it instead of trusting a comment. */
   reconcile: sellerStore.reconcile,
   builder: {
@@ -384,6 +538,7 @@ export const sampleReviewControls = {
       // a test asserting "this enquiry was not here before" would fail on its
       // own second run.
       enquiryStore.resetForReview();
+      adminStore.resetForReview();
     },
   },
 } as const;
@@ -525,5 +680,6 @@ export const sampleServices: Services = {
     credits: builderCredits,
     support: builderSupport,
   },
+  admin: adminService,
   isSample: true,
 };

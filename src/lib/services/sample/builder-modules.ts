@@ -539,7 +539,47 @@ function withoutMessages(thread: StoredThread): SupportTicket {
   };
 }
 
-export const builderSupport: SupportService = {
+/**
+ * The Builder's support module, plus the two synchronous accessors the Admin
+ * console needs.
+ *
+ * `SupportService` is async because a real one will be. The Admin store reads
+ * the same in-process records and has no request to await, so it reads them
+ * through `snapshot` and `snapshotThread` rather than pretending. Keeping those
+ * on this object rather than exporting them loose is deliberate: whoever reads
+ * a Builder ticket goes through the Builder's own module, which is what keeps
+ * "the two queues are separate" true rather than hopeful.
+ */
+export const builderSupport: SupportService & {
+  snapshot(): readonly StoredThread[];
+  snapshotThread(reference: string): StoredThread | null;
+  postStaffReply(input: {
+    reference: string;
+    body: string;
+    staffLabel: string;
+  }): StoredThread | null;
+  resolveThread(reference: string): StoredThread | null;
+} = {
+  snapshot() {
+    return m().threads;
+  },
+
+  snapshotThread(reference) {
+    return m().threads.find((t) => t.reference === reference) ?? null;
+  },
+
+  postStaffReply(input) {
+    return postBuilderStaffReply(input);
+  },
+
+  resolveThread(reference) {
+    const thread = m().threads.find((t) => t.reference === reference);
+    if (!thread) return null;
+    thread.status = "resolved";
+    thread.updatedAt = new Date().toISOString();
+    return thread;
+  },
+
   async listTickets() {
     return m().threads.map(withoutMessages);
   },
@@ -598,6 +638,45 @@ export const builderSupport: SupportService = {
     return thread;
   },
 };
+
+/**
+ * A staff reply into the Builder's own thread (A-23 → B-23).
+ *
+ * The Builder mirror of `postStaffReply` in seller-store, and separate from it
+ * for the reason the two consoles are separate everywhere else: a reply meant
+ * for a Builder must not be appendable to a Seller's thread. The Admin store
+ * picks which of these two to call from the ticket's own account, not from
+ * anything the form said.
+ */
+export function postBuilderStaffReply(input: {
+  reference: string;
+  body: string;
+  staffLabel: string;
+}): StoredThread | null {
+  const thread = m().threads.find((t) => t.reference === input.reference);
+  if (!thread) return null;
+  const now = new Date().toISOString();
+  thread.messages.push({
+    id: `BM-${(m().messageSequence += 1)}`,
+    author: "support",
+    authorLabel: input.staffLabel,
+    body: input.body,
+    sentAt: now,
+  });
+  thread.updatedAt = now;
+  thread.status = "replied";
+  return thread;
+}
+
+/**
+ * The Builder's purchased leads, read synchronously for the Admin console.
+ *
+ * Same reasoning as `builderSupport.snapshot`: A-16 joins both consoles'
+ * purchases into one order list and has no request to await.
+ */
+export function builderPurchasedLeads(): readonly PurchasedLead[] {
+  return [...m().soldLeads.values()];
+}
 
 export function resetBuilderModules(): void {
   Object.assign(m(), freshModules());

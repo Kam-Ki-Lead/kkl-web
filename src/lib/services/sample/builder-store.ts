@@ -385,6 +385,8 @@ function freshState() {
     listingSequence: 0,
     subscriptionSequence: 40_118,
     subscriptionOutcome: "active" as "active" | "pending" | "failed",
+    /** Staff credit adjustments (A-19). Reset with everything else. */
+    adjustmentSequence: 0,
   };
 }
 
@@ -934,6 +936,27 @@ export function postEntry(input: {
   };
   state().ledger.push(entry);
   return entry;
+}
+
+/**
+ * A staff credit adjustment (A-19) on the Builder's wallet.
+ *
+ * Same shape and same reasoning as the Seller's: an action by a named person
+ * for a stated reason, posted as an entry so the Builder's own billing history
+ * carries it, and moving no money because there is none to move.
+ */
+export function postStaffAdjustment(input: {
+  deltaCredits: number;
+  reason: string;
+  staffLabel: string;
+}): LedgerEntry {
+  state().adjustmentSequence += 1;
+  return postEntry({
+    type: "adjustment",
+    description: `Adjustment by ${input.staffLabel} — ${input.reason}`,
+    deltaCredits: input.deltaCredits,
+    reference: `LG-${state().adjustmentSequence + 55_600}`,
+  });
 }
 
 // ------------------------------------------------------- review affordances --

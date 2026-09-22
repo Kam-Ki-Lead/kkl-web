@@ -821,6 +821,30 @@ export function wallet(): WalletSummary {
  * Posts an adjustment entry rather than assigning a balance, so even the review
  * switch cannot break the invariant it is there to help test.
  */
+/**
+ * A staff credit adjustment (A-19), posted as a traceable ledger entry.
+ *
+ * Exported rather than folded into `setBalanceForReview`, because the two are
+ * not the same thing and should not look the same in a ledger. The review
+ * switch is scaffolding; this is an action a named person took for a stated
+ * reason, and the reason travels with the entry so the Seller's own S-17
+ * shows it too.
+ *
+ * It still moves no money. The balance is a number in this process.
+ */
+export function postStaffAdjustment(input: {
+  deltaCredits: number;
+  reason: string;
+  staffLabel: string;
+}): LedgerEntry {
+  return postLedgerEntry({
+    type: "adjustment",
+    description: `Adjustment by ${input.staffLabel} — ${input.reason}`,
+    deltaCredits: input.deltaCredits,
+    reference: `LG-${(state().adjustmentSequence += 1) + 55_400}`,
+  });
+}
+
 export function setBalanceForReview(credits: number): void {
   const delta = credits - derivedBalance();
   if (delta === 0) return;
@@ -1155,6 +1179,38 @@ export function createTicket(input: {
   };
   state().threads.unshift(thread);
   return withoutMessages(thread);
+}
+
+/**
+ * A staff reply, landing in the Seller's own thread (A-23 → S-24).
+ *
+ * Separate from `replyToTicket`, which is the Seller replying. The author is
+ * what makes the two different on screen, and getting it wrong would show a
+ * Seller their own words in the support voice.
+ *
+ * **Only public replies reach here.** An internal note is never passed to this
+ * function — it stays in the Admin store, which no Seller-facing service reads.
+ * That is the containment, and it is structural rather than a filter: there is
+ * no field on a Seller `TicketMessage` that could carry one.
+ */
+export function postStaffReply(input: {
+  reference: string;
+  body: string;
+  staffLabel: string;
+}): SupportThread | null {
+  const thread = state().threads.find((t) => t.reference === input.reference);
+  if (!thread) return null;
+  const now = new Date().toISOString();
+  thread.messages.push({
+    id: nextMessageId(),
+    author: "support",
+    authorLabel: input.staffLabel,
+    body: input.body,
+    sentAt: now,
+  });
+  thread.updatedAt = now;
+  thread.status = "replied";
+  return thread;
 }
 
 export function replyToTicket(input: {

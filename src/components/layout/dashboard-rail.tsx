@@ -35,6 +35,15 @@ export type RailItem = {
    * "exact" is for an index route, whose href is a prefix of every sibling's.
    */
   readonly match?: "prefix" | "exact";
+  /**
+   * The rail heading this item sits under (A-02's grouped navigation).
+   *
+   * The Admin rail has nine groups because it has twenty destinations; the
+   * Seller's and Builder's have none, and items without one render flat
+   * exactly as before. Consecutive items sharing a group print the heading
+   * once.
+   */
+  readonly group?: string;
 };
 
 export type RailFooter = {
@@ -78,9 +87,14 @@ export function DashboardRail({
         <p className="t-eyebrow px-[18px] pb-[8px] text-rail-seller-label">{eyebrow}</p>
       ) : null}
 
-      <ul className="flex flex-col gap-[2px] px-[14px]">
-        {items.map((item) => (
+      <ul className="flex flex-col gap-[2px] overflow-y-auto px-[14px] pb-[10px]">
+        {items.map((item, index) => (
           <li key={item.href}>
+            {item.group && item.group !== items[index - 1]?.group ? (
+              <p className="t-eyebrow px-[17px] pb-[6px] pt-[14px] text-rail-seller-label">
+                {item.group}
+              </p>
+            ) : null}
             <RailLink item={item} active={isActive(item, pathname)} />
           </li>
         ))}
@@ -198,8 +212,13 @@ export function RailDrawer({
               <p className="t-eyebrow pb-[8px] text-rail-seller-label">{eyebrow}</p>
             ) : null}
             <ul className="flex flex-col gap-[2px]">
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <li key={item.href}>
+                  {item.group && item.group !== items[index - 1]?.group ? (
+                    <p className="t-eyebrow px-[17px] pb-[6px] pt-[14px] text-rail-seller-label">
+                      {item.group}
+                    </p>
+                  ) : null}
                   <RailLink item={item} active={isActive(item, pathname)} />
                 </li>
               ))}
