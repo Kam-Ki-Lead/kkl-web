@@ -8,7 +8,7 @@
  * has no action at all before then. That defect shipped once in the Buyer OTP
  * form and was found by a check like this one.
  *
- * Run with a production build serving on BASE_URL:
+ * Covers both consoles. Run with a production build serving on BASE_URL:
  *   PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-no-javascript.mjs
  */
 const { chromium } = await import(process.env.PLAYWRIGHT ?? 'playwright');
@@ -25,9 +25,11 @@ const browser = await chromium.launch();
 const ctx = await browser.newContext({ javaScriptEnabled: false });
 
 async function reset() {
-  const page = await ctx.newPage();
-  await page.goto(`${BASE}/seller/review-state?reset=1`, { waitUntil: 'load' });
-  await page.close();
+  for (const path of ['/seller/review-state?reset=1', '/builder/review-state?reset=1']) {
+    const page = await ctx.newPage();
+    await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
+    await page.close();
+  }
 }
 
 /** Submits a form by clicking a named button and waiting for the navigation. */
@@ -200,6 +202,152 @@ await submit(profile, 'Save changes');
 ok('21. S-25 saves without JavaScript',
    (await profile.textContent('body')).includes('Your details were saved'),
    'confirmation rendered from a full page post');
+
+// ============================================================ Builder console
+
+// ------------------------------------------------------ B-01 registration
+const breg = await ctx.newPage();
+await breg.goto(`${BASE}/builder/register`, { waitUntil: 'load' });
+await breg.fill('#breg-mobile', '12');
+await breg.fill('#breg-company', 'X');
+await submit(breg, 'Send OTP');
+const bregBody = await breg.textContent('body');
+ok('22. B-01 validates without JavaScript',
+   bregBody.includes('10-digit Indian mobile number') && bregBody.includes('company name'),
+   'both field errors from a full page post');
+
+await breg.fill('#breg-mobile', '9830066666');
+await breg.fill('#breg-company', 'No-JS Builders Pvt Ltd');
+await submit(breg, 'Send OTP');
+await breg.fill('#breg-code', '123456');
+await submit(breg, 'Verify and continue');
+ok('23. B-01 completes to verification without JavaScript',
+   breg.url().includes('/builder/verification'),
+   `landed on ${breg.url().replace(BASE, '')}`);
+
+// ------------------------------------------------------- B-02 verification
+await reset();
+const bver = await ctx.newPage();
+await bver.goto(`${BASE}/builder/review-state?kyc=not_submitted&to=/builder/verification`, {
+  waitUntil: 'load',
+});
+await bver.fill('#panNumber', 'NOPE');
+await submit(bver, 'Submit for verification');
+const bverBody = await bver.textContent('body');
+ok('24. B-02 validates the PAN and both documents without JavaScript',
+   bverBody.includes('five letters, four digits and a letter') &&
+     bverBody.includes('Choose a photo or scan of the company PAN') &&
+     bverBody.includes('incorporation certificate'),
+   'all three errors together');
+
+// --------------------------------------------------------- B-08 to B-12 editor
+await reset();
+const bnew = await ctx.newPage();
+await bnew.goto(`${BASE}/builder/properties/new`, { waitUntil: 'load' });
+await submit(bnew, 'New listing');
+ok('25. Creating a listing works without JavaScript',
+   /\/builder\/properties\/[^/]+\/basics$/.test(bnew.url()),
+   `landed on ${bnew.url().replace(BASE, '')}`);
+const newId = bnew.url().split('/properties/')[1].split('/')[0];
+
+await bnew.fill('#title', 'No-JS Gardens');
+await bnew.selectOption('#propertyType', 'Apartment');
+await submit(bnew, 'Save draft');
+ok('26. Saving an editor section works without JavaScript',
+   (await bnew.textContent('body')).includes('Draft saved'),
+   'the saved state renders from a full page post');
+
+await bnew.goto(`${BASE}/builder/properties/${newId}/location`, { waitUntil: 'load' });
+await bnew.selectOption('#locality', 'Rajarhat');
+await bnew.fill('#addressLine', 'Plot 3, Street 9');
+await submit(bnew, 'Next: Pricing');
+ok('27. The editor advances between sections without JavaScript',
+   bnew.url().includes('/pricing'),
+   `landed on ${bnew.url().replace(BASE, '')}`);
+
+await bnew.check('input[name="configurations"][value="2"]');
+await bnew.fill('#priceMinInr', '5500000');
+await submit(bnew, 'Save draft');
+await bnew.goto(`${BASE}/builder/properties/${newId}/media`, { waitUntil: 'load' });
+await bnew.fill('#photoCount', '1');
+await submit(bnew, 'Save draft');
+
+await bnew.goto(`${BASE}/builder/properties/${newId}/preview`, { waitUntil: 'load' });
+await submit(bnew, 'Publish listing');
+ok('28. B-13 publishes without JavaScript',
+   bnew.url().includes('/builder/properties') && bnew.url().includes('published='),
+   `landed on ${bnew.url().replace(BASE, '')}`);
+
+const portal = await ctx.newPage();
+await portal.goto(`${BASE}/search`, { waitUntil: 'load' });
+ok('29. The listing published without JavaScript reaches the portal',
+   (await portal.textContent('body')).includes('No-JS Gardens'),
+   'the join does not depend on the browser either');
+
+// ---------------------------------------------------------- B-07 actions
+const bprops = await ctx.newPage();
+await bprops.goto(`${BASE}/builder/properties`, { waitUntil: 'load' });
+await Promise.all([
+  bprops.waitForLoadState('load'),
+  bprops.locator('form:has(button:has-text("Unpublish"))').first().locator('button').click(),
+]);
+ok('30. B-07 unpublish works without JavaScript',
+   (await bprops.textContent('body')).includes('Unpublished'),
+   'each listing action is its own form');
+
+// ------------------------------------------------------------ B-17 unlock
+await reset();
+const bunlock = await ctx.newPage();
+await bunlock.goto(`${BASE}/builder/review-state?contact=unlock&to=/builder/enquiries/E-8801`, {
+  waitUntil: 'load',
+});
+await submit(bunlock, 'Unlock for');
+ok('31. B-17 unlocks a contact without JavaScript',
+   (await bunlock.textContent('body')).includes('98300 51134'),
+   'the credit deduction and the reveal both happen on a plain form post');
+
+// ------------------------------------------------------- B-03 subscription
+await reset();
+const bsub = await ctx.newPage();
+await bsub.goto(`${BASE}/builder/review-state?subscription=none&to=/builder/subscription`, {
+  waitUntil: 'load',
+});
+await submit(bsub, 'Activate a subscription');
+ok('32. B-03 starts a subscription without JavaScript',
+   bsub.url().includes('/builder/subscription/payment'),
+   `landed on ${bsub.url().replace(BASE, '')}`);
+
+// ----------------------------------------------------------- B-24 profile
+await reset();
+const bprof = await ctx.newPage();
+await bprof.goto(`${BASE}/builder/profile`, { waitUntil: 'load' });
+await bprof.fill('#companyName', '');
+await submit(bprof, 'Save changes');
+ok('33. B-24 validates without JavaScript',
+   (await bprof.textContent('body')).includes('Enter the company name'),
+   'server-side validation');
+
+await bprof.fill('#companyName', 'No-JS Builders Pvt Ltd');
+await submit(bprof, 'Save changes');
+ok('34. B-24 saves without JavaScript',
+   (await bprof.textContent('body')).includes('Your details were saved'),
+   'confirmation from a full page post');
+
+// ------------------------------------------------------------ B-23 support
+const bticket = await ctx.newPage();
+await bticket.goto(`${BASE}/builder/support/new`, { waitUntil: 'load' });
+await bticket.fill('#subject', 'Raised from the Builder console with scripting off');
+await bticket.fill('#body', 'Checking that the scope field routes this to the Builder queue.');
+await submit(bticket, 'Submit ticket');
+ok('35. B-23 creates a ticket in the Builder queue without JavaScript',
+   /\/builder\/support\/T-\d+/.test(bticket.url()),
+   `landed on ${bticket.url().replace(BASE, '')} — the scope field kept it out of the Seller queue`);
+
+const sellerQueue = await ctx.newPage();
+await sellerQueue.goto(`${BASE}/seller/support`, { waitUntil: 'load' });
+ok('36. That ticket did not land in the Seller queue',
+   !(await sellerQueue.textContent('body')).includes('scripting off'),
+   'the two queues stay separate even on the no-JavaScript path');
 
 await reset();
 await browser.close();
