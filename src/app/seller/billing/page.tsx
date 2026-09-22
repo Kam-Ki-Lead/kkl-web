@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SellerShell } from "@/components/seller/seller-shell";
-import { UsageChart } from "@/components/seller/usage-chart";
+import { UsageChart } from "@/components/console/usage-chart";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { formatCreditBalance, formatDate, formatSignedInr } from "@/lib/format";

@@ -21,9 +21,11 @@ import { Card } from "@/components/ui/card";
 export function TicketReplyForm({
   reference,
   resolved,
+  scope = "seller",
 }: {
   reference: string;
   resolved: boolean;
+  scope?: "seller" | "builder";
 }) {
   const [state, action, pending] = useActionState<ReplyFormState, FormData>(replyToTicket, {});
 
@@ -40,6 +42,7 @@ export function TicketReplyForm({
 
       <form action={action} className="flex flex-col gap-[12px]">
         <input type="hidden" name="reference" value={reference} />
+        <input type="hidden" name="scope" value={scope} />
 
         {state.error ? (
           <p
@@ -71,6 +74,7 @@ export function TicketReplyForm({
       {resolved ? null : (
         <form action={resolveTicket}>
           <input type="hidden" name="reference" value={reference} />
+          <input type="hidden" name="scope" value={scope} />
           <Button type="submit" variant="secondary">
             Mark as resolved
           </Button>

@@ -20,7 +20,14 @@ import { formatCreditBalance, formatExactInr } from "@/lib/format";
  */
 const PACKS = [1_000, 2_000, 5_000, 10_000];
 
-export function RechargeForm({ balanceCredits }: { balanceCredits: number }) {
+export function RechargeForm({
+  balanceCredits,
+  scope = "seller",
+}: {
+  balanceCredits: number;
+  /** Which wallet this credits. The two accounts have separate balances. */
+  scope?: "seller" | "builder";
+}) {
   const [state, action, pending] = useActionState<RechargeFormState, FormData>(startRecharge, {});
   const [amount, setAmount] = useState<string>(state.amount ?? "2000");
 
@@ -29,6 +36,7 @@ export function RechargeForm({ balanceCredits }: { balanceCredits: number }) {
 
   return (
     <form action={action} className="mt-[18px] flex flex-col gap-[16px]">
+      <input type="hidden" name="scope" value={scope} />
       {state.error ? (
         <p
           role="alert"

@@ -119,6 +119,39 @@ export function findByReceipt(token: string): BuyerEnquiry | null {
   return reference === undefined ? null : (state.byReference.get(reference) ?? null);
 }
 
+/**
+ * Enquiries submitted in this process, with the details a Builder's console
+ * needs — the buyer's name and number.
+ *
+ * Deliberately a separate export from `submittedEnquiries`, which returns the
+ * Buyer's own view. This one carries contact details, so it is only reachable
+ * from code that has a reason for them, and the Builder service masks or
+ * reveals them according to the access alternative in force (D-05).
+ */
+export function submittedForBuilder(): readonly {
+  id: string;
+  propertyId: string;
+  propertyTitle: string;
+  kind: "enquiry" | "site_visit";
+  name: string;
+  mobile: string;
+  message: string | null;
+  createdAt: string;
+}[] {
+  return [...state.byReference.values()]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map((e) => ({
+      id: e.id,
+      propertyId: e.propertyId,
+      propertyTitle: e.propertyTitle,
+      kind: e.kind,
+      name: e.name,
+      mobile: e.mobile,
+      message: e.message,
+      createdAt: e.createdAt,
+    }));
+}
+
 /** Enquiries submitted in this process, newest first. */
 export function submittedEnquiries(): readonly BuyerEnquiry[] {
   return [...state.byReference.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SellerShell } from "@/components/seller/seller-shell";
-import { StatTiles } from "@/components/seller/stat-tiles";
-import { LeadRow } from "@/components/seller/lead-card";
+import { StatTiles } from "@/components/console/stat-tiles";
+import { LeadRow } from "@/components/console/lead-card";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { DECISIONS } from "@/lib/config/business-rules";

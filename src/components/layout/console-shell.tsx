@@ -17,6 +17,7 @@ export function ConsoleShell({
   items,
   footer,
   navLabel,
+  navEyebrow,
   title,
   subtitle,
   aside,
@@ -25,6 +26,8 @@ export function ConsoleShell({
   items: readonly RailItem[];
   footer?: RailFooter | null;
   navLabel: string;
+  /** A small label above the rail's items, e.g. "Builder" in B-06. */
+  navEyebrow?: string;
   title: string;
   subtitle: string;
   /** Right-hand header content — balance chip, avatar. */
@@ -33,13 +36,13 @@ export function ConsoleShell({
 }) {
   return (
     <div className="flex min-h-screen bg-surface">
-      <DashboardRail items={items} footer={footer} ariaLabel={navLabel} />
+      <DashboardRail items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* `relative` anchors the mobile drawer, which is absolutely positioned
             against this bar rather than the viewport. */}
         <header className="relative flex items-center gap-[14px] border-b border-line bg-white px-[28px] py-[16px] max-[1060px]:px-[16px]">
-          <RailDrawer items={items} footer={footer} ariaLabel={navLabel} />
+          <RailDrawer items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} />
           <div className="min-w-0 flex-1">
             <h1 className="t-heading truncate text-ink">{title}</h1>
             <p className="t-caption truncate text-muted">{subtitle}</p>

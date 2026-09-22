@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { SellerShell } from "@/components/seller/seller-shell";
-import { PurchaseConfirmForm } from "@/components/seller/purchase-confirm-form";
+import { PurchaseConfirmForm } from "@/components/console/purchase-confirm-form";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { AccessPanel } from "@/components/ui/states";

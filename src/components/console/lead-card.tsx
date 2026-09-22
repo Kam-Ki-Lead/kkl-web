@@ -15,7 +15,14 @@ import { formatAreaPath, formatExactInr } from "@/lib/format";
  * placeholder string the server composed, and how much that string may reveal is
  * kkl-backend's disclosure policy, not this component's.
  */
-export function LeadCard({ lead }: { lead: MarketplaceLead }) {
+export function LeadCard({
+  lead,
+  basePath = "/seller/leads",
+}: {
+  lead: MarketplaceLead;
+  /** Where this card's links point — the Seller and Builder marketplaces differ. */
+  basePath?: string;
+}) {
   const onSale = lead.status === "on_sale";
 
   return (
@@ -53,10 +60,10 @@ export function LeadCard({ lead }: { lead: MarketplaceLead }) {
       </p>
 
       <div className="mt-[14px] grid grid-cols-2 gap-[10px] max-[480px]:grid-cols-1">
-        <ButtonLink href={`/seller/leads/${lead.id}`} variant="secondary">
+        <ButtonLink href={`${basePath}/${lead.id}`} variant="secondary">
           View lead
         </ButtonLink>
-        <ButtonLink href={`/seller/leads/${lead.id}/buy`}>
+        <ButtonLink href={`${basePath}/${lead.id}/buy`}>
           Buy for {formatExactInr(lead.priceCredits)}
         </ButtonLink>
       </div>
@@ -74,10 +81,16 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 
 /** The compact row used on the dashboard's "new leads" list. */
-export function LeadRow({ lead }: { lead: MarketplaceLead }) {
+export function LeadRow({
+  lead,
+  basePath = "/seller/leads",
+}: {
+  lead: MarketplaceLead;
+  basePath?: string;
+}) {
   return (
     <Link
-      href={`/seller/leads/${lead.id}`}
+      href={`${basePath}/${lead.id}`}
       className="flex items-center justify-between gap-[12px] rounded-[8px] bg-tint px-[14px] py-[12px] transition-[background-color] duration-150 hover:bg-[#EEF2FD]"
     >
       <span className="min-w-0">

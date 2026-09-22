@@ -6,6 +6,9 @@ import {
   type LeadMarketService,
   type NotificationService,
   type ProfileService,
+  type BuilderAccountService,
+  type BuilderEnquiryService,
+  type ListingService,
   type SellerAccountService,
   type SupportService,
   type HomepageContent,
@@ -16,11 +19,20 @@ import {
 import * as accountStore from "./account-store";
 import * as enquiryStore from "./enquiry-store";
 import * as sellerStore from "./seller-store";
+import * as builderStore from "./builder-store";
+import {
+  builderCredits,
+  builderLeadMarket,
+  builderSupport,
+  reconcileBuilder,
+  resetBuilderModules,
+  setBuilderBalanceForReview,
+  setBuilderPaymentOutcomeForReview,
+} from "./builder-modules";
+import { buyerEnquiriesForBuilder, livePortalProperties } from "./portal-bridge";
 import {
   SAMPLE_ENQUIRIES,
   SAMPLE_LOCALITIES,
-  SAMPLE_PROPERTIES,
-  SAMPLE_TOTAL_LISTINGS,
   sampleDetailFor,
 } from "./fixtures";
 
@@ -76,9 +88,21 @@ function sorted(items: readonly PropertySummary[], sort: string): readonly Prope
   }
 }
 
+/**
+ * What the portal currently shows.
+ *
+ * Not `SAMPLE_PROPERTIES` directly: three of those belong to the sample Builder,
+ * and unpublishing one in the Builder console has to remove it from the portal.
+ * See portal-bridge.ts — this is the listing-to-portal continuity the approved
+ * prototype leaves disconnected.
+ */
+function live() {
+  return livePortalProperties();
+}
+
 const propertyService: PropertyService = {
   async getHomepage(): Promise<HomepageContent> {
-    const bySlug = (slug: string) => SAMPLE_PROPERTIES.find((p) => p.slug === slug) ?? null;
+    const bySlug = (slug: string) => live().find((p) => p.slug === slug) ?? null;
     const hero = bySlug("ivy-court-action-area-i");
 
     return {
@@ -92,12 +116,12 @@ const propertyService: PropertyService = {
         .map(bySlug)
         .filter((p): p is NonNullable<typeof p> => p !== null),
       localities: SAMPLE_LOCALITIES,
-      totalPublishedListings: SAMPLE_TOTAL_LISTINGS,
+      totalPublishedListings: live().length,
     };
   },
 
   async search({ filters, sort, page }): Promise<Paged<PropertySummary>> {
-    const all = sorted(SAMPLE_PROPERTIES.filter((p) => matches(p, filters)), sort);
+    const all = sorted(live().filter((p) => matches(p, filters)), sort);
     const start = (page - 1) * PAGE_SIZE;
     return {
       items: all.slice(start, start + PAGE_SIZE),
@@ -108,7 +132,7 @@ const propertyService: PropertyService = {
   },
 
   async getBySlug(slug) {
-    const summary = SAMPLE_PROPERTIES.find((p) => p.slug === slug);
+    const summary = live().find((p) => p.slug === slug);
     if (!summary) {
       throw new ServiceError("not_found", `No published listing with slug "${slug}".`);
     }
@@ -116,7 +140,7 @@ const propertyService: PropertyService = {
   },
 
   async countMatching(filters) {
-    return SAMPLE_PROPERTIES.filter((p) => matches(p, filters)).length;
+    return live().filter((p) => matches(p, filters)).length;
   },
 
   /**
@@ -125,7 +149,7 @@ const propertyService: PropertyService = {
    * real one will be computed by kkl-backend — never in the browser.
    */
   async match(requirement) {
-    const scored = SAMPLE_PROPERTIES.filter((p) => {
+    const scored = live().filter((p) => {
       const localityOk =
         !requirement.locationId ||
         p.locationPath.some(
@@ -342,7 +366,141 @@ export const sampleReviewControls = {
   reset: sellerStore.resetForReview,
   /** The ledger invariant, so a test can assert it instead of trusting a comment. */
   reconcile: sellerStore.reconcile,
+  builder: {
+    setKycStatus: builderStore.setKycStatusForReview,
+    setAccountStatus: builderStore.setAccountStatusForReview,
+    setSubscriptionState: builderStore.setSubscriptionStateForReview,
+    setSubscriptionOutcome: builderStore.setSubscriptionOutcomeForReview,
+    setContactAccess: builderStore.setContactAccessForReview,
+    setPaymentOutcome: setBuilderPaymentOutcomeForReview,
+    setBalance: setBuilderBalanceForReview,
+    reconcile: reconcileBuilder,
+    reset: () => {
+      builderStore.resetForReview();
+      resetBuilderModules();
+    },
+  },
 } as const;
+
+/**
+ * Builder console (B-01 to B-24).
+ *
+ * The account, listings and enquiries are Builder-specific; the marketplace,
+ * credits and support are the same three interfaces the Seller uses, over the
+ * Builder's own records (builder-modules.ts).
+ */
+const builderAccountService: BuilderAccountService = {
+  async get() {
+    return builderStore.getAccount();
+  },
+  async saveCompany(input) {
+    return builderStore.saveCompany(input);
+  },
+  async submitVerification(input) {
+    return builderStore.submitVerification(input);
+  },
+  async verificationTimeline() {
+    return builderStore.verificationTimeline();
+  },
+  async startSubscription(input) {
+    return builderStore.startSubscription(input);
+  },
+  async saveAlerts(input) {
+    return builderStore.saveAlerts(input);
+  },
+};
+
+const listingService: ListingService = {
+  async list(filter) {
+    return builderStore.listSummaries(filter);
+  },
+  async get(id) {
+    return builderStore.getListing(id);
+  },
+  async create() {
+    return builderStore.createListing();
+  },
+  async saveSection(input) {
+    return builderStore.saveSection(input);
+  },
+  async sections(id) {
+    return builderStore.sections(id);
+  },
+  async publishBlockers(id) {
+    const listing = builderStore.getListing(id);
+    return listing ? builderStore.publishBlockers(listing) : [];
+  },
+  async publish(id) {
+    return builderStore.publishListing(id);
+  },
+  async unpublish(id) {
+    return builderStore.unpublishListing(id);
+  },
+  async remove(id) {
+    return builderStore.removeListing(id);
+  },
+};
+
+const builderEnquiryService: BuilderEnquiryService = {
+  async list(filter) {
+    // The Buyer enquiries are passed in rather than read inside the store, so
+    // the dependency runs one way. See portal-bridge.ts.
+    return builderStore.listEnquiries(buyerEnquiriesForBuilder(), filter);
+  },
+  async get(id) {
+    const seed =
+      builderStore.findSeedEnquiry(id) ??
+      buyerEnquiriesForBuilder().find((e) => e.id === id);
+    return seed ? builderStore.projectOne(seed) : null;
+  },
+  async markRead(id) {
+    builderStore.markEnquiryRead(id);
+  },
+  async unreadCount() {
+    return builderStore.listEnquiries(buyerEnquiriesForBuilder(), { unreadOnly: true }).length;
+  },
+  async contactAccessMode() {
+    return builderStore.contactAccessMode();
+  },
+
+  /**
+   * Alternative B only. Spends credits from the Builder's own balance to reveal
+   * one enquiry's contact.
+   *
+   * Under alternative A this is `not_applicable` rather than a silent success:
+   * the two alternatives are genuinely different products, and a screen that
+   * charged for something already included would be the worst of both.
+   */
+  async unlockContact(input) {
+    if (builderStore.contactAccessMode() !== "unlock") return { kind: "not_applicable" };
+
+    const seed =
+      builderStore.findSeedEnquiry(input.id) ??
+      buyerEnquiriesForBuilder().find((e) => e.id === input.id);
+    if (!seed) return { kind: "not_applicable" };
+
+    if (builderStore.isUnlocked(input.id)) {
+      return { kind: "unlocked", enquiry: builderStore.projectOne(seed), duplicate: true };
+    }
+
+    const price = builderStore.unlockPrice();
+    const balance = builderStore.balance();
+    if (balance < price) {
+      return { kind: "insufficient_credits", priceCredits: price, balanceCredits: balance };
+    }
+
+    const fresh = builderStore.recordUnlock({ id: input.id, idempotencyKey: input.idempotencyKey });
+    if (fresh) {
+      builderStore.postEntry({
+        type: "lead_purchase",
+        description: `Contact unlock ${input.id}`,
+        deltaCredits: -price,
+        reference: `UNL-${input.id}`,
+      });
+    }
+    return { kind: "unlocked", enquiry: builderStore.projectOne(seed), duplicate: !fresh };
+  },
+};
 
 export const sampleServices: Services = {
   properties: propertyService,
@@ -353,5 +511,13 @@ export const sampleServices: Services = {
   leadMarket: leadMarketService,
   credits: creditService,
   support: supportService,
+  builder: {
+    account: builderAccountService,
+    listings: listingService,
+    enquiries: builderEnquiryService,
+    leadMarket: builderLeadMarket,
+    credits: builderCredits,
+    support: builderSupport,
+  },
   isSample: true,
 };

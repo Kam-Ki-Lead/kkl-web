@@ -8,13 +8,14 @@ import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
 import { DECISIONS } from "@/lib/config/business-rules";
 
 /** S-23 new-ticket form. */
-export function NewTicketForm() {
+export function NewTicketForm({ scope = "seller" }: { scope?: "seller" | "builder" }) {
   const [state, action, pending] = useActionState<TicketFormState, FormData>(createTicket, {});
   const err = state.errors ?? {};
   const v = state.values ?? {};
 
   return (
     <form action={action} className="flex flex-col gap-[16px]">
+      <input type="hidden" name="scope" value={scope} />
       <Field id="topic" label="Topic">
         <Select id="topic" name="topic" defaultValue={v.topic ?? TICKET_TOPICS[0]}>
           {TICKET_TOPICS.map((topic) => (

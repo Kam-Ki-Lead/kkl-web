@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SellerShell } from "@/components/seller/seller-shell";
-import { LeadCard } from "@/components/seller/lead-card";
-import { LeadFilters } from "@/components/seller/lead-filters";
+import { LeadCard } from "@/components/console/lead-card";
+import { LeadFilters } from "@/components/console/lead-filters";
 import { StateMessage } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
 import { PendingRule } from "@/components/ui/states";

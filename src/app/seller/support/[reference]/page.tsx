@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SellerShell } from "@/components/seller/seller-shell";
-import { TicketReplyForm } from "@/components/seller/ticket-reply-form";
+import { TicketReplyForm } from "@/components/console/ticket-reply-form";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { formatDate, formatDateTime } from "@/lib/format";

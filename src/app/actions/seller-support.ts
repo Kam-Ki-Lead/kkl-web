@@ -7,6 +7,28 @@ import { getServices } from "@/lib/services";
 import { TICKET_TOPICS } from "@/lib/domain/support-topics";
 
 /**
+ * Which account's support queue a ticket belongs to.
+ *
+ * The Seller and Builder have separate ticket lists, so the scope travels on
+ * the form. A Builder's ticket appearing in a Seller's list would be a data
+ * leak, not a cosmetic bug.
+ */
+type SupportScope = "seller" | "builder";
+
+function supportFor(scope: SupportScope) {
+  const services = getServices();
+  return scope === "builder" ? services.builder.support : services.support;
+}
+
+function scopeOf(formData: FormData): SupportScope {
+  return String(formData.get("scope") ?? "seller") === "builder" ? "builder" : "seller";
+}
+
+function basePath(scope: SupportScope): string {
+  return scope === "builder" ? "/builder/support" : "/seller/support";
+}
+
+/**
  * Support tickets (S-22 to S-24).
  *
  * Creating a ticket really creates one: it appears in the list with the body
@@ -56,9 +78,10 @@ export async function createTicket(
     return { errors, values: raw };
   }
 
-  const ticket = await getServices().support.createTicket(parsed.data);
-  revalidatePath("/seller/support");
-  redirect(`/seller/support/${ticket.reference}`);
+  const scope = scopeOf(formData);
+  const ticket = await supportFor(scope).createTicket(parsed.data);
+  revalidatePath(basePath(scope));
+  redirect(`${basePath(scope)}/${ticket.reference}`);
 }
 
 const replySchema = z
@@ -82,16 +105,18 @@ export async function replyToTicket(
     return { error: parsed.error.issues[0]?.message ?? "Write a reply.", value: raw };
   }
 
-  await getServices().support.reply({ reference, body: parsed.data });
-  revalidatePath(`/seller/support/${reference}`);
-  revalidatePath("/seller/support");
+  const scope = scopeOf(formData);
+  await supportFor(scope).reply({ reference, body: parsed.data });
+  revalidatePath(`${basePath(scope)}/${reference}`);
+  revalidatePath(basePath(scope));
   return {};
 }
 
 export async function resolveTicket(formData: FormData): Promise<void> {
   const reference = String(formData.get("reference") ?? "");
   if (!reference) return;
-  await getServices().support.resolve(reference);
-  revalidatePath(`/seller/support/${reference}`);
-  revalidatePath("/seller/support");
+  const scope = scopeOf(formData);
+  await supportFor(scope).resolve(reference);
+  revalidatePath(`${basePath(scope)}/${reference}`);
+  revalidatePath(basePath(scope));
 }

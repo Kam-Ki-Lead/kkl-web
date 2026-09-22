@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SellerShell } from "@/components/seller/seller-shell";
-import { NewTicketForm } from "@/components/seller/new-ticket-form";
+import { NewTicketForm } from "@/components/console/new-ticket-form";
 
 export const metadata: Metadata = { title: "New ticket" };
 

@@ -23,6 +23,21 @@ import type { RechargeOutcome } from "@/lib/services/contracts";
 
 const OUTCOME_COOKIE = "kkl_recharge_outcome";
 
+/**
+ * Which account's wallet this recharge credits.
+ *
+ * Carried on the form rather than inferred, for the same reason the lead
+ * purchase carries one: the Seller and Builder have separate balances and
+ * separate ledgers, and a recharge that guessed wrong would credit the wrong
+ * account.
+ */
+export type WalletScope = "seller" | "builder";
+
+function creditsFor(scope: WalletScope) {
+  const services = getServices();
+  return scope === "builder" ? services.builder.credits : services.credits;
+}
+
 const MIN_INR = 100;
 const MAX_INR = 100_000;
 
@@ -41,6 +56,8 @@ export async function startRecharge(
   _previous: RechargeFormState,
   formData: FormData,
 ): Promise<RechargeFormState> {
+  const rawScope = String(formData.get("scope") ?? "seller");
+  const scope: WalletScope = rawScope === "builder" ? "builder" : "seller";
   const raw = String(formData.get("amount") ?? "").replace(/[₹,\s]/g, "");
   const parsed = amountSchema.safeParse(Number(raw));
 
@@ -49,7 +66,7 @@ export async function startRecharge(
     return { error: parsed.error.issues[0]?.message ?? "Enter a valid amount.", amount: raw };
   }
 
-  const outcome = await getServices().credits.recharge({
+  const outcome = await creditsFor(scope).recharge({
     amountInr: parsed.data,
     // One key per submission. A retried POST resolves to the same outcome rather
     // than crediting twice — the same reason the lead purchase carries one.
@@ -60,7 +77,7 @@ export async function startRecharge(
   // ?result=credited in the address bar and see a success screen for a payment
   // that never happened.
   const jar = await cookies();
-  jar.set(OUTCOME_COOKIE, JSON.stringify(outcome), {
+  jar.set(OUTCOME_COOKIE, JSON.stringify({ ...outcome, scope }), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -68,15 +85,22 @@ export async function startRecharge(
     maxAge: 60 * 15,
   });
 
-  redirect("/seller/billing/payment");
+  redirect(scope === "builder" ? "/builder/billing/payment" : "/seller/billing/payment");
 }
 
-/** The outcome the payment-result screen should render, if there is one. */
-export async function readRechargeOutcome(): Promise<RechargeOutcome | null> {
+/**
+ * The outcome the payment-result screen should render, if there is one.
+ *
+ * Scoped, so a Seller's recharge cannot render on the Builder's result screen.
+ */
+export async function readRechargeOutcome(
+  scope: WalletScope = "seller",
+): Promise<RechargeOutcome | null> {
   const raw = (await cookies()).get(OUTCOME_COOKIE)?.value;
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as RechargeOutcome;
+    const parsed = JSON.parse(raw) as RechargeOutcome & { scope?: WalletScope };
+    return (parsed.scope ?? "seller") === scope ? parsed : null;
   } catch {
     return null;
   }

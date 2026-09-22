@@ -147,28 +147,6 @@ export type BuyerEnquiry = {
   readonly createdAt: string;
 };
 
-/**
- * A Builder's view of an enquiry on their own listing.
- *
- * `buyerContact` is nullable because whether it is revealed immediately or
- * requires a paid unlock is an UNRESOLVED client decision — the two source
- * documents contradict each other (design-brief/04-confirmed-vs-unresolved.md
- * §B4). The nullable shape lets the UI render both states without this code
- * picking a winner. When it is null, the server withheld it; the UI must not
- * infer why, and must not fabricate a placeholder that looks like a real number.
- */
-export type BuilderEnquiry = {
-  readonly id: string;
-  readonly propertyId: string;
-  readonly propertyTitle: string;
-  readonly kind: EnquiryKind;
-  readonly status: EnquiryStatus;
-  readonly message: string | null;
-  readonly createdAt: string;
-  readonly buyerName: string | null;
-  readonly buyerContact: string | null;
-};
-
 // -------------------------------------------------- profile & notifications --
 
 export type BuyerProfile = {
@@ -508,4 +486,169 @@ export type Page<T> = {
   readonly total: number;
   readonly page: number;
   readonly pageSize: number;
+};
+
+// ----------------------------------------------------------------- builder --
+
+/**
+ * The signed-in Builder's account.
+ *
+ * Three independent axes, and keeping them independent is the point:
+ * `kycStatus` is a verification decision, `accountStatus` is an administrative
+ * one, and `subscription` is a commercial one. Suspending an account does not
+ * un-verify it; letting a subscription lapse does neither. B-19 depends on the
+ * three being readable separately, and collapsing any two would make its table
+ * unrepresentable.
+ *
+ * None of it is authoritative in kkl-web. What a Builder may actually do is
+ * decided by kkl-backend on every request.
+ */
+export type BuilderAccount = {
+  readonly id: string;
+  readonly contactName: string;
+  readonly companyName: string;
+  readonly mobile: string;
+  readonly email: string | null;
+  readonly reraId: string | null;
+  readonly kycStatus: KycStatus;
+  readonly accountStatus: SellerAccountStatus;
+  readonly subscription: BuilderSubscription;
+  readonly alerts: BuilderAlertPreferences;
+};
+
+export type BuilderAlertPreferences = {
+  readonly newEnquiry: boolean;
+  readonly siteVisitRequest: boolean;
+  readonly subscriptionReminders: boolean;
+};
+
+export type BuilderSubscriptionState = "none" | "active" | "due" | "grace" | "expired";
+
+export type BuilderSubscription = {
+  readonly state: BuilderSubscriptionState;
+  readonly startedAt: string | null;
+  readonly renewsAt: string | null;
+  /**
+   * Null always, while D-01 is open.
+   *
+   * No subscription price or billing cycle has been agreed, so there is no
+   * figure to show. A number here would be an invented price on a screen that
+   * asks someone to pay it.
+   */
+  readonly priceInr: number | null;
+};
+
+/** What a listing is doing, as the Builder sees it (B-07). */
+export type ListingStatus = "draft" | "published" | "unpublished";
+
+/** The six sections of the listing editor (B-08 to B-13). */
+export type ListingSectionId =
+  | "basics"
+  | "location"
+  | "pricing"
+  | "specifications"
+  | "media"
+  | "preview";
+
+export type ListingSectionState = {
+  readonly id: ListingSectionId;
+  readonly label: string;
+  readonly complete: boolean;
+};
+
+/**
+ * A reason a listing cannot be published yet, pointing at the section to fix.
+ *
+ * Carried as data rather than a rendered sentence so B-13 can link each one to
+ * the section that owns it — "Project name is missing (section 1)" is only
+ * useful if it can take you there.
+ */
+export type PublishBlocker = {
+  readonly section: ListingSectionId;
+  readonly sectionNumber: number;
+  readonly message: string;
+};
+
+export type ListingDraft = {
+  readonly id: string;
+  readonly status: ListingStatus;
+  readonly title: string;
+  readonly propertyType: string | null;
+  readonly possessionTarget: string | null;
+  readonly description: string;
+  readonly locality: string | null;
+  readonly addressLine: string;
+  readonly configurations: readonly string[];
+  readonly priceMinInr: number | null;
+  readonly priceMaxInr: number | null;
+  readonly areaMin: string;
+  readonly areaMax: string;
+  readonly totalUnits: string;
+  readonly amenities: readonly string[];
+  readonly reraRegistered: boolean;
+  readonly reraNumber: string | null;
+  readonly media: readonly PropertyMedia[];
+  readonly videoUrl: string | null;
+  readonly publishedAt: string | null;
+  readonly updatedAt: string;
+  readonly enquiryCount: number;
+};
+
+export type ListingSummary = {
+  readonly id: string;
+  readonly title: string;
+  readonly status: ListingStatus;
+  readonly locationLabel: string;
+  readonly configurationLabel: string;
+  readonly priceLabel: string;
+  readonly detailLine: string;
+  readonly enquiryCount: number;
+  readonly hasMedia: boolean;
+  readonly sectionsComplete: number;
+  readonly sectionsTotal: number;
+};
+
+/**
+ * How much of a Buyer's contact a Builder can see on an enquiry for their own
+ * listing.
+ *
+ * D-05 is open: the account-roles specification says a Builder is notified of
+ * enquiries on their own listings and does not say whether the notification
+ * carries contact details; the development proposal lists paid unlocking.
+ * Neither is confirmed, so both are built and the screens say which is showing.
+ */
+export type ContactAccessMode = "included" | "unlock";
+
+/**
+ * A Builder's view of an enquiry on their own listing.
+ *
+ * `contactPhone` is nullable because whether contact is revealed immediately or
+ * requires a paid unlock is unresolved (D-05) — the two source documents
+ * contradict each other. When it is null the server withheld it; the UI must not
+ * infer why, and must never fabricate a placeholder that looks like a real
+ * number. `contactMask` is the placeholder, composed server-side.
+ */
+export type BuilderEnquiry = {
+  readonly id: string;
+  readonly listingId: string;
+  readonly listingTitle: string;
+  readonly kind: "enquiry" | "site_visit";
+  readonly buyerName: string;
+  /** The mask, always present. The unmasked number is a separate field. */
+  readonly contactMask: string;
+  /**
+   * Present only when this enquiry's contact is currently accessible — under
+   * alternative A always, under alternative B once unlocked. Absent otherwise,
+   * so a locked enquiry has no number in the response to leak.
+   */
+  readonly contactPhone: string | null;
+  readonly message: string | null;
+  readonly requirement: string;
+  readonly budgetBand: string | null;
+  readonly timeline: string | null;
+  readonly source: string;
+  readonly receivedAt: string;
+  readonly read: boolean;
+  /** Credits it would cost to unlock, under alternative B. Null under A. */
+  readonly unlockPriceCredits: number | null;
 };

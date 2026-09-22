@@ -2,8 +2,19 @@ import type {
   BillingDetails,
   BuyerEnquiry,
   BuyerNotification,
+  BuilderAccount,
+  BuilderAlertPreferences,
+  BuilderEnquiry,
+  BuilderSubscription,
   BuyerProfile,
+  ContactAccessMode,
   Invoice,
+  ListingDraft,
+  ListingSectionId,
+  ListingSectionState,
+  ListingStatus,
+  ListingSummary,
+  PublishBlocker,
   InvoiceDetail,
   KycStatus,
   KycSubmission,
@@ -308,6 +319,101 @@ export interface SupportService {
   resolve(reference: string): Promise<SupportThread>;
 }
 
+// ----------------------------------------------------------------- builder --
+
+/** The Builder's own account, verification and subscription (B-01 to B-05, B-24). */
+export interface BuilderAccountService {
+  get(): Promise<BuilderAccount>;
+  saveCompany(input: {
+    companyName: string;
+    contactName: string;
+    email: string | null;
+    reraId: string | null;
+  }): Promise<BuilderAccount>;
+  /** B-02. Moves to `pending`; never approves. Approval is A-06's. */
+  submitVerification(input: {
+    panNumber: string;
+    hasPanDocument: boolean;
+    hasCompanyDocument: boolean;
+  }): Promise<KycSubmission>;
+  verificationTimeline(): Promise<readonly KycTimelineEntry[]>;
+  /**
+   * B-03/B-04. Records the intent to subscribe and returns the gateway result.
+   *
+   * No price is passed, because none exists: D-01 leaves the subscription price
+   * and billing cycle unset. A real implementation takes the plan from
+   * kkl-backend and the money from a gateway, never from this argument.
+   */
+  startSubscription(input: { idempotencyKey: string }): Promise<SubscriptionOutcome>;
+  saveAlerts(input: BuilderAlertPreferences): Promise<BuilderAccount>;
+}
+
+export type SubscriptionOutcome =
+  | { readonly kind: "active"; readonly subscription: BuilderSubscription; readonly reference: string; readonly duplicate: boolean }
+  | { readonly kind: "pending"; readonly reference: string }
+  | { readonly kind: "failed"; readonly message: string }
+  | { readonly kind: "not_verified"; readonly kycStatus: KycStatus }
+  | { readonly kind: "account_suspended" };
+
+/** Why a listing action was refused, each one a designed state in B-07 or B-19. */
+export type ListingActionOutcome =
+  | { readonly kind: "ok"; readonly listing: ListingDraft }
+  | { readonly kind: "blocked"; readonly reason: ListingBlockReason; readonly blockers: readonly PublishBlocker[] };
+
+export type ListingBlockReason =
+  | "incomplete"
+  | "not_verified"
+  | "no_subscription"
+  | "subscription_expired"
+  | "account_suspended";
+
+/**
+ * Listings (B-07 to B-15).
+ *
+ * `publish` is the one operation that crosses into the public portal, and the
+ * rule it applies is the one part of this that IS defined: an active
+ * subscription is required to publish. Whether a listing that is ALREADY live
+ * stays up when the subscription lapses is a different question, it is D-02, and
+ * it is not decided — so nothing here hides or deletes anything on expiry, and
+ * B-05 presents the three alternatives to the client instead.
+ *
+ * Whether listings are reviewed before or after publishing is D-10 and is also
+ * open. This publishes directly and says so, rather than inventing a moderation
+ * queue that nobody has agreed to staff.
+ */
+export interface ListingService {
+  list(filter?: { status?: ListingStatus }): Promise<readonly ListingSummary[]>;
+  get(id: string): Promise<ListingDraft | null>;
+  create(): Promise<ListingDraft>;
+  saveSection(input: {
+    id: string;
+    section: ListingSectionId;
+    values: Readonly<Record<string, string | readonly string[] | boolean | null>>;
+  }): Promise<ListingDraft>;
+  sections(id: string): Promise<readonly ListingSectionState[]>;
+  /** What stops this listing being published, in section order. */
+  publishBlockers(id: string): Promise<readonly PublishBlocker[]>;
+  publish(id: string): Promise<ListingActionOutcome>;
+  unpublish(id: string): Promise<ListingActionOutcome>;
+  remove(id: string): Promise<{ removed: boolean }>;
+}
+
+/** Enquiries on the Builder's own listings (B-16 to B-18). */
+export interface BuilderEnquiryService {
+  list(filter?: { unreadOnly?: boolean; kind?: "enquiry" | "site_visit" }): Promise<readonly BuilderEnquiry[]>;
+  get(id: string): Promise<BuilderEnquiry | null>;
+  markRead(id: string): Promise<void>;
+  unreadCount(): Promise<number>;
+  /** The contact-access alternative currently in force (D-05). */
+  contactAccessMode(): Promise<ContactAccessMode>;
+  /** Alternative B only. Spends credits to reveal one enquiry's contact. */
+  unlockContact(input: { id: string; idempotencyKey: string }): Promise<
+    | { readonly kind: "unlocked"; readonly enquiry: BuilderEnquiry; readonly duplicate: boolean }
+    | { readonly kind: "insufficient_credits"; readonly priceCredits: number; readonly balanceCredits: number }
+    | { readonly kind: "not_applicable" }
+  >;
+}
+
 export type Services = {
   readonly properties: PropertyService;
   readonly enquiries: EnquiryService;
@@ -317,6 +423,23 @@ export type Services = {
   readonly leadMarket: LeadMarketService;
   readonly credits: CreditService;
   readonly support: SupportService;
+  /**
+   * The Builder console.
+   *
+   * Its marketplace, credits and support are the same interfaces the Seller
+   * uses — the design says Builders get the same modules under Builder access —
+   * but they are separate instances over separate records. A Builder and a
+   * Seller are two accounts; sharing a ledger or a ticket list between them
+   * would be a data leak wearing a convenience's clothes.
+   */
+  readonly builder: {
+    readonly account: BuilderAccountService;
+    readonly listings: ListingService;
+    readonly enquiries: BuilderEnquiryService;
+    readonly leadMarket: LeadMarketService;
+    readonly credits: CreditService;
+    readonly support: SupportService;
+  };
   /** True when these are fixtures. Screens use it to label simulated actions. */
   readonly isSample: boolean;
 };

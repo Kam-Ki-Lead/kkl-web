@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SellerShell } from "@/components/seller/seller-shell";
-import { RechargeForm } from "@/components/seller/recharge-form";
+import { RechargeForm } from "@/components/console/recharge-form";
 import { getServices } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Recharge credits" };

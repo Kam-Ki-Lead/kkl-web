@@ -21,7 +21,10 @@ import { Button } from "@/components/ui/button";
  */
 export function LeadFilters({
   options,
+  action = "/seller/leads",
 }: {
+  /** Where the filter form submits — the two marketplaces have separate routes. */
+  action?: string;
   options: {
     readonly areas: readonly string[];
     readonly budgetBands: readonly string[];
@@ -41,7 +44,7 @@ export function LeadFilters({
     <form
       ref={form}
       method="GET"
-      action="/seller/leads"
+      action={action}
       className="grid grid-cols-4 gap-[14px] max-[1060px]:grid-cols-2 max-[560px]:grid-cols-1"
     >
       {/* The tab and sort are part of the view, not of this form's fields, so

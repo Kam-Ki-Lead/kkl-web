@@ -33,6 +33,25 @@ import type { PurchaseOutcome } from "@/lib/services/contracts";
 
 const OUTCOME_COOKIE = "kkl_purchase_outcome";
 
+/**
+ * Which account's marketplace this purchase belongs to.
+ *
+ * Carried explicitly rather than inferred from the URL. The Seller and Builder
+ * marketplaces are separate pools over separate balances, and a purchase that
+ * guessed wrong would spend the wrong account's credits on a lead it does not
+ * list — so the scope is a field on the form, validated here.
+ */
+export type MarketScope = "seller" | "builder";
+
+function marketFor(scope: MarketScope) {
+  const services = getServices();
+  return scope === "builder" ? services.builder.leadMarket : services.leadMarket;
+}
+
+function basePathFor(scope: MarketScope): string {
+  return scope === "builder" ? "/builder/marketplace" : "/seller/leads";
+}
+
 export type PurchaseFormState = {
   readonly error?: string;
 };
@@ -43,6 +62,8 @@ export async function purchaseLead(
 ): Promise<PurchaseFormState> {
   const leadId = String(formData.get("leadId") ?? "");
   const idempotencyKey = String(formData.get("idempotencyKey") ?? "");
+  const rawScope = String(formData.get("scope") ?? "seller");
+  const scope: MarketScope = rawScope === "builder" ? "builder" : "seller";
 
   if (!leadId) return { error: "That lead could not be identified. Open it again from the marketplace." };
   if (!/^[0-9a-f-]{36}$/.test(idempotencyKey)) {
@@ -54,14 +75,14 @@ export async function purchaseLead(
     };
   }
 
-  const outcome = await getServices().leadMarket.purchase({ leadId, idempotencyKey });
+  const outcome = await marketFor(scope).purchase({ leadId, idempotencyKey });
 
   // The outcome is held in a short-lived httpOnly cookie rather than a query
   // string: it decides which of the designed result screens renders, and a URL
   // the Seller can edit must not be able to claim a purchase that did not
   // happen. The result screen reads it once.
   const jar = await cookies();
-  jar.set(OUTCOME_COOKIE, JSON.stringify({ leadId, kind: outcome.kind }), {
+  jar.set(OUTCOME_COOKIE, JSON.stringify({ leadId, kind: outcome.kind, scope }), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -69,18 +90,32 @@ export async function purchaseLead(
     maxAge: 60 * 10,
   });
 
-  redirect(`/seller/leads/${leadId}/result`);
+  redirect(`${basePathFor(scope)}/${leadId}/result`);
 }
 
-export type StoredOutcome = { readonly leadId: string; readonly kind: PurchaseOutcome["kind"] };
+export type StoredOutcome = {
+  readonly leadId: string;
+  readonly kind: PurchaseOutcome["kind"];
+  readonly scope: MarketScope;
+};
 
-/** The outcome the result screen should render, if this browser has one. */
-export async function readPurchaseOutcome(leadId: string): Promise<StoredOutcome | null> {
+/**
+ * The outcome the result screen should render, if this browser has one.
+ *
+ * Matched on scope as well as lead id: the two marketplaces can hold leads with
+ * the same reference, and a Seller's outcome must not render on a Builder's
+ * result screen.
+ */
+export async function readPurchaseOutcome(
+  leadId: string,
+  scope: MarketScope = "seller",
+): Promise<StoredOutcome | null> {
   const raw = (await cookies()).get(OUTCOME_COOKIE)?.value;
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as StoredOutcome;
-    return parsed.leadId === leadId ? parsed : null;
+    const sameScope = (parsed.scope ?? "seller") === scope;
+    return parsed.leadId === leadId && sameScope ? parsed : null;
   } catch {
     return null;
   }

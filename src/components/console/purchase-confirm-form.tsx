@@ -19,9 +19,14 @@ import { Button } from "@/components/ui/button";
 export function PurchaseConfirmForm({
   leadId,
   idempotencyKey,
+  scope = "seller",
+  cancelHref,
 }: {
   leadId: string;
   idempotencyKey: string;
+  /** Which marketplace this buys from. The two are separate pools. */
+  scope?: "seller" | "builder";
+  cancelHref?: string;
 }) {
   const [state, action, pending] = useActionState<PurchaseFormState, FormData>(purchaseLead, {});
 
@@ -29,6 +34,7 @@ export function PurchaseConfirmForm({
     <form action={action} className="flex flex-col gap-[12px]">
       <input type="hidden" name="leadId" value={leadId} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+      <input type="hidden" name="scope" value={scope} />
 
       {state.error ? (
         <p
@@ -44,7 +50,7 @@ export function PurchaseConfirmForm({
           {pending ? "Deducting credits…" : "Confirm and buy"}
         </Button>
         <Link
-          href={`/seller/leads/${leadId}`}
+          href={cancelHref ?? `/seller/leads/${leadId}`}
           className="text-[15px] font-semibold text-brand underline underline-offset-2"
         >
           Cancel

@@ -53,10 +53,13 @@ export function DashboardRail({
   items,
   footer,
   ariaLabel,
+  eyebrow,
 }: {
   items: readonly RailItem[];
   footer?: RailFooter | null;
   ariaLabel: string;
+  /** Names which console this is, where more than one exists (B-06). */
+  eyebrow?: string;
 }) {
   const pathname = usePathname();
 
@@ -70,6 +73,10 @@ export function DashboardRail({
           <Wordmark onDark />
         </Link>
       </div>
+
+      {eyebrow ? (
+        <p className="t-eyebrow px-[18px] pb-[8px] text-rail-seller-label">{eyebrow}</p>
+      ) : null}
 
       <ul className="flex flex-col gap-[2px] px-[14px]">
         {items.map((item) => (
@@ -137,10 +144,12 @@ export function RailDrawer({
   items,
   footer,
   ariaLabel,
+  eyebrow,
 }: {
   items: readonly RailItem[];
   footer?: RailFooter | null;
   ariaLabel: string;
+  eyebrow?: string;
 }) {
   const pathname = usePathname();
   // The drawer's open state is stored as the path it was opened on, so a route
@@ -185,6 +194,9 @@ export function RailDrawer({
           className="absolute left-0 right-0 top-full z-20 border-t border-line bg-brand-deep px-[14px] py-[14px]"
         >
           <nav aria-label={ariaLabel}>
+            {eyebrow ? (
+              <p className="t-eyebrow pb-[8px] text-rail-seller-label">{eyebrow}</p>
+            ) : null}
             <ul className="flex flex-col gap-[2px]">
               {items.map((item) => (
                 <li key={item.href}>
