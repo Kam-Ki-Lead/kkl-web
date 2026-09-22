@@ -32,10 +32,12 @@ npx next start -p 3811
 
 Then open <http://127.0.0.1:3811>.
 
-Set all four. The `NEXT_PUBLIC_*` pair is frozen into the bundle at build time;
-the unprefixed pair is read from the process on every request. The guard refuses
-to serve when they disagree, because a bundle built for one environment and
-deployed as another is not the bundle that environment asked for.
+**All four are required.** The `NEXT_PUBLIC_*` pair is frozen into the bundle at
+build time; the unprefixed pair is read from the process on every request. A
+served build that does not set `KKL_ENV` and `KKL_DATA_SOURCE` refuses to serve
+at all, and the guard also refuses when the two pairs disagree — a bundle built
+for one environment and deployed as another is not the bundle that environment
+asked for.
 
 ### With the baseline's review photography
 
@@ -60,7 +62,7 @@ It must never serve real users, and two guards enforce that:
 | Guard | Where | Catches |
 | --- | --- | --- |
 | Build-time | `src/lib/config/runtime.ts`, at module load | `NEXT_PUBLIC_KKL_ENV=production` built together with `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`. The build fails. |
-| Run-time | `src/proxy.ts`, ahead of every request | `KKL_ENV=production` on a server whose bundle was built for review or development. Every request returns 503 with the reason. |
+| Run-time | `src/proxy.ts`, ahead of every request | A served build that declares nothing; production with sample services; a bundle/server disagreement in either variable. Every request returns 503 with the reason. |
 
 The second guard exists because the first cannot see the likelier accident. A
 review build deployed to production with `NEXT_PUBLIC_KKL_ENV=production` set on
@@ -68,11 +70,30 @@ the server still has `"review"` inlined in its bundle, so the build-time check
 stays quiet and simulated authentication serves real users. **That was verified
 to happen** before the run-time guard was added.
 
+### What the guard cannot do
+
+It cannot tell where it is running. Nothing available to a Node process
+distinguishes a production host from a laptop, and this code does not guess from
+hostnames or cloud metadata — a guess that can be wrong is worse than a rule
+that is explicit.
+
+What it does instead is **require the deployment to declare itself**, and refuse
+to serve when it has not. That turns "nobody configured this" from a silent
+fallback into a visible failure.
+
+The residual risk, stated plainly: a deployment that declares `KKL_ENV=review`
+while serving real users is not detectable here, and nothing in a frontend could
+detect it. That is an operational control, not a code one.
+
 Verify both directions with:
 
 ```bash
 ./scripts/verify-sample-mode-guard.sh
 ```
+
+Eight scenarios: the build-time refusal, the review build succeeding, the
+documented configuration serving, three missing-declaration cases, production
+with sample services, and a data-source disagreement.
 
 ## Reaching the Seller states a reviewer cannot otherwise get to
 
@@ -108,13 +129,23 @@ PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-enquiry-flow.mjs
 PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-seller-flow.mjs
 ```
 
-The enquiry harness runs twenty checks covering reload, direct access, replay,
+```bash
+PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-no-javascript.mjs
+```
+
+The enquiry harness runs seventeen behaviour checks covering reload, direct access, replay,
 two tabs, two independent browser sessions, expired and missing drafts, and
-personal data in URLs. The Seller harness runs twenty-two covering mask
+personal data in URLs. The Seller harness runs twenty-six covering mask
 containment, deduction and the ledger, a replayed idempotency key, a sold lead,
 insufficient credits, unverified and suspended accounts, all three payment
-outcomes, direct access to both result screens, and the CSV export.
+outcomes, direct access to both result screens, the CSV export, reset
+determinism and ledger reconciliation. The third drives twenty-one form
+submissions with JavaScript disabled.
 
-Five checks across the two assert a **limitation** rather than a guarantee —
-they pass while the limitation is present, so closing one shows up as a failure
-instead of going unnoticed. Each file's header says which.
+Behaviour checks and **known limitations are counted separately**. Reproducing
+an OTP bypass or shared-account state is not a control passing — it is a control
+that does not exist, confirmed still absent. A limitation that stops reproducing
+fails the run, so closing one is noticed rather than silently absorbed.
+
+Run the Seller suite twice against the same server: the results are identical,
+which is what makes the reset claim mean something.

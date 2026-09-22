@@ -5,11 +5,14 @@
  * `next start`) and checks what the flow does under reload, replay, two tabs,
  * two independent sessions, and expired or missing drafts.
  *
- * Three checks (8, 19, 20) assert a LIMITATION rather than a guarantee. They
- * pass when the limitation is still present, and are written that way on
- * purpose: each one is a control that sample mode does not have and kkl-backend
- * must provide. If one starts failing, the limitation has been closed and the
- * check should be rewritten as a guarantee.
+ * Three of these are NOT behaviour tests. They record a known limitation
+ * reproducing as documented — a control sample mode does not have. Reproducing
+ * an OTP bypass, an unsigned cookie or an unprotected URL is not that control
+ * passing, so they are counted and reported separately. Mixing them into one
+ * total would inflate the pass count with things that are wrong on purpose.
+ *
+ * If one stops reproducing, the limitation may have been closed: re-verify and
+ * rewrite it as an assertion.
  *
  * Run:
  *   npx next build
@@ -30,7 +33,10 @@ const { chromium } = await import(process.env.PLAYWRIGHT ?? 'playwright');
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3811';
 const DRAFT = 'kkl_enquiry_draft';
 const results = [];
+const observations = [];
 const ok = (name, pass, detail) => { results.push({ name, pass, detail }); console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}\n      ${detail}`); };
+/** A known limitation reproducing as documented. Never a passing control. */
+const observed = (name, reproduced, detail) => { observations.push({ name, reproduced, detail }); console.log(`${reproduced ? 'LIMIT' : 'CHANGED'}  ${name}\n      ${detail}`); };
 
 async function countEnquiries(ctx) {
   const pg = await ctx.newPage();
@@ -113,9 +119,9 @@ ok('7. Reloading the confirmation records nothing further',
 // direct access to confirmation in a fresh context
 const Fresh = await browser.newContext();
 const rDirect = await Fresh.request.get(confirmedUrlA);
-ok('8. Direct access to a confirmation with no session still renders (no account scoping in sample mode)',
+observed('L1. An exact receipt URL is not access-controlled',
    rDirect.status() === 200,
-   `status ${rDirect.status()} — LIMITATION: sample mode has no accounts, so an exact receipt URL is not access-controlled`);
+   `status ${rDirect.status()}. Sample mode has no accounts, so possession of the URL is all there is. Unguessable is not authorised — per-account access control is kkl-backend's and is NOT demonstrated.`);
 
 const rGuess = await Fresh.request.get(`${BASE}/enquiry/${refA}/confirmed`);
 const rGuess2 = await Fresh.request.get(`${BASE}/enquiry/e-50001/confirmed`);
@@ -224,7 +230,7 @@ ok('18. A rejected code keeps the draft rather than dropping the enquiry',
 const S = await browser.newContext();
 const pageS = await makeDraft(S, { name: 'Test Skip', mobile: '9400011122', slug: 'palm-meadows' });
 await pageS.goto(`${BASE}/enquiry/confirm`, { waitUntil: 'networkidle' });
-ok('19. LIMITATION: the confirm handoff does not require the OTP step',
+observed('L2. The confirm handoff does not require the OTP step',
    /\/confirmed$/.test(pageS.url()),
    `a draft alone reaches ${pageS.url()} without entering a code — the sample OTP step is not a control; real verification is kkl-backend's`);
 
@@ -236,11 +242,18 @@ await F.addCookies([{ name: DRAFT, url: BASE, httpOnly: true,
     submissionToken: '11111111-2222-4333-8444-555555555555', createdAt: Date.now() })) }]);
 const pageF = await F.newPage();
 await pageF.goto(`${BASE}/enquiry/confirm`, { waitUntil: 'networkidle' });
-ok('20. LIMITATION: the draft cookie is unsigned, so a crafted one is accepted',
+observed('L3. The draft cookie is unsigned, so a crafted one is accepted',
    /\/confirmed$/.test(pageF.url()),
    `forged draft accepted -> ${pageF.url()}; a real implementation must sign it or hold it server-side`);
 
 await browser.close();
+
 const failed = results.filter(r => !r.pass);
-console.log(`\n${results.length - failed.length}/${results.length} checks behaved as expected.`);
-if (failed.length) { console.log('Unexpected:'); failed.forEach(f => console.log(' - ' + f.name)); process.exit(1); }
+const changed = observations.filter(o => !o.reproduced);
+
+console.log(`\n${results.length - failed.length}/${results.length} behaviour checks passed.`);
+console.log(`${observations.length - changed.length}/${observations.length} known limitations reproduced as documented (reproduction is not a pass — these are things that do not work yet).`);
+
+if (failed.length) { console.log('\nFailed behaviour checks:'); failed.forEach(f => console.log(' - ' + f.name)); }
+if (changed.length) { console.log('\nLimitations that no longer reproduce — re-verify and rewrite as assertions:'); changed.forEach(c => console.log(' - ' + c.name)); }
+if (failed.length || changed.length) process.exit(1);

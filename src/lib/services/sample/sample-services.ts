@@ -340,6 +340,8 @@ export const sampleReviewControls = {
   setPaymentOutcome: sellerStore.setPaymentOutcomeForReview,
   setBalance: sellerStore.setBalanceForReview,
   reset: sellerStore.resetForReview,
+  /** The ledger invariant, so a test can assert it instead of trusting a comment. */
+  reconcile: sellerStore.reconcile,
 } as const;
 
 export const sampleServices: Services = {

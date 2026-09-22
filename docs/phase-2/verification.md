@@ -31,8 +31,10 @@ run against `next start`.
 | Type check | `npx tsc --noEmit` | Pass, 0 errors |
 | Lint | `npx eslint .` | Pass, 0 errors, 0 warnings |
 | Production build | `npx next build` | Pass — 24 routes compiled |
-| Enquiry flow, 20 checks | `node scripts/verify-enquiry-flow.mjs` | Pass — all 20 behaved as expected |
-| Seller flow, 22 checks | `node scripts/verify-seller-flow.mjs` | Pass — all 22 behaved as expected |
+| Enquiry flow | `node scripts/verify-enquiry-flow.mjs` | 17/17 behaviour checks pass; 3 limitations reproduce |
+| Seller flow | `node scripts/verify-seller-flow.mjs` | 26/26 behaviour checks pass; 2 limitations reproduce |
+| Forms without JavaScript | `node scripts/verify-no-javascript.mjs` | 21/21 forms work with scripting disabled |
+| Sample-mode guard | `./scripts/verify-sample-mode-guard.sh` | 8/8 — build time and run time, both directions |
 | Sample-mode guard, both directions | `./scripts/verify-sample-mode-guard.sh` | Pass — build-time and run-time |
 | Unit / integration tests | — | **None written. No test runner is configured.** |
 
@@ -75,6 +77,22 @@ OTP → invalid code → valid code → confirmation → enquiry tracking → en
 | Browser Back through the journey | ✅ no lost state |
 | Unknown property | ✅ 404 |
 | Over-narrow filters | ✅ empty state naming the filters and offering to clear |
+
+## How these results are counted
+
+Two registers, kept apart on purpose.
+
+**Behaviour checks** assert that something claimed to work does. A pass means
+the claim holds.
+
+**Limitations** record a known gap reproducing as documented. Reproducing an OTP
+bypass, an unsigned cookie, an unprotected URL or shared-account state is **not
+a control passing** — it is a control that does not exist yet, confirmed still
+absent. Counting those in one total with real assertions would inflate the
+number with things that are wrong on purpose.
+
+A limitation that stops reproducing fails the run, because it means either the
+gap was closed (and the check should become an assertion) or the test drifted.
 
 ## Enquiry flow beyond the happy path
 
@@ -144,7 +162,7 @@ come from a sequence, never from the payload.
 | 5 | Happy path records exactly one enquiry | ✅ list grew by one |
 | 6 | Confirmation URL carries an opaque receipt, not the reference | ✅ UUID in URL, `e-…` on screen |
 | 7 | Reloading the confirmation records nothing further | ✅ |
-| 8 | Direct access to a confirmation with no session | ⚠️ **renders (200)** — see limitations |
+| 8 | *(moved to limitation L1)* | — |
 | 9 | A guessed or enumerated reference cannot open a confirmation | ✅ 404 for both `e-50004` and `e-50001` |
 | 10 | Replaying the same draft after it was cleared | ✅ no second enquiry |
 | 11 | Two tabs on the same draft | ✅ one enquiry, both tabs land on the same receipt |
@@ -155,8 +173,12 @@ come from a sequence, never from the payload.
 | 16 | Missing draft | ✅ refused, named as missing |
 | 17 | Expired and missing show different copy | ✅ not one generic error |
 | 18 | A rejected code keeps the draft | ✅ error shown, draft intact |
-| 19 | The confirm handoff does not require the OTP step | ⚠️ **a draft alone reaches confirmation** |
-| 20 | The draft cookie is unsigned | ⚠️ **a crafted draft is accepted** |
+| 19 | *(moved to limitation L2)* | — |
+| 20 | *(moved to limitation L3)* | — |
+
+**Limitations, not results:** L1 an exact receipt URL is not access-controlled ·
+L2 the confirm handoff does not require the OTP step · L3 the draft cookie is
+unsigned. Each reproduces as documented, and none of them is a control passing.
 
 ### On "expired OTP"
 
@@ -231,11 +253,59 @@ contact field to the seed cannot leak it by default.
 | CSV export is server-generated and attached | ✅ `text/csv`, `content-disposition: attachment` |
 | Exporting a lead not owned | ✅ 404, not an empty file |
 
-### Limitations asserted, not passed
+### Reset determinism and ledger reconciliation
+
+Two defects found by reading the store rather than the screens, both now fixed
+and both covered by checks 19–24:
+
+- **Reset was incomplete.** It restored the account, balance and purchases and
+  left the ledger, invoices, support threads and every counter carrying whatever
+  the previous review pass had done to them. A reviewer who reset and opened the
+  transaction history saw the last run's entries. Initialisation and reset now
+  derive from one `freshState()` factory, so a field that is not reset is a
+  field that does not exist. Verified by disturbing every kind of record — a
+  purchase, a recharge, a created ticket, a reply, a balance adjustment and a
+  KYC change — then resetting and comparing the full snapshot.
+
+- **The wallet did not reconcile.** The seed ledger's four entries summed to
+  3,180 while the wallet reported 4,200, the running-balance column did not
+  chain, and the store kept a `balanceCredits` field alongside the ledger while
+  the screen told Sellers that "balances are derived from these entries, never
+  edited directly". There is now no balance field: the balance is the last
+  entry's running total, computed from an explicit opening balance of zero.
+  Seven seed entries, recharges 8,000 and purchases 3,800, netting the 4,200 the
+  approved screens show, with the balance never going negative.
+
+  The invariant is exposed at `/seller/review-state?reconcile=1` and asserted
+  after a purchase, a recharge, a review adjustment and a reset — not just at
+  rest. Even the review balance switch posts an adjustment entry rather than
+  assigning a number, so it cannot break the invariant it helps test.
+
+**The suite was run three times against one running server**, with identical
+results, which is what makes the reset claim meaningful rather than an artifact
+of a fresh process.
+
+### Forms without JavaScript
+
+`scripts/verify-no-javascript.mjs` drives 21 submissions with
+`javaScriptEnabled: false`: registration through both phases including the
+rejected code, business details with GSTIN format checking, KYC validation,
+ticket creation, reply and resolve, recharge validation and completion, a lead
+purchase, marketplace filtering, billing details and profile. All 21 work.
+
+This matters because the defect it guards against shipped once: an action passed
+to `useActionState` must be the server action itself, and a client closure that
+dispatches between two of them only exists after hydration — so the form has no
+action at all before then. The Apply-filters button on S-07 is server-rendered
+and hidden only once the change handler is live, which is why filtering works
+either way.
+
+### Limitations reproduced, not passed
 
 - **A second browser sees the first browser's purchase.** Sample mode has one
   Seller and no sign-in, so state is shared across browsers. Per-account
-  isolation is kkl-backend's and is not demonstrated.
+  isolation is kkl-backend's and is not demonstrated. This is not an
+  access-control pass.
 - **`/seller/review-state` is reachable in sample mode.** It is how S-04, S-05,
   S-10 and S-16 are reached without an administrator or a gateway. It returns
   404 outside sample mode — **and that path is untestable today**, because a

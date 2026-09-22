@@ -15,10 +15,25 @@
 const { chromium } = await import(process.env.PLAYWRIGHT ?? 'playwright');
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3811';
+/**
+ * Two separate registers, deliberately.
+ *
+ * `ok()` is a behaviour test: something is claimed to work and it does.
+ * `observed()` records a KNOWN LIMITATION reproducing as documented. Reproducing
+ * an OTP bypass or shared-account state is not a control passing — counting it
+ * in the same total as a real assertion would inflate the pass count with
+ * things that are wrong on purpose, which is the opposite of what a reader
+ * needs. They are counted and printed apart.
+ */
 const results = [];
+const observations = [];
 const ok = (name, pass, detail) => {
   results.push({ name, pass, detail });
   console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}\n      ${detail}`);
+};
+const observed = (name, reproduced, detail) => {
+  observations.push({ name, reproduced, detail });
+  console.log(`${reproduced ? 'LIMIT' : 'CHANGED'}  ${name}\n      ${detail}`);
 };
 
 const browser = await chromium.launch();
@@ -229,28 +244,188 @@ ok('18. Exporting a lead this account does not own returns 404, not an empty fil
    notOwned.status() === 404,
    `status ${notOwned.status()} for an unpurchased lead`);
 
+// ------------------------------------------------------- reset determinism
+
+/** The full state a reset has to put back, read through the screens. */
+async function snapshot(ctx) {
+  const page = await ctx.newPage();
+  const read = async (path, fn) => {
+    await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
+    return fn(await page.textContent('body'));
+  };
+
+  const balanceText = await read('/seller/billing', (t) =>
+    (t.match(/Available balance\s*₹([\d,]+) credits/) ?? [])[1] ?? null,
+  );
+  // Unique references, not raw matches: each row prints its reference in both
+  // the description and the reference column, so counting occurrences triples
+  // the number of entries.
+  const ledgerRows = await read('/seller/billing/history', (t) =>
+    new Set(t.match(/(PAY|ORD|ADJ)-[\d]+/g) ?? []).size,
+  );
+  const invoiceRows = await read('/seller/billing/invoices', (t) =>
+    new Set(t.match(/INV-\d{4}-\d{4}/g) ?? []).size,
+  );
+  const purchasedCount = await read('/seller/purchased', (t) =>
+    Number((t.match(/(\d+) purchased lead/) ?? [])[1] ?? 0),
+  );
+  const ticketCount = await read('/seller/support', (t) =>
+    Number((t.match(/(\d+) ticket/) ?? [])[1] ?? 0),
+  );
+  const marketCount = await read('/seller/leads', (t) =>
+    Number((t.match(/(\d+) leads? ·/) ?? [])[1] ?? 0),
+  );
+  const kycChip = await read('/seller/kyc/status', (t) =>
+    ['Approved', 'In review', 'Rejected', 'Not submitted'].find((w) => t.includes(w)) ?? null,
+  );
+
+  await page.close();
+  return { balanceText, ledgerRows, invoiceRows, purchasedCount, ticketCount, marketCount, kycChip };
+}
+
+async function reconciliation(ctx) {
+  const res = await ctx.request.get(`${BASE}/seller/review-state?reconcile=1`);
+  return res.json();
+}
+
+await reviewState(A, 'reset=1');
+const seed = await snapshot(A);
+
+ok('19. The seed state is the documented one',
+   seed.balanceText === '4,200' &&
+     seed.ledgerRows === 7 &&
+     seed.invoiceRows === 3 &&
+     seed.purchasedCount === 0 &&
+     seed.ticketCount === 3 &&
+     seed.marketCount === 4 &&
+     seed.kycChip === 'Approved',
+   JSON.stringify(seed));
+
+const seedReconcile = await reconciliation(A);
+ok('20. The seed ledger reconciles',
+   seedReconcile.consistent && seedReconcile.expectedBalance === 4200,
+   `opening ${seedReconcile.openingBalance} + deltas ${seedReconcile.sumOfDeltas} = ${seedReconcile.expectedBalance}, reported ${seedReconcile.reportedBalance}, chain ${seedReconcile.chainIntact ? 'intact' : 'BROKEN'}`);
+
+// Disturb every kind of record, then reset.
+const dirty1 = await A.newPage();
+await dirty1.goto(`${BASE}/seller/leads/L-4471/buy`, { waitUntil: 'networkidle' });
+await Promise.all([
+  dirty1.waitForURL(/\/result$/, { timeout: 15000 }),
+  dirty1.click('button:has-text("Confirm and buy")'),
+]);
+const dirty2 = await A.newPage();
+await dirty2.goto(`${BASE}/seller/billing/recharge`, { waitUntil: 'networkidle' });
+await Promise.all([
+  dirty2.waitForURL(/\/billing\/payment$/, { timeout: 15000 }),
+  dirty2.click('button:has-text("Continue to payment")'),
+]);
+const dirty3 = await A.newPage();
+await dirty3.goto(`${BASE}/seller/support/new`, { waitUntil: 'networkidle' });
+await dirty3.fill('#subject', 'Reset determinism probe');
+await dirty3.fill('#body', 'A ticket created only so that reset has something to clear.');
+await Promise.all([
+  dirty3.waitForURL(/\/seller\/support\/T-/, { timeout: 15000 }),
+  dirty3.click('button:has-text("Submit ticket")'),
+]);
+await dirty3.fill('#reply-body', 'A reply, so the thread has been touched too.');
+await dirty3.click('button:has-text("Send reply")');
+await dirty3.waitForTimeout(600);
+await reviewState(A, 'balance=137');
+await reviewState(A, 'kyc=rejected');
+await reviewState(A, 'account=suspended');
+
+const dirty = await snapshot(A);
+ok('21. The disturbance actually changed every kind of record',
+   dirty.ledgerRows > seed.ledgerRows &&
+     dirty.invoiceRows > seed.invoiceRows &&
+     dirty.purchasedCount > seed.purchasedCount &&
+     dirty.ticketCount > seed.ticketCount &&
+     dirty.kycChip !== seed.kycChip,
+   JSON.stringify(dirty));
+
+await reviewState(A, 'reset=1');
+const afterReset = await snapshot(A);
+ok('22. Reset restores every record and counter to the seed state',
+   JSON.stringify(afterReset) === JSON.stringify(seed),
+   `after reset ${JSON.stringify(afterReset)}`);
+
+const resetReconcile = await reconciliation(A);
+ok('23. The ledger still reconciles after reset',
+   resetReconcile.consistent && JSON.stringify(resetReconcile) === JSON.stringify(seedReconcile),
+   `${resetReconcile.expectedBalance} expected, ${resetReconcile.reportedBalance} reported, ${resetReconcile.entryCount} entries`);
+
+// The invariant must hold after each kind of mutation, not just at rest.
+const afterEach = [];
+const buyAgain = await A.newPage();
+await buyAgain.goto(`${BASE}/seller/leads/L-4471/buy`, { waitUntil: 'networkidle' });
+await Promise.all([
+  buyAgain.waitForURL(/\/result$/, { timeout: 15000 }),
+  buyAgain.click('button:has-text("Confirm and buy")'),
+]);
+afterEach.push(['purchase', await reconciliation(A)]);
+
+const rechargeAgain = await A.newPage();
+await rechargeAgain.goto(`${BASE}/seller/billing/recharge`, { waitUntil: 'networkidle' });
+await Promise.all([
+  rechargeAgain.waitForURL(/\/billing\/payment$/, { timeout: 15000 }),
+  rechargeAgain.click('button:has-text("Continue to payment")'),
+]);
+afterEach.push(['recharge', await reconciliation(A)]);
+
+await reviewState(A, 'balance=500');
+afterEach.push(['review adjustment', await reconciliation(A)]);
+
+await reviewState(A, 'reset=1');
+afterEach.push(['reset', await reconciliation(A)]);
+
+ok('24. The ledger reconciles after every kind of mutation',
+   afterEach.every(([, r]) => r.consistent),
+   afterEach.map(([label, r]) => `${label}: ${r.reportedBalance} (${r.entryCount})`).join(' · '));
+
 // ------------------------------------------------------------- LIMITATIONS
+
+// A purchase has to exist for the cross-session observation to mean anything;
+// the reset above cleared the earlier one.
+const forCross = await A.newPage();
+await forCross.goto(`${BASE}/seller/leads/L-4471/buy`, { waitUntil: 'networkidle' });
+await Promise.all([
+  forCross.waitForURL(/\/result$/, { timeout: 15000 }),
+  forCross.click('button:has-text("Confirm and buy")'),
+]);
+
 const C = await browser.newContext();
 const crossSession = await C.newPage();
 await crossSession.goto(`${BASE}/seller/purchased/L-4471`, { waitUntil: 'networkidle' });
 const crossBody = await crossSession.textContent('body');
-ok('19. LIMITATION: a second browser sees the first browser\'s purchase',
+observed('L1. A second browser sees the first browser\'s purchase',
    crossBody.includes('Rina Sen'),
-   'sample mode has one Seller and no sign-in, so state is shared — per-account isolation is kkl-backend\'s');
+   'sample mode has one Seller and no sign-in, so state is shared. Per-account isolation is kkl-backend\'s and is NOT demonstrated. This is not an access-control pass.');
 
 const guard = await C.request.get(`${BASE}/seller/review-state?reset=1`, {
   maxRedirects: 0,
   failOnStatusCode: false,
 });
-ok('20. LIMITATION: the review-state route is reachable in sample mode',
+observed('L2. The review-state route is reachable in sample mode',
    guard.status() === 307 || guard.status() === 302 || guard.status() === 200,
-   `status ${guard.status()} — refuses with 404 outside sample mode, and sample mode cannot serve production`);
+   `status ${guard.status()}. It sets which designed screen renders; it is not an authorisation bypass, and it returns 404 outside sample mode.`);
 
 await browser.close();
+
 const failed = results.filter((r) => !r.pass);
-console.log(`\n${results.length - failed.length}/${results.length} checks behaved as expected.`);
+const changed = observations.filter((o) => !o.reproduced);
+
+console.log(`\n${results.length - failed.length}/${results.length} behaviour checks passed.`);
+console.log(
+  `${observations.length - changed.length}/${observations.length} known limitations reproduced as documented ` +
+    '(reproduction is not a pass — these are things that do not work yet).',
+);
+
 if (failed.length) {
-  console.log('Unexpected:');
+  console.log('\nFailed behaviour checks:');
   failed.forEach((f) => console.log(' - ' + f.name));
-  process.exit(1);
 }
+if (changed.length) {
+  console.log('\nLimitations that no longer reproduce — re-verify and rewrite as assertions:');
+  changed.forEach((c) => console.log(' - ' + c.name));
+}
+if (failed.length || changed.length) process.exit(1);

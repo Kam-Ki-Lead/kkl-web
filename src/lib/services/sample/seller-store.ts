@@ -96,8 +96,51 @@ const SEED_KYC: KycSubmission = {
   aadhaarMasked: "•••• •••• 4182",
 };
 
-/** Seed balance. Declared above the holder, which reads it. */
-const SEED_BALANCE = 4_200;
+/*
+ * Sequence seeds. Declared above `freshState`, which reads them: the holder
+ * calls that factory during module evaluation, so a `const` below it is still
+ * in its temporal dead zone and the whole route fails to build.
+ */
+const SEED_ORDER_SEQUENCE = 10_233;
+const SEED_PAYMENT_SEQUENCE = 88_441;
+const SEED_TICKET_SEQUENCE = 2_291;
+const SEED_INVOICE_SEQUENCE = 914;
+
+/**
+ * One description of a clean Seller, used for both initialisation and reset.
+ *
+ * Reset was previously a hand-written list of fields to put back, and it drifted
+ * from the list of fields that exist: it restored the account, balance and
+ * purchases but left the ledger, invoices, support threads and every counter
+ * carrying whatever the last review pass had done to them. A reviewer who reset
+ * and then read the transaction history saw the previous run's entries.
+ *
+ * Deriving both paths from this one function makes that failure impossible: a
+ * field that is not reset is a field that does not exist.
+ */
+function freshState() {
+  return {
+    account: SEED_ACCOUNT,
+    billing: SEED_BILLING,
+    kyc: SEED_KYC,
+    soldLeads: new Map<string, PurchasedLead>(),
+    purchaseTokens: new Map<string, string>(),
+    rechargeTokens: new Map<string, RechargeOutcome>(),
+    orderSequence: SEED_ORDER_SEQUENCE,
+    paymentSequence: SEED_PAYMENT_SEQUENCE,
+    ticketSequence: SEED_TICKET_SEQUENCE,
+    invoiceSequence: SEED_INVOICE_SEQUENCE,
+    messageSequence: 0,
+    adjustmentSequence: 0,
+    openingBalance: SEED_OPENING_BALANCE,
+    paymentOutcome: "success" as "success" | "pending" | "failed",
+    ledger: seedLedger(),
+    invoices: seedInvoices(),
+    threads: seedThreads(),
+  };
+}
+
+type SellerState = ReturnType<typeof freshState>;
 
 /**
  * All mutable state, in one process-scoped holder.
@@ -108,29 +151,27 @@ const SEED_BALANCE = 4_200;
  * review route set the balance and every page went on showing the old one. See
  * process-state.ts.
  *
- * Fields are mutated in place. Reassigning `state` would leave whichever bundle
- * loaded first holding the old object.
+ * The holder object itself is never reassigned, including on reset: whichever
+ * bundle loaded first holds this reference, so replacing it would strand them.
+ * Reset copies a fresh state's fields into it instead.
  */
-const state = processState("seller", () => ({
-  account: SEED_ACCOUNT,
-  billing: SEED_BILLING,
-  kyc: SEED_KYC,
-  soldLeads: new Map<string, PurchasedLead>(),
-  purchaseTokens: new Map<string, string>(),
-  rechargeTokens: new Map<string, RechargeOutcome>(),
-  orderSequence: 10_233,
-  paymentSequence: 88_441,
-  ticketSequence: 2_291,
-  messageSequence: 0,
-  balanceCredits: SEED_BALANCE,
-  paymentOutcome: "success" as "success" | "pending" | "failed",
-  ledger: seedLedger(),
-  invoices: seedInvoices(),
-  threads: seedThreads(),
-}));
+let holder: SellerState | null = null;
+
+/**
+ * The state, resolved on first use rather than at module evaluation.
+ *
+ * `freshState()` reads seed constants declared throughout this file, and calling
+ * it while the module is still evaluating puts whichever ones sit below it in
+ * their temporal dead zone — which failed the build twice while this was being
+ * written. Resolving lazily means declaration order stops mattering.
+ */
+function state(): SellerState {
+  holder ??= processState("seller", freshState);
+  return holder;
+}
 
 export function getAccount(): SellerAccount {
-  return state.account;
+  return state().account;
 }
 
 export function saveBusiness(input: {
@@ -139,8 +180,8 @@ export function saveBusiness(input: {
   areas: readonly string[];
   gstin: string | null;
 }): SellerAccount {
-  state.account = { ...state.account, ...input };
-  return state.account;
+  state().account = { ...state().account, ...input };
+  return state().account;
 }
 
 export function saveProfile(input: {
@@ -148,23 +189,23 @@ export function saveProfile(input: {
   agencyName: string;
   alerts: SellerAlertPreferences;
 }): SellerAccount {
-  state.account = { ...state.account, ...input };
-  return state.account;
+  state().account = { ...state().account, ...input };
+  return state().account;
 }
 
 export function getBilling(): BillingDetails {
-  return state.billing;
+  return state().billing;
 }
 
 export function saveBilling(next: BillingDetails): BillingDetails {
-  state.billing = next;
-  return state.billing;
+  state().billing = next;
+  return state().billing;
 }
 
-// ---------------------------------------------------------------------- state.kyc --
+// ---------------------------------------------------------------------- state().kyc --
 
 export function getKyc(): KycSubmission {
-  return state.kyc;
+  return state().kyc;
 }
 
 /**
@@ -182,7 +223,7 @@ export function submitKyc(input: {
   const masked = input.panNumber
     ? `${input.panNumber.slice(0, 5)}••••${input.panNumber.slice(-1)}`
     : null;
-  state.kyc = {
+  state().kyc = {
     status: "pending",
     submittedAt: new Date().toISOString(),
     decidedAt: null,
@@ -190,26 +231,26 @@ export function submitKyc(input: {
     panMasked: masked,
     aadhaarMasked: input.hasAadhaarDocument ? "•••• •••• ••••" : null,
   };
-  state.account = { ...state.account, kycStatus: "pending" };
-  return state.kyc;
+  state().account = { ...state().account, kycStatus: "pending" };
+  return state().kyc;
 }
 
 export function kycTimeline(): readonly KycTimelineEntry[] {
   const entries: KycTimelineEntry[] = [
-    { label: "Documents submitted", at: state.kyc.submittedAt },
+    { label: "Documents submitted", at: state().kyc.submittedAt },
   ];
-  if (state.kyc.status === "approved") {
+  if (state().kyc.status === "approved") {
     entries.push({
       label: "Approved by administrator",
-      at: state.kyc.decidedAt,
+      at: state().kyc.decidedAt,
     });
-    entries.push({ label: "Purchasing enabled", at: state.kyc.decidedAt });
-  } else if (state.kyc.status === "rejected") {
+    entries.push({ label: "Purchasing enabled", at: state().kyc.decidedAt });
+  } else if (state().kyc.status === "rejected") {
     entries.push({
       label: "Rejected by administrator",
-      at: state.kyc.decidedAt,
+      at: state().kyc.decidedAt,
     });
-  } else if (state.kyc.status === "pending") {
+  } else if (state().kyc.status === "pending") {
     // No third entry, and no estimate: D-11 leaves turnaround unpromised.
     entries.push({ label: "Awaiting administrator review", at: null });
   }
@@ -384,7 +425,7 @@ function toMaskedDetail(seed: SeedLead): MarketplaceLeadDetail {
 }
 
 export function listLeads(query: LeadMarketQuery): LeadMarketPage {
-  const available = SEED_LEADS.filter((l) => !state.soldLeads.has(l.id));
+  const available = SEED_LEADS.filter((l) => !state().soldLeads.has(l.id));
   let leads = available.filter((l) =>
     query.onSaleOnly === true ? l.status === "on_sale" : true,
   );
@@ -441,7 +482,7 @@ export function listLeads(query: LeadMarketQuery): LeadMarketPage {
 }
 
 export function getLead(id: string): MarketplaceLeadDetail | null {
-  if (state.soldLeads.has(id)) return null;
+  if (state().soldLeads.has(id)) return null;
   const seed = SEED_LEADS.find((l) => l.id === id);
   return seed ? toMaskedDetail(seed) : null;
 }
@@ -450,39 +491,39 @@ export function getLead(id: string): MarketplaceLeadDetail | null {
  * Buying a lead.
  *
  * Order of checks matters and mirrors what a real implementation must do:
- * state.account state first, then availability, then funds, then the deduction, and
+ * state().account state first, then availability, then funds, then the deduction, and
  * only then the release. Nothing is released if the deduction does not happen.
  */
 export function purchaseLead(input: {
   leadId: string;
   idempotencyKey: string;
 }): PurchaseOutcome {
-  const replayed = state.purchaseTokens.get(input.idempotencyKey);
+  const replayed = state().purchaseTokens.get(input.idempotencyKey);
   if (replayed !== undefined) {
-    const existing = state.soldLeads.get(replayed);
+    const existing = state().soldLeads.get(replayed);
     if (existing) return { kind: "purchased", lead: existing, duplicate: true };
   }
 
-  if (state.account.accountStatus === "suspended")
+  if (state().account.accountStatus === "suspended")
     return { kind: "account_suspended" };
-  if (state.account.kycStatus !== "approved") {
-    return { kind: "not_verified", kycStatus: state.account.kycStatus };
+  if (state().account.kycStatus !== "approved") {
+    return { kind: "not_verified", kycStatus: state().account.kycStatus };
   }
 
   const seed = SEED_LEADS.find((l) => l.id === input.leadId);
-  if (!seed || state.soldLeads.has(input.leadId))
+  if (!seed || state().soldLeads.has(input.leadId))
     return { kind: "already_sold" };
 
-  if (state.balanceCredits < seed.priceCredits) {
+  if (derivedBalance() < seed.priceCredits) {
     return {
       kind: "insufficient_credits",
       priceCredits: seed.priceCredits,
-      balanceCredits: state.balanceCredits,
+      balanceCredits: derivedBalance(),
     };
   }
 
-  state.orderSequence += 1;
-  const orderId = `ORD-${state.orderSequence}`;
+  state().orderSequence += 1;
+  const orderId = `ORD-${state().orderSequence}`;
   const purchasedAt = new Date().toISOString();
 
   // Deduct first. The release below is only reached because this succeeded.
@@ -508,19 +549,19 @@ export function purchaseLead(input: {
     qualification: seed.qualification,
   };
 
-  state.soldLeads.set(seed.id, purchased);
-  state.purchaseTokens.set(input.idempotencyKey, seed.id);
+  state().soldLeads.set(seed.id, purchased);
+  state().purchaseTokens.set(input.idempotencyKey, seed.id);
   return { kind: "purchased", lead: purchased, duplicate: false };
 }
 
 export function listPurchased(): readonly PurchasedLead[] {
-  return [...state.soldLeads.values()].sort((a, b) =>
+  return [...state().soldLeads.values()].sort((a, b) =>
     b.purchasedAt.localeCompare(a.purchasedAt),
   );
 }
 
 export function getPurchased(id: string): PurchasedLead | null {
-  return state.soldLeads.get(id) ?? null;
+  return state().soldLeads.get(id) ?? null;
 }
 
 /** CSV of the caller's own purchased leads. Quoting is deliberate, not optional. */
@@ -572,53 +613,174 @@ export function exportPurchasedCsv(ids?: readonly string[]): string {
 
 // ------------------------------------------------------------------ credits --
 
+/**
+ * The balance before the first entry in the ledger below.
+ *
+ * Zero: the seed history starts at account opening, so every credit in the
+ * balance is accounted for by an entry a reviewer can see. An opening balance
+ * exists as a concept because a real ledger is windowed — you do not fetch every
+ * entry since 2019 to render a page — but the sample data does not need one, and
+ * a non-zero opening would be an unexplained number at the top of the table.
+ */
+const SEED_OPENING_BALANCE = 0;
+
+/**
+ * The seed ledger, oldest first, as deltas only.
+ *
+ * `balanceAfterCredits` is deliberately absent here and computed by
+ * `withRunningBalance`. Writing both the delta and the balance by hand is how
+ * the previous version came to disagree with itself: its four entries summed to
+ * 3,180 while the wallet reported 4,200, and the balances down the column did
+ * not chain. A reader checking the arithmetic — which is the whole point of
+ * showing a running balance — would have found it wrong.
+ *
+ * Reconciliation: recharges 1,000 + 5,000 + 2,000 = 8,000; purchases 950 +
+ * 1,030 + 780 + 1,040 = 3,800; 0 + 8,000 − 3,800 = 4,200, which is the balance
+ * the approved S-06 and S-14 show. The running balance never goes negative,
+ * because the account is recharged before it buys.
+ */
+type SeedEntry = Omit<LedgerEntry, "balanceAfterCredits">;
+
+const SEED_ENTRIES: readonly SeedEntry[] = [
+  {
+    id: "PAY-87811",
+    occurredAt: "2026-08-21T05:40:00.000Z",
+    type: "recharge",
+    description: "Credit recharge",
+    deltaCredits: 1_000,
+    expiresAt: null,
+  },
+  {
+    id: "ORD-10088",
+    occurredAt: "2026-08-28T10:15:00.000Z",
+    type: "lead_purchase",
+    description: "Lead purchase L-4310",
+    deltaCredits: -950,
+    expiresAt: null,
+  },
+  {
+    id: "PAY-87902",
+    occurredAt: "2026-09-02T07:20:00.000Z",
+    type: "recharge",
+    description: "Credit recharge",
+    deltaCredits: 5_000,
+    expiresAt: null,
+  },
+  {
+    id: "ORD-10190",
+    occurredAt: "2026-09-05T12:02:00.000Z",
+    type: "lead_purchase",
+    description: "Lead purchase L-4288",
+    deltaCredits: -1_030,
+    expiresAt: null,
+  },
+  {
+    id: "ORD-10211",
+    occurredAt: "2026-09-09T09:05:00.000Z",
+    type: "lead_purchase",
+    description: "Lead purchase L-4455",
+    deltaCredits: -780,
+    expiresAt: null,
+  },
+  {
+    id: "ORD-10233",
+    occurredAt: "2026-09-12T11:40:00.000Z",
+    type: "lead_purchase",
+    description: "Lead purchase L-4402",
+    deltaCredits: -1_040,
+    expiresAt: null,
+  },
+  {
+    id: "PAY-88441",
+    occurredAt: "2026-09-14T06:12:00.000Z",
+    type: "recharge",
+    description: "Credit recharge",
+    deltaCredits: 2_000,
+    expiresAt: null,
+  },
+];
+
+/** Runs the deltas from the opening balance, stamping each entry's result. */
+function withRunningBalance(
+  entries: readonly SeedEntry[],
+  opening: number,
+): LedgerEntry[] {
+  let running = opening;
+  return entries.map((entry) => {
+    running += entry.deltaCredits;
+    return { ...entry, balanceAfterCredits: running };
+  });
+}
+
 function seedLedger(): LedgerEntry[] {
-  return [
-    {
-      id: "PAY-88441",
-      occurredAt: "2026-09-14T06:12:00.000Z",
-      type: "recharge",
-      description: "Credit recharge",
-      deltaCredits: 2_000,
-      balanceAfterCredits: 4_200,
-      expiresAt: null,
-    },
-    {
-      id: "ORD-10233",
-      occurredAt: "2026-09-12T11:40:00.000Z",
-      type: "lead_purchase",
-      description: "Lead purchase L-4402",
-      deltaCredits: -1_040,
-      balanceAfterCredits: 2_200,
-      expiresAt: null,
-    },
-    {
-      id: "ORD-10211",
-      occurredAt: "2026-09-09T09:05:00.000Z",
-      type: "lead_purchase",
-      description: "Lead purchase L-4455",
-      deltaCredits: -780,
-      balanceAfterCredits: 3_240,
-      expiresAt: null,
-    },
-    {
-      id: "PAY-87902",
-      occurredAt: "2026-09-02T07:20:00.000Z",
-      type: "recharge",
-      description: "Credit recharge",
-      deltaCredits: 5_000,
-      balanceAfterCredits: 4_020,
-      expiresAt: null,
-    },
-  ];
+  return withRunningBalance(SEED_ENTRIES, SEED_OPENING_BALANCE);
 }
 
 /**
- * Appends to the state.ledger and derives the new balance from it.
+ * The balance, derived from the ledger rather than tracked alongside it.
  *
- * The balance is never set directly — it is the result of an entry, which is the
- * property the design states on S-17: "balances are derived from these entries,
- * never edited directly."
+ * There is no `balanceCredits` field to drift. The previous version kept one and
+ * documented that balances are derived from entries, which made the
+ * documentation false the moment the two disagreed — and they did.
+ */
+function derivedBalance(): number {
+  const last = state().ledger[state().ledger.length - 1];
+  return last ? last.balanceAfterCredits : state().openingBalance;
+}
+
+/**
+ * The reconciliation invariant, exposed so a test can assert it rather than
+ * trust a comment.
+ *
+ * `consistent` is true when the opening balance plus every delta equals the last
+ * entry's running balance — that is, when the column a reader can add up agrees
+ * with the figure the screens show.
+ */
+export type Reconciliation = {
+  readonly openingBalance: number;
+  readonly sumOfDeltas: number;
+  readonly expectedBalance: number;
+  readonly reportedBalance: number;
+  readonly entryCount: number;
+  readonly chainIntact: boolean;
+  readonly consistent: boolean;
+};
+
+export function reconcile(): Reconciliation {
+  const sumOfDeltas = state().ledger.reduce(
+    (total, e) => total + e.deltaCredits,
+    0,
+  );
+  const expectedBalance = state().openingBalance + sumOfDeltas;
+  const reportedBalance = derivedBalance();
+
+  // Every row's balance must equal the row above it plus this row's delta, not
+  // just the last one — a single broken link in the middle is exactly what a
+  // reader following the column would trip over.
+  let running = state().openingBalance;
+  let chainIntact = true;
+  for (const entry of state().ledger) {
+    running += entry.deltaCredits;
+    if (entry.balanceAfterCredits !== running) chainIntact = false;
+  }
+
+  return {
+    openingBalance: state().openingBalance,
+    sumOfDeltas,
+    expectedBalance,
+    reportedBalance,
+    entryCount: state().ledger.length,
+    chainIntact,
+    consistent: chainIntact && expectedBalance === reportedBalance,
+  };
+}
+
+/**
+ * Appends to the ledger. The balance follows from the entry, never the reverse.
+ *
+ * This is the only way credits move. S-17 tells a Seller that "balances are
+ * derived from these entries, never edited directly", and that is true here
+ * because there is no balance field to edit.
  */
 function postLedgerEntry(input: {
   type: LedgerEntry["type"];
@@ -626,25 +788,26 @@ function postLedgerEntry(input: {
   deltaCredits: number;
   reference: string;
 }): LedgerEntry {
-  state.balanceCredits += input.deltaCredits;
   const entry: LedgerEntry = {
     id: input.reference,
     occurredAt: new Date().toISOString(),
     type: input.type,
     description: input.description,
     deltaCredits: input.deltaCredits,
-    balanceAfterCredits: state.balanceCredits,
+    balanceAfterCredits: derivedBalance() + input.deltaCredits,
     // Null, not a computed date. D-04 leaves the expiry period unset, and
     // inventing one here would put a made-up date in front of a Seller.
     expiresAt: null,
   };
-  state.ledger.unshift(entry);
+  // Appended, because the ledger is held oldest-first so the running balance
+  // reads down the array. `getLedger` reverses it for display.
+  state().ledger.push(entry);
   return entry;
 }
 
 export function wallet(): WalletSummary {
   return {
-    balanceCredits: state.balanceCredits,
+    balanceCredits: derivedBalance(),
     // Both null while D-04 is open: with no expiry period there is no basis for
     // saying any part of the balance is expiring or expired.
     expiringSoonCredits: null,
@@ -652,23 +815,30 @@ export function wallet(): WalletSummary {
   };
 }
 
-/** Review affordance: drop the balance to zero to reach the S-10 failure state. */
+/**
+ * Review affordance: set the balance, to reach S-10's insufficient-credits case.
+ *
+ * Posts an adjustment entry rather than assigning a balance, so even the review
+ * switch cannot break the invariant it is there to help test.
+ */
 export function setBalanceForReview(credits: number): void {
-  const delta = credits - state.balanceCredits;
+  const delta = credits - derivedBalance();
   if (delta === 0) return;
   postLedgerEntry({
     type: "adjustment",
     description: "Review adjustment — sample mode only",
     deltaCredits: delta,
-    reference: `ADJ-${Date.now()}`,
+    reference: `ADJ-${(state().adjustmentSequence += 1)}`,
   });
 }
 
+/** Newest first, which is how every screen reads it. */
 export function getLedger(filter?: {
   type?: "recharge" | "purchase";
 }): readonly LedgerEntry[] {
-  if (!filter?.type) return state.ledger;
-  return state.ledger.filter((e) =>
+  const newestFirst = [...state().ledger].reverse();
+  if (!filter?.type) return newestFirst;
+  return newestFirst.filter((e) =>
     filter.type === "recharge"
       ? e.type === "recharge"
       : e.type === "lead_purchase",
@@ -691,43 +861,43 @@ export function usageByMonth(): readonly UsageMonth[] {
 /**
  * Recharging.
  *
- * `state.paymentOutcome` decides success, pending or failure so the three
+ * `state().paymentOutcome` decides success, pending or failure so the three
  * designed results (S-16) can all be reached. That switch is the whole of the
  * "payment" here: no gateway is contacted and no money moves.
  */
 export function setPaymentOutcomeForReview(
   outcome: "success" | "pending" | "failed",
 ): void {
-  state.paymentOutcome = outcome;
+  state().paymentOutcome = outcome;
 }
 
 export function recharge(input: {
   amountInr: number;
   idempotencyKey: string;
 }): RechargeOutcome {
-  const replayed = state.rechargeTokens.get(input.idempotencyKey);
+  const replayed = state().rechargeTokens.get(input.idempotencyKey);
   if (replayed) {
     return replayed.kind === "credited"
       ? { ...replayed, duplicate: true }
       : replayed;
   }
 
-  state.paymentSequence += 1;
-  const paymentReference = `PAY-${state.paymentSequence}`;
+  state().paymentSequence += 1;
+  const paymentReference = `PAY-${state().paymentSequence}`;
 
-  if (state.paymentOutcome === "pending") {
+  if (state().paymentOutcome === "pending") {
     const outcome: RechargeOutcome = { kind: "pending", paymentReference };
-    state.rechargeTokens.set(input.idempotencyKey, outcome);
+    state().rechargeTokens.set(input.idempotencyKey, outcome);
     return outcome;
   }
 
-  if (state.paymentOutcome === "failed") {
+  if (state().paymentOutcome === "failed") {
     const outcome: RechargeOutcome = {
       kind: "failed",
       message:
         "The payment was not completed. No credits were added and nothing was charged.",
     };
-    state.rechargeTokens.set(input.idempotencyKey, outcome);
+    state().rechargeTokens.set(input.idempotencyKey, outcome);
     return outcome;
   }
 
@@ -738,8 +908,12 @@ export function recharge(input: {
     reference: paymentReference,
   });
 
-  const invoiceId = `INV-2026-${String(state.invoices.length + 915).padStart(4, "0")}`;
-  state.invoices.unshift({
+  // A counter, not `invoices.length + n`. Deriving an id from the length means
+  // the same id comes back after anything removes an invoice, and it ties the
+  // numbering to the display list rather than to issuance.
+  state().invoiceSequence += 1;
+  const invoiceId = `INV-2026-${String(state().invoiceSequence).padStart(4, "0")}`;
+  state().invoices.unshift({
     id: invoiceId,
     number: invoiceId,
     issuedAt: new Date().toISOString(),
@@ -751,16 +925,16 @@ export function recharge(input: {
   const outcome: RechargeOutcome = {
     kind: "credited",
     amountInr: input.amountInr,
-    balanceCredits: state.balanceCredits,
+    balanceCredits: derivedBalance(),
     paymentReference,
     invoiceId,
     duplicate: false,
   };
-  state.rechargeTokens.set(input.idempotencyKey, outcome);
+  state().rechargeTokens.set(input.idempotencyKey, outcome);
   return outcome;
 }
 
-// ----------------------------------------------------------------- state.invoices --
+// ----------------------------------------------------------------- state().invoices --
 
 function seedInvoices(): Invoice[] {
   return [
@@ -792,18 +966,18 @@ function seedInvoices(): Invoice[] {
 }
 
 export function listInvoices(): readonly Invoice[] {
-  return state.invoices;
+  return state().invoices;
 }
 
 export function getInvoice(id: string): InvoiceDetail | null {
-  const invoice = state.invoices.find((i) => i.id === id);
+  const invoice = state().invoices.find((i) => i.id === id);
   if (!invoice) return null;
   return {
     ...invoice,
     billedTo: {
-      name: state.billing.billingName,
-      addressLines: state.billing.addressLines,
-      gstin: state.billing.gstin,
+      name: state().billing.billingName,
+      addressLines: state().billing.addressLines,
+      gstin: state().billing.gstin,
     },
     issuedBy: {
       name: "Kam Ki Lead",
@@ -832,7 +1006,7 @@ type StoredThread = Omit<SupportThread, "messages" | "status" | "updatedAt"> & {
   updatedAt: string;
 };
 
-const nextMessageId = () => `M-${(state.messageSequence += 1)}`;
+const nextMessageId = () => `M-${(state().messageSequence += 1)}`;
 
 /**
  * Seed threads.
@@ -931,7 +1105,7 @@ function seedThreads(): StoredThread[] {
 }
 
 export function listTickets(): readonly SupportTicket[] {
-  return state.threads.map(withoutMessages);
+  return state().threads.map(withoutMessages);
 }
 
 /** A thread's ticket half, so a list never carries every message body. */
@@ -948,7 +1122,7 @@ function withoutMessages(thread: StoredThread): SupportTicket {
 }
 
 export function getThread(reference: string): SupportThread | null {
-  return state.threads.find((t) => t.reference === reference) ?? null;
+  return state().threads.find((t) => t.reference === reference) ?? null;
 }
 
 export function createTicket(input: {
@@ -956,8 +1130,8 @@ export function createTicket(input: {
   subject: string;
   body: string;
 }): SupportTicket {
-  state.ticketSequence += 1;
-  const reference = `T-${state.ticketSequence}`;
+  state().ticketSequence += 1;
+  const reference = `T-${state().ticketSequence}`;
   const now = new Date().toISOString();
   const thread: StoredThread = {
     id: reference,
@@ -979,7 +1153,7 @@ export function createTicket(input: {
       },
     ],
   };
-  state.threads.unshift(thread);
+  state().threads.unshift(thread);
   return withoutMessages(thread);
 }
 
@@ -987,7 +1161,7 @@ export function replyToTicket(input: {
   reference: string;
   body: string;
 }): SupportThread | null {
-  const thread = state.threads.find((t) => t.reference === input.reference);
+  const thread = state().threads.find((t) => t.reference === input.reference);
   if (!thread) return null;
   const now = new Date().toISOString();
   thread.messages.push({
@@ -1003,7 +1177,7 @@ export function replyToTicket(input: {
 }
 
 export function resolveTicket(reference: string): SupportThread | null {
-  const thread = state.threads.find((t) => t.reference === reference);
+  const thread = state().threads.find((t) => t.reference === reference);
   if (!thread) return null;
   thread.status = "resolved";
   thread.updatedAt = new Date().toISOString();
@@ -1013,7 +1187,7 @@ export function resolveTicket(reference: string): SupportThread | null {
 // ------------------------------------------------------- review affordances --
 
 /**
- * Review-only setters for the state.account states the design covers.
+ * Review-only setters for the state().account states the design covers.
  *
  * These exist so S-04 and S-05 can be reviewed without an administrator. They
  * are reachable only from a route that refuses to exist outside sample mode —
@@ -1023,41 +1197,39 @@ export function resolveTicket(reference: string): SupportThread | null {
  */
 export function setKycStatusForReview(status: KycSubmission["status"]): void {
   const now = new Date().toISOString();
-  state.kyc = {
+  state().kyc = {
     status,
     submittedAt:
-      status === "not_submitted" ? null : (state.kyc.submittedAt ?? now),
+      status === "not_submitted" ? null : (state().kyc.submittedAt ?? now),
     decidedAt: status === "approved" || status === "rejected" ? now : null,
     rejectionReason:
       status === "rejected"
         ? "The Aadhaar upload was not readable. Please re-upload both sides, or the e-Aadhaar PDF."
         : null,
     panMasked:
-      status === "not_submitted" ? null : (state.kyc.panMasked ?? "ABCDE••••F"),
+      status === "not_submitted"
+        ? null
+        : (state().kyc.panMasked ?? "ABCDE••••F"),
     aadhaarMasked:
       status === "not_submitted"
         ? null
-        : (state.kyc.aadhaarMasked ?? "•••• •••• 4182"),
+        : (state().kyc.aadhaarMasked ?? "•••• •••• 4182"),
   };
-  state.account = { ...state.account, kycStatus: status };
+  state().account = { ...state().account, kycStatus: status };
 }
 
 export function setAccountStatusForReview(
   status: SellerAccountStatusInput,
 ): void {
-  state.account = { ...state.account, accountStatus: status };
+  state().account = { ...state().account, accountStatus: status };
 }
 
 type SellerAccountStatusInput = SellerAccount["accountStatus"];
 
 /** Puts every seed value back, for a clean review pass. */
 export function resetForReview(): void {
-  state.account = SEED_ACCOUNT;
-  state.billing = SEED_BILLING;
-  setKycStatusForReview("approved");
-  state.soldLeads.clear();
-  state.purchaseTokens.clear();
-  state.rechargeTokens.clear();
-  state.balanceCredits = SEED_BALANCE;
-  state.paymentOutcome = "success";
+  // Copy a fresh state's fields into the existing holder rather than replacing
+  // it. Other bundles hold this object by reference (see process-state.ts), so
+  // reassigning it would leave them looking at the pre-reset state().
+  Object.assign(state(), freshState());
 }

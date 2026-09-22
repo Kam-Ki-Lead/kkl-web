@@ -25,9 +25,28 @@
  * So the authoritative values for the runtime guard are KKL_ENV and
  * KKL_DATA_SOURCE — deliberately without the NEXT_PUBLIC_ prefix, so they are
  * read from the process on each request instead of being frozen into the
- * bundle. assertDeploymentSafe() runs in proxy.ts, ahead of every request, and
- * refuses both the unsafe combination and any disagreement between what the
- * bundle was built as and what the server says it is.
+ * bundle. assertDeploymentSafe() runs in proxy.ts, ahead of every request.
+ *
+ * WHAT THE GUARD CAN AND CANNOT DETECT
+ * ------------------------------------
+ * It cannot tell where it is running. Nothing available to a Node process
+ * distinguishes a production host from a laptop, and this code does not try to
+ * guess from hostnames, cloud metadata or anything else — a guess that can be
+ * wrong is worse than a rule that is explicit.
+ *
+ * What it does instead is **require the deployment to declare itself**. A served
+ * build (NODE_ENV=production, i.e. `next start`) must set both KKL_ENV and
+ * KKL_DATA_SOURCE or it refuses to serve at all. That turns "nobody configured
+ * this" from a silent fallback into a visible failure, which is the only honest
+ * thing a guard in this position can do.
+ *
+ * Given those declarations it then refuses three things: production with sample
+ * services, a bundle built for one environment deployed as another, and a
+ * data-source disagreement between bundle and server.
+ *
+ * The residual risk, stated plainly: a deployment that declares itself
+ * `KKL_ENV=review` while serving real users is not detectable here, and nothing
+ * in a frontend could detect it. That is an operational control, not a code one.
  */
 
 export type DataSource = "sample" | "api";
@@ -92,6 +111,34 @@ export function assertDeploymentSafe(): void {
   const serverEnv = readEnv("KKL_ENV");
   const serverSource = readEnv("KKL_DATA_SOURCE");
 
+  // A production server must say what it is. Without this the guard falls back
+  // to the values baked into the bundle, which means a deployment that sets
+  // nothing at all runs whatever it was built as — and a review build deployed
+  // to production with no server configuration would serve sample services in
+  // silence. Refusing is the only way the absence of configuration is visible.
+  //
+  // NODE_ENV is "production" under `next start` and "development" under
+  // `next dev`, so this applies to a served build and not to local development.
+  // It does not apply during `next build`, because this function runs per
+  // request in proxy.ts, not at build time.
+  if (process.env.NODE_ENV === "production") {
+    const missing = [
+      serverEnv === undefined ? "KKL_ENV" : null,
+      serverSource === undefined ? "KKL_DATA_SOURCE" : null,
+    ].filter((name): name is string => name !== null);
+
+    if (missing.length > 0) {
+      throw new Error(
+        `Refusing to serve: ${missing.join(" and ")} ${missing.length === 1 ? "is" : "are"} not set. ` +
+          "A served build must state its environment and data source on the server, because the " +
+          "values compiled into the bundle cannot be trusted to describe where it ended up. Set " +
+          "KKL_ENV=development|review|production and KKL_DATA_SOURCE=sample|api to match the build. " +
+          "For local review that is KKL_ENV=review KKL_DATA_SOURCE=sample — see " +
+          "docs/phase-2/local-review.md.",
+      );
+    }
+  }
+
   const effectiveEnv = serverEnv ?? deploymentEnv;
   const effectiveSource = serverSource ?? dataSource;
 
@@ -122,6 +169,7 @@ export function assertDeploymentSafe(): void {
     );
   }
 }
+
 
 export const runtimeConfig = {
   deploymentEnv,

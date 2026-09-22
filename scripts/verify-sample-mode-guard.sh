@@ -3,10 +3,18 @@
 # Verifies the sample-mode guard in both directions.
 #
 #   1. The documented local review configuration serves a production build.
-#   2. A deployment marked for real users refuses to run sample services —
+#   2. A served build that declares nothing refuses to serve at all, so an
+#      unconfigured deployment fails visibly instead of silently running
+#      whatever it was built as.
+#   3. A deployment marked for real users refuses to run sample services —
 #      including the case the build-time check cannot see, where a bundle built
 #      for review is deployed with the production environment variable set on
 #      the server.
+#   4. A bundle/server disagreement, in either variable, refuses.
+#
+# What is NOT tested, because it is not detectable: a deployment that declares
+# KKL_ENV=review while actually serving real users. Nothing in a frontend can
+# tell where it is running. That is an operational control.
 #
 # Run from the repository root. Builds once, then starts the server under each
 # configuration in turn.
@@ -60,10 +68,16 @@ echo
 echo "== run-time guard =="
 scenario "documented local review configuration serves normally" 200 \
   NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample KKL_ENV=review KKL_DATA_SOURCE=sample
+scenario "a served build declaring nothing is refused" 503 \
+  NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample
+scenario "KKL_ENV set but KKL_DATA_SOURCE missing is refused" 503 \
+  NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample KKL_ENV=review
+scenario "KKL_DATA_SOURCE set but KKL_ENV missing is refused" 503 \
+  NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample KKL_DATA_SOURCE=sample
 scenario "review build deployed with KKL_ENV=production is refused" 503 \
-  NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample KKL_ENV=production
-scenario "KKL_ENV=production on a default build is refused" 503 \
-  KKL_ENV=production
+  NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample KKL_ENV=production KKL_DATA_SOURCE=sample
+scenario "KKL_ENV=production with sample data is refused" 503 \
+  NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample KKL_ENV=production KKL_DATA_SOURCE=sample
 scenario "a server/bundle data-source disagreement is refused" 503 \
   NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample KKL_ENV=review KKL_DATA_SOURCE=api
 

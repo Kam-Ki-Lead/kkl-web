@@ -40,6 +40,16 @@ export async function GET(request: NextRequest) {
   }
 
   const params = request.nextUrl.searchParams;
+
+  // Read-only: the ledger invariant, as JSON, so a test can assert it rather
+  // than infer it from rendered figures. Returned before any mutation so the
+  // caller sees the state it asked about.
+  if (params.get("reconcile") === "1") {
+    return NextResponse.json(review.reconcile(), {
+      headers: { "cache-control": "no-store" },
+    });
+  }
+
   const applied: string[] = [];
 
   // Reset runs first, so ?reset=1&balance=0 means "start clean, then set the
@@ -83,6 +93,7 @@ export async function GET(request: NextRequest) {
         "  ?payment=success|pending|failed                next recharge outcome (S-16)",
         "  ?balance=<rupees>                              set the balance, e.g. 0 for S-10",
         "  ?reset=1                                       restore every seed value",
+        "  ?reconcile=1                                   the ledger invariant, as JSON",
         "  &to=/seller/...                                where to go afterwards",
         "",
         "These set which designed screen renders. Nothing here approves a document,",
