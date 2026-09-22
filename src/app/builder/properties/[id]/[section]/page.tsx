@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BuilderShell } from "@/components/builder/builder-shell";
 import { EditorShell } from "@/components/builder/editor-shell";
-import { SectionForm } from "@/components/builder/section-forms";
+import { SectionForm, SECTION_FORM_ID } from "@/components/builder/section-forms";
 import { PublishForm } from "@/components/builder/publish-form";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -70,6 +70,7 @@ export default async function ListingSectionPage({
         sections={sections}
         current={section}
         editing={editing}
+        formId={section === "preview" ? null : SECTION_FORM_ID}
       >
         {section === "preview" ? (
           <PreviewSection listingId={id} listing={listing} previousHref={previous} account={account} />

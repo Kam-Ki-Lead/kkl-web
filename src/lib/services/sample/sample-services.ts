@@ -378,6 +378,12 @@ export const sampleReviewControls = {
     reset: () => {
       builderStore.resetForReview();
       resetBuilderModules();
+      // B-16 lists Buyer enquiries from the public portal alongside the seeded
+      // ones, so a Builder reset that left those behind would not be a reset:
+      // the console would reopen carrying the last review pass's enquiries, and
+      // a test asserting "this enquiry was not here before" would fail on its
+      // own second run.
+      enquiryStore.resetForReview();
     },
   },
 } as const;

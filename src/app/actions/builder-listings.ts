@@ -40,6 +40,14 @@ export async function createListing(): Promise<void> {
 export type SectionFormState = {
   readonly status: "idle" | "saved";
   readonly errors?: Readonly<Record<string, string>>;
+  /**
+   * An opaque nonce that changes on every successful save.
+   *
+   * B-15's header mark clears when a save lands, and "saved" alone cannot say
+   * that: two consecutive saves return an identical object and the second one
+   * would look like no change at all. This is read only for its inequality.
+   */
+  readonly savedAt?: number;
 };
 
 /**
@@ -80,7 +88,7 @@ export async function saveListingSection(
 
   const next = String(formData.get("next") ?? "");
   if (next.startsWith("/builder/")) redirect(next);
-  return { status: "saved" };
+  return { status: "saved", savedAt: Date.now() };
 }
 
 export type PublishFormState = {

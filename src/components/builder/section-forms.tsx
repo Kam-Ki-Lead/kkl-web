@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState } from "react";
-import Link from "next/link";
 import {
   saveListingSection,
   type SectionFormState,
 } from "@/app/actions/builder-listings";
+import { NoScriptSaveNotice, SavedSignal } from "@/components/builder/unsaved-changes";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
@@ -45,6 +45,16 @@ const AMENITIES = [
   "Swimming pool",
 ];
 
+/**
+ * The id the B-15 guard uses to find this form.
+ *
+ * It is shared rather than passed because the guard wraps the editor from
+ * outside — the header mark and the exit dialog are above and below the form in
+ * the tree — and a string both sides import cannot drift the way two literals
+ * would.
+ */
+export const SECTION_FORM_ID = "listing-section-form";
+
 export function SectionForm({
   listing,
   section,
@@ -64,9 +74,10 @@ export function SectionForm({
   );
 
   return (
-    <form action={action} className="flex flex-col gap-[16px]">
+    <form id={SECTION_FORM_ID} action={action} className="flex flex-col gap-[16px]">
       <input type="hidden" name="listingId" value={listing.id} />
       <input type="hidden" name="section" value={section} />
+      <SavedSignal savedAt={state.savedAt} />
 
       {state.status === "saved" ? (
         <p
@@ -84,21 +95,28 @@ export function SectionForm({
       {section === "media" ? <MediaFields listing={listing} /> : null}
 
       <div className="flex flex-wrap items-center gap-[10px] border-t border-line pt-[16px]">
+        {previousHref ? (
+          <Button
+            type="submit"
+            name="next"
+            value={previousHref}
+            variant="secondary"
+            disabled={pending}
+          >
+            ← Previous section
+          </Button>
+        ) : null}
         <Button type="submit" name="next" value={nextHref} disabled={pending}>
           {pending ? "Saving…" : nextLabel}
         </Button>
-        <Button type="submit" variant="secondary" disabled={pending}>
-          Save draft
-        </Button>
-        {previousHref ? (
-          <Link
-            href={previousHref}
-            className="t-caption text-brand underline underline-offset-2"
-          >
-            ← Previous section
-          </Link>
-        ) : null}
       </div>
+
+      {/* B-15. The dirty mark, the exit dialog and the reload warning are all
+          client behaviour; with scripting off none of them exist and nothing
+          here pretends they do. What still works is the part that matters
+          most: every control above is a submit button, so a section can be
+          saved and the editor left without losing anything. */}
+      <NoScriptSaveNotice />
     </form>
   );
 }

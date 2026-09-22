@@ -43,11 +43,31 @@ type StoredEnquiry = BuyerEnquiry & { readonly mobile: string; readonly name: st
  * the idempotency guarantee would then hold only within whichever bundle
  * happened to serve the request. See process-state.ts.
  */
-const state = processState("enquiry", () => ({
-  byToken: new Map<string, string>(),
-  byReference: new Map<string, StoredEnquiry>(),
-  sequence: 50_000,
-}));
+function freshState() {
+  return {
+    byToken: new Map<string, string>(),
+    byReference: new Map<string, StoredEnquiry>(),
+    sequence: 50_000,
+  };
+}
+
+const state = processState("enquiry", freshState);
+
+/**
+ * Restore the seed state (S-/B- review resets, and repeatable test runs).
+ *
+ * Initialisation and reset come from one factory for the same reason the Seller
+ * store does: a field that is not reset here is a field that does not exist.
+ *
+ * This matters beyond tidiness. Enquiries submitted through the portal feed the
+ * Builder's B-16 list, so a Builder reset that left them behind would not be a
+ * reset — the console would reopen carrying the last review pass's enquiries.
+ * `Object.assign` onto the held object rather than reassignment, so every
+ * consumer that captured the reference sees it.
+ */
+export function resetForReview(): void {
+  Object.assign(state, freshState());
+}
 
 function nextReference(): string {
   state.sequence += 1;

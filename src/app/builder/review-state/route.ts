@@ -89,7 +89,8 @@ export async function GET(request: NextRequest) {
       [
         "Builder review state — sample mode only.",
         "",
-        "  ?reset=1                                        restore every seed value",
+        "  ?reset=1                                        restore every seed value,",
+        "                                                  including portal enquiries (B-16)",
         "  ?reconcile=1                                    the ledger invariant, as JSON",
         "  ?kyc=not_submitted|pending|approved|rejected    verification (B-02, B-19)",
         "  ?account=active|suspended                       account state (B-19)",

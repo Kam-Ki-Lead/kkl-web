@@ -308,6 +308,155 @@ ok('26. No subscription price is shown anywhere',
    subPage.includes('Not set by the client') && subPage.includes('D-01'),
    'D-01 is open, so no figure is presented as a price');
 
+// ------------------------------------------------------ B-15 unsaved changes
+await review('reset=1');
+
+{
+  const ctx15 = await browser.newContext();
+  const ed = await ctx15.newPage();
+  const open = async (section = 'basics') => {
+    await ed.goto(`${BASE}/builder/properties/bl-greenview/${section}`, { waitUntil: 'networkidle' });
+  };
+  const badge = () => ed.$('text=Unsaved changes');
+
+  await open();
+  ok('27. A freshly opened section is not marked unsaved',
+     (await badge()) === null,
+     'the mark reads the DOM, so an untouched form is clean');
+
+  await ed.fill('#title', 'Greenview Residency Phase II');
+  ok('28. Editing a field marks the editor unsaved',
+     (await badge()) !== null,
+     'the header mark appears on the first keystroke');
+
+  // Typing a value back to what the server rendered is not a change.
+  const original = await ed.$eval('#title', (el) => el.defaultValue);
+  await ed.fill('#title', original);
+  ok('29. Typing a value back to what was saved clears the mark',
+     (await badge()) === null,
+     `restored "${original}" — dirtiness is a comparison, not a "was touched" flag`);
+
+  // --- leaving with unsaved changes: the dialog, and all three ways out ---
+  await ed.fill('#title', 'Discarded title');
+  await ed.click('a:has-text("Close editor")');
+  await ed.waitForSelector('#unsaved-changes-dialog', { timeout: 5000 });
+  ok('30. Leaving with unsaved changes opens the approved dialog instead',
+     ed.url().endsWith('/basics') &&
+       (await ed.textContent('#unsaved-changes-dialog')).includes('You have unsaved changes'),
+     'navigation was stopped and the dialog offers save, discard and keep editing');
+
+  await ed.click('button:has-text("Keep editing")');
+  ok('31. "Keep editing" stays put and preserves what was typed',
+     (await ed.$('#unsaved-changes-dialog')) === null &&
+       (await ed.inputValue('#title')) === 'Discarded title' &&
+       (await badge()) !== null,
+     'the dialog closed, the edit survived, the mark is still up');
+
+  await ed.click('a:has-text("Close editor")');
+  await ed.waitForSelector('#unsaved-changes-dialog');
+  await Promise.all([
+    ed.waitForURL(/\/builder\/properties$/, { timeout: 10000 }),
+    ed.click('button:has-text("Discard changes")'),
+  ]);
+  await open();
+  ok('32. "Discard changes" leaves and does not save',
+     (await ed.inputValue('#title')) === original,
+     `back on the section, the title is still "${original}"`);
+
+  // --- save and close ---
+  await ed.fill('#title', 'Greenview Residency Phase II');
+  await ed.click('a:has-text("Close editor")');
+  await ed.waitForSelector('#unsaved-changes-dialog');
+  await Promise.all([
+    ed.waitForURL(/\/builder\/properties$/, { timeout: 10000 }),
+    ed.click('button:has-text("Save draft and close")'),
+  ]);
+  ok('33. "Save draft and close" saves and lands where the Builder was going',
+     (await ed.textContent('body')).includes('Greenview Residency Phase II'),
+     'the listing list shows the saved title, so the save happened before the navigation');
+
+  await open();
+  ok('34. The saved value is what the editor reopens with',
+     (await ed.inputValue('#title')) === 'Greenview Residency Phase II' && (await badge()) === null,
+     'and the reopened section is clean');
+
+  // --- saving in place clears the mark ---
+  await ed.fill('#title', original);
+  await ed.click('button:has-text("Save draft")');
+  await ed.waitForSelector('text=Draft saved', { timeout: 10000 });
+  ok('35. Saving in place clears the mark and settles the button label',
+     (await badge()) === null,
+     'the save control reads "Draft saved" and the unsaved mark is gone');
+
+  // --- the rail, not just "Close editor" ---
+  await ed.fill('#title', 'Rail interception check');
+  await ed.click('a[href="/builder/enquiries"]');
+  await ed.waitForSelector('#unsaved-changes-dialog', { timeout: 5000 });
+  ok('36. The console rail is intercepted too, not only "Close editor"',
+     ed.url().endsWith('/basics'),
+     'one capture-phase listener covers every anchor, including ones added later');
+
+  await ed.click('button:has-text("Keep editing")');
+  await ed.fill('#title', 'Section rail check');
+  await ed.click('a:has-text("Location")');
+  await ed.waitForSelector('#unsaved-changes-dialog', { timeout: 5000 });
+  ok('37. Moving between editor sections is intercepted as well',
+     ed.url().endsWith('/basics'),
+     'section 2 would have discarded section 1 silently');
+
+  // Save into that move: the dialog carries where you were going.
+  await Promise.all([
+    ed.waitForURL(/\/location$/, { timeout: 10000 }),
+    ed.click('button:has-text("Save draft and close")'),
+  ]);
+  await open();
+  ok('38. Saving from the dialog continues to the link that was intercepted',
+     (await ed.inputValue('#title')) === 'Section rail check',
+     'landed on section 2 with section 1 saved');
+
+  // --- the preview section has no form and must not be guarded ---
+  await ed.goto(`${BASE}/builder/properties/bl-greenview/preview`, { waitUntil: 'networkidle' });
+  const previewHasSaveControl = (await ed.$('button:has-text("Save draft")')) !== null;
+  await Promise.all([
+    ed.waitForURL(/\/builder\/properties$/, { timeout: 10000 }),
+    ed.click('a:has-text("Close editor")'),
+  ]);
+  ok('39. The preview section has nothing to lose and does not interrupt',
+     previewHasSaveControl === false &&
+       (await ed.$('#unsaved-changes-dialog')) === null &&
+       ed.url().endsWith('/builder/properties'),
+     'no fields, so no save control, no guard and no dialog — leaving preview is immediate');
+
+  // --- reload/close: the browser-level warning ---
+  await open();
+  await ed.fill('#title', 'Reload warning check');
+  const beforeUnloadArmed = await ed.evaluate(() => {
+    // A synthetic beforeunload cannot open the browser's own prompt, but it
+    // does run the page's handler, and a handler that calls preventDefault is
+    // exactly what makes a real browser prompt.
+    const event = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  ok('40. A reload or tab close is armed with the browser warning while unsaved',
+     beforeUnloadArmed,
+     'the page cancels beforeunload, which is what triggers the browser prompt; the wording is the browser\'s and cannot be set');
+
+  await ed.click('button:has-text("Save draft")');
+  await ed.waitForSelector('text=Draft saved', { timeout: 10000 });
+  const armedAfterSave = await ed.evaluate(() => {
+    const event = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  ok('41. Once saved, a reload is no longer interrupted',
+     armedAfterSave === false,
+     'the handler is removed with the dirty state, so a clean editor does not nag');
+
+  await review('reset=1');
+  await ctx15.close();
+}
+
 // -------------------------------------------------------------- LIMITATIONS
 const other = await browser.newContext();
 const otherPage = await other.newPage();
@@ -323,6 +472,13 @@ const fileInput = await njs.$('#photos');
 observed('L2. Choosing a photograph uploads nothing',
    fileInput !== null && (await njs.textContent('body')).includes('Nothing is uploaded yet'),
    'media storage, scanning and retention are kkl-backend\'s. The count is a review stand-in and the screen says so.');
+
+await njs.goto(`${BASE}/builder/properties/bl-greenview/basics`, { waitUntil: 'load' });
+const njsBody = await njs.textContent('body');
+observed('L3. Without JavaScript there is no unsaved-changes warning',
+   njsBody.includes('Without JavaScript there is no unsaved-changes warning') &&
+     (await njs.$('#unsaved-changes-dialog')) === null,
+   'the mark, the dialog and the reload warning are all client behaviour. The screen says so, and every control that leaves a section is still a submit button, so moving through the editor saves on the way.');
 
 await browser.close();
 
