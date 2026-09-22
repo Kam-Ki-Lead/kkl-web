@@ -8,10 +8,12 @@ import type { PropertyMedia } from "@/lib/domain/types";
  * covers, so a bad photo cannot break a grid, and it has a real designed fallback
  * rather than a broken-image icon.
  *
- * No illustrative stock photography ships here. The baseline package used Unsplash
- * imagery for review and is explicit that "every image must be replaced with
- * licensed project photography before launch" — so until kkl-backend serves real
- * builder media, every slot renders the fallback.
+ * No illustrative stock photography is vendored here. The baseline package used
+ * Unsplash imagery for review and is explicit that "every image must be replaced
+ * with licensed project photography before launch". Until kkl-backend serves real
+ * builder media, every slot renders the fallback unless a review session turns the
+ * baseline's stand-in imagery on (NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on), in which case
+ * each item's `attribution` is drawn over the image so credit travels with it.
  */
 export function PropertyImage({
   media,
@@ -53,12 +55,19 @@ export function PropertyImage({
   // next/image's remotePatterns allowlist stays empty and a plain <img> is used.
   // Revisit once the media origin is published.
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={media.url}
-      alt={media.alt}
-      className={`h-full w-full object-cover ${className}`}
-      style={sizing}
-    />
+    <span className="relative block h-full w-full">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={media.url}
+        alt={media.alt}
+        className={`h-full w-full object-cover ${className}`}
+        style={sizing}
+      />
+      {media.attribution ? (
+        <span className="absolute bottom-0 left-0 bg-black/55 px-[7px] py-[3px] text-[10px] text-white">
+          {media.attribution}
+        </span>
+      ) : null}
+    </span>
   );
 }

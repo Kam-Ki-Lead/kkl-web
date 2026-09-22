@@ -1,5 +1,6 @@
 import type { BuyerEnquiry, PropertyDetail, PropertySummary } from "@/lib/domain/types";
 import type { LocalitySummary } from "@/lib/services/contracts";
+import { reviewCoverFor, reviewGalleryFor } from "./review-imagery";
 
 /**
  * Deterministic synthetic fixtures.
@@ -14,9 +15,12 @@ import type { LocalitySummary } from "@/lib/services/contracts";
  * a price list — the lead price list and subscription price are unresolved client
  * decisions (D-01, D-03) and are never sourced from here.
  *
- * No photography ships with these fixtures. `coverImage: null` makes every card
- * render its designed no-image fallback, which is the honest state until licensed
- * project photography exists.
+ * No photography is vendored with these fixtures. By default every card renders
+ * its designed no-image fallback, which is the honest state until licensed
+ * project photography exists. Setting NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on swaps in
+ * the baseline's illustrative Unsplash stand-ins for a review session — see
+ * `review-imagery.ts` for what that does and does not guarantee. Two listings are
+ * deliberately excluded from that set so the missing-media state stays visible.
  */
 
 const L = 100_000;
@@ -25,7 +29,9 @@ const CR = 10_000_000;
 function property(
   input: Omit<PropertySummary, "coverImage"> & Partial<Pick<PropertySummary, "coverImage">>,
 ): PropertySummary {
-  return { coverImage: null, ...input };
+  // Null unless review imagery is switched on, so the designed no-image
+  // fallback is the default everywhere.
+  return { coverImage: reviewCoverFor(input.id, input.title), ...input };
 }
 
 export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
@@ -190,7 +196,7 @@ export function sampleDetailFor(summary: PropertySummary): PropertyDetail {
     ...summary,
     description:
       "Synthetic sample copy for development and review. A landscaped development within reach of the Biswa Bangla Convention Centre, with a sample flat open on site.",
-    media: [],
+    media: reviewGalleryFor(summary.id, summary.title),
     floorPlans: [],
     amenities: [
       "Lift",
