@@ -47,7 +47,7 @@ run against `next start`.
 | Builder flow | `node scripts/verify-builder-flow.mjs` | 48/48 behaviour checks pass; 3 limitations reproduce |
 | Admin flow | `node scripts/verify-admin-flow.mjs` | 36/36 behaviour checks pass; 3 limitations reproduce |
 | Forms without JavaScript | `node scripts/verify-no-javascript.mjs` | 50/50 forms work with scripting disabled |
-| Sample-mode guard | `./scripts/verify-sample-mode-guard.sh` | 8/8 — build time and run time, both directions |
+| Sample-mode guard | `./scripts/verify-sample-mode-guard.sh` | 10/10 + **2 pending** — each scenario against a bundle actually built that way |
 
 All nine scripts are committed and repeatable, against one production build
 served by `next start`. **The whole set was run twice in a row against one
@@ -817,7 +817,7 @@ designed. The full list of what was compared, the differences found and fixed,
 the deliberate departures, and what remains uncompared are in
 **`docs/phase-2/acceptance.md` §3**.
 
-### Four differences the rendered comparison found
+### Six differences the rendered comparison found
 
 None of them could have been seen by a token check, a computed-style check or
 a route sweep — every one of those was passing at the time.
@@ -830,6 +830,24 @@ a route sweep — every one of those was passing at the time.
    tighter padding because twenty destinations do not fit at 16px.
 4. **Form controls used the card hairline** `#E1E4EE` where the design uses the
    control border `#C6CCE0` at 1.5px — 124 occurrences against 268.
+5. **The P-03 gallery was sized by aspect ratio** where the approved screen
+   declares fixed heights: `galleryMainH` 400/320/220 and `thumbH` 194/150/120,
+   breaking at 1060 and 620. At 1440 it rendered 802×551 against the design's
+   843×400.
+6. **The public container was 64px too narrow on every page.**
+   `max-w-[1280px]` was read as a border-box width, giving 1216px of content;
+   the baseline's wrappers are content-box, so its 1280px *is* 1280px of
+   content inside a 1344px box.
+
+Findings 5 and 6 were invisible until photography was wired into the
+comparison — an empty slot collapses to a box that resembles the design. They
+also share a cause worth naming: **the approved prototypes are content-box and
+Tailwind is border-box, so a number copied across without that adjustment is
+short by its own borders and padding.** The first attempt at fixing 5 landed
+exactly 2px short at every width and every breakpoint for that reason.
+
+After the fix, implementation and prototype measure identically at 1440:
+843 image, 845 wrapper, 1280 grid, 1344 container.
 
 ### And one earlier, from measurement
 
@@ -838,16 +856,37 @@ and danger panel in the application rendered white with a grey hairline**.
 Tailwind emits `bg-white` and `bg-[#FFF7E8]` as two rules of equal specificity;
 stylesheet order decides, not class-attribute order.
 
-### Imagery — still not compared
+### Imagery — now compared, with a stated limit
 
-The baseline references seven Unsplash photographs by URL. The implementation
-wires the same URLs behind `NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on`, and **this
-environment's network policy denies `images.unsplash.com`** — the proxy answers
-403 to CONNECT. The flag path has never been seen rendered.
+An earlier version of this document recorded this as blocked. The blockage is
+real and unchanged: **this environment's network policy denies
+`images.unsplash.com`** — re-confirmed this pass, the proxy rejects CONNECT —
+so the baseline's actual photographs cannot be fetched here.
 
-Missing-media fallbacks are captured as their own states and are **not** a
-substitute for the normal state. See `acceptance.md` §3 for the exact access
-needed.
+What was wrong was stopping there. `scripts/make-review-photos.mjs` generates
+seven deterministic stand-in images under the photo ids the baseline names;
+the prototype copy is rewritten to fetch them and the application reaches the
+same files through `NEXT_PUBLIC_KKL_IMAGE_ORIGIN`. Both sides receive the
+identical file.
+
+**What that does and does not establish.** It establishes slot geometry:
+aspect ratio, crop, rounding, overlay and caption placement — which is how
+findings 5 and 6 above were caught. It establishes nothing about photographic
+fidelity, and cannot: the images are placeholders and say so on their face.
+To compare the real photographs, run the capture where `images.unsplash.com`
+is reachable and omit `NEXT_PUBLIC_KKL_IMAGE_ORIGIN`.
+
+The two states are captured as separate sets — `-photos` for image-present,
+unsuffixed for missing media — and **neither stands in for the other**. Both
+sides of a pair are always in the same state: the missing-media set uses a
+second prototype copy built with `KKL_REVIEW_PHOTOS=off`.
+
+One difference the image-present state shows and leaves open: the
+implementation draws an attribution band on every card carrying review
+imagery, where the approved homepage draws one on the project cards but not
+the property cards. It exists only on the review-imagery path, which is off by
+default, and disappears when licensed project photography replaces the
+stand-ins.
 
 ### What is still not compared
 
@@ -894,6 +933,12 @@ The baseline's unresolved homepage console defect is not inherited — see
   returning 404 outside sample mode is untestable, not verified**: a build with
   `NEXT_PUBLIC_KKL_DATA_SOURCE=api` fails at build time because no API client
   exists. The guard was not weakened to make one.
+- **The guard's own comparison was inert until this pass.** The build-time
+  values were read through a computed `process.env[name]` lookup, which the
+  bundler does not substitute, so on the server both sides of the
+  bundle-versus-server check read the same live process environment. Fixed,
+  and the fix is covered by a scenario that proves supplying `NEXT_PUBLIC_*`
+  at start time cannot launder a mismatched bundle.
 - **The deployment guard cannot detect that it is running in production.** It
   requires the deployment to declare itself. A deployment declaring
   `KKL_ENV=review` while serving real users is not detectable here, and nothing
@@ -902,7 +947,7 @@ The baseline's unresolved homepage console defect is not inherited — see
 
 ### Claims this document has had to withdraw
 
-Three, kept rather than deleted — a verification record that quietly corrects
+Five, kept rather than deleted — a verification record that quietly corrects
 itself is worth less than one that shows its corrections.
 
 1. **"C-01 values transcribed and compared."** Three colour tokens and nine
@@ -919,3 +964,19 @@ itself is worth less than one that shows its corrections.
    audited ledger event, single-actor, which is what is built. An invented
    requirement in a verification document reads as a defect, and somebody would
    have built it.
+4. **"Sample-mode guard: 8/8, build time and run time, both directions."** The
+   script passed `NEXT_PUBLIC_*` on the `next start` line of every scenario, so
+   both sides of the bundle/server comparison came from one process. It never
+   ran the documented configuration — which in fact returned 503 — and its
+   mismatch scenarios would have passed against any bundle at all. It built
+   once, with no `NEXT_PUBLIC_*` set, and tested that bundle under every label.
+   **A green count from a test that cannot fail is worse than no test**: it was
+   cited as evidence the guard worked. Each scenario now builds the bundle it
+   claims to test; 10/10, with two scenarios reported pending because they need
+   a backend that does not exist yet.
+5. **"Imagery cannot be compared."** True of the baseline's actual
+   photographs, which this environment cannot fetch, and not true of the
+   comparison: stand-ins served to both sides establish slot geometry, and did
+   so — they caught two layout defects that had survived every other check.
+   The same shape of error as (2): right about the blockage, wrong to stop at
+   it.

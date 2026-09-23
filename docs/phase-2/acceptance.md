@@ -17,7 +17,7 @@ withdrawn.
 | | Category | Count | Whose it is |
 |---|---|---|---|
 | **A** | Frontend defects or missing approved interactions | **1 open** | This repository |
-| **B** | Frontend visual and accessibility verification | **4 open** | This repository, plus 2 design decisions |
+| **B** | Frontend visual and accessibility verification | **5 open** | This repository, plus 2 design decisions |
 | **C** | Backend / integration dependencies | **9** | kkl-backend — *not frontend work* |
 | **D** | Unresolved client decisions | **16** | The client |
 
@@ -36,6 +36,9 @@ Work this repository owns and could do today.
 | A-7 | Form controls using the card hairline, not the control border | **Closed** | §3 |
 | A-8 | Reflow failures at 320 CSS px on two screens | **Closed** | `verify-zoom.mjs` |
 | A-9 | **B-15 unsaved-changes prompt on browser Back** | **Open, partial** | §2 |
+| A-10 | P-03 gallery sized by ratio, not the approved fixed heights | **Closed** | §3 |
+| A-11 | Public container 64px narrow on every page (border-box vs content-box) | **Closed** | §3 |
+| A-12 | Deployment guard compared the server against itself, not the bundle | **Closed** | `verify-sample-mode-guard.sh` 10/10 |
 
 **A-9 is the only open frontend item**, and it is partial rather than missing:
 edits are no longer lost, but the approved *dialog* does not appear on Back.
@@ -45,14 +48,16 @@ The trade-off and what would close it are in §2.
 
 | # | Item | State |
 |---|---|---|
-| B-1 | Rendered comparison against the prototypes | **Done for 17 screens** — §3 |
+| B-1 | Rendered comparison against the prototypes | **Done for 17 screens**, 11 at 1440 only — §3 |
 | B-2 | Remaining screens compared | **Open** — 96 of 113 rows not compared |
 | B-3 | Status-chip contrast measured | **Closed** — 5/5 pass, §4 |
 | B-4 | Native and text-only zoom | **Closed** — 32/32, §4 |
 | B-5 | Keyboard, dialog focus, validation announcements | **Closed** — 22/22, §4 |
 | B-6 | Screen-reader behaviour | **Pending** — no tooling, §4 |
 | B-7 | Forced-colors / High Contrast | **Pending** — needs Windows, §4 |
-| B-8 | Imagery in the normal-state comparison | **Blocked** — §3 |
+| B-8 | Imagery in the normal-state comparison | **Done for slot geometry** — §3 |
+| B-11 | Photographic fidelity against the baseline's own images | **Blocked** — host denied, §3 |
+| B-12 | Attribution band on cards with review imagery | **Open, review path only** — §3 |
 | B-9 | Focus-ring contrast (2.11:1) | **Design decision** — §4 |
 | B-10 | Control-border contrast (1.60:1) | **Design decision** — §4 |
 
@@ -202,30 +207,63 @@ copy of each prototype pointing at those local files.
 byte-identical before it finishes, and aborts if not.
 
 ```bash
+# image-present state
 ./scripts/setup-prototype-review.sh ../kkl-design /tmp/kkl-prototype-review
-(cd /tmp/kkl-prototype-review && python3 -m http.server 8099)
+(cd /tmp/kkl-prototype-review && python3 -m http.server 8099 &)
 PROTO_URL=http://127.0.0.1:8099 BASE_URL=http://127.0.0.1:3811 \
+  CAPTURE_SUFFIX=-photos ONLY=P-01-home,P-02-search,P-03-property \
+  PLAYWRIGHT=… node scripts/capture-visual-comparison.mjs
+
+# missing-media state — a second copy, so BOTH sides are missing their media
+KKL_REVIEW_PHOTOS=off ./scripts/setup-prototype-review.sh ../kkl-design /tmp/kkl-prototype-nophoto
+(cd /tmp/kkl-prototype-nophoto && python3 -m http.server 8098 &)
+PROTO_URL=http://127.0.0.1:8098 BASE_URL=http://127.0.0.1:3811 \
   PLAYWRIGHT=… node scripts/capture-visual-comparison.mjs
 ```
 
+Each state needs the application built to match: the image-present run against
+a build carrying `NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on` and
+`NEXT_PUBLIC_KKL_IMAGE_ORIGIN`, the missing-media run against the ordinary
+review build. Full commands in `local-review.md`.
+
 The harness drives the prototype's **own screen picker and width tabs**, so it
-reflows as designed — a browser viewport alone does not make it do that.
+reflows as designed — a browser viewport alone does not make it do that. The
+implementation is captured **full page**, after scrolling to the bottom to
+trigger anything lazy; it used to be captured at viewport size while the
+prototype was captured as its whole frame, which made every long screen a
+top-of-page comparison.
 
 ### Screens compared, and at which widths
 
-25 pairs across 17 screens, in `docs/phase-2/visual/`.
+25 pairs across 17 screens, in `docs/phase-2/visual/` — plus 5 pairs across the
+3 public screens in the image-present state.
 
-| Area | Screens | Widths |
-|---|---|---|
-| Public portal | P-01 homepage, P-02 search, P-03 property detail | 1440, 390 (P-03 1440) |
-| Seller | S-06 dashboard, S-07 marketplace, S-11 purchase result, S-14 billing | 1440, 390 |
-| Builder | B-06 dashboard, B-08 listing editor, B-16 enquiries, B-19 restrictions | 1440, 390 |
-| Admin | A-02 dashboard, A-06 KYC review, A-19 wallet adjustment, A-23 support, A-30 audit | 1440, 390 |
-| Shared | Mobile navigation drawer | 390 |
+| Area | Screen | 1440 | 390 |
+|---|---|:-:|:-:|
+| Public portal | P-01 homepage | ✓ | ✓ |
+| | P-02 search results | ✓ | ✓ |
+| | P-03 property detail | ✓ | — |
+| Seller | S-06 dashboard | ✓ | ✓ |
+| | S-07 lead marketplace | ✓ | ✓ |
+| | S-11 purchase result | ✓ | — |
+| | S-14 billing | ✓ | ✓ |
+| Builder | B-06 dashboard | ✓ | ✓ |
+| | B-08 listing editor | ✓ | ✓ |
+| | B-16 enquiries | ✓ | — |
+| | B-19 restrictions | ✓ | — |
+| Admin | A-02 dashboard | ✓ | ✓ |
+| | A-06 KYC review | ✓ | — |
+| | A-19 wallet adjustment | ✓ | — |
+| | A-23 support ticket | ✓ | — |
+| | A-30 audit log | ✓ | — |
+| Shared | Mobile navigation drawer | — | ✓ |
+
+**Eleven of the seventeen were compared at 1440 only.** An earlier version of
+this table said "1440, 390" for whole journeys, which overstated it.
 
 ### Differences found, and fixed
 
-Four, none of which any token or computed-style check could have seen:
+Six, none of which any token or computed-style check could have seen:
 
 1. **Card headings were at the screen-heading step.** C-02 declares
    "Card and section title — Archivo 700 · 17px"; the consoles render 18px.
@@ -238,6 +276,24 @@ Four, none of which any token or computed-style check could have seen:
    per-console density rather than a token.
 4. **Form controls used the card hairline** `#E1E4EE` where the design uses the
    control border `#C6CCE0` at 1.5px — 124 occurrences against 268.
+5. **The P-03 gallery was sized by aspect ratio.** The approved screen declares
+   fixed heights — `galleryMainH` 400/320/220 and `thumbH` 194/150/120, at
+   breakpoints 1060 and 620. At 1440 the implementation rendered 802×551 where
+   the design is 843×400.
+6. **The public container was 64px too narrow on every page.** `max-w-[1280px]`
+   was read as a border-box width, giving 1216px of content; the baseline's
+   wrappers are content-box, so 1280px there means 1280px of content inside a
+   1344px box. Nine call sites across the public shell.
+
+Findings 5 and 6 only became visible once photography was in the comparison —
+an empty slot collapses to a box that resembles the design. They share a cause
+worth carrying forward: **the approved prototypes are content-box and Tailwind
+is border-box**, so a number copied across without that adjustment is short by
+its own borders and padding. The first attempt at fixing 5 landed exactly 2px
+short at every width for that reason.
+
+Measured after the fix, implementation and prototype agree at 1440: 843 image,
+845 wrapper, 1280 grid, 1344 container.
 
 ### Differences that remain — deliberate, and listed so they are not mistaken for defects
 
@@ -251,6 +307,22 @@ Four, none of which any token or computed-style check could have seen:
 | Recent activity shows dates, not "2 days ago" | A relative time computed server-side is wrong as soon as it is cached |
 | Longer copy on unresolved rules ("Expiry period is not yet set by the client") | Names the decision rather than abbreviating it |
 
+### Smaller differences the full-page captures show, recorded not fixed
+
+These come from reading P-03 side by side at 1440 after the gallery fix. None
+is a layout fault; they are listed so a reviewer comparing the same pair does
+not have to work out whether they were noticed.
+
+| Difference | Reading |
+|---|---|
+| Locality subtitle reads "New Town, Action Area II"; the prototype has "Action Area II, New Town" | An ordering choice, not a fixture artefact. Worth a decision if the prototype's order is deliberate |
+| Pricing table has two rows against the prototype's three | Fixture-derived — the prototype lists a third "3 BHK large" configuration |
+| "Map — tile provider not yet chosen" against "Map placeholder — tile provider not yet chosen" | Copy |
+| "a target handover of Dec 2028" against "of December 2028" | Copy |
+
+The first is the only one that would change a screen's meaning to a buyer, and
+it is a one-line change once someone confirms which order the design intends.
+
 ### What is still not compared
 
 **96 of 113 inventory rows.** The 17 compared were chosen by the priority list;
@@ -259,29 +331,47 @@ the rest have not been looked at, and no claim is made about them. The shared
 `verify-visual-baseline.mjs`) because they come from shared components — that
 says nothing about the layout of a screen nobody opened.
 
-### Imagery — blocked, with the exact access needed
+### Imagery — compared, with the limit stated
 
-**B-8 is not done.** The normal-state comparison should include photography and
-does not.
+**B-8 is done for slot geometry and open for photographic fidelity.**
 
-The baseline vendors no images: it references seven Unsplash photographs by URL
-and states that each must be replaced with licensed project photography before
-launch. The implementation wires those same URLs behind
-`NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on`.
+The blockage is real and unchanged: **this environment's network policy denies
+`images.unsplash.com`** — re-confirmed this pass, the proxy rejects CONNECT —
+so the baseline's seven photographs cannot be fetched here at all.
 
-**This environment's network policy denies `images.unsplash.com`** — the
-proxy answers 403 to CONNECT. So the flag path has never been seen rendered,
-in this session or any previous one.
+What was wrong was treating that as the end of it.
+`scripts/make-review-photos.mjs` generates seven deterministic stand-in images
+under the photo ids the baseline names; the prototype copy is rewritten to
+fetch them and the application reaches the same files through
+`NEXT_PUBLIC_KKL_IMAGE_ORIGIN`. Both sides receive identical bytes.
 
-To complete it, one of:
+| | Established | Not established |
+|---|---|---|
+| Image-present state | Slot aspect ratio, crop behaviour, rounding, overlay and caption placement | Anything about the actual photographs |
+
+That is what caught findings 5 and 6 above. It says nothing about photographic
+fidelity and cannot: the files are placeholders and say so on their face.
+
+The two states are captured as separate sets — `-photos` for image-present,
+unsuffixed for missing media — and **neither stands in for the other**. Both
+sides of a pair are always in the same state; the missing-media set uses a
+second prototype copy built with `KKL_REVIEW_PHOTOS=off`.
+
+**To close the remaining half**, one of:
 
 - **Allow `images.unsplash.com`** in the environment's network settings, then
-  re-run the capture with the flag on; or
+  re-run the capture with `NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on` and no
+  `NEXT_PUBLIC_KKL_IMAGE_ORIGIN`; or
 - **Supply the licensed project photography** the baseline says is needed
-  anyway, and point the imagery module at it.
+  before launch anyway, and point the imagery module at it.
 
-Missing-media fallbacks are already captured as their own states and are
-**not** a substitute for the normal state.
+**One difference the image-present state leaves open.** The implementation
+draws an attribution band on every card carrying review imagery; the approved
+homepage draws one on the project cards but not the property cards. This
+exists only on the review-imagery path, which is off by default, and goes away
+when licensed photography replaces the stand-ins. Recorded rather than
+changed — dropping attribution from a card showing a third party's photograph
+is not a decision to take on layout grounds alone.
 
 ---
 
@@ -379,6 +469,14 @@ Every screen in the inventory is built and behaves against typed sample
 services. The verification is repeatable, runs twice against one server with
 identical results, and separates behaviour from known limitations throughout.
 
+**This pass changed that answer once before arriving at it.** Wiring
+photography into the comparison exposed two layout defects that every
+automated check had been passing over, and re-examining the deployment guard
+showed its central comparison had never actually run. Both are fixed and
+verified; they are listed as closed in §1 rather than omitted, because the
+reason they were missed matters more than the fixes: **a check that cannot
+fail reports the same number as a check that passes.**
+
 **The one open frontend item is A-9**: B-15's approved dialog does not appear
 on browser Back. Edits are no longer lost — that defect is fixed — but the
 interaction differs from the dialog shown for in-app navigation. **It needs a
@@ -395,10 +493,13 @@ decision, not more work**, and the three options are in §2.
 
 | Item | Needs |
 |---|---|
-| Imagery in the normal-state comparison | `images.unsplash.com` allowed, or the licensed photography |
+| Photographic fidelity in the comparison | `images.unsplash.com` allowed, or the licensed photography. Slot geometry **is** compared — see §3 |
 | 96 of 113 rows not visually compared | Time, with the rig that now exists |
+| 11 of the 17 compared at 1440 only | Time — the harness takes both widths already |
+| Attribution band on cards with review imagery | A decision, not code: it affects the review path only (B-12) |
 | Screen-reader, forced-colors, voice control | Tooling and a Windows host |
 | Focus-ring and control-border contrast | A design decision (B-9, B-10) |
+| Production/api deployment-guard scenarios | A reachable kkl-backend; reported pending, not passing |
 
 ### The boundaries this pass maintained
 

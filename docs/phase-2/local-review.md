@@ -54,20 +54,45 @@ That is the guard doing its job on its own documentation, and it is recorded
 here rather than quietly corrected: a reviewer following the old instructions
 got a 503, and the 503 was right.
 
+**And then the corrected instructions returned a 503 too, and that one was the
+code's fault.** `runtime.ts` read the build-time values through a computed
+`process.env[name]` lookup, which the bundler does not substitute, so on the
+server the "bundle" side of the comparison was reading the live process
+environment. A server given only the unprefixed pair saw the build side as
+`development` and refused a bundle that in fact matched it. The configuration
+documented above is now the one that works, and
+`scripts/verify-sample-mode-guard.sh` runs exactly it rather than quietly
+passing the prefixed pair at start time as it used to.
+
 A served build that sets neither `KKL_ENV` nor `KKL_DATA_SOURCE` refuses to
 serve at all.
 
 ### With the baseline's review photography
 
 ```bash
-NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on npx next build
+NEXT_PUBLIC_KKL_ENV=review \
+NEXT_PUBLIC_KKL_DATA_SOURCE=sample \
+NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on \
+npx next build
 ```
 
-then start as above. This hotlinks seven Unsplash photographs referenced by the
-approved baseline, with their credits drawn over the images. It is off by
-default, is not tied to sample mode, and has never been seen rendered from this
-repository — the build environment blocks `images.unsplash.com`. See
-`src/lib/services/sample/review-imagery.ts`.
+then start as above. This hotlinks the seven Unsplash photographs the approved
+baseline references, with their credits drawn over the images. It is off by
+default and is not tied to sample mode, so nobody gets third-party hotlinks by
+accident just by running with fixtures.
+
+**Where `images.unsplash.com` is unreachable** — as it is in the environment
+this was built in, whose proxy rejects CONNECT to that host — add an origin
+serving stand-in files under the same photo ids:
+
+```bash
+node scripts/make-review-photos.mjs /tmp/kkl-prototype-review/vendor/photos
+# ... NEXT_PUBLIC_KKL_IMAGE_ORIGIN=http://127.0.0.1:8099/vendor/photos npx next build
+```
+
+Those files are placeholders, not the baseline photographs, and each says so on
+its face. See `src/lib/services/sample/review-imagery.ts` and
+`docs/phase-2/visual/README.md`.
 
 ## What sample mode is not
 
@@ -109,9 +134,17 @@ Verify both directions with:
 ./scripts/verify-sample-mode-guard.sh
 ```
 
-Eight scenarios: the build-time refusal, the review build succeeding, the
-documented configuration serving, three missing-declaration cases, production
-with sample services, and a data-source disagreement.
+Ten scenarios, each against a bundle actually built the way it claims: two
+build-time refusals, the documented configuration serving, three
+missing-declaration cases, production with sample services, a data-source
+disagreement, a review bundle deployed as production, and a check that setting
+`NEXT_PUBLIC_*` at start time cannot launder a mismatched bundle.
+
+Two further scenarios are reported **PENDING**, not passing: a production/api
+bundle that must serve, and a production bundle deployed as review that must
+refuse. An api build prerenders against kkl-backend and fails without one, and
+that refusal is correct behaviour which must not be weakened to raise the
+number. Run them once kkl-backend serves the public catalogue.
 
 ## Reaching the Seller states a reviewer cannot otherwise get to
 
@@ -234,13 +267,30 @@ Where the network policy denies those, this builds a local review copy from the
 modified** — the script verifies it is byte-identical and aborts if not.
 
 ```bash
-./scripts/setup-prototype-review.sh ../kkl-design /tmp/kkl-prototype-review
-(cd /tmp/kkl-prototype-review && python3 -m http.server 8099)
+# Missing-media state: both sides without photography.
+KKL_REVIEW_PHOTOS=off \
+  ./scripts/setup-prototype-review.sh ../kkl-design /tmp/kkl-prototype-nophoto
+(cd /tmp/kkl-prototype-nophoto && python3 -m http.server 8098 &)
 
-PROTO_URL=http://127.0.0.1:8099 BASE_URL=http://127.0.0.1:3811 \
+PROTO_URL=http://127.0.0.1:8098 BASE_URL=http://127.0.0.1:3811 \
   PLAYWRIGHT=/path/to/playwright/index.mjs \
   node scripts/capture-visual-comparison.mjs   # 25 pairs into docs/phase-2/visual/
+
+# Image-present state: both sides with the stand-ins. Needs an application
+# build carrying NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on and
+# NEXT_PUBLIC_KKL_IMAGE_ORIGIN=http://127.0.0.1:8099/vendor/photos.
+./scripts/setup-prototype-review.sh ../kkl-design /tmp/kkl-prototype-review
+(cd /tmp/kkl-prototype-review && python3 -m http.server 8099 &)
+
+PROTO_URL=http://127.0.0.1:8099 BASE_URL=http://127.0.0.1:3811 \
+  CAPTURE_SUFFIX=-photos ONLY=P-01-home,P-02-search,P-03-property \
+  PLAYWRIGHT=/path/to/playwright/index.mjs \
+  node scripts/capture-visual-comparison.mjs   # 5 pairs
 ```
+
+**Run each state against an application build in the matching state.** A
+prototype showing photographs next to an application that requests none is not
+a comparison of anything.
 
 The pairs are **for a person to look at.** No pass is claimed from capture
 alone.

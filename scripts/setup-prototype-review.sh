@@ -82,7 +82,13 @@ sed -i \
 # These are NOT the baseline photographs — images.unsplash.com is unreachable
 # from environments with this kind of egress policy. Both sides get the same
 # bytes, so what the comparison shows is slot layout and crop, not photography.
-if node -e "require.resolve('sharp')" >/dev/null 2>&1; then
+if [ "${KKL_REVIEW_PHOTOS:-on}" = "off" ]; then
+  # The missing-media state needs BOTH sides missing media. Building a second
+  # copy this way is how that state stays a real comparison rather than a
+  # prototype with photographs set against an application without them.
+  echo "  KKL_REVIEW_PHOTOS=off - leaving the photograph URLs as the baseline has them"
+  PHOTOS_READY=0
+elif node -e "require.resolve('sharp')" >/dev/null 2>&1; then
   node "$(dirname "$0")/make-review-photos.mjs" "$OUT/vendor/photos"
   PHOTOS_READY=1
 else

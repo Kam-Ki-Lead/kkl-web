@@ -1,0 +1,37 @@
+[
+  {
+    "id": "P-01-home",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/P-01-home-1440-photos-baseline.png",
+    "implementation": "docs/phase-2/visual/P-01-home-1440-photos-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-01-home",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/P-01-home-390-photos-baseline.png",
+    "implementation": "docs/phase-2/visual/P-01-home-390-photos-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-02-search",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/P-02-search-1440-photos-baseline.png",
+    "implementation": "docs/phase-2/visual/P-02-search-1440-photos-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-02-search",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/P-02-search-390-photos-baseline.png",
+    "implementation": "docs/phase-2/visual/P-02-search-390-photos-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-03-property",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/P-03-property-1440-photos-baseline.png",
+    "implementation": "docs/phase-2/visual/P-03-property-1440-photos-implementation.png",
+    "ok": true
+  }
+]

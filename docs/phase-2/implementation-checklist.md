@@ -450,8 +450,9 @@ straight past them:
    testing, per-chip contrast measurement, and native plus text-only zoom. They
    were outstanding at design approval (C-11) and design approval did not
    discharge them. No row's Verified mark includes them, on any of the 113 rows.
-2. **The visual comparison against the baseline is not complete.** Primary
-   property imagery still differs: the baseline shows photography, this
-   implementation shows it only when the review-imagery flag is on, and that
-   path has never been seen rendered because the build environment blocks
-   `images.unsplash.com`. See `approved-baseline.md`.
+2. **The visual comparison against the baseline is not complete.** 17 of the
+   113 rows were compared against a rendered prototype, eleven of those at 1440
+   only. The image-present state was compared with generated stand-ins, which
+   establishes slot geometry and nothing about the baseline's own photography —
+   the build environment blocks `images.unsplash.com`. See `acceptance.md` §3
+   and `approved-baseline.md`.
