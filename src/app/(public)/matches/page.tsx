@@ -39,7 +39,7 @@ export default async function MatchesPage({
   ].filter(Boolean) as string[];
 
   return (
-    <div className="mx-auto max-w-[1280px] px-[32px] pb-[50px] pt-[28px] max-[1060px]:px-[18px]">
+    <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[50px] pt-[28px] max-[1060px]:px-[18px]">
       <h1 className="t-title text-ink">Matching homes</h1>
       <p className="mt-[6px] text-[16px] text-body">
         {matches.length === 0

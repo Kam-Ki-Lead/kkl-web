@@ -23,7 +23,7 @@ export default async function EnquiryPage({
   }
 
   return (
-    <div className="mx-auto max-w-[1280px] px-[32px] pb-[40px] pt-[18px] max-[1060px]:px-[18px]">
+    <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[18px] max-[1060px]:px-[18px]">
       <p className="t-caption mb-[14px] text-muted">
         <Link href={`/property/${slug}`} className="font-semibold text-brand hover:text-brand-deep">
           <span aria-hidden="true">← </span>Back

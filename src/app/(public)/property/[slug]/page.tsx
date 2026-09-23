@@ -43,7 +43,7 @@ export default async function PropertyDetailPage({
   const ready = property.construction === "ready_to_move";
 
   return (
-    <div className="mx-auto max-w-[1280px] px-[32px] pb-[40px] pt-[18px] max-[1060px]:px-[18px]">
+    <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[18px] max-[1060px]:px-[18px]">
       <p className="t-caption mb-[14px] text-muted">
         <Link href="/search" className="font-semibold text-brand hover:text-brand-deep">
           <span aria-hidden="true">← </span>Back
@@ -209,24 +209,36 @@ export default async function PropertyDetailPage({
 function Gallery({ property }: { property: PropertyDetail }) {
   const [main, second] = property.media;
 
+  // The approved P-03 gallery sizes these slots by FIXED HEIGHT, not by aspect
+  // ratio: galleryMainH 400/320/220 and thumbH 194/150/120 across its three
+  // widths, which break at 1060 and 620. Ratios were used here instead, and at
+  // 1440 that rendered the main slot at 802x551 against the design's 843x400.
+  // Nothing caught it until photography was wired into the comparison — with an
+  // empty slot the two collapse to similar boxes and look alike.
+  //
+  // box-content is not decoration: the baseline's wrappers are content-box, so
+  // its declared 400px is the height of the IMAGE and the box outside it is
+  // 402px. Tailwind's border-box default makes the same number mean 398px of
+  // image, which is how the first attempt at this fix landed 2px short on
+  // every slot at every width.
   return (
-    <div className="grid grid-cols-[2fr_1fr] gap-[10px] max-[900px]:grid-cols-1">
-      <div className="overflow-hidden rounded-[10px] border border-line">
+    <div className="grid grid-cols-[2fr_1fr] gap-[12px] max-[1059px]:grid-cols-1">
+      <div className="box-content h-[400px] overflow-hidden rounded-[10px] border border-line max-[1059px]:h-[320px] max-[619px]:h-[220px]">
         <PropertyImage
           media={main ?? null}
-          ratio="16 / 11"
+          fill
           label={`${property.title} — photograph pending from builder`}
         />
       </div>
-      <div className="grid grid-rows-2 gap-[10px] max-[900px]:grid-rows-none max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
-        <div className="overflow-hidden rounded-[10px] border border-line">
+      <div className="grid grid-rows-2 gap-[12px] max-[1059px]:grid-cols-2 max-[1059px]:grid-rows-none">
+        <div className="box-content h-[194px] overflow-hidden rounded-[8px] border border-line max-[1059px]:h-[150px] max-[619px]:h-[120px]">
           <PropertyImage
             media={second ?? null}
-            ratio="16 / 10"
+            fill
             label="Further photographs pending"
           />
         </div>
-        <div className="flex flex-col items-center justify-center rounded-[10px] border border-line bg-[#EFF1F7] p-[14px] text-center">
+        <div className="box-content flex h-[194px] flex-col items-center justify-center rounded-[8px] border border-line bg-[#EFF1F7] p-[14px] text-center max-[1059px]:h-[150px] max-[619px]:h-[120px]">
           <p className="t-card-title text-ink">Floor plans</p>
           <p className="t-caption mt-[2px] text-muted">
             {property.floorPlans.length === 0

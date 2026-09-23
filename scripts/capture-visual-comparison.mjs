@@ -32,6 +32,19 @@ const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3811';
 const OUT = process.env.OUT_DIR ?? 'docs/phase-2/visual';
 
 /**
+ * Appended to every output filename, so one state does not overwrite another.
+ *
+ * The image-present state and the missing-media fallback are separate states
+ * and are captured as separate sets: `''` for the fallback the app ships by
+ * default, `'-photos'` for the run with stand-in photography wired into both
+ * sides. Neither substitutes for the other.
+ */
+const SUFFIX = process.env.CAPTURE_SUFFIX ?? '';
+
+/** Restrict the run to these pair ids (comma-separated). Empty means all. */
+const ONLY = (process.env.ONLY ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+
+/**
  * The comparison set, in the priority order the acceptance pass asked for.
  *
  * `file` is the prototype document, `screen` the id its picker uses, `path`
@@ -98,7 +111,7 @@ async function captureProto(pair, width) {
 
   const frame = await page.$('div[style*="transform:scale"], div[style*="transform: scale"]');
   const target = frame ?? (await page.$('body'));
-  const file = join(OUT, `${pair.id}-${width}-baseline.png`);
+  const file = join(OUT, `${pair.id}-${width}${SUFFIX}-baseline.png`);
   await target.screenshot({ path: file }).catch(async () => {
     await page.screenshot({ path: file, fullPage: false });
   });
@@ -125,13 +138,30 @@ async function captureImpl(pair, width) {
     await page.click('button[aria-controls="console-drawer"]').catch(() => {});
     await page.waitForTimeout(600);
   }
-  const file = join(OUT, `${pair.id}-${width}-implementation.png`);
-  await page.screenshot({ path: file, fullPage: false });
+  const file = join(OUT, `${pair.id}-${width}${SUFFIX}-implementation.png`);
+  // Full page, because the prototype side is captured as its whole frame. A
+  // viewport crop here made every long screen a top-of-page comparison, which
+  // is how P-02's results list — imagery included — went uncompared at 390
+  // while the pair still counted as captured.
+  //
+  // Scroll to the bottom first: anything lazily loaded further down has to be
+  // given the chance to load before the page is painted in one pass.
+  await page.evaluate(async () => {
+    const step = window.innerHeight;
+    for (let y = 0; y < document.body.scrollHeight; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 120));
+    }
+    window.scrollTo(0, 0);
+  });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: file, fullPage: true });
   await context.close();
   return file;
 }
 
 for (const pair of PAIRS) {
+  if (ONLY.length && !ONLY.includes(pair.id)) continue;
   for (const width of pair.widths) {
     try {
       const baseline = await captureProto(pair, width);
@@ -146,7 +176,7 @@ for (const pair of PAIRS) {
 }
 
 await browser.close();
-writeFileSync(join(OUT, 'index.json'), JSON.stringify(rows, null, 2));
+writeFileSync(join(OUT, `index${SUFFIX}.json`), JSON.stringify(rows, null, 2));
 const failed = rows.filter((r) => !r.ok);
 console.log(`\n${rows.length - failed.length}/${rows.length} pairs captured into ${OUT}/`);
 console.log('These are for a person to look at. No pass is claimed from capture alone.');

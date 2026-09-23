@@ -28,6 +28,21 @@ import type { PropertyMedia } from "@/lib/domain/types";
 
 export const REVIEW_IMAGERY_ENABLED = process.env.NEXT_PUBLIC_KKL_REVIEW_IMAGERY === "on";
 
+/**
+ * Where the photographs are fetched from. Defaults to the host the baseline
+ * names.
+ *
+ * A review session in an environment that cannot reach images.unsplash.com can
+ * point this at a local origin serving stand-in files under the same photo ids
+ * (`scripts/make-review-photos.mjs` writes them), so the normal image-present
+ * state can be compared at all. That is a **review convenience for matching
+ * the prototype's own local copy** - it is not an asset decision, and the
+ * baseline's instruction that every image must be replaced with licensed
+ * project photography before launch is untouched by it.
+ */
+const IMAGE_ORIGIN = (process.env.NEXT_PUBLIC_KKL_IMAGE_ORIGIN ?? "https://images.unsplash.com")
+  .replace(/\/+$/, "");
+
 type Credited = { readonly photoId: string; readonly credit: string };
 
 /** The seven photographs the baseline uses, with the credit it shows per slot. */
@@ -59,8 +74,20 @@ const ASSIGNMENT: Readonly<Record<string, keyof typeof PHOTOS>> = {
   // p-the-pinnacle and p-willow-court intentionally have no photograph.
 };
 
+/** True when the photographs come from the host the baseline names. */
+const FROM_UNSPLASH = /(^|\.)unsplash\.com$/.test((() => {
+  try {
+    return new URL(IMAGE_ORIGIN).hostname;
+  } catch {
+    return "";
+  }
+})());
+
 function url(photoId: string, w: number, h: number): string {
-  return `https://images.unsplash.com/${photoId}?fm=jpg&q=72&w=${w}&h=${h}&auto=format&fit=crop`;
+  // Unsplash's sizing parameters mean nothing to a local stand-in server, and
+  // a bare id would be served as octet-stream; ask for the file by name there.
+  if (!FROM_UNSPLASH) return `${IMAGE_ORIGIN}/${photoId}.jpg`;
+  return `${IMAGE_ORIGIN}/${photoId}?fm=jpg&q=72&w=${w}&h=${h}&auto=format&fit=crop`;
 }
 
 /** Cover image for a listing, or null to keep the designed fallback. */

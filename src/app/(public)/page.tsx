@@ -19,7 +19,7 @@ export default async function HomePage() {
   const home = await services.properties.getHomepage();
 
   return (
-    <div className="mx-auto max-w-[1280px] px-[32px] pb-[40px] pt-[20px] max-[1060px]:px-[18px]">
+    <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[20px] max-[1060px]:px-[18px]">
       {home.featuredHero ? <FeaturedHero property={home.featuredHero} /> : null}
 
       <HomeSearchCard
