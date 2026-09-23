@@ -1,0 +1,177 @@
+[
+  {
+    "id": "P-01-home",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/P-01-home-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/P-01-home-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-01-home",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/P-01-home-390-baseline.png",
+    "implementation": "docs/phase-2/visual/P-01-home-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-02-search",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/P-02-search-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/P-02-search-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-02-search",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/P-02-search-390-baseline.png",
+    "implementation": "docs/phase-2/visual/P-02-search-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "P-03-property",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/P-03-property-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/P-03-property-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "S-06-dashboard",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/S-06-dashboard-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/S-06-dashboard-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "S-06-dashboard",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/S-06-dashboard-390-baseline.png",
+    "implementation": "docs/phase-2/visual/S-06-dashboard-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "S-07-marketplace",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/S-07-marketplace-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/S-07-marketplace-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "S-07-marketplace",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/S-07-marketplace-390-baseline.png",
+    "implementation": "docs/phase-2/visual/S-07-marketplace-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "S-11-purchase-result",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/S-11-purchase-result-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/S-11-purchase-result-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "S-14-billing",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/S-14-billing-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/S-14-billing-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "S-14-billing",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/S-14-billing-390-baseline.png",
+    "implementation": "docs/phase-2/visual/S-14-billing-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "B-06-dashboard",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/B-06-dashboard-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/B-06-dashboard-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "B-06-dashboard",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/B-06-dashboard-390-baseline.png",
+    "implementation": "docs/phase-2/visual/B-06-dashboard-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "B-08-editor",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/B-08-editor-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/B-08-editor-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "B-08-editor",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/B-08-editor-390-baseline.png",
+    "implementation": "docs/phase-2/visual/B-08-editor-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "B-16-enquiries",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/B-16-enquiries-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/B-16-enquiries-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "B-19-restrictions",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/B-19-restrictions-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/B-19-restrictions-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "A-02-dashboard",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/A-02-dashboard-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/A-02-dashboard-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "A-02-dashboard",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/A-02-dashboard-390-baseline.png",
+    "implementation": "docs/phase-2/visual/A-02-dashboard-390-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "A-06-kyc-review",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/A-06-kyc-review-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/A-06-kyc-review-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "A-19-adjust",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/A-19-adjust-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/A-19-adjust-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "A-23-ticket",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/A-23-ticket-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/A-23-ticket-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "A-30-audit",
+    "width": 1440,
+    "baseline": "docs/phase-2/visual/A-30-audit-1440-baseline.png",
+    "implementation": "docs/phase-2/visual/A-30-audit-1440-implementation.png",
+    "ok": true
+  },
+  {
+    "id": "C-mobile-nav",
+    "width": 390,
+    "baseline": "docs/phase-2/visual/C-mobile-nav-390-baseline.png",
+    "implementation": "docs/phase-2/visual/C-mobile-nav-390-implementation.png",
+    "ok": true
+  }
+]
