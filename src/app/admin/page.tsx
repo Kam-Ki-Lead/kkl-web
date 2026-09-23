@@ -68,7 +68,7 @@ export default async function AdminDashboardPage() {
 
         <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-[16px] max-[1200px]:grid-cols-1">
           <Card className="p-[18px]">
-            <h2 className="t-heading text-ink">Today&rsquo;s volumes</h2>
+            <h2 className="t-card-title text-ink">Today&rsquo;s volumes</h2>
             <div className="mt-[14px] grid grid-cols-3 gap-px overflow-hidden rounded-[8px] border border-line bg-line max-[700px]:grid-cols-2">
               {volumes.map((volume) => (
                 <div key={volume.label} className="bg-white px-[15px] py-[13px]">
@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
           </Card>
 
           <Card className="p-[18px]">
-            <h2 className="t-heading text-ink">Needs attention</h2>
+            <h2 className="t-card-title text-ink">Needs attention</h2>
             <div className="mt-[12px] flex flex-col gap-[10px]">
               {alerts.map((alert) => (
                 <Link

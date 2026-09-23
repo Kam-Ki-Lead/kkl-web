@@ -91,7 +91,14 @@ export function AdminTable({
           })}
         </div>
 
-        <form method="GET" action={basePath} className="flex items-center gap-[10px]">
+        {/* flex-wrap and min-w-0: at 320 CSS px the label, the field and the
+            button do not fit on one line, and without wrapping the form
+            pushed the page 43px wide — WCAG 1.4.10 Reflow. */}
+        <form
+          method="GET"
+          action={basePath}
+          className="flex min-w-0 flex-wrap items-center gap-[10px]"
+        >
           {activeFilter !== "all" ? (
             <input type="hidden" name="filter" value={activeFilter} />
           ) : null}

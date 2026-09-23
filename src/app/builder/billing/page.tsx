@@ -58,7 +58,7 @@ export default async function BillingPage() {
 
         <Card className="p-[22px]">
           <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
-            <h2 className="t-heading text-ink">Usage this month</h2>
+            <h2 className="t-card-title text-ink">Usage this month</h2>
             <p className="t-caption text-muted">
               {formatCreditBalance(spentThisMonth)} spent · six months shown
             </p>
@@ -69,7 +69,7 @@ export default async function BillingPage() {
         </Card>
 
         <Card className="overflow-hidden">
-          <h2 className="t-heading border-b border-line px-[22px] py-[16px] text-ink">
+          <h2 className="t-card-title border-b border-line px-[22px] py-[16px] text-ink">
             Recent transactions
           </h2>
           {ledger.length === 0 ? (

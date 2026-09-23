@@ -18,6 +18,17 @@
   --color-surface: #f4f6fb;
   --color-tint: #f6f8fd;
   --color-line: #e1e4ee;
+  /*
+   * Form controls and secondary buttons, distinct from the card hairline.
+   *
+   * The design uses #C6CCE0 on 1.5px control borders (124 occurrences) and
+   * #E1E4EE on 1px card borders (268). The controls here were using the card
+   * value, which is both a fidelity difference and a contrast one — see
+   * scripts/verify-contrast.mjs, where NEITHER value clears WCAG 1.4.11 for a
+   * boundary that identifies a control. That is a design-level finding and is
+   * recorded rather than resolved by inventing a darker colour.
+   */
+  --color-control-border: #c6cce0;
   --color-success: #0e6b45;
   --color-warning: #8a4a08;
   --color-danger: #b3261e;

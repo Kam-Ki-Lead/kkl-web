@@ -31,19 +31,23 @@ run against `next start`.
 
 | Check | Command | Result |
 |---|---|---|
-| Type check | `npx tsc --noEmit` | Pass, 0 errors |
-| Lint | `npx eslint .` | Pass, 0 errors, 0 warnings |
+| Type check | `npm run typecheck` | Pass, 0 errors |
+| Lint | `npm run lint` | Pass, 0 errors, 0 warnings |
 | Production build | `npx next build` | Pass — 120 routes compiled |
-| Design tokens | `node scripts/verify-design-tokens.mjs ../kkl-design` | 26/26 tokens and 37/37 component literals appear in the approved design |
+| **Unit tests** | `npm test` | **27/27** — `node:test`, no framework added |
+| Design tokens | `node scripts/verify-design-tokens.mjs ../kkl-design` | 27/27 tokens and 37/37 component literals appear in the approved design |
+| Contrast | `node scripts/verify-contrast.mjs` | 24/24 declared pairs meet AA; **2 design-level findings** |
+| Zoom | `node scripts/verify-zoom.mjs` | 32/32 — reflow at 320 CSS px and 200% text, 16 screens |
+| Accessibility | `node scripts/verify-accessibility.mjs` | 22/22; **3 pending** (no tooling) |
 | Visual values | `node scripts/verify-visual-baseline.mjs` | 22/22 measured values match the baseline's declared values |
+| **Rendered comparison** | `node scripts/capture-visual-comparison.mjs` | **25 pairs captured**, 17 screens — see `visual/` |
 | Route sweep | `node scripts/verify-route-sweep.mjs` | 224/224 — 112 routes × 2 widths |
 | Enquiry flow | `node scripts/verify-enquiry-flow.mjs` | 17/17 behaviour checks pass; 3 limitations reproduce |
 | Seller flow | `node scripts/verify-seller-flow.mjs` | 26/26 behaviour checks pass; 2 limitations reproduce |
-| Builder flow | `node scripts/verify-builder-flow.mjs` | 43/43 behaviour checks pass; 3 limitations reproduce |
+| Builder flow | `node scripts/verify-builder-flow.mjs` | 48/48 behaviour checks pass; 3 limitations reproduce |
 | Admin flow | `node scripts/verify-admin-flow.mjs` | 36/36 behaviour checks pass; 3 limitations reproduce |
 | Forms without JavaScript | `node scripts/verify-no-javascript.mjs` | 50/50 forms work with scripting disabled |
 | Sample-mode guard | `./scripts/verify-sample-mode-guard.sh` | 8/8 — build time and run time, both directions |
-| Unit / integration tests | — | **None written. No test runner is configured.** |
 
 All nine scripts are committed and repeatable, against one production build
 served by `next start`. **The whole set was run twice in a row against one
@@ -54,10 +58,17 @@ something rather than being an artifact of a fresh process.
 and the only one that compares this repository to the **design** rather than to
 itself. Everything else compares the implementation with its own expectations.
 
-**There are still no unit or integration tests.** Nine browser-driven harnesses
-are not a substitute: they cover the journeys, not the functions, and a
-reconciliation invariant asserted through a web page is asserted more slowly
-and less precisely than it could be.
+**There are now unit tests, and no framework was added to get them.**
+`node:test` and `node:assert` are built into Node 22. The 27 tests cover what
+the browser suites cover *poorly*: the ledger invariant as a property over 500
+randomised sequences rather than four examples, idempotency keys reused with
+**different** inputs, all eight status/verification combinations in both
+directions, the scope field against 23 hostile values, note containment over
+all 16 interleavings, and the deployment guard's full 72-combination space.
+
+They are not a substitute for the harnesses and do not try to be — each file
+states where it mirrors a rule rather than importing the module, and what that
+costs. There are still **no component tests**.
 
 The ESLint flat config was broken on arrival (`FlatCompat` threw "Converting circular structure
 to JSON"); lint could not run at all until it was repaired. Any earlier claim of a lint pass in
@@ -709,144 +720,140 @@ control. Recorded here because an invented requirement in a verification
 document is worse than a missing one: it reads as a defect, and somebody would
 have built it.
 
-## Accessibility — checked
+## Accessibility
 
-| Check | Result |
+Three of C-11's carried-forward items are now closed. Two remain, plus two
+design-level findings that are not this implementation's to resolve.
+
+### Measured and passing
+
+| Check | Result | Script |
+|---|---|---|
+| **Status-chip contrast, all five** | **5/5 pass**, 5.26:1 to 8.07:1 | `verify-contrast.mjs` |
+| Text and surface pairs | 24/24 pass AA | same |
+| **Reflow at 320 CSS px** (1.4.10) | **16/16 screens** | `verify-zoom.mjs` |
+| **Text-only zoom 200%** (1.4.4) | **16/16 screens** | same |
+| Every control labelled | 5 screens, one per console | `verify-accessibility.mjs` |
+| One h1, no skipped levels | 5 screens | same |
+| Keyboard reaches field and submit | pass | same |
+| No positive tabindex | pass | same |
+| Dialog: focus in, named, Tab trapped, Escape keeps the edit | 4/4 | same |
+| Validation announced with `role="alert"` | 2 screens | same |
+| Invalid field points at its own message | pass | same |
+| Mobile drawer: opens, reports state, Escape closes | 3 consoles | same |
+| Focus ring immediate, not transitioned | pass | fixed earlier |
+| Minimum target size 44px | enforced in the control components | — |
+
+**C-11's chip-contrast item is closed.** It had been carried forward since
+design approval as though it needed a person with a colour meter; it is
+arithmetic on values this repository already held.
+
+Checks are run **on a screen from each console**, not on one shared component.
+A component being right does not make a screen right: a page can hand-roll an
+input, or label one control and forget the next.
+
+### Two reflow defects, found and fixed
+
+Both looked perfectly fine and passed every other check:
+
+- **`sr-only` on a `<table>` does not remove it from layout.** A table cannot
+  shrink below its min-content width, so `width:1px` is ignored; it is hidden
+  visually and still occupied 305px, pushing `/seller/billing` 23px wide at
+  320 CSS px. Now wrapped in a `div`, which does shrink.
+- **The Admin search form did not wrap**, pushing `/admin/users` 43px wide.
+
+### Pending — tooling or platform unavailable
+
+Recorded as pending. **Not passed, not failed.**
+
+| Check | What is needed |
 |---|---|
-| Focus ring on every interactive element | ✅ 3px saffron at 2px offset, verified under real keyboard focus |
-| Focus ring is immediate | ✅ after a fix — see below |
-| Tab order through the enquiry journey | ✅ header → breadcrumb → fields → submit, no traps, nothing skipped |
-| Form controls have associated labels | ✅ zero unlabelled controls on the enquiry form, search filters, requirement capture, auth |
-| One `h1` per page, sensible heading order | ✅ checked on homepage, search, property detail, enquiries |
-| Mobile drawer | ✅ toggles, `aria-expanded` and `aria-controls` correct, dismisses |
-| Minimum target size | ✅ 44px enforced in the control components (48px where a thumb is likely) |
+| **Screen reader** (NVDA, JAWS, VoiceOver) | A screen reader. None is installed here and none can be |
+| **Forced-colors / High Contrast** | A Windows host. A *real* risk: the application sets explicit backgrounds and borders throughout, the usual cause of failure |
+| **Voice control** (Dragon, Voice Access) | The tooling |
 
-**Focus-ring defect found and fixed.** Controls carrying Tailwind's `transition-colors` also
-transition `outline-color`, so the focus indicator faded in from `currentColor` over 150ms —
-effectively invisible on filled buttons at the moment focus lands. The transition now names its
-properties explicitly and excludes `outline-color`. A base-layer override was tried first and
-does not work: a utility class outranks it.
+What is checked above is the **markup that would produce announcements** —
+roles, live regions, `aria-describedby` wiring — not what a user would hear.
+That is the difference between "the page says the right things" and "the page
+is usable without sight", and **only the first is claimed.**
 
-## Accessibility — NOT checked
+### Two design-level findings
 
-Carried forward from C-11. None of these may be reported as passed without being performed.
+Both are values the **approved baseline** declares. Changing either alters the
+approved appearance, so they are reported with numbers and a proposed remedy
+rather than quietly darkened. Neither was changed unilaterally.
 
-1. **Screen-reader testing.** None performed, on the baseline or the application.
-2. **Individual status-chip contrast.** Not measured chip by chip.
-3. **Native browser zoom and Firefox text-only zoom.** Unverified. The baseline checked only a
-   *simulated* 200% text enlargement, on one screen at one width, and recorded it **Partial**.
-   Nothing here improves on that.
+**Focus ring on a light background — 2.11:1, needs 3:1** (WCAG 1.4.11).
+C-01 names the focus ring as one of saffron's three permitted uses, so the
+colour is part of the identity. *Proposed:* keep saffron and pair it with a
+dark companion — an outline plus a 1px ink box-shadow reads as one indicator
+and clears 3:1 on any background — or darken the ring on light surfaces only.
+
+**Control border on white — 1.60:1, needs 3:1** (WCAG 1.4.11). A text input is
+identified by its border; the approved `#C6CCE0` is 1.60:1. *Proposed:* darken
+it on light surfaces, or give controls a filled surface distinct from the card.
+
+The card hairline is **not** in scope: it groups visible content rather than
+identifying a component. The controls were using it (1.27:1) until this pass,
+and that part is fixed.
 
 ## Visual comparison against the approved baseline
 
-**The approved prototypes cannot be rendered in this environment.** They boot
-React from `unpkg.com`, which the sandbox's proxy refuses
-(`ERR_TUNNEL_CONNECTION_FAILED`), so the pages stay as unexpanded
-`{{ template }}` placeholders. Google Fonts is blocked too.
+**The prototypes now render locally, and screens were compared.** An earlier
+version of this document recorded that they could not be rendered here at all —
+they load React, ReactDOM and Babel from `unpkg.com` and fonts from Google
+Fonts, and this environment's network policy denies both.
 
-That has a consequence worth stating before anything else: **no screenshot
-comparison of the Seller, Builder or Admin consoles was possible in this
-session, and none is claimed.** The three rows compared that way (P-01, P-02,
-P-03) were done in an earlier session on an environment where the homepage
-prototype did render.
+`scripts/setup-prototype-review.sh` resolves that without touching the
+baseline: it fetches the **same pinned versions** (react 18.3.1, react-dom
+18.3.1, @babel/standalone 7.29.0) from the npm registry, which the policy does
+allow, and the same three font families from `@fontsource`, then writes a
+separate copy of each prototype pointing at those local files. The script
+verifies kkl-design is byte-identical before it finishes and aborts if not.
 
-### What was done instead, and what it is worth
+**25 pairs across 17 screens** are captured in `docs/phase-2/visual/`, driven
+through the prototype's own screen picker and width tabs so it reflows as
+designed. The full list of what was compared, the differences found and fixed,
+the deliberate departures, and what remains uncompared are in
+**`docs/phase-2/acceptance.md` §3**.
 
-The baseline declares every colour, size and weight as an inline style in its
-own source. Those values can be read out and compared to what a browser
-actually computes for the implementation. Two committed scripts do that:
+### Four differences the rendered comparison found
 
-| Check | What it compares | Result |
-|---|---|---|
-| `verify-design-tokens.mjs` | every `--color-*` token, and every hex literal in `src/` | 26/26 and 37/37 appear in the approved design |
-| `verify-visual-baseline.mjs` | computed styles on representative screens of all three consoles, at 1440 and 390 | 22/22 match the declared values |
+None of them could have been seen by a token check, a computed-style check or
+a route sweep — every one of those was passing at the time.
 
-**This is a measurement, and it is better than an eyeball in one direction and
-much worse in the other.** It catches near-misses a person comparing two screens
-never would. It says nothing about layout, spacing rhythm, or whether a screen
-reads well — which is exactly what a screenshot would show. Both scripts say so
-in their own output.
+1. **Card headings were at the screen-heading step** — `.t-heading` (26px/800)
+   where C-02 declares "Card and section title — Archivo 700 · 17px". The right
+   ladder, the wrong rung, across 12 headings in all four journeys.
+2. **The Credits card figure was 34px**; the approved Seller card declares 30px.
+3. **The Admin rail used the Seller's step.** The approved A-02 sets 14px with
+   tighter padding because twenty destinations do not fit at 16px.
+4. **Form controls used the card hairline** `#E1E4EE` where the design uses the
+   control border `#C6CCE0` at 1.5px — 124 occurrences against 268.
 
-### Three defects it found, which had shipped
+### And one earlier, from measurement
 
-1. **Three colour tokens appear nowhere in the approved design.**
-   `--color-chip-success-bg`, `-danger-bg` and `-muted-bg` held `#E4F3EC`,
-   `#FBECEB` and `#ECEEF4`; the baseline uses `#E3F3EA`, `#FDECEA` and
-   `#F0F2F9`, 31, 16 and 13 times respectively in the component library alone.
+`Card`'s base classes beat the caller's overrides, so **every warning, success
+and danger panel in the application rendered white with a grey hairline**.
+Tailwind emits `bg-white` and `bg-[#FFF7E8]` as two rules of equal specificity;
+stylesheet order decides, not class-attribute order.
 
-   An earlier version of this document recorded C-01 as "values transcribed and
-   compared". They were transcribed. The comparison was a person reading two
-   lists of hex codes, which is the one comparison a near-miss survives intact.
+### Imagery — still not compared
 
-2. **Nine more near-misses were written directly into components**, including
-   the warning panel's surface and border — `#FFF9EE`/`#F2DFBC` against the
-   baseline's `#FFF7E8`/`#F3DFB4` — used across 27 files.
+The baseline references seven Unsplash photographs by URL. The implementation
+wires the same URLs behind `NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on`, and **this
+environment's network policy denies `images.unsplash.com`** — the proxy answers
+403 to CONNECT. The flag path has never been seen rendered.
 
-3. **`Card` overrode its callers.** Tailwind emits `bg-white` and
-   `bg-[#FFF7E8]` as two rules of equal specificity, so which wins is decided
-   by their order in the generated stylesheet, not by the order in a `class`
-   attribute. **Every warning, success and danger panel in this application was
-   rendering white with a grey hairline** instead of its approved colour.
+Missing-media fallbacks are captured as their own states and are **not** a
+substitute for the normal state. See `acceptance.md` §3 for the exact access
+needed.
 
-   A route sweep could never have seen this. The page loads, nothing errors,
-   and the panel is simply the wrong colour.
+### What is still not compared
 
-All three are fixed, and the checks that found them are committed so they
-cannot come back quietly.
-
-### Screens compared by screenshot, and how
-
-| Screen | Widths | Method | Result |
-|---|---|---|---|
-| P-01 Homepage | 1440, 768, 390 | screenshot vs prototype | Structure, order, type scale, colour and copy match, including the distinct mobile layout |
-| P-02 Search results | 1440 | screenshot vs prototype | Filter row, possession chips, applied-filter bar, sort set, card grid and count line match |
-| P-03 Property detail | 1440 | screenshot vs prototype | Gallery split, spec grid, pricing table, amenities, location, possession panel and sidebar match in layout; gallery contents differ |
-
-### Screens compared by measurement, and how
-
-| Screen | Widths | Method | Result |
-|---|---|---|---|
-| S-06 Seller dashboard | 1440, 390 | computed styles vs declared values | Rail surface, figure step, hairline, rail collapse |
-| S-07 Lead marketplace | 1440 | computed styles | Neutral chip surface |
-| B-06 Builder dashboard | 1440, 390 | computed styles | Rail surface, rail collapse, drawer toggle |
-| A-02 Admin dashboard | 1440, 390 | computed styles | Rail surface, active rail item, queue-tile figure at 28px, warning chip, rail collapse, drawer toggle |
-| A-03 Users | 1440 | computed styles | Success chip, hairline |
-| A-05 KYC queue | 1440 | computed styles | Warning and muted chips |
-| A-08 Property review | 1440 | computed styles | Danger chip |
-| A-20 Refunds | 1440 | computed styles | Warning panel surface and border |
-
-**Not compared at all, by either method:** P-05, P-08 to P-11, P-15 to P-20,
-S-01 to S-05, S-08 to S-25, B-01 to B-05, B-07 to B-24, A-01, A-04, A-06,
-A-07, A-09 to A-19, A-21 to A-31, and every screen at 768 except the homepage.
-
-That is most of the application. What the measurement establishes is that the
-**values** are right everywhere they are shared — the tokens, the chips, the
-rails, the panels — because those are shared components rather than per-screen
-decisions. It establishes nothing about the layout of a screen nobody looked at.
-
-### Other differences, recorded in `approved-baseline.md` §5
-
-- **Photography (open, not deliberate).** The baseline vendors no images of its
-  own; it references seven Unsplash photographs by URL and credits each, and
-  states that every one must be replaced with licensed project photography
-  before launch. Those URLs are wired behind `NEXT_PUBLIC_KKL_REVIEW_IMAGERY=on`
-  with their credits drawn over the images, and two listings are deliberately
-  excluded so the missing-media state stays visible. **The flag path is
-  unverified** — it typechecks and builds, and the images have never loaded
-  here, because the same proxy blocks `images.unsplash.com`. This is the
-  specific outstanding asset dependency.
-- **Listing counts (deliberate).** Derived from fixtures rather than the
-  baseline's illustrative 244/128, because a homepage claiming 128 listings that
-  searches to nine is incoherent.
-- **Figures (corrected).** The baseline declares three different figure sizes —
-  28px for A-02's queue tiles, 26px for the other Admin stat blocks, 21px for
-  the shared Seller and Builder tiles. `.t-figure` is the 21px step; the other
-  two are set where they apply.
-
-Defects found by the earlier screenshot comparison and fixed: hero fallback
-caption colliding with hero copy; project card image overlapping its content;
-"1 listings"; three nav items marking themselves active at once; carpet-area
-unit dropped from the first pricing row.
+**96 of 113 inventory rows.** The shared *values* are right everywhere, because
+they come from shared components — that says nothing about the layout of a
+screen nobody opened.
 
 ## Console output
 
@@ -861,55 +868,54 @@ The baseline's unresolved homepage console defect is not inherited — see
 
 ## Not claimed
 
-- **No screen is connected to a real service.** Everything renders from sample
-  fixtures. Authentication, authorization, KYC, lead ownership, contact
-  disclosure, credits and payments are all simulated, and every screen that
-  touches one says so on the screen.
+- **No screen is connected to a real service.** Authentication, authorization,
+  KYC, lead ownership, contact disclosure, credits and payments are all
+  simulated, and every screen that touches one says so on the screen.
 - **There is no staff sign-in and there are no staff roles.** Anything that
-  reaches `/admin` gets the whole console. Who may approve a document, adjust a
-  balance or read a transcript is not modelled at all. Reproducing that is
-  limitation L1 of the Admin suite, and reproducing it is not a pass.
-- **The Admin operational screens read fixtures.** There is no intake pipeline,
-  qualification caller, WhatsApp journey or notification sender anywhere in this
-  repository.
-- **No accessibility conformance claim at any level.** Screen-reader behaviour,
-  per-chip contrast and native/text-only zoom are unverified on all 113 rows.
-- **No performance or load testing.**
-- **No cross-browser testing**; every check ran in headless Chromium.
-- **No unit or component tests, and no test runner.** Nine committed browser
-  harnesses cover the journeys end to end; they are not a substitute for tests
-  of the functions underneath.
-- **The visual comparison is by measurement, not by screenshot, for everything
-  except P-01 to P-03.** The approved prototypes cannot be rendered in this
-  environment — they boot React from a blocked CDN. What is established is that
-  the shared *values* are right; nothing is established about the layout of any
-  screen nobody looked at, which is most of them. The full list of what was
-  compared and how is above.
-- **Primary imagery still differs**, and the review-imagery path has never been
-  seen rendered, because the same proxy blocks `images.unsplash.com`.
+  reaches `/admin` gets the whole console. Reproducing that is limitation L1 of
+  the Admin suite, and reproducing it is not a pass.
+- **The Admin operational screens read fixtures.** No intake pipeline,
+  qualification caller, WhatsApp journey or notification sender exists here.
+- **No accessibility conformance claim at any level.** Screen-reader
+  behaviour, forced-colors and voice control are pending on all 113 rows, and
+  two design-level contrast findings are open.
+- **96 of 113 rows have not been visually compared.** 17 were, by rendered
+  screenshot; the shared values are right everywhere, which says nothing about
+  the layout of a screen nobody opened.
+- **Imagery is not in the comparison.** `images.unsplash.com` is denied by this
+  environment's network policy, so the review-imagery path has never been seen
+  rendered.
+- **B-15 is partial.** Edits survive browser Back, but the approved dialog does
+  not appear for it. The trade-off and the three options are in
+  `acceptance.md` §2.
+- **No performance or load testing.** **No cross-browser testing** — every
+  check ran in headless Chromium. **No component tests.**
 - **`/seller/review-state`, `/builder/review-state` and `/admin/review-state`
   returning 404 outside sample mode is untestable, not verified**: a build with
   `NEXT_PUBLIC_KKL_DATA_SOURCE=api` fails at build time because no API client
-  exists, so no non-sample build can be produced for the routes to be absent
-  from. The guard was not weakened to make one.
+  exists. The guard was not weakened to make one.
 - **The deployment guard cannot detect that it is running in production.** It
-  requires the deployment to declare itself and refuses to serve when it has
-  not. A deployment that declares `KKL_ENV=review` while serving real users is
-  not detectable here, and nothing in a frontend could detect it. That residual
-  risk is operational, not a code control.
-- **B-15's guard does not cover browser Back**, and cannot control what the
-  browser's own reload prompt says. Both are recorded in the B-15 section.
+  requires the deployment to declare itself. A deployment declaring
+  `KKL_ENV=review` while serving real users is not detectable here, and nothing
+  in a frontend could detect it. Operational, not a code control.
 - **The dev-server hydration failure has no established cause.**
 
-### One thing this document got wrong, and how
+### Claims this document has had to withdraw
 
-An earlier version recorded C-01 as "values transcribed and compared" and
-reported a clean route sweep on the same page. Three colour tokens were wrong,
-nine component literals were wrong, and every coloured panel in the application
-was rendering white — all of it while 224 route renders passed and the console
-was clean.
+Three, kept rather than deleted — a verification record that quietly corrects
+itself is worth less than one that shows its corrections.
 
-The lesson is not that the sweep was useless. It is that **a check which only
-asks "did this load without complaining" cannot see a wrong colour**, and that
-a comparison performed by a person reading two lists is the one comparison a
-near-miss survives. Both gaps now have scripts.
+1. **"C-01 values transcribed and compared."** Three colour tokens and nine
+   component literals were wrong, all near-misses, while a route sweep of 224
+   renders passed with a clean console. A comparison performed by a person
+   reading two lists of hex codes is the one comparison a near-miss survives.
+   Now `verify-design-tokens.mjs`.
+2. **"The prototypes cannot be rendered in this environment."** True of the
+   default setup and not true of what was reachable: the npm registry is
+   allowed, so the pinned versions could be fetched and served locally. The
+   conclusion was right about the blockage and wrong to stop there.
+3. **"No four-eyes rule on money."** Listed as an outstanding gap. **No
+   approved source asks for one** — kkl-backend's access matrix specifies an
+   audited ledger event, single-actor, which is what is built. An invented
+   requirement in a verification document reads as a defect, and somebody would
+   have built it.

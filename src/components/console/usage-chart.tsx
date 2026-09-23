@@ -30,7 +30,14 @@ export function UsageChart({ months }: { months: readonly UsageMonth[] }) {
         ))}
       </div>
 
-      <table className="sr-only">
+      {/* The sr-only class on a <table> does not take it out of the layout: a
+          table cannot shrink below its min-content width, so width:1px is
+          ignored and it still occupies its full size. Visually it is hidden —
+          clip-path and overflow do apply — but it pushed /seller/billing
+          23px wide at 320 CSS px, failing WCAG 1.4.10 Reflow while looking
+          perfectly fine. Hence the wrapper, which is a div and does shrink. */}
+      <div className="sr-only">
+      <table>
         <caption>Credits spent per month, last six months</caption>
         <thead>
           <tr>
@@ -47,6 +54,7 @@ export function UsageChart({ months }: { months: readonly UsageMonth[] }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

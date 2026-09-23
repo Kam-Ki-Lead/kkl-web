@@ -57,7 +57,7 @@ export default async function SellerDashboardPage() {
         <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-[18px] max-[1200px]:grid-cols-1">
           <Card className="p-[18px]">
             <div className="flex flex-wrap items-center justify-between gap-[10px]">
-              <h2 className="t-heading text-ink">New leads matching your areas</h2>
+              <h2 className="t-card-title text-ink">New leads matching your areas</h2>
               <Link
                 href="/seller/leads"
                 className="text-[15px] font-bold text-brand underline underline-offset-2"
@@ -84,7 +84,9 @@ export default async function SellerDashboardPage() {
           <div className="flex flex-col gap-[18px]">
             <Card className="p-[18px]">
               <h2 className="t-card-title text-ink">Credits</h2>
-              <p className="t-title mt-[4px] text-ink">
+              {/* 30px, as the approved Credits card declares. C-02's page-title
+                  step is 34px and is a rung too high here. */}
+                <p className="font-[family-name:var(--font-heading)] text-[30px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink mt-[4px]">
                 {formatCreditBalance(wallet.balanceCredits)}
               </p>
               <p className="t-caption mt-[2px] text-muted">

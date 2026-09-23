@@ -190,7 +190,7 @@ screens where money, identity and lead ownership appear:
 | B-12 | Create listing — media | `…/:id/media` | ✓ | ~ records that photographs were chosen; **stores no bytes** | · | ✓ the limitation is asserted, not the upload |
 | B-13 | Create listing — preview & publish | `…/:id/preview` | ✓ | ✓ blockers per section, publish, **portal continuity — *disconnected step 1 closed in sample*** | · | ✓ blockers named, publish reaches `/search`, incl. no-JS |
 | B-14 | Listing actions | *nested — within B-07* | ✓ | ✓ edit, unpublish, republish, delete a draft | · | ✓ |
-| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/basics` *(same editor)* | ✓ | ✓ dirty mark, exit dialog, reload warning | · | ✓ 15 checks, incl. rail and section interception |
+| B-15 | Edit listing & unsaved changes | `/builder/properties/:id/basics` *(same editor)* | ✓ | ~ mark, dialog, reload warning and Back-safety; **no dialog on browser Back** | · | ~ 20 checks; the Back case is closed for data loss, open for the dialog |
 | B-16 | Enquiries on my listings | `/builder/enquiries` | ✓ | ✓ seeded **plus Buyer enquiries from the portal** | · | ✓ a portal enquiry reaches the console |
 | B-17 | Enquiry detail | `/builder/enquiries/:id` | ✓ | ✓ both alternatives; **disclosure rule open, D-05** | · | ✓ incl. a mask-containment check over the whole HTML |
 | B-18 | New-enquiry notification | `/builder/enquiries/notifications` | ✓ | ✓ read/unread; **D-05** | · | ✓ |
@@ -216,21 +216,29 @@ creating a listing and by editing one, which is what the prototype shows: B-08
 to B-13 are the same six sections, and B-15 is that editor opened on an existing
 listing. There is no separate edit screen and building one would duplicate it.
 
-**The unsaved-changes experience is now built**, to the approved design: the
-"Unsaved changes" mark in the header, a save control whose label settles to
-"Draft saved", and the three-way dialog on the way out — save and close,
-discard, keep editing — plus the browser's own warning on reload or tab close.
+**The unsaved-changes experience is built and is partial.** The header mark,
+the three-way exit dialog, the reload warning and the section/rail interception
+are all present and verified. What is **not** present is the dialog on browser
+**Back** — and that is a decision rather than unfinished work.
 
 Two things about it are worth recording rather than leaving to be rediscovered:
 
 - **Dirtiness is read from the DOM against each control's own default**, not
   from a snapshot taken at mount. That is exactly the state `form.reset()`
-  restores, so "discard" and "is it dirty" cannot disagree. It also means typing
-  a value back to what was saved clears the mark rather than latching.
+  restores, so "discard" and "is it dirty" cannot disagree. Typing a value back
+  to what was saved clears the mark rather than latching.
 - **File inputs are excluded.** In sample mode nothing is uploaded and
   `photoCount` is what actually saves, so a chosen file could never become
-  "saved" — counting it would leave the editor permanently dirty with no way for
-  a Builder to clear it.
+  "saved" — counting it would leave the editor permanently dirty.
+
+**Browser Back does not show the dialog, and no longer loses work.** Back is
+not cancellable: by the time `popstate` fires the navigation has happened, so a
+history trap has to undo it — breaking Forward, growing the stack and competing
+with the router. Instead the section's unsaved values are held per tab and put
+back on return, with a notice. Closing B-15 fully needs a decision between
+accepting that, adopting Cache Components (a whole-application migration, and
+still best-effort at three routes), or a history trap. See
+`acceptance.md` §2.
 
 **None of it works without JavaScript**, and the screen says so rather than
 implying otherwise. What still works there is the part a Builder would actually
@@ -410,7 +418,7 @@ Counted per dimension, because they are not the same question.
 | C library | 12 | 11 (2 partial) | 9 (1 partial) | **0** | 8 (3 partial) |
 | P public + Buyer | 21 | 21 (2 partial) | 19 (3 partial) | **0** | 16 (5 partial) |
 | S Seller | 25 | 25 (1 partial) | 22 (3 partial) | **0** | 25 (8 partial) |
-| B Builder | 24 | 24 | 24 (3 partial) | **0** | 24 |
+| B Builder | 24 | 24 | 24 (4 partial) | **0** | 24 (1 partial) |
 | A Admin | 31 | 31 (1 partial) | 22 (10 partial, 3 n/a) | **0** | 31 |
 
 **Every screen in the inventory is now built.** The shared foundation, the

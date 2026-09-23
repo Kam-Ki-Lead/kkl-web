@@ -33,6 +33,9 @@ export async function AdminShell({
     <ConsoleShell
       navLabel="Admin console"
       navEyebrow="Internal operations"
+      // Twenty destinations under eight headings; the approved A-02 sets a
+      // tighter step than the Seller and Builder rails use.
+      dense
       items={adminRailItems(railCounts(dashboard.queues, notifications.length))}
       footer={null}
       title={title}

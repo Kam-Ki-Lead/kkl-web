@@ -40,7 +40,7 @@ export default async function MaskedLeadPage({
         <BuilderShell title={`Lead ${id}`} subtitle="Already purchased">
           <Card className="border-[#BFE0CE] bg-chip-success-bg p-[22px]">
             <Chip tone="success">Purchased</Chip>
-            <h2 className="t-heading mt-[8px] text-success">You already own this lead</h2>
+            <h2 className="t-card-title mt-[8px] text-success">You already own this lead</h2>
             <p className="t-body mt-[6px] text-body">
               It is in My leads with full contact details. Buying it again is not possible — one
               lead is released to one purchaser only.

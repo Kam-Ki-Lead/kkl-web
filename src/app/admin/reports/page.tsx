@@ -31,7 +31,7 @@ export default async function AdminReportsPage() {
 
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-baseline justify-between gap-[12px]">
-            <h2 className="t-heading text-ink">Lead funnel · 1–16 September 2026</h2>
+            <h2 className="t-card-title text-ink">Lead funnel · 1–16 September 2026</h2>
             <a
               href="/admin/reports/funnel.csv"
               className="text-[15px] font-bold text-brand underline underline-offset-2"

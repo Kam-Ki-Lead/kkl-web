@@ -63,12 +63,15 @@ export function DashboardRail({
   footer,
   ariaLabel,
   eyebrow,
+  dense = false,
 }: {
   items: readonly RailItem[];
   footer?: RailFooter | null;
   ariaLabel: string;
   /** Names which console this is, where more than one exists (B-06). */
   eyebrow?: string;
+  /** The Admin rail's tighter step — see RailLink. */
+  dense?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -95,7 +98,7 @@ export function DashboardRail({
                 {item.group}
               </p>
             ) : null}
-            <RailLink item={item} active={isActive(item, pathname)} />
+            <RailLink item={item} active={isActive(item, pathname)} dense={dense} />
           </li>
         ))}
       </ul>
@@ -109,12 +112,29 @@ export function DashboardRail({
   );
 }
 
-function RailLink({ item, active }: { item: RailItem; active: boolean }) {
+/**
+ * The Admin rail is denser than the Seller's and Builder's, in the design.
+ *
+ * Its twenty destinations do not fit at the 16px step the other two use, so
+ * the approved A-02 sets 14px with tighter padding. That is a per-console
+ * metric rather than a token, so it is a prop rather than a second component.
+ */
+function RailLink({
+  item,
+  active,
+  dense,
+}: {
+  item: RailItem;
+  active: boolean;
+  dense: boolean;
+}) {
   return (
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className={`flex min-h-[46px] items-center justify-between gap-[10px] rounded-[8px] px-[17px] text-[16px] transition-[background-color,color] duration-150 ${
+      className={`flex items-center justify-between gap-[10px] rounded-[8px] transition-[background-color,color] duration-150 ${
+        dense ? "min-h-[40px] px-[13px] text-[14px]" : "min-h-[46px] px-[17px] text-[16px]"
+      } ${
         active
           ? "bg-brand font-bold text-white"
           : "font-medium text-rail-seller-item hover:bg-white/10 hover:text-white"
@@ -159,11 +179,13 @@ export function RailDrawer({
   footer,
   ariaLabel,
   eyebrow,
+  dense = false,
 }: {
   items: readonly RailItem[];
   footer?: RailFooter | null;
   ariaLabel: string;
   eyebrow?: string;
+  dense?: boolean;
 }) {
   const pathname = usePathname();
   // The drawer's open state is stored as the path it was opened on, so a route
@@ -219,7 +241,7 @@ export function RailDrawer({
                       {item.group}
                     </p>
                   ) : null}
-                  <RailLink item={item} active={isActive(item, pathname)} />
+                  <RailLink item={item} active={isActive(item, pathname)} dense={dense} />
                 </li>
               ))}
             </ul>

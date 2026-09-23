@@ -7,7 +7,7 @@ import type { ComponentProps, ReactNode } from "react";
  */
 
 const controlBase =
-  "w-full min-h-[44px] rounded-[8px] border bg-white px-[13px] py-[10px] text-[15px] " +
+  "w-full min-h-[44px] rounded-[8px] border-[1.5px] bg-white px-[13px] py-[10px] text-[15px] " +
   "text-ink placeholder:text-[#9AA2B8] disabled:bg-tint disabled:text-muted";
 
 export function Field({
@@ -55,7 +55,7 @@ export function TextInput({
     <input
       {...props}
       aria-invalid={invalid || undefined}
-      className={`${controlBase} ${invalid ? "border-danger" : "border-line"} ${className}`}
+      className={`${controlBase} ${invalid ? "border-danger" : "border-control-border"} ${className}`}
     />
   );
 }
@@ -69,7 +69,7 @@ export function TextArea({
     <textarea
       {...props}
       aria-invalid={invalid || undefined}
-      className={`${controlBase} ${invalid ? "border-danger" : "border-line"} ${className}`}
+      className={`${controlBase} ${invalid ? "border-danger" : "border-control-border"} ${className}`}
     />
   );
 }
@@ -84,7 +84,7 @@ export function Select({
     <select
       {...props}
       aria-invalid={invalid || undefined}
-      className={`${controlBase} ${invalid ? "border-danger" : "border-line"} cursor-pointer ${className}`}
+      className={`${controlBase} ${invalid ? "border-danger" : "border-control-border"} cursor-pointer ${className}`}
     >
       {children}
     </select>

@@ -79,7 +79,9 @@ export function SectionHeader({
   return (
     <div className="mb-[14px] flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2 className="t-heading text-ink">{title}</h2>
+        {/* C-02: a section title is the 17px/700 step, not the 26px
+          screen-heading step. */}
+      <h2 className="t-card-title text-ink">{title}</h2>
         {subtitle ? <p className="t-caption mt-[3px] text-muted">{subtitle}</p> : null}
       </div>
       {action}

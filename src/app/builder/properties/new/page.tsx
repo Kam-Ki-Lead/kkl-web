@@ -18,7 +18,7 @@ export default function NewListingPage() {
     <BuilderShell title="New listing" subtitle="Six sections — save a draft any time">
       <div className="max-w-[620px]">
         <Card className="p-[22px]">
-          <h2 className="t-heading text-ink">Start a listing</h2>
+          <h2 className="t-card-title text-ink">Start a listing</h2>
           <p className="t-body mt-[8px] text-body">
             Six short sections: basics, location, pricing, specifications, media and preview.
             Nothing is published until you reach the preview and choose to publish, and a draft

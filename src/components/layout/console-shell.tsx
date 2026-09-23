@@ -18,6 +18,7 @@ export function ConsoleShell({
   footer,
   navLabel,
   navEyebrow,
+  dense = false,
   title,
   subtitle,
   aside,
@@ -28,6 +29,8 @@ export function ConsoleShell({
   navLabel: string;
   /** A small label above the rail's items, e.g. "Builder" in B-06. */
   navEyebrow?: string;
+  /** The Admin rail's tighter step; its twenty items do not fit at 16px. */
+  dense?: boolean;
   title: string;
   subtitle: string;
   /** Right-hand header content — balance chip, avatar. */
@@ -36,7 +39,7 @@ export function ConsoleShell({
 }) {
   return (
     <div className="flex min-h-screen bg-surface">
-      <DashboardRail items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} />
+      <DashboardRail items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} dense={dense} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* `relative` anchors the mobile drawer, which is absolutely positioned

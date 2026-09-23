@@ -199,6 +199,18 @@ Nothing here authenticates anybody, because there is nobody to authenticate.
 
 ## Verifying the flows
 
+### No browser or server needed
+
+```bash
+npm run typecheck                                     # 0 errors
+npm run lint                                          # 0 errors, 0 warnings
+npm test                                              # 27 unit tests
+node scripts/verify-design-tokens.mjs ../kkl-design   # 27 tokens, 37 literals
+node scripts/verify-contrast.mjs                      # 24 pairs + 2 findings
+```
+
+### Against a running server
+
 ```bash
 export PLAYWRIGHT=/path/to/playwright/index.mjs
 export BASE_URL=http://127.0.0.1:3811
@@ -206,15 +218,32 @@ export BASE_URL=http://127.0.0.1:3811
 node scripts/verify-route-sweep.mjs      # 112 routes x 2 widths
 node scripts/verify-enquiry-flow.mjs     # 17 behaviour + 3 limitations
 node scripts/verify-seller-flow.mjs      # 26 behaviour + 2 limitations
-node scripts/verify-builder-flow.mjs     # 43 behaviour + 3 limitations
+node scripts/verify-builder-flow.mjs     # 48 behaviour + 3 limitations
 node scripts/verify-admin-flow.mjs       # 36 behaviour + 3 limitations
 node scripts/verify-no-javascript.mjs    # 50 forms
 node scripts/verify-visual-baseline.mjs  # 22 measured values
+node scripts/verify-zoom.mjs             # 32 checks, 16 screens
+node scripts/verify-accessibility.mjs    # 22 checks + 3 pending
 ```
 
+### Rendered comparison against the approved prototypes
+
+The prototypes load React and Babel from a CDN and fonts from Google Fonts.
+Where the network policy denies those, this builds a local review copy from the
+**same pinned versions** fetched from the npm registry. **kkl-design is never
+modified** — the script verifies it is byte-identical and aborts if not.
+
 ```bash
-node scripts/verify-design-tokens.mjs ../kkl-design   # no browser needed
+./scripts/setup-prototype-review.sh ../kkl-design /tmp/kkl-prototype-review
+(cd /tmp/kkl-prototype-review && python3 -m http.server 8099)
+
+PROTO_URL=http://127.0.0.1:8099 BASE_URL=http://127.0.0.1:3811 \
+  PLAYWRIGHT=/path/to/playwright/index.mjs \
+  node scripts/capture-visual-comparison.mjs   # 25 pairs into docs/phase-2/visual/
 ```
+
+The pairs are **for a person to look at.** No pass is claimed from capture
+alone.
 
 ```bash
 ./scripts/verify-sample-mode-guard.sh    # 8 scenarios; starts its own servers
