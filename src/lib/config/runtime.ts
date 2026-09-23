@@ -55,13 +55,41 @@ export type DataSource = "sample" | "api";
  *  local production build stays possible while a real production deploy is guarded. */
 export type DeploymentEnv = "development" | "review" | "production";
 
+/** Read a variable from the live process, at the moment of the call. */
 function readEnv(name: string): string | undefined {
   const raw = process.env[name];
   return raw === undefined || raw === "" ? undefined : raw;
 }
 
+/**
+ * The values frozen into this bundle when it was built.
+ *
+ * **Every one of these must be written as a literal `process.env.NEXT_PUBLIC_…`
+ * member access.** That exact syntax is what the bundler substitutes with the
+ * build-time value; a computed lookup — `process.env[name]`, destructuring, a
+ * variable holding the name — is left in the output untouched and therefore
+ * reads the *server's* environment at request time instead.
+ *
+ * That distinction is the whole basis of the deployment guard below, which
+ * compares what this bundle was built as against what the server says it is.
+ * Sourcing either side from the same place makes the comparison meaningless.
+ * **This file previously read them through `readEnv`,** and the consequences
+ * were exactly that: a server started with only `KKL_ENV` refused a bundle
+ * that in fact matched it, and a server that set all four variables compared
+ * each value against itself and could never disagree. See
+ * `docs/phase-2/verification.md`.
+ */
+const BUILT_ENV = process.env.NEXT_PUBLIC_KKL_ENV;
+const BUILT_DATA_SOURCE = process.env.NEXT_PUBLIC_KKL_DATA_SOURCE;
+const BUILT_API_BASE_URL = process.env.NEXT_PUBLIC_KKL_API_BASE_URL;
+
+/** An unset variable and one set to "" mean the same thing here: not given. */
+function given(raw: string | undefined): string | undefined {
+  return raw === undefined || raw === "" ? undefined : raw;
+}
+
 function parseDeploymentEnv(): DeploymentEnv {
-  const raw = readEnv("NEXT_PUBLIC_KKL_ENV") ?? "development";
+  const raw = given(BUILT_ENV) ?? "development";
   if (raw === "development" || raw === "review" || raw === "production") return raw;
   throw new Error(
     `NEXT_PUBLIC_KKL_ENV must be "development", "review" or "production"; received "${raw}".`,
@@ -69,7 +97,7 @@ function parseDeploymentEnv(): DeploymentEnv {
 }
 
 function parseDataSource(): DataSource {
-  const raw = readEnv("NEXT_PUBLIC_KKL_DATA_SOURCE") ?? "sample";
+  const raw = given(BUILT_DATA_SOURCE) ?? "sample";
   if (raw === "sample" || raw === "api") return raw;
   throw new Error(
     `NEXT_PUBLIC_KKL_DATA_SOURCE must be "sample" or "api"; received "${raw}".`,
@@ -78,7 +106,7 @@ function parseDataSource(): DataSource {
 
 const deploymentEnv = parseDeploymentEnv();
 const dataSource = parseDataSource();
-const apiBaseUrl = readEnv("NEXT_PUBLIC_KKL_API_BASE_URL");
+const apiBaseUrl = given(BUILT_API_BASE_URL);
 
 /*
  * Fail closed, at module load, in both directions.
