@@ -5,7 +5,11 @@ import {
   saveListingSection,
   type SectionFormState,
 } from "@/app/actions/builder-listings";
-import { NoScriptSaveNotice, SavedSignal } from "@/components/builder/unsaved-changes";
+import {
+  NoScriptSaveNotice,
+  RestoredDraftNotice,
+  SavedSignal,
+} from "@/components/builder/unsaved-changes";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
@@ -78,6 +82,7 @@ export function SectionForm({
       <input type="hidden" name="listingId" value={listing.id} />
       <input type="hidden" name="section" value={section} />
       <SavedSignal savedAt={state.savedAt} />
+      <RestoredDraftNotice />
 
       {state.status === "saved" ? (
         <p

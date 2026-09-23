@@ -453,6 +453,76 @@ await review('reset=1');
      armedAfterSave === false,
      'the handler is removed with the dirty state, so a clean editor does not nag');
 
+  // --- browser Back and Forward, each checked on its own ---
+  //
+  // These are the seven interactions B-15 has to survive, kept apart because
+  // they fail differently: Save, Discard, Keep editing, section navigation,
+  // console navigation, Back/Forward, and reload. The first five are above;
+  // these are the two the dialog cannot reach.
+  //
+  // Back is not cancellable — by the time popstate fires the navigation has
+  // happened — so the editor does not try to stop it. It makes it harmless
+  // instead: the draft is held per tab and put back on return.
+  await review('reset=1');
+  await ed.goto(`${BASE}/builder/properties`, { waitUntil: 'networkidle' });
+  await ed.click('a[href="/builder/properties/bl-greenview/basics"]');
+  await ed.waitForURL(/\/basics$/);
+  await ed.waitForTimeout(400);
+
+  await ed.fill('#title', 'Survives Back');
+  await ed.goBack({ waitUntil: 'networkidle' });
+  await ed.waitForTimeout(500);
+  ok('42. Browser Back is not interrupted, and is not silent data loss',
+     ed.url().endsWith('/builder/properties'),
+     'Back is not cancellable, so the editor does not pretend to block it — see check 43');
+
+  await ed.goForward({ waitUntil: 'networkidle' });
+  await ed.waitForTimeout(600);
+  const restoredValue = await ed.inputValue('#title');
+  const noticeShown = (await ed.textContent('body')).includes('Unsaved work restored');
+  ok('43. Forward returns to the work, not to the last save',
+     restoredValue === 'Survives Back' && noticeShown && (await badge()) !== null,
+     'the draft is restored, the screen says so, and the unsaved mark is back up');
+
+  // Saving must beat the draft: coming back after a save shows the saved value,
+  // not a stale draft of it.
+  await ed.fill('#title', 'Saved then revisited');
+  await ed.click('button:has-text("Save draft")');
+  await ed.waitForSelector('text=Draft saved', { timeout: 10000 });
+  await ed.goto(`${BASE}/builder/enquiries`, { waitUntil: 'networkidle' });
+  await open();
+  ok('44. A saved section restores nothing — the draft is spent',
+     (await ed.inputValue('#title')) === 'Saved then revisited' &&
+       !(await ed.textContent('body')).includes('Unsaved work restored') &&
+       (await badge()) === null,
+     'the save clears the stored draft, so returning is clean rather than "restored"');
+
+  // And Discard must not be undone by the restore.
+  await ed.fill('#title', 'Typed then discarded');
+  await ed.click('a:has-text("Close editor")');
+  await ed.waitForSelector('#unsaved-changes-dialog');
+  await Promise.all([
+    ed.waitForURL(/\/builder\/properties$/, { timeout: 10000 }),
+    ed.click('button:has-text("Discard changes")'),
+  ]);
+  await open();
+  ok('45. Discard is not undone by the draft restore',
+     (await ed.inputValue('#title')) === 'Saved then revisited' &&
+       !(await ed.textContent('body')).includes('Unsaved work restored'),
+     'discarding clears the stored draft too — otherwise "discard" would be a lie');
+
+  // The draft is per tab. A second tab must not inherit it.
+  await ed.fill('#title', 'Only in this tab');
+  await ed.waitForTimeout(300);
+  const otherTab = await browser.newContext();
+  const otherPage = await otherTab.newPage();
+  await otherPage.goto(`${BASE}/builder/properties/bl-greenview/basics`, { waitUntil: 'networkidle' });
+  await otherPage.waitForTimeout(400);
+  ok('46. The draft does not leak into another tab',
+     (await otherPage.inputValue('#title')) === 'Saved then revisited',
+     'sessionStorage, not localStorage — a draft shared between tabs would fight itself');
+  await otherTab.close();
+
   await review('reset=1');
   await ctx15.close();
 }

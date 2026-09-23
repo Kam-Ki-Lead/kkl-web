@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 type DirtyContextValue = {
   readonly dirty: boolean;
   readonly saved: boolean;
+  readonly restored: boolean;
   readonly formId: string;
 };
 
@@ -77,6 +78,144 @@ function isFormDirty(form: HTMLFormElement): boolean {
 /** Dispatched by the section form once a save has come back successfully. */
 export const SAVED_EVENT = "kkl:section-saved";
 
+/** Dispatched once a per-tab draft has been put back into the form. */
+const RESTORED_EVENT = "kkl:draft-restored";
+
+/**
+ * Per-tab persistence for an unsaved section, so browser Back loses nothing.
+ *
+ * WHY THIS EXISTS RATHER THAN A HISTORY TRAP
+ * ------------------------------------------
+ * The dialog intercepts links, because a click is cancellable. **Browser Back
+ * is not.** By the time `popstate` fires the navigation has happened, and the
+ * usual workaround — pushing a duplicate history entry and re-pushing it on
+ * every `popstate` — breaks Forward, grows the stack, escapes on a fast double
+ * press, and fights the router for the same events. It reports a pass and
+ * behaves badly.
+ *
+ * So this does not try to stop Back. It removes the reason to: the draft is
+ * written as it is typed and put back when the section is opened again, so
+ * Back-then-Forward returns to the work rather than to the last save.
+ *
+ * WHAT IT IS NOT
+ * --------------
+ * It is **not storage of record** and nothing reads it but this form. It holds
+ * one listing's unsaved text in one tab, is cleared the moment a save lands,
+ * and dies with the tab. `sessionStorage` rather than `localStorage`
+ * deliberately: a draft that outlived the tab would be a surprise, and one
+ * shared between tabs would fight itself.
+ *
+ * Every access is wrapped. Private windows, blocked site data and storage
+ * quotas all make these calls throw, and a failure here must cost nothing more
+ * than the restoration.
+ */
+const draftStore = {
+  key(formId: string): string {
+    const form = document.getElementById(formId);
+    if (!(form instanceof HTMLFormElement)) return "";
+    const listing = form.querySelector<HTMLInputElement>('input[name="listingId"]')?.value ?? "";
+    const section = form.querySelector<HTMLInputElement>('input[name="section"]')?.value ?? "";
+    return listing && section ? `kkl:listing-draft:${listing}:${section}` : "";
+  },
+
+  save(formId: string): void {
+    const key = draftStore.key(formId);
+    const form = document.getElementById(formId);
+    if (!key || !(form instanceof HTMLFormElement)) return;
+
+    const values: Record<string, string | string[] | boolean> = {};
+    for (const element of Array.from(form.elements)) {
+      if (!("name" in element) || !element.name) continue;
+      if (element instanceof HTMLInputElement) {
+        // Files cannot be serialised and are not saved by this editor anyway.
+        if (element.type === "file" || element.type === "submit" || element.type === "button") continue;
+        if (element.type === "checkbox" || element.type === "radio") {
+          if (element.checked !== element.defaultChecked) {
+            values[`${element.name}::${element.value}`] = element.checked;
+          }
+        } else if (element.value !== element.defaultValue) {
+          values[element.name] = element.value;
+        }
+      } else if (element instanceof HTMLTextAreaElement) {
+        if (element.value !== element.defaultValue) values[element.name] = element.value;
+      } else if (element instanceof HTMLSelectElement) {
+        if (Array.from(element.options).some((o) => o.selected !== o.defaultSelected)) {
+          values[element.name] = element.value;
+        }
+      }
+    }
+
+    try {
+      if (Object.keys(values).length === 0) window.sessionStorage.removeItem(key);
+      else window.sessionStorage.setItem(key, JSON.stringify(values));
+    } catch {
+      // Storage unavailable. The editor still works; only the restore is lost.
+    }
+  },
+
+  /** Puts a stored draft back. Returns true if anything actually changed. */
+  restore(formId: string): boolean {
+    const key = draftStore.key(formId);
+    const form = document.getElementById(formId);
+    if (!key || !(form instanceof HTMLFormElement)) return false;
+
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem(key);
+    } catch {
+      return false;
+    }
+    if (!raw) return false;
+
+    let values: Record<string, string | string[] | boolean>;
+    try {
+      values = JSON.parse(raw) as Record<string, string | string[] | boolean>;
+    } catch {
+      return false;
+    }
+
+    let changed = false;
+    for (const element of Array.from(form.elements)) {
+      if (!("name" in element) || !element.name) continue;
+      if (element instanceof HTMLInputElement) {
+        if (element.type === "checkbox" || element.type === "radio") {
+          const stored = values[`${element.name}::${element.value}`];
+          if (typeof stored === "boolean" && element.checked !== stored) {
+            element.checked = stored;
+            changed = true;
+          }
+        } else if (element.type !== "file" && typeof values[element.name] === "string") {
+          const stored = values[element.name] as string;
+          if (element.value !== stored) {
+            element.value = stored;
+            changed = true;
+          }
+        }
+      } else if (
+        (element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) &&
+        typeof values[element.name] === "string"
+      ) {
+        const stored = values[element.name] as string;
+        if (element.value !== stored) {
+          element.value = stored;
+          changed = true;
+        }
+      }
+    }
+    return changed;
+  },
+
+  clear(formId: string): void {
+    const key = draftStore.key(formId);
+    if (!key) return;
+    try {
+      window.sessionStorage.removeItem(key);
+    } catch {
+      // Nothing to do; the draft is cleared on the next successful save anyway.
+    }
+  },
+};
+
 export function UnsavedChangesProvider({
   formId,
   children,
@@ -87,6 +226,7 @@ export function UnsavedChangesProvider({
   const router = useRouter();
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [restored, setRestored] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   const recompute = useCallback(() => {
@@ -104,19 +244,49 @@ export function UnsavedChangesProvider({
         recompute();
       }
     };
+    const onEdit = (event: Event) => {
+      onChange(event);
+      const target = event.target;
+      if (target instanceof HTMLElement && target.closest(`#${CSS.escape(formId)}`)) {
+        draftStore.save(formId);
+      }
+    };
     const onSaved = () => {
       setSaved(true);
+      // The saved values are now the form's defaults, so the draft is spent.
+      // Clearing here rather than on unmount means a save always wins, even if
+      // the Builder leaves immediately afterwards.
+      draftStore.clear(formId);
+      setRestored(false);
       recompute();
     };
-    document.addEventListener("input", onChange);
-    document.addEventListener("change", onChange);
+    const onRestored = () => {
+      setRestored(true);
+      recompute();
+    };
+    document.addEventListener("input", onEdit);
+    document.addEventListener("change", onEdit);
     document.addEventListener(SAVED_EVENT, onSaved);
+    document.addEventListener(RESTORED_EVENT, onRestored);
     return () => {
-      document.removeEventListener("input", onChange);
-      document.removeEventListener("change", onChange);
+      document.removeEventListener("input", onEdit);
+      document.removeEventListener("change", onEdit);
       document.removeEventListener(SAVED_EVENT, onSaved);
+      document.removeEventListener(RESTORED_EVENT, onRestored);
     };
   }, [formId, recompute]);
+
+  // Put a stored draft back, once, after the listeners above are live.
+  //
+  // The restore mutates the DOM and then dispatches, rather than calling
+  // setState here: a state update in an effect body cascades a second render
+  // and is what React's own lint rule warns about. The listener registered
+  // above picks the event up as an ordinary handler.
+  useEffect(() => {
+    if (draftStore.restore(formId)) {
+      document.dispatchEvent(new Event(RESTORED_EVENT));
+    }
+  }, [formId]);
 
   // In-app navigation. Capture phase, so this runs before Next's own link
   // handling rather than racing it.
@@ -166,14 +336,18 @@ export function UnsavedChangesProvider({
     // Nothing was sent to the server, so discarding is purely local: put the
     // controls back to what the server rendered and go.
     if (form instanceof HTMLFormElement) form.reset();
+    // And drop the stored draft, or coming back would restore what was just
+    // discarded — which would make "discard" a lie.
+    draftStore.clear(formId);
     setDirty(false);
+    setRestored(false);
     const href = pendingHref;
     setPendingHref(null);
     if (href) router.push(href);
   }, [formId, pendingHref, router]);
 
   return (
-    <DirtyContext.Provider value={{ dirty, saved, formId }}>
+    <DirtyContext.Provider value={{ dirty, saved, restored, formId }}>
       {children}
       {pendingHref ? (
         <ExitDialog
@@ -295,6 +469,29 @@ export function SaveDraftButton() {
     >
       {settled ? "Draft saved" : "Save draft"}
     </Button>
+  );
+}
+
+/**
+ * Says a draft was put back, so the form differing from the last save is
+ * explained rather than mysterious.
+ *
+ * Without this the restoration would be the confusing kind of helpful: a
+ * Builder returns to a section, sees text they do not remember leaving there,
+ * and cannot tell whether it was saved. The line says it was not.
+ */
+export function RestoredDraftNotice() {
+  const context = useContext(DirtyContext);
+  if (!context?.restored) return null;
+  return (
+    <p
+      role="status"
+      className="rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[13px] py-[10px] text-[14px] text-body"
+    >
+      <strong className="text-ink">Unsaved work restored.</strong> You left this section without
+      saving, so what you had typed has been put back. It is held in this browser tab only — save
+      the draft to keep it.
+    </p>
   );
 }
 

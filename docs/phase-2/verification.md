@@ -694,10 +694,20 @@ Checks 29–34, one per open decision:
 - **No staff roles exist, so none were tested.** Who may approve a document,
   adjust a balance or read a transcript is not modelled at all. Nothing here
   says anything about whether a real staff member could be stopped.
-- **No four-eyes rule on money.** A-19 and A-20 are single-actor in this build.
-  Whether a real adjustment or refund needs a second approver is not decided
-  and is not represented.
 - **No screenshot comparison against the Admin prototype** — see below.
+
+**A requirement this document previously invented, now withdrawn.** An earlier
+version listed "no four-eyes rule on money" here, as though a two-person
+approval on A-19 and A-20 were an outstanding gap. **No approved source asks
+for one.** The screen inventory does not mention it, the approved prototypes do
+not draw it, and kkl-backend's access matrix specifies the opposite shape: an
+Admin may "issue refund / adjust ledger", qualified only by "audited ledger
+event only, never a manual balance overwrite" — which is exactly what is built.
+
+Single-actor with a mandatory reason and an audit entry *is* the specified
+control. Recorded here because an invented requirement in a verification
+document is worse than a missing one: it reads as a defect, and somebody would
+have built it.
 
 ## Accessibility — checked
 
@@ -859,8 +869,6 @@ The baseline's unresolved homepage console defect is not inherited — see
   reaches `/admin` gets the whole console. Who may approve a document, adjust a
   balance or read a transcript is not modelled at all. Reproducing that is
   limitation L1 of the Admin suite, and reproducing it is not a pass.
-- **No four-eyes rule on money.** A-19 and A-20 are single-actor here, and
-  whether a real adjustment or refund needs a second approver is undecided.
 - **The Admin operational screens read fixtures.** There is no intake pipeline,
   qualification caller, WhatsApp journey or notification sender anywhere in this
   repository.
