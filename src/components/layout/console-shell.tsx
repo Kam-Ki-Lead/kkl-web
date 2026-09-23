@@ -51,7 +51,7 @@ export function ConsoleShell({
         <header className="relative flex items-center gap-[14px] border-b border-line bg-white px-[28px] py-[16px] max-[1060px]:px-[16px]">
           <RailDrawer items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} dense={dense} tone={tone} />
           <div className="min-w-0 flex-1">
-            <h1 className="t-heading truncate text-ink max-[1060px]:whitespace-normal max-[1060px]:text-[20px]">
+            <h1 className="t-console-title truncate text-ink max-[1060px]:whitespace-normal max-[1060px]:text-[20px]">
               {title}
             </h1>
             <p className="truncate text-[14px] leading-[1.5] text-muted max-[1060px]:whitespace-normal">

@@ -57,7 +57,7 @@ export default async function SellerDashboardPage() {
         <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-[18px] max-[1200px]:grid-cols-1">
           <Card className="p-[18px]">
             <div className="flex flex-wrap items-center justify-between gap-[10px]">
-              <h2 className="t-card-title text-ink">New leads matching your areas</h2>
+              <h2 className="t-panel-title text-ink">New leads matching your areas</h2>
               <Link
                 href="/seller/leads"
                 className="text-[15px] font-bold text-brand underline underline-offset-2"

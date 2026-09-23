@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
           </Card>
 
           <Card className="p-[18px]">
-            <h2 className="t-card-title text-ink">Needs attention</h2>
+            <h2 className="t-panel-title text-ink">Needs attention</h2>
             <div className="mt-[12px] flex flex-col gap-[10px]">
               {alerts.map((alert) => (
                 <Link

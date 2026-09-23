@@ -28,7 +28,22 @@
    * boundary that identifies a control. That is a design-level finding and is
    * recorded rather than resolved by inventing a darker colour.
    */
-  --color-control-border: #c6cce0;
+  /*
+   * ACCESSIBILITY CORRECTION TO THE APPROVED BASELINE — control border.
+   *
+   * The approved #C6CCE0 is 1.60:1 on white and 1.48:1 on the page surface,
+   * against the 3:1 that WCAG 2.2 AA 1.4.11 requires of the border that
+   * identifies a control. #8A8E9C is the smallest darkening in the same hue
+   * family that clears it: 3.27:1 on white, 3.02:1 on the page surface.
+   *
+   * The card hairline --color-line #E1E4EE is deliberately NOT changed. It
+   * groups visible content rather than identifying a component, so 1.4.11
+   * does not apply to it, and darkening it would alter the approved
+   * appearance for no accessibility gain.
+   */
+  --color-control-border: #8a8e9c;
+  /* The approved value, kept so the correction is legible as a correction. */
+  --color-control-border-baseline: #c6cce0;
   --color-success: #0e6b45;
   --color-warning: #8a4a08;
   --color-danger: #b3261e;
@@ -98,6 +113,47 @@
     line-height: 1.2;
     letter-spacing: -0.025em;
   }
+  /*
+   * TYPOGRAPHY PRECEDENCE
+   * ---------------------
+   * Where an approved SCREEN renders a size, that size wins over the generic
+   * label in the C-02 library. C-02 says "Card and section title — Archivo
+   * 700 · 17px" and that reading, applied everywhere, flattened four distinct
+   * steps into one. Measured from the rendered baseline at 1440:
+   *
+   *   page title            P-03 subject                     34px / 800
+   *   public section        P-01 "Featured properties"       26px / 700
+   *   console header        S-06, B-07, A-02 screen titles   22px / 700
+   *   console panel         S-06, B-06, A-02 panel headings  18px / 700
+   *                         and the portal's listing-card titles
+   *   card title            S-06 "Credits" stat card         17px / 700
+   *
+   * So 17px and 18px are not a contradiction in the approved package — they
+   * are two roles the library gave one name. Recorded in acceptance.md; the
+   * classes below carry the roles so the next reader does not have to
+   * rediscover this from a screenshot.
+   */
+  .t-section-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .t-console-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .t-panel-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
   .t-card-title {
     font-family: var(--font-heading);
     font-weight: 700;
@@ -165,6 +221,50 @@
    * interactive element, including the ones that look like table rows." It is
    * saffron on every surface, including inside the dark rails.
    */
+  /*
+   * ACCESSIBILITY CORRECTION TO THE APPROVED BASELINE — focus indicator.
+   *
+   * C-04 specifies a 3px saffron ring at 2px offset and C-01 names the focus
+   * ring as one of saffron's three permitted uses, so the colour stays. But
+   * saffron #F2A20C is 2.11:1 on white and 1.95:1 on the page surface, and
+   * WCAG 2.2 AA 1.4.11 Non-text Contrast needs 3:1. The baseline declaring
+   * the value does not close the failure.
+   *
+   * The correction is additive: a 1px ink companion immediately inside the
+   * saffron ring. The indicator then presents a 17.63:1 edge against white
+   * and 16.30:1 against the page surface, while saffron reads 8.35:1 against
+   * its own companion, so the ring still reads as saffron rather than as a
+   * dark outline. Nothing that was saffron stops being saffron, and no
+   * declared token changes.
+   *
+   * box-shadow rather than a second outline: it paints inside the offset gap
+   * without taking layout, so nothing shifts and nothing clips. On the dark
+   * rails saffron already passes (6.44:1 on #0F2478), and the companion is
+   * harmless there because it sits against the ring, not the surface.
+   */
+  /*
+   * ACCESSIBILITY CORRECTION — status chips in forced-colors mode.
+   *
+   * A chip carries its meaning in a tinted fill. Forced-colors mode discards
+   * author background colours and substitutes system ones, so a chip with no
+   * border stops being a distinct object: the word survives, "this is a
+   * status" does not. C-01 already says "status is never colour alone: every
+   * chip carries a word", and this keeps the same promise for the shape.
+   *
+   * Scoped to the media query, so the approved appearance is untouched
+   * everywhere else. currentColor becomes the system foreground in this mode,
+   * which is exactly the contrast the mode is for.
+   *
+   * Found by scripts/verify-forced-colors.mjs. This project had recorded
+   * forced-colors as "pending, needs Windows"; Chromium emulates the mode and
+   * Playwright exposes it, so the check was never blocked — only unwritten.
+   */
+  @media (forced-colors: active) {
+    .chip {
+      border: 1px solid currentColor;
+    }
+  }
+
   :focus-visible {
     outline: 3px solid var(--color-saffron);
     /* Restated so the shorthand's colour cannot fall back to currentColor.
@@ -173,5 +273,6 @@
     outline-color: var(--color-saffron);
     outline-offset: 2px;
     border-radius: 2px;
+    box-shadow: 0 0 0 1px var(--color-ink);
   }
 }

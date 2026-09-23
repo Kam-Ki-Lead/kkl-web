@@ -157,7 +157,10 @@ for (const r of results) {
 
 console.log(`\n${results.length - failed.length}/${results.length} declared colour pairs meet WCAG 2.2 AA.`);
 
-console.log(`\n${findings.length} DESIGN-LEVEL findings — below threshold, and not the implementation's to change:`);
+console.log(`\n${findings.length} DESIGN-LEVEL findings — the APPROVED values, both below threshold.`);
+console.log('Both now have a correction APPLIED in the implementation (E-P2a, E-P2b).');
+console.log('The numbers below are the baseline\'s, kept so the correction stays legible.');
+console.log('What is rendered is verified by scripts/verify-contrast-corrections.mjs.');
 for (const f of findings) {
   console.log(`\n  ${f.what}`);
   console.log(`    ${f.fg} on ${f.bg} = ${f.value.toFixed(2)}:1, needs ${f.need}:1`);
@@ -169,13 +172,15 @@ for (const f of findings) {
   for (const c of f.components ?? []) console.log(`      - ${c}`);
   console.log(`    ${f.why}`);
   console.log(`    Proposed: ${f.remedy}`);
+  console.log(`    STATUS: correction applied and verified as rendered; design sign-off still open.`);
 }
 
 // Matching the baseline is not a defence. Say so where the numbers are read.
 console.log('\n  Both values are the approved baseline\'s own. That explains how they got');
 console.log('  here; it does not close them. A contrast failure inherited from a design');
 console.log('  is still a contrast failure, and the correction is a design decision to');
-console.log('  take, not a finding to file and leave.');
+console.log('  take, not a finding to file and leave. Both corrections are applied here');
+console.log('  and reversible in one line each if the design prefers another remedy.');
 
 console.log('\nThis is arithmetic on declared pairs. It is not an accessibility pass for any screen.');
 if (failed.length > 0) {

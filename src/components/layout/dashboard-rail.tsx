@@ -189,7 +189,10 @@ function RailLink({
 function RailFooterCard({ footer }: { footer: RailFooter }) {
   return (
     <div className="rounded-[10px] bg-white/[0.07] p-[16px]">
-      <p className={`text-[13px] ${RAIL_TONES.console.muted}`}>{footer.label}</p>
+      {/* `font-size:13px; color:#B9C3EC` in the approved consoles — the rail
+          ITEM colour, not the group-label colour. Swapping the hardcoded value
+          for the muted token in an earlier pass dimmed it on 16 screens. */}
+      <p className={`text-[13px] ${RAIL_TONES.console.item}`}>{footer.label}</p>
       <p className="t-card-title mt-[2px] text-white">{footer.value}</p>
       <Link
         href={footer.actionHref}

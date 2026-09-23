@@ -94,13 +94,23 @@ export function SectionHeader({
   title: string;
   subtitle?: string;
   action?: ReactNode;
-  /** `page` = the portal's 26px section step; `card` = the 17px step. */
-  level?: "page" | "card";
+  /**
+   * Which step this heading is, measured from the approved screens:
+   * `page` 26/700 (public section), `panel` 18/700 (console panel heading and
+   * portal listing-card title), `card` 17/700 (compact and stat cards).
+   */
+  level?: "page" | "panel" | "card";
 }) {
   return (
     <div className="mb-[14px] flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2 className={`${level === "page" ? "t-heading" : "t-card-title"} text-ink`}>{title}</h2>
+        <h2
+          className={`${
+            level === "page" ? "t-section-title" : level === "panel" ? "t-panel-title" : "t-card-title"
+          } text-ink`}
+        >
+          {title}
+        </h2>
         {subtitle ? <p className="t-caption mt-[3px] text-muted">{subtitle}</p> : null}
       </div>
       {action}

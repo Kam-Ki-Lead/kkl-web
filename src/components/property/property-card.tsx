@@ -41,7 +41,7 @@ export function PropertyCard({
 
       <div className="flex flex-1 flex-col p-[14px]">
         {price ? <p className="t-figure text-ink">{price}</p> : null}
-        <h3 className="t-card-title mt-[2px] text-ink">
+        <h3 className="t-panel-title mt-[2px] text-ink">
           <Link href={`/property/${property.slug}`} className="hover:text-brand">
             {property.title}
           </Link>
@@ -150,7 +150,7 @@ export function ProjectCard({ property }: { property: PropertySummary }) {
             </Chip>
           )}
         </span>
-        <h3 className="t-card-title mt-[8px] text-ink">
+        <h3 className="t-panel-title mt-[8px] text-ink">
           <Link href={`/property/${property.slug}`} className="hover:text-brand">
             {property.title}
           </Link>

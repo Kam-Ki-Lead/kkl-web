@@ -29,7 +29,10 @@ export function Field({
 }) {
   return (
     <div className={`flex flex-col gap-[6px] ${className}`}>
-      <label htmlFor={id} className="t-label text-ink">
+      {/* The approved forms label their controls in body #2A3250, not ink —
+          14px/600 appears 14 times at that colour across the Buyer journey and
+          once at brand blue, never at ink. */}
+      <label htmlFor={id} className="t-label text-body">
         {label}
       </label>
       {children}

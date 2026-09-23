@@ -99,7 +99,9 @@ export function PublicHeader({ shortlistCount = 0 }: { shortlistCount?: number }
         <div className="ml-auto flex items-center gap-[22px] whitespace-nowrap max-[1060px]:hidden">
           <Link
             href="/account/shortlist"
-            aria-label={`Shortlist, ${shortlistCount} saved`}
+            /* 2.5.3 Label in Name: the visible text has to be inside the
+               accessible name, or "click Shortlist (0)" matches nothing. */
+            aria-label={`Shortlist (${shortlistCount}), ${shortlistCount} saved`}
             className="text-[16px] font-medium text-body hover:text-brand"
           >
             <span aria-hidden="true">♡ </span>

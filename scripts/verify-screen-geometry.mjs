@@ -74,12 +74,27 @@ function collect(scale, rootSelector) {
     const cs = getComputedStyle(el);
     if (cs.visibility === 'hidden' || cs.display === 'none') continue;
     if (seen.has(text)) { dupes.add(text); continue; }
+    // The nearest painted background behind this text, and where it sits down
+    // the page. Two elements can carry the same words and not be the same
+    // element — a "Sign in" in the header and a "Sign in" in the footer — and
+    // comparing those reports a difference in nothing. Context makes that
+    // detectable instead of leaving it to be argued about per finding.
+    let bg = 'rgba(0, 0, 0, 0)';
+    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+      const c = getComputedStyle(n).backgroundColor;
+      if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') { bg = c; break; }
+    }
+    const rootTop = root.getBoundingClientRect().top;
     seen.set(text, {
       fontSize: Math.round(parseFloat(cs.fontSize) / scale * 10) / 10,
       fontWeight: String(cs.fontWeight),
       color: cs.color,
       fontFamily: cs.fontFamily.split(',')[0].replace(/["']/g, ''),
       textTransform: cs.textTransform,
+      bg,
+      // Fraction of the way down the captured page, so header-versus-footer is
+      // visible without depending on either page's absolute height.
+      atY: Math.round(((r.top - rootTop) / Math.max(1, root.scrollHeight || root.getBoundingClientRect().height)) * 100) / 100,
     });
   }
   for (const d of dupes) seen.delete(d);
@@ -168,8 +183,16 @@ for (const pair of selected) {
     // Typography divergence on text both sides render identically.
     const shared = Object.keys(proto.text).filter((t) => t in impl.text);
     const typo = [];
+    const mismatched = [];
     for (const t of shared) {
       const a = proto.text[t], b = impl.text[t];
+      // Same words, different place in the page, or on a different surface:
+      // almost certainly not the same element. Reported separately so it can
+      // be excluded from the defect list rather than hidden from it.
+      if (a.bg !== b.bg && Math.abs(a.atY - b.atY) > 0.25) {
+        mismatched.push({ text: t, note: `proto at ${a.atY} on ${a.bg}; impl at ${b.atY} on ${b.bg}` });
+        continue;
+      }
       const d = [];
       if (Math.abs(a.fontSize - b.fontSize) > 0.6) d.push(`size ${a.fontSize}->${b.fontSize}`);
       if (a.fontWeight !== b.fontWeight) d.push(`weight ${a.fontWeight}->${b.fontWeight}`);
@@ -208,13 +231,13 @@ for (const pair of selected) {
     }
 
     results.push({
-      id: pair.id, width: WIDTH, shared: shared.length,
+      id: pair.id, width: WIDTH, shared: shared.length, mismatched,
       protoOnly: Object.keys(proto.text).length - shared.length,
       implOnly: Object.keys(impl.text).length - shared.length,
       typo, struct, score: typo.length * 2 + struct.length * 5,
     });
     const flag = typo.length || struct.length ? 'DIFF' : 'ok  ';
-    console.log(`${flag} ${pair.id} @${WIDTH}  shared=${shared.length}  typo=${typo.length}  struct=${struct.length}`);
+    console.log(`${flag} ${pair.id} @${WIDTH}  shared=${shared.length}  typo=${typo.length}  struct=${struct.length}  ambiguous=${mismatched.length}`);
   } catch (error) {
     results.push({ id: pair.id, width: WIDTH, error: String(error).slice(0, 140), score: -1 });
     console.log(`ERR  ${pair.id} @${WIDTH}  ${String(error).slice(0, 110)}`);

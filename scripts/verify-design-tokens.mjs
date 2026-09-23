@@ -57,12 +57,24 @@ const DERIVED = {
   '#2a4199': 'Footer link hover on the deep-blue footer. Not specified in the baseline.',
   '#aeb6ce': 'Disabled primary-button fill. The baseline shows a disabled button but declares no fill for it.',
   '#9aa2b8': 'Placeholder text in form controls. Not specified in the baseline.',
+  // The same accessibility correction as --color-control-border above, caught
+  // again here because the token declaration is itself a literal in the CSS.
+  '#8a8e9c': 'Control border, corrected for WCAG 2.2 AA 1.4.11. See --color-control-border in EXPLAINED. Awaiting design sign-off as E-P2b.',
 };
 
 const EXPLAINED = {
   // The design writes rail foregrounds only inside the Seller and Builder rail
   // markup, as literals that also appear there; if one of these ever stops
   // matching, it is a real change.
+  //
+  // ACCESSIBILITY CORRECTION, not a derived state. It is listed here — in the
+  // place reserved for things that need explaining — rather than quietly
+  // admitted, because the whole point of this check is that a token the
+  // approved design never uses has to be argued for.
+  'control-border':
+    'Corrected for contrast. The approved #C6CCE0 is 1.60:1 on white and 1.48:1 on the page surface, against the 3:1 that WCAG 2.2 AA 1.4.11 requires of the border identifying a control. #8A8E9C is the smallest same-hue darkening that clears it: 3.27:1 on white, 3.02:1 on the page surface. Awaiting design sign-off as E-P2b. The approved value is kept as --color-control-border-baseline so the change stays legible.',
+  'control-border-baseline':
+    'The approved #C6CCE0, retained unused so the correction above can be read as a correction and reverted in one line if the design prefers a different remedy.',
 };
 
 const results = [];

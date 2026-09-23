@@ -28,7 +28,8 @@ export function Chip({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[13px] font-semibold ${tones[tone]} ${className}`}
+      data-chip={tone}
+      className={`chip inline-flex items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[13px] font-semibold ${tones[tone]} ${className}`}
     >
       {children}
     </span>
