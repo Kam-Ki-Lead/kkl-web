@@ -56,7 +56,13 @@ function collect(scale, rootSelector) {
   const seen = new Map();
   const dupes = new Set();
 
-  const INTERESTING = 'h1,h2,h3,h4,h5,h6,p,span,a,button,label,th,td,li,summary,legend,figcaption';
+  // `div` belongs in this list even though it is not a text element. The
+  // approved prototypes render their headings as styled divs — there is not a
+  // single h1 or h2 inside the console frames — so leaving div out made every
+  // prototype heading invisible to a tool whose whole purpose is catching a
+  // heading at the wrong step of the type ladder. The leaf test below keeps
+  // wrappers out.
+  const INTERESTING = 'div,h1,h2,h3,h4,h5,h6,p,span,a,button,label,th,td,li,summary,legend,figcaption';
   for (const el of root.querySelectorAll(INTERESTING)) {
     // Leaf-ish only: an element whose own text is its children's text is a
     // wrapper, and its computed size says nothing about what is on screen.
@@ -78,10 +84,15 @@ function collect(scale, rootSelector) {
   }
   for (const d of dupes) seen.delete(d);
 
-  // Structure: the widest laid-out boxes, and the controls.
+  // Structure: the widest laid-out box NARROWER than the frame, which is the
+  // page's content container. Including the frame-width element itself made
+  // this compare the prototype's stage against the application's viewport —
+  // "1344 -> 1440" at 1440 and "1344 -> 390" at 390, neither of which was a
+  // difference in anything.
+  const bound = Math.round(root.getBoundingClientRect().width / scale) || Infinity;
   const widths = [...root.querySelectorAll('div,section,main,form')]
     .map((n) => Math.round(n.getBoundingClientRect().width / scale))
-    .filter((w) => w > 200);
+    .filter((w) => w > 200 && w < bound);
   const controls = [...root.querySelectorAll('input:not([type=hidden]),select,textarea')]
     .map((n) => {
       const cs = getComputedStyle(n);
@@ -102,7 +113,7 @@ function collect(scale, rootSelector) {
 
   return {
     text: Object.fromEntries(seen),
-    contentWidth: widths.length ? Math.max(...widths.filter((w) => w < 1600)) : null,
+    contentWidth: widths.length ? Math.max(...widths) : null,
     controls,
     buttons,
   };
@@ -188,7 +199,11 @@ for (const pair of selected) {
       if (ph !== ih) struct.push(`control height [${ph}] -> [${ih}]`);
     }
     if (proto.buttons.length && impl.buttons.length) {
-      const pr = uniq(proto.buttons, (b) => b.radius), ir = uniq(impl.buttons, (b) => b.radius);
+      // A pill is a pill: the baseline writes 999px and Chromium clamps an
+      // enormous radius to 2^25px. Comparing them literally reports a
+      // difference in notation, not in appearance.
+      const radius = (b) => (parseFloat(b.radius) >= 500 ? 'pill' : b.radius);
+      const pr = uniq(proto.buttons, radius), ir = uniq(impl.buttons, radius);
       if (pr !== ir) struct.push(`button radius [${pr}] -> [${ir}]`);
     }
 

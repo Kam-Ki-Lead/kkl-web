@@ -67,21 +67,40 @@ export function InsetPanel({
   );
 }
 
+/**
+ * Two steps, because the approved package uses two.
+ *
+ * C-02 declares "Card and section title — Archivo 700 · 17px", and an earlier
+ * pass moved every section heading to that step on the strength of it. The
+ * rendered baseline disagrees in both directions: the **public portal's**
+ * section headings ("Featured properties", "Featured projects", "Browse by
+ * locality") are **26px/700**, and the **consoles'** panel headings ("Needs
+ * attention", "Recent enquiries on your listings") are **18px/700**. Nothing
+ * in the four console documents renders at 17px.
+ *
+ * So `level="page"` restores what P-01 actually draws, which the earlier fix
+ * flattened. The 17px default is left alone deliberately: 17-against-18 is an
+ * inconsistency inside the approved package — the library says one thing and
+ * the consoles draw another — and resolving it across 152 call sites on one
+ * screen's evidence would be guessing. It is recorded for the designer as
+ * E-P4 in `docs/phase-2/acceptance.md`.
+ */
 export function SectionHeader({
   title,
   subtitle,
   action,
+  level = "card",
 }: {
   title: string;
   subtitle?: string;
   action?: ReactNode;
+  /** `page` = the portal's 26px section step; `card` = the 17px step. */
+  level?: "page" | "card";
 }) {
   return (
     <div className="mb-[14px] flex flex-wrap items-end justify-between gap-3">
       <div>
-        {/* C-02: a section title is the 17px/700 step, not the 26px
-          screen-heading step. */}
-      <h2 className="t-card-title text-ink">{title}</h2>
+        <h2 className={`${level === "page" ? "t-heading" : "t-card-title"} text-ink`}>{title}</h2>
         {subtitle ? <p className="t-caption mt-[3px] text-muted">{subtitle}</p> : null}
       </div>
       {action}

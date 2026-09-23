@@ -40,7 +40,9 @@ run against `next start`.
 | Zoom | `node scripts/verify-zoom.mjs` | 32/32 — reflow at 320 CSS px and 200% text, 16 screens |
 | Accessibility | `node scripts/verify-accessibility.mjs` | 22/22; **3 pending** (no tooling) |
 | Visual values | `node scripts/verify-visual-baseline.mjs` | 22/22 measured values match the baseline's declared values |
-| **Rendered comparison** | `node scripts/capture-visual-comparison.mjs` | **25 pairs captured**, 17 screens — see `visual/` |
+| **Rendered comparison** | `node scripts/capture-visual-comparison.mjs` | **195 pairs**, 97 screens at 1440 and 390 — see `coverage.md` |
+| **Screen geometry** | `node scripts/verify-screen-geometry.mjs` | 93 screens ranked by measured divergence, both widths |
+| **B-15 navigation** | `node scripts/verify-b15-navigation.mjs` | 9/9 — Back and Forward, both arrival paths |
 | Route sweep | `node scripts/verify-route-sweep.mjs` | 224/224 — 112 routes × 2 widths |
 | Enquiry flow | `node scripts/verify-enquiry-flow.mjs` | 17/17 behaviour checks pass; 3 limitations reproduce |
 | Seller flow | `node scripts/verify-seller-flow.mjs` | 26/26 behaviour checks pass; 2 limitations reproduce |
@@ -811,13 +813,13 @@ allow, and the same three font families from `@fontsource`, then writes a
 separate copy of each prototype pointing at those local files. The script
 verifies kkl-design is byte-identical before it finishes and aborts if not.
 
-**25 pairs across 17 screens** are captured in `docs/phase-2/visual/`, driven
+**195 pairs across 97 screens** are captured in `docs/phase-2/visual/`, driven
 through the prototype's own screen picker and width tabs so it reflows as
 designed. The full list of what was compared, the differences found and fixed,
 the deliberate departures, and what remains uncompared are in
 **`docs/phase-2/acceptance.md` §3**.
 
-### Six differences the rendered comparison found
+### Twelve differences the rendered comparison found
 
 None of them could have been seen by a token check, a computed-style check or
 a route sweep — every one of those was passing at the time.
@@ -848,6 +850,51 @@ exactly 2px short at every width and every breakpoint for that reason.
 
 After the fix, implementation and prototype measure identically at 1440:
 843 image, 845 wrapper, 1280 grid, 1344 container.
+
+7. **The Admin rail was brand-deep, not ink.** A-02 declares
+   `background:#12182B`, muted text `#9AA3BE` and a 256px width, against the
+   other two consoles' `#0F2478`, `#B9C3EC`/`#8A9AD8` and 264px.
+8. **Buttons were `rounded-[8px] font-semibold` at 15px** against the
+   baseline's 6px radius, weight 700 and 16px with 14/22 padding — 64
+   occurrences of 6px across the console documents against 4 at 8px.
+9. **Console rail items were 16px**; the approved Seller and Builder rails
+   declare 15px.
+10. **The rail wordmark was the 20px header treatment**; the consoles declare
+    a 28px tile at 5px radius with 17px text.
+
+Findings 7 to 10 came from `verify-screen-geometry.mjs`, which matches elements
+across the two DOMs by their rendered text and compares computed properties.
+Each was verified against the approved source before anything was changed.
+After all twelve, 93 screens compare at each width: at 1440, 655 of 2,314
+matched elements still differ (28.3%); at 390, 612 of 1,115 (54.9%). **That is
+the honest state, not a pass.** The systematic causes are fixed; the remainder
+is per-screen and overlaps heavily with the unresolved 17px-against-18px
+question recorded as E-P4.
+
+11. **Homepage section headings had been demoted to 17px by this project's own
+    earlier fix.** C-02 declares 17px for "Card and section title"; the
+    rendered P-01 draws its section headings at 26px/700. The earlier fix
+    applied the library's declaration to screens the library does not govern,
+    and reported itself as a correction.
+12. **The console header truncated title and subtitle with an ellipsis at
+    390.** The approved A-02 fits the title and wraps the subtitle.
+
+**Finding 11 exposed a blind spot in the differ.** Its element list omitted
+`div`, and the approved prototypes render every heading as a styled `div` —
+there is not one `h1` or `h2` inside the console frames — so a tool built to
+catch headings at the wrong step could not see a single prototype heading.
+Added, and it found 11 on the first run.
+
+**Finding 12 was found by looking at a screenshot.** Truncation changes no
+computed property, so measuring could not have found it at any resolution.
+
+**Finding 7 had a passing check sitting on top of it.**
+`verify-visual-baseline.mjs` asserted `/admin`'s rail was `rgb(15, 36, 120)` —
+it was encoding the implementation, not the design — so it reported a match
+while the operations console rendered as a seller's. Corrected, and given the
+two rail widths as well. That is the second time in two passes that a green
+check was found to be asserting the defect; the first was the deployment
+guard.
 
 ### And one earlier, from measurement
 
@@ -890,9 +937,10 @@ stand-ins.
 
 ### What is still not compared
 
-**96 of 113 inventory rows.** The shared *values* are right everywhere, because
-they come from shared components — that says nothing about the layout of a
-screen nobody opened.
+**Nothing in the inventory is now unmapped** — `coverage.md` carries all 113
+rows. What remains uncompared is narrower and named there: spacing, alignment,
+shadow and imagery are outside what the geometry differ can see, and a screen
+with no measured divergence still needs a person to look at the pair.
 
 ## Console output
 

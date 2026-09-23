@@ -56,15 +56,26 @@ build() {
   fi
 }
 
-# scenario <label> <expected-status> <env-assignments...>
+# scenario <label> <expected-status> <expected-reason-substring> <env...>
+#
+# The reason is asserted, not just the status. A 503 raised for the wrong
+# reason is not the guard working — it is a different failure wearing the same
+# number, and a suite that only counts status codes cannot tell them apart.
+# Pass "-" where no reason applies (a 200).
 scenario() {
-  local label="$1" expect="$2"; shift 2
+  local label="$1" expect="$2" reason="$3"; shift 3
   stop
   (env "$@" npx next start -p "$PORT" > "$LOG" 2>&1 &)
   sleep 6
-  local code
+  local code body ok=1
   code=$(curl -s -o "$OUT" -w '%{http_code}' "http://127.0.0.1:${PORT}/")
-  if [ "$code" = "$expect" ]; then
+  body=$(cat "$OUT")
+  [ "$code" = "$expect" ] || ok=0
+  if [ "$reason" != "-" ] && ! printf '%s' "$body" | grep -qF "$reason"; then
+    ok=0
+    echo "      reason mismatch: expected to contain \"${reason}\""
+  fi
+  if [ "$ok" = "1" ]; then
     echo "PASS  ${label}  (HTTP ${code})"
   else
     echo "FAIL  ${label}  (HTTP ${code}, expected ${expect})"
@@ -96,21 +107,27 @@ build "review/sample" NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sam
 
 # The documented configuration: NEXT_PUBLIC_* on the build line, unprefixed on
 # the start line. This is the case the previous script never ran.
-scenario "documented review configuration serves normally" 200 \
+scenario "documented review configuration serves normally" 200 "-" \
   KKL_ENV=review KKL_DATA_SOURCE=sample
-scenario "a served build declaring nothing is refused" 503
+scenario "a served build declaring nothing is refused" 503 \
+  "KKL_ENV and KKL_DATA_SOURCE are not set"
 scenario "KKL_ENV set but KKL_DATA_SOURCE missing is refused" 503 \
+  "KKL_DATA_SOURCE is not set" \
   KKL_ENV=review
 scenario "KKL_DATA_SOURCE set but KKL_ENV missing is refused" 503 \
+  "KKL_ENV is not set" \
   KKL_DATA_SOURCE=sample
 scenario "marked production while running sample services is refused" 503 \
+  "marked production but is running sample services" \
   KKL_ENV=production KKL_DATA_SOURCE=sample
 scenario "a data-source disagreement with the bundle is refused" 503 \
+  "built with NEXT_PUBLIC_KKL_DATA_SOURCE=sample but deployed with KKL_DATA_SOURCE=api" \
   KKL_ENV=review KKL_DATA_SOURCE=api
 
 # The accident the run-time guard exists for: a review bundle reaching a
 # production host whose server variables all say production.
 scenario "a review bundle deployed as production is refused" 503 \
+  "built with NEXT_PUBLIC_KKL_ENV=review but deployed with KKL_ENV=production" \
   KKL_ENV=production KKL_DATA_SOURCE=api
 
 # The regression test for the defect described at the top of this file. Setting
@@ -118,6 +135,7 @@ scenario "a review bundle deployed as production is refused" 503 \
 # something it is not: those values are frozen in the bundle and the server's
 # copy of them is ignored.
 scenario "NEXT_PUBLIC_* at start time cannot launder a review bundle" 503 \
+  "built with NEXT_PUBLIC_KKL_ENV=review but deployed with KKL_ENV=production" \
   NEXT_PUBLIC_KKL_ENV=production NEXT_PUBLIC_KKL_DATA_SOURCE=api \
   KKL_ENV=production KKL_DATA_SOURCE=api
 

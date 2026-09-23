@@ -32,6 +32,7 @@ export default async function HomePage() {
           <section className="mb-[32px]">
             <SectionHeader
               title="Featured properties"
+              level="page"
               subtitle="Curated selection in Kolkata"
               action={
                 <Link
@@ -66,6 +67,7 @@ export default async function HomePage() {
           <section className="mb-[32px]">
             <SectionHeader
               title="Featured projects"
+              level="page"
               subtitle="Builder-published developments"
               action={
                 <Link
@@ -86,6 +88,7 @@ export default async function HomePage() {
           <section className="mb-[32px]">
             <SectionHeader
               title="Browse by locality"
+              level="page"
               subtitle={`${home.totalPublishedListings} listings across ${spellSmallNumber(home.localities.length)} localities`}
             />
             <div className="grid grid-cols-3 gap-[12px] max-[900px]:grid-cols-2">
