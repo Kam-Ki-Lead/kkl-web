@@ -35,6 +35,9 @@
 
   /* Rail foregrounds — C-03. Inactive items sit above 7:1 on their rail. */
   --color-rail-seller-label: #8a9ad8;
+  /* A-02's rail is ink with a dimmer muted text than the other two consoles.
+     5.41:1 on #12182B, so it clears AA for body text. */
+  --color-rail-admin-muted: #9aa3be;
   --color-rail-seller-item: #b9c3ec;
   --color-rail-admin-label: #9aa3be;
   --color-rail-admin-item: #9aa3be;

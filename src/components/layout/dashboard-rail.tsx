@@ -58,12 +58,43 @@ function isActive(item: RailItem, pathname: string): boolean {
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
+/**
+ * The Admin rail is a different colour from the other two in the approved
+ * design, not a tighter version of them.
+ *
+ * A-02 declares `background:#12182B` — ink — where the Seller and Builder rails
+ * declare `#0F2478`, and its muted text is `#9AA3BE` where theirs is `#B9C3EC`
+ * for items and `#8A9AD8` for group labels. `approved-baseline.md` records the
+ * same thing in its colour table: "Ink #12182B — headings, **admin rail**,
+ * primary text". The implementation was rendering all three rails in
+ * brand-deep, which made the operations console look like a seller's.
+ *
+ * Widths are per console too: Seller 236+28, Builder 238+28, Admin 232+24.
+ */
+const RAIL_TONES = {
+  console: {
+    surface: "bg-brand-deep",
+    width: "w-[264px]",
+    muted: "text-rail-seller-label",
+    item: "text-rail-seller-item",
+  },
+  admin: {
+    surface: "bg-ink",
+    width: "w-[256px]",
+    muted: "text-rail-admin-muted",
+    item: "text-rail-admin-muted",
+  },
+} as const;
+
+export type RailTone = keyof typeof RAIL_TONES;
+
 export function DashboardRail({
   items,
   footer,
   ariaLabel,
   eyebrow,
   dense = false,
+  tone = "console",
 }: {
   items: readonly RailItem[];
   footer?: RailFooter | null;
@@ -72,33 +103,36 @@ export function DashboardRail({
   eyebrow?: string;
   /** The Admin rail's tighter step — see RailLink. */
   dense?: boolean;
+  /** Which rail this is. The Admin rail is ink, not brand-deep. */
+  tone?: RailTone;
 }) {
   const pathname = usePathname();
+  const t = RAIL_TONES[tone];
 
   return (
     <nav
       aria-label={ariaLabel}
-      className="flex w-[268px] flex-none flex-col bg-brand-deep max-[1060px]:hidden"
+      className={`flex ${t.width} flex-none flex-col ${t.surface} max-[1060px]:hidden`}
     >
       <div className="px-[18px] py-[20px]">
         <Link href="/" aria-label="Kam Ki Lead — home" className="inline-block">
-          <Wordmark onDark />
+          <Wordmark size="rail" onDark />
         </Link>
       </div>
 
       {eyebrow ? (
-        <p className="t-eyebrow px-[18px] pb-[8px] text-rail-seller-label">{eyebrow}</p>
+        <p className={`t-eyebrow px-[18px] pb-[8px] ${t.muted}`}>{eyebrow}</p>
       ) : null}
 
       <ul className="flex flex-col gap-[2px] overflow-y-auto px-[14px] pb-[10px]">
         {items.map((item, index) => (
           <li key={item.href}>
             {item.group && item.group !== items[index - 1]?.group ? (
-              <p className="t-eyebrow px-[17px] pb-[6px] pt-[14px] text-rail-seller-label">
+              <p className={`t-eyebrow px-[17px] pb-[6px] pt-[14px] ${t.muted}`}>
                 {item.group}
               </p>
             ) : null}
-            <RailLink item={item} active={isActive(item, pathname)} dense={dense} />
+            <RailLink item={item} active={isActive(item, pathname)} dense={dense} tone={tone} />
           </li>
         ))}
       </ul>
@@ -123,21 +157,23 @@ function RailLink({
   item,
   active,
   dense,
+  tone,
 }: {
   item: RailItem;
   active: boolean;
   dense: boolean;
+  tone: RailTone;
 }) {
   return (
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={`flex items-center justify-between gap-[10px] rounded-[8px] transition-[background-color,color] duration-150 ${
-        dense ? "min-h-[40px] px-[13px] text-[14px]" : "min-h-[46px] px-[17px] text-[16px]"
+        dense ? "min-h-[40px] px-[13px] text-[14px]" : "min-h-[46px] px-[17px] text-[15px]"
       } ${
         active
           ? "bg-brand font-bold text-white"
-          : "font-medium text-rail-seller-item hover:bg-white/10 hover:text-white"
+          : `font-medium ${RAIL_TONES[tone].item} hover:bg-white/10 hover:text-white`
       }`}
     >
       <span>{item.label}</span>
@@ -153,7 +189,7 @@ function RailLink({
 function RailFooterCard({ footer }: { footer: RailFooter }) {
   return (
     <div className="rounded-[10px] bg-white/[0.07] p-[16px]">
-      <p className="text-[13px] text-rail-seller-label">{footer.label}</p>
+      <p className={`text-[13px] ${RAIL_TONES.console.muted}`}>{footer.label}</p>
       <p className="t-card-title mt-[2px] text-white">{footer.value}</p>
       <Link
         href={footer.actionHref}
@@ -180,12 +216,14 @@ export function RailDrawer({
   ariaLabel,
   eyebrow,
   dense = false,
+  tone = "console",
 }: {
   items: readonly RailItem[];
   footer?: RailFooter | null;
   ariaLabel: string;
   eyebrow?: string;
   dense?: boolean;
+  tone?: RailTone;
 }) {
   const pathname = usePathname();
   // The drawer's open state is stored as the path it was opened on, so a route
@@ -227,21 +265,21 @@ export function RailDrawer({
           id="console-drawer"
           ref={panel}
           tabIndex={-1}
-          className="absolute left-0 right-0 top-full z-20 border-t border-line bg-brand-deep px-[14px] py-[14px]"
+          className={`absolute left-0 right-0 top-full z-20 border-t border-line ${RAIL_TONES[tone].surface} px-[14px] py-[14px]`}
         >
           <nav aria-label={ariaLabel}>
             {eyebrow ? (
-              <p className="t-eyebrow pb-[8px] text-rail-seller-label">{eyebrow}</p>
+              <p className={`t-eyebrow pb-[8px] ${RAIL_TONES[tone].muted}`}>{eyebrow}</p>
             ) : null}
             <ul className="flex flex-col gap-[2px]">
               {items.map((item, index) => (
                 <li key={item.href}>
                   {item.group && item.group !== items[index - 1]?.group ? (
-                    <p className="t-eyebrow px-[17px] pb-[6px] pt-[14px] text-rail-seller-label">
+                    <p className={`t-eyebrow px-[17px] pb-[6px] pt-[14px] ${RAIL_TONES[tone].muted}`}>
                       {item.group}
                     </p>
                   ) : null}
-                  <RailLink item={item} active={isActive(item, pathname)} dense={dense} />
+                  <RailLink item={item} active={isActive(item, pathname)} dense={dense} tone={tone} />
                 </li>
               ))}
             </ul>

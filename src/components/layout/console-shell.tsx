@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import {
   DashboardRail,
+  type RailTone,
   RailDrawer,
   type RailFooter,
   type RailItem,
@@ -19,6 +20,7 @@ export function ConsoleShell({
   navLabel,
   navEyebrow,
   dense = false,
+  tone = "console",
   title,
   subtitle,
   aside,
@@ -31,6 +33,8 @@ export function ConsoleShell({
   navEyebrow?: string;
   /** The Admin rail's tighter step; its twenty items do not fit at 16px. */
   dense?: boolean;
+  /** The Admin rail is ink, not brand-deep — see DashboardRail. */
+  tone?: RailTone;
   title: string;
   subtitle: string;
   /** Right-hand header content — balance chip, avatar. */
@@ -39,16 +43,16 @@ export function ConsoleShell({
 }) {
   return (
     <div className="flex min-h-screen bg-surface">
-      <DashboardRail items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} dense={dense} />
+      <DashboardRail items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} dense={dense} tone={tone} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* `relative` anchors the mobile drawer, which is absolutely positioned
             against this bar rather than the viewport. */}
         <header className="relative flex items-center gap-[14px] border-b border-line bg-white px-[28px] py-[16px] max-[1060px]:px-[16px]">
-          <RailDrawer items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} />
+          <RailDrawer items={items} footer={footer} ariaLabel={navLabel} eyebrow={navEyebrow} dense={dense} tone={tone} />
           <div className="min-w-0 flex-1">
             <h1 className="t-heading truncate text-ink">{title}</h1>
-            <p className="t-caption truncate text-muted">{subtitle}</p>
+            <p className="truncate text-[14px] leading-[1.5] text-muted">{subtitle}</p>
           </div>
           {aside ? <div className="flex flex-none items-center gap-[12px]">{aside}</div> : null}
         </header>

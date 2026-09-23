@@ -36,6 +36,7 @@ export async function AdminShell({
       // Twenty destinations under eight headings; the approved A-02 sets a
       // tighter step than the Seller and Builder rails use.
       dense
+      tone="admin"
       items={adminRailItems(railCounts(dashboard.queues, notifications.length))}
       footer={null}
       title={title}

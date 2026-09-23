@@ -36,7 +36,15 @@ const CHECKS = [
   // Rails — C-03. Deep blue for every console, brand blue for the active item.
   { path: '/seller', at: 1440, sel: 'nav[aria-label="Seller console"]', prop: 'backgroundColor', want: 'rgb(15, 36, 120)', note: 'rail surface #0F2478' },
   { path: '/builder', at: 1440, sel: 'nav[aria-label="Builder console"]', prop: 'backgroundColor', want: 'rgb(15, 36, 120)', note: 'rail surface #0F2478' },
-  { path: '/admin', at: 1440, sel: 'nav[aria-label="Admin console"]', prop: 'backgroundColor', want: 'rgb(15, 36, 120)', note: 'rail surface #0F2478' },
+  // A-02's rail is INK, not brand-deep. This row asserted #0F2478 until a
+  // rendered comparison showed the approved console declares
+  // `background:#12182B` — and `approved-baseline.md` said so all along
+  // ("Ink #12182B — headings, admin rail, primary text"). The check was
+  // encoding the implementation rather than the design, so it passed while
+  // the operations console looked like a seller's.
+  { path: '/admin', at: 1440, sel: 'nav[aria-label="Admin console"]', prop: 'backgroundColor', want: 'rgb(18, 24, 43)', note: 'rail surface #12182B (ink) — NOT brand-deep' },
+  { path: '/admin', at: 1440, sel: 'nav[aria-label="Admin console"]', prop: 'width', want: '256px', note: 'admin rail width 232 + 24 padding' },
+  { path: '/seller', at: 1440, sel: 'nav[aria-label="Seller console"]', prop: 'width', want: '264px', note: 'seller rail width 236 + 28 padding' },
   { path: '/admin', at: 1440, sel: 'nav[aria-label="Admin console"] a[aria-current="page"]', prop: 'backgroundColor', want: 'rgb(27, 59, 179)', note: 'active rail item #1B3BB3' },
 
   // Status chips — C-06 and C-08. All five surfaces.

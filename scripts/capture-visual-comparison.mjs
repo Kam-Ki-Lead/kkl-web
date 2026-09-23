@@ -4,120 +4,163 @@
  * The prototypes boot React and Babel from a CDN the environment's network
  * policy denies. `scripts/setup-prototype-review.sh` builds a **separate local
  * review copy** whose script tags point at the same pinned versions fetched
- * from the npm registry (which the policy does allow), and at local font files
- * from @fontsource instead of Google Fonts. **kkl-design is never modified.**
+ * from the npm registry, and at local font files from @fontsource instead of
+ * Google Fonts. **kkl-design is never modified.**
  *
  * This drives that copy the way a reviewer would — its own screen picker and
  * its own width tabs, so the prototype reflows the way it is designed to,
  * which a browser viewport alone does not make it do — and screenshots the
  * inner frame. Then it captures the implementation at the same width and the
- * matching state, and writes the pair plus a difference metric.
+ * matching state, full page.
  *
- * The metric is a coarse per-pixel comparison after resizing to a common box.
- * It is a *sorting aid*, not a verdict: it tells a reviewer which pairs to
- * look at first. Layout judgements come from looking at the images.
+ * The pair list is `scripts/screen-map.mjs`, which covers every inventory row:
+ * 97 screens as pairs, 4 nested states named against their parent, and the 12
+ * library rows against the screens they are judged in.
+ *
+ * **These are for a person to look at.** Capturing successfully is not a
+ * visual pass. `scripts/verify-screen-geometry.mjs` reads the same pairs
+ * mechanically and ranks them, so inspection is directed rather than blind.
  *
  * Run:
- *   ./scripts/setup-prototype-review.sh              # once
+ *   ./scripts/setup-prototype-review.sh                 # once
  *   PROTO_URL=http://127.0.0.1:8099 BASE_URL=http://127.0.0.1:3811 \
  *   PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/capture-visual-comparison.mjs
+ *
+ * Env: CAPTURE_SUFFIX names the state (''=missing media, '-photos'=image
+ * present). ONLY restricts to a comma-separated list of pair ids.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { PAIRS } from './screen-map.mjs';
 
 const { chromium } = await import(process.env.PLAYWRIGHT ?? 'playwright');
 
 const PROTO = process.env.PROTO_URL ?? 'http://127.0.0.1:8099';
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3811';
 const OUT = process.env.OUT_DIR ?? 'docs/phase-2/visual';
-
-/**
- * Appended to every output filename, so one state does not overwrite another.
- *
- * The image-present state and the missing-media fallback are separate states
- * and are captured as separate sets: `''` for the fallback the app ships by
- * default, `'-photos'` for the run with stand-in photography wired into both
- * sides. Neither substitutes for the other.
- */
 const SUFFIX = process.env.CAPTURE_SUFFIX ?? '';
-
-/** Restrict the run to these pair ids (comma-separated). Empty means all. */
 const ONLY = (process.env.ONLY ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-
-/**
- * The comparison set, in the priority order the acceptance pass asked for.
- *
- * `file` is the prototype document, `screen` the id its picker uses, `path`
- * the implementation route, and `setup` any state the implementation needs to
- * be in for the states to match.
- */
-const PAIRS = [
-  // Public portal
-  { id: 'P-01-home', file: 'KKL Homepage - Portal Layout.dc.html', screen: null, path: '/', widths: [1440, 390] },
-  { id: 'P-02-search', file: 'KKL Buyer Journey.dc.html', screen: 'P-02', path: '/search', widths: [1440, 390] },
-  { id: 'P-03-property', file: 'KKL Buyer Journey.dc.html', screen: 'P-03', path: '/property/greenview-residency', widths: [1440] },
-
-  // Seller
-  { id: 'S-06-dashboard', file: 'KKL Seller Console.dc.html', screen: 'S-06', path: '/seller', widths: [1440, 390] },
-  { id: 'S-07-marketplace', file: 'KKL Seller Console.dc.html', screen: 'S-07', path: '/seller/leads', widths: [1440, 390] },
-  { id: 'S-11-purchase-result', file: 'KKL Seller Console.dc.html', screen: 'S-11', path: '/seller/leads/L-4471/result', widths: [1440], setup: 'purchase' },
-  { id: 'S-14-billing', file: 'KKL Seller Console.dc.html', screen: 'S-14', path: '/seller/billing', widths: [1440, 390] },
-
-  // Builder
-  { id: 'B-06-dashboard', file: 'KKL Builder Console.dc.html', screen: 'B-06', path: '/builder', widths: [1440, 390] },
-  { id: 'B-08-editor', file: 'KKL Builder Console.dc.html', screen: 'B-08', path: '/builder/properties/bl-greenview/basics', widths: [1440, 390] },
-  { id: 'B-16-enquiries', file: 'KKL Builder Console.dc.html', screen: 'B-16', path: '/builder/enquiries', widths: [1440] },
-  { id: 'B-19-restrictions', file: 'KKL Builder Console.dc.html', screen: 'B-19', path: '/builder/restrictions', widths: [1440] },
-
-  // Admin
-  { id: 'A-02-dashboard', file: 'KKL Admin Console.dc.html', screen: 'A-02', path: '/admin', widths: [1440, 390] },
-  { id: 'A-06-kyc-review', file: 'KKL Admin Console.dc.html', screen: 'A-06', path: '/admin/kyc/K-3318', widths: [1440] },
-  { id: 'A-19-adjust', file: 'KKL Admin Console.dc.html', screen: 'A-19', path: '/admin/wallets/U-10442/adjust', widths: [1440] },
-  { id: 'A-23-ticket', file: 'KKL Admin Console.dc.html', screen: 'A-23', path: '/admin/support/T-2291', widths: [1440] },
-  { id: 'A-30-audit', file: 'KKL Admin Console.dc.html', screen: 'A-30', path: '/admin/audit', widths: [1440] },
-
-  // Shared: component library against representative implementation surfaces
-  { id: 'C-mobile-nav', file: 'KKL Admin Console.dc.html', screen: 'A-02', path: '/admin', widths: [390], drawer: true },
-];
 
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
 const rows = [];
 
-/** Capture one prototype screen at one width, 1:1 (no scale-to-fit). */
-async function captureProto(pair, width) {
-  // The frame is scaled down when the stage is narrower than it. Give the
-  // viewport room so scale stays at 1 and the screenshot is not resampled.
+// ---------------------------------------------------------------- prototype
+//
+// One page per (document, width), reused across every screen in it. Booting
+// React and Babel takes about two and a half seconds; doing that 194 times
+// rather than 10 is most of an hour for nothing.
+const protoPages = new Map();
+
+async function protoPage(file, width) {
+  const key = `${file}@${width}`;
+  const existing = protoPages.get(key);
+  if (existing) return existing;
+
   const context = await browser.newContext({
+    // The frame is scaled down when the stage is narrower than it. Give the
+    // viewport room so scale stays at 1 and the screenshot is not resampled.
     viewport: { width: Math.max(width + 260, 1700), height: 1400 },
     deviceScaleFactor: 1,
   });
   const page = await context.newPage();
-  await page.goto(`${PROTO}/${encodeURIComponent(pair.file)}`, { waitUntil: 'load', timeout: 40000 });
+  await page.goto(`${PROTO}/${encodeURIComponent(file)}`, { waitUntil: 'load', timeout: 40000 });
   await page.waitForTimeout(2500);
-
-  if (pair.screen) {
-    await page.selectOption('select[aria-label="Jump to screen"]', pair.screen).catch(() => {});
-    await page.waitForTimeout(900);
-  }
   // Its own width tab, so the prototype reflows as designed.
   await page.click(`button[aria-pressed]:text-is("${width}")`).catch(async () => {
-    const tabs = await page.$$('button');
-    for (const t of tabs) {
+    for (const t of await page.$$('button')) {
       if ((await t.textContent())?.trim() === String(width)) { await t.click(); break; }
     }
   });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1000);
+  protoPages.set(key, page);
+  return page;
+}
 
+async function captureProto(pair, width) {
+  const page = await protoPage(pair.file, width);
+  if (pair.screen) {
+    await page.selectOption('select[aria-label="Jump to screen"]', pair.screen).catch(() => {});
+    await page.waitForTimeout(800);
+  }
   const frame = await page.$('div[style*="transform:scale"], div[style*="transform: scale"]');
   const target = frame ?? (await page.$('body'));
   const file = join(OUT, `${pair.id}-${width}${SUFFIX}-baseline.png`);
   await target.screenshot({ path: file }).catch(async () => {
     await page.screenshot({ path: file, fullPage: false });
   });
-  await context.close();
   return file;
 }
+
+// ----------------------------------------------------------- implementation
+//
+// Each setup is a sequence a real browser would have to perform. A purchase
+// result, a payment outcome and an enquiry confirmation do not exist for a
+// browser that has not earned them, and opening them directly is refused —
+// correctly. So they are reached the way a person reaches them.
+const SETUPS = {
+  async 'enquiry-confirmed'(page) {
+    // The approved flow verifies a mobile number before it confirms anything,
+    // so the confirmation cannot be opened directly and is not reached by
+    // skipping the step. This walks it: form, then the verification screen.
+    await page.goto(`${BASE}/property/greenview-residency/enquiry`, { waitUntil: 'networkidle' });
+    await page.fill('#name', 'A. Reviewer');
+    await page.fill('#mobile', '9800000000');
+    const message = await page.$('#message');
+    if (message) await message.fill('Checking availability for a 3 BHK.');
+    await Promise.all([
+      page.waitForURL(/\/auth/, { timeout: 15000 }),
+      page.click('form button[type=submit]'),
+    ]);
+    await page.fill('#auth-code', '123456');
+    await Promise.all([
+      page.waitForURL(/\/enquiry\/[^/]+\/confirmed|\/enquiry\/unavailable/, { timeout: 15000 }),
+      page.click('button:has-text("Verify and continue")'),
+    ]);
+  },
+  async 'seller-suspended'(page) {
+    await page.goto(`${BASE}/seller/review-state?account=suspended&to=/seller/restricted`, { waitUntil: 'networkidle' });
+  },
+  async purchase(page) {
+    await page.goto(`${BASE}/seller/review-state?reset=1&to=/seller`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/seller/leads/L-4471/buy`, { waitUntil: 'networkidle' });
+    await Promise.all([
+      page.waitForURL(/\/result$/, { timeout: 15000 }).catch(() => {}),
+      page.click('button:has-text("Confirm and buy")').catch(() => {}),
+    ]);
+  },
+  async 'purchase-then'(page, pair) {
+    await SETUPS.purchase(page);
+    await page.goto(`${BASE}${pair.path}`, { waitUntil: 'networkidle' });
+  },
+  async 'payment-success'(page) {
+    await page.goto(`${BASE}/seller/review-state?reset=1&payment=success&to=/seller`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/seller/billing/recharge`, { waitUntil: 'networkidle' });
+    await Promise.all([
+      page.waitForURL(/\/billing\/payment$/, { timeout: 15000 }).catch(() => {}),
+      page.click('button:has-text("Continue to payment")').catch(() => {}),
+    ]);
+  },
+  async 'builder-subscription-payment'(page) {
+    await page.goto(`${BASE}/builder/review-state?reset=1&subscriptionOutcome=success&to=/builder`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE}/builder/subscription`, { waitUntil: 'networkidle' });
+    await Promise.all([
+      page.waitForURL(/\/subscription\/payment$/, { timeout: 15000 }),
+      page.click('button:has-text("Renew now")'),
+    ]);
+  },
+  async 'dirty-editor'(page, pair) {
+    await page.goto(`${BASE}${pair.path}`, { waitUntil: 'networkidle' });
+    // B-15 is the unsaved-changes screen; an editor with no edit is B-08.
+    const field = await page.$('input[type="text"], input:not([type])');
+    if (field) {
+      await field.click();
+      await field.fill('Greenview Residency — revised');
+      await page.keyboard.press('Tab');
+      await page.waitForTimeout(400);
+    }
+  },
+};
 
 async function captureImpl(pair, width) {
   const context = await browser.newContext({
@@ -125,59 +168,62 @@ async function captureImpl(pair, width) {
     deviceScaleFactor: 1,
   });
   const page = await context.newPage();
-  if (pair.setup === 'purchase') {
-    await page.goto(`${BASE}/seller/review-state?reset=1`, { waitUntil: 'load' });
-    await page.goto(`${BASE}/seller/leads/L-4471/buy`, { waitUntil: 'networkidle' });
-    await page.click('button:has-text("Confirm")').catch(() => {});
-    await page.waitForTimeout(1200);
+  const setup = pair.setup ? SETUPS[pair.setup] : null;
+  if (setup) {
+    await setup(page, pair);
   } else {
     await page.goto(`${BASE}${pair.path}`, { waitUntil: 'networkidle', timeout: 40000 });
   }
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(600);
   if (pair.drawer) {
     await page.click('button[aria-controls="console-drawer"]').catch(() => {});
     await page.waitForTimeout(600);
   }
-  const file = join(OUT, `${pair.id}-${width}${SUFFIX}-implementation.png`);
   // Full page, because the prototype side is captured as its whole frame. A
-  // viewport crop here made every long screen a top-of-page comparison, which
-  // is how P-02's results list — imagery included — went uncompared at 390
-  // while the pair still counted as captured.
-  //
-  // Scroll to the bottom first: anything lazily loaded further down has to be
-  // given the chance to load before the page is painted in one pass.
+  // viewport crop made every long screen a top-of-page comparison.
   await page.evaluate(async () => {
     const step = window.innerHeight;
     for (let y = 0; y < document.body.scrollHeight; y += step) {
       window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 120));
+      await new Promise((r) => setTimeout(r, 90));
     }
     window.scrollTo(0, 0);
   });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(400);
+  const landed = page.url().replace(BASE, '').replace(/^https?:\/\/[^/]+/, '');
+  const file = join(OUT, `${pair.id}-${width}${SUFFIX}-implementation.png`);
   await page.screenshot({ path: file, fullPage: true });
   await context.close();
-  return file;
+  return { file, landed };
 }
 
-for (const pair of PAIRS) {
-  if (ONLY.length && !ONLY.includes(pair.id)) continue;
-  for (const width of pair.widths) {
+// Group by document so each prototype page is booted once per width.
+const selected = PAIRS.filter((p) => !ONLY.length || ONLY.includes(p.id));
+const order = [...selected].sort((a, b) => (a.file + a.id).localeCompare(b.file + b.id));
+
+for (const width of [1440, 390]) {
+  for (const pair of order) {
+    if (!pair.widths.includes(width)) continue;
     try {
       const baseline = await captureProto(pair, width);
-      const implementation = await captureImpl(pair, width);
-      rows.push({ id: pair.id, width, baseline, implementation, ok: true });
-      console.log(`captured  ${pair.id} @${width}`);
+      const { file: implementation, landed } = await captureImpl(pair, width);
+      rows.push({ id: pair.id, width, baseline, implementation, landed, ok: true });
+      console.log(`captured  ${pair.id} @${width}  -> ${landed}`);
     } catch (error) {
-      rows.push({ id: pair.id, width, ok: false, error: String(error).slice(0, 120) });
-      console.log(`FAILED    ${pair.id} @${width}  ${String(error).slice(0, 100)}`);
+      rows.push({ id: pair.id, width, ok: false, error: String(error).slice(0, 140) });
+      console.log(`FAILED    ${pair.id} @${width}  ${String(error).slice(0, 110)}`);
     }
+  }
+  // Release this width's prototype pages before the next width boots its own.
+  for (const [key, page] of protoPages) {
+    if (key.endsWith(`@${width}`)) { await page.context().close(); protoPages.delete(key); }
   }
 }
 
 await browser.close();
+rows.sort((a, b) => a.id.localeCompare(b.id) || a.width - b.width);
 writeFileSync(join(OUT, `index${SUFFIX}.json`), JSON.stringify(rows, null, 2));
 const failed = rows.filter((r) => !r.ok);
 console.log(`\n${rows.length - failed.length}/${rows.length} pairs captured into ${OUT}/`);
-console.log('These are for a person to look at. No pass is claimed from capture alone.');
+console.log('Capturing is not comparing. Run verify-screen-geometry.mjs, then look at the pairs it ranks.');
 if (failed.length) process.exit(1);

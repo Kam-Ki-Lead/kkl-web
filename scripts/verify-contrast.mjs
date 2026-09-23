@@ -46,6 +46,7 @@ function ratio(a, b) {
   return (x + 0.05) / (y + 0.05);
 }
 
+const SURFACE = tokens.surface;
 const WHITE = '#ffffff';
 
 /**
@@ -105,22 +106,37 @@ const PAIRS = [
  */
 const DESIGN_FINDINGS = [
   {
-    what: 'Focus ring on a light background',
+    what: 'Focus indicator on light surfaces',
     fg: tokens.saffron,
     bg: WHITE,
+    alsoOn: [['page surface', SURFACE]],
     need: 3,
-    criterion: 'WCAG 2.2 AA · 1.4.11 Non-text Contrast',
-    why: 'The focus indicator must be distinguishable from its surroundings. Saffron on white and on the page surface is about 2.1:1.',
-    remedy: 'Keep saffron and pair it with a dark companion — an outline plus a 1px ink box-shadow reads as one indicator and clears 3:1 on any background — or darken the ring on light surfaces only. Both change the approved appearance and need a design decision.',
+    criterion: 'WCAG 2.2 AA \u00b7 1.4.11 Non-text Contrast',
+    // Named so a reviewer does not have to work out the blast radius.
+    components: [
+      'globals.css :focus-visible — applies to EVERY focusable element',
+      'every button, link, input, select, textarea, chip and table-row control',
+      'on white cards, dialogs and table rows, and on the page surface',
+      'NOT the dark rails: saffron on brand-deep is 6.44:1 and on brand 4.28:1, both pass',
+    ],
+    why: 'The focus indicator must be distinguishable from what surrounds it. Matching the approved baseline does not close this — the baseline declares the value that fails.',
+    remedy: 'Smallest correction that keeps saffron exactly: keep the 3px saffron outline and add a 1px ink #12182B box-shadow immediately inside it. The indicator then presents a 17.63:1 edge against white and 16.30:1 against the page surface, and saffron reads 8.35:1 against its own companion, so the ring still reads as saffron. Alternative, if a single colour is required: darken to #C1810A, which clears 3:1 on both light surfaces (3.03:1 page, 3.28:1 white) at the same hue — but that changes a declared brand token.',
   },
   {
-    what: 'Control border on white',
+    what: 'Control border on light surfaces',
     fg: tokens['control-border'],
     bg: WHITE,
+    alsoOn: [['page surface', SURFACE]],
     need: 3,
-    criterion: 'WCAG 2.2 AA · 1.4.11 Non-text Contrast',
-    why: 'A text input is identified by its border. The approved #C6CCE0 is about 1.6:1; the card hairline #E1E4EE, which these controls were using until this pass, is 1.27:1.',
-    remedy: 'Darken the control border on light surfaces, or give controls a filled surface distinct from the card. The card hairline itself is decorative — it groups visible content rather than identifying a component — and is not in scope for 1.4.11.',
+    criterion: 'WCAG 2.2 AA \u00b7 1.4.11 Non-text Contrast',
+    components: [
+      'src/components/ui/field.tsx — Input, Textarea and Select, three call sites',
+      'every text field, number field, textarea and select in all four journeys',
+      'NOT the card hairline #E1E4EE: it groups visible content rather than identifying a component, and is out of scope for 1.4.11',
+      'NOT the invalid state: border-danger is measured in the passing table above',
+    ],
+    why: 'A text input is identified by its border. The approved #C6CCE0 is 1.60:1 on white. The card hairline #E1E4EE, which these controls used until an earlier pass, was 1.27:1 — the fix improved it without reaching the threshold.',
+    remedy: 'Smallest correction: darken the token to #8A8E9C, which clears 3:1 on both light surfaces (3.27:1 white, 3.02:1 page) and stays in the same hue family. A filled control surface would also work but changes the approved appearance considerably more.',
   },
 ];
 
@@ -143,11 +159,23 @@ console.log(`\n${results.length - failed.length}/${results.length} declared colo
 
 console.log(`\n${findings.length} DESIGN-LEVEL findings — below threshold, and not the implementation's to change:`);
 for (const f of findings) {
-  console.log(`\n  ${f.what}: ${f.fg} on ${f.bg} = ${f.value.toFixed(2)}:1, needs ${f.need}:1`);
+  console.log(`\n  ${f.what}`);
+  console.log(`    ${f.fg} on ${f.bg} = ${f.value.toFixed(2)}:1, needs ${f.need}:1`);
+  for (const [label, bg] of f.alsoOn ?? []) {
+    console.log(`    ${f.fg} on ${bg} (${label}) = ${ratio(f.fg, bg).toFixed(2)}:1`);
+  }
   console.log(`    ${f.criterion}`);
+  console.log('    Components affected:');
+  for (const c of f.components ?? []) console.log(`      - ${c}`);
   console.log(`    ${f.why}`);
   console.log(`    Proposed: ${f.remedy}`);
 }
+
+// Matching the baseline is not a defence. Say so where the numbers are read.
+console.log('\n  Both values are the approved baseline\'s own. That explains how they got');
+console.log('  here; it does not close them. A contrast failure inherited from a design');
+console.log('  is still a contrast failure, and the correction is a design decision to');
+console.log('  take, not a finding to file and leave.');
 
 console.log('\nThis is arithmetic on declared pairs. It is not an accessibility pass for any screen.');
 if (failed.length > 0) {
