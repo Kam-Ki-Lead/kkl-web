@@ -4,6 +4,10 @@ Start here.
 
 | Document | What it answers |
 |---|---|
+| **[decision-sheet.md](decision-sheet.md)** | **Start here.** One page: the commit, what is open, who decides each item |
+| [visual-differences.md](visual-differences.md) | Every measured difference, classified — defect, sample content, artefact, baseline conflict, or proposed deviation |
+| [exceptions.md](exceptions.md) | The four exceptions in plain language, each with its owner |
+| [pending-verification.md](pending-verification.md) | What is still unverified, what it needs and who does it — two of the original five were never blocked |
 | **[acceptance.md](acceptance.md)** | **Is this ready?** Remaining work split five ways — frontend defects, frontend verification pending on tooling, asset dependencies, backend dependencies, client decisions and proposed deviations |
 | **[coverage.md](coverage.md)** | **What was actually checked.** All 113 inventory rows mapped to a pair, nested-state evidence or a named pending check. Generated, not hand-written |
 | [implementation-checklist.md](implementation-checklist.md) | Screen and state coverage, 113 inventory rows across four dimensions, with every partial explained |
@@ -35,9 +39,12 @@ check in this repository had been passing over:
   including four shared-component deviations this pass found: the Admin rail
   rendered brand-deep instead of ink, buttons at the wrong radius/weight/size,
   rail items a step too large, and the rail wordmark at the header's size.
-- **Three deviations await a decision** — B-15's dialog on browser Back, the
-  two contrast failures at the baseline's own values, and the attribution band
-  on review imagery. None is closed by more frontend work.
+- **Four exceptions await a decision** — B-15's dialog on browser Back, the
+  two contrast corrections (applied, sign-off open) and the attribution band on
+  review imagery. None is closed by more frontend work.
+- **The typography conflict is resolved, not escalated.** C-02 names one step;
+  the screens render five. Screen-specific evidence takes precedence, and the
+  classes now carry the roles.
 - **Nine backend capabilities** are missing. The frontend for each is complete:
   interface, sample implementation, built and verified states. **These are not
   unfinished frontend work.**
@@ -52,9 +59,10 @@ check in this repository had been passing over:
 - **Photographic fidelity is not compared.** The environment denies the image
   host, so slot geometry was compared with stand-ins; the baseline's actual
   photographs have not been seen here.
-- **Five verification checks are pending on tooling** — screen readers,
-  forced-colors, voice control, Firefox text-only zoom, real devices. They are
-  **frontend verification this repository owns**, not backend work.
+- **Two of the five "blocked" checks were never blocked.** Forced-colors and
+  the accessibility tree needed a script, not a platform — and writing them
+  found two real defects. Four checks remain, three needing only a Windows or
+  macOS machine somebody already owns.
 
 ## What is verified, in one table
 
@@ -76,6 +84,10 @@ check in this repository had been passing over:
 | Deployment guard | `verify-sample-mode-guard.sh` | 10/10, **2 pending** |
 | Screen geometry | `verify-screen-geometry.mjs` | 93 screens ranked by divergence, both widths |
 | B-15 navigation | `verify-b15-navigation.mjs` | 9/9 — Back and Forward, both arrival paths |
+| Typography precedence | `verify-typography.mjs` | 11/11 representative uses |
+| Contrast corrections | `verify-contrast-corrections.mjs` | 12/12 rendered states |
+| Accessible names / 2.5.3 | `verify-accessible-names.mjs` | 24/24 across 6 screens |
+| Forced-colors | `verify-forced-colors.mjs` | 13/13 across 6 screens |
 
 Run twice against one server with identical results.
 

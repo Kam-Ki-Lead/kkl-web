@@ -2,3783 +2,559 @@
   {
     "id": "P-01",
     "width": 390,
-    "shared": 62,
-    "protoOnly": 29,
-    "implOnly": 21,
-    "typo": [
-      {
-        "text": "Location",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "BHK",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Budget",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Featured properties",
-        "diff": "weight 700->800"
-      },
-      {
-        "text": "₹78L – ₹1.4Cr",
-        "diff": "size 24->21"
-      },
-      {
-        "text": "Greenview Residency",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "2, 3 BHK · 985–1,420 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "₹1.1Cr – ₹2.2Cr",
-        "diff": "size 24->21"
-      },
-      {
-        "text": "Lakeshore Heights",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "3, 4 BHK · 1,540–2,180 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "₹52L – ₹85L",
-        "diff": "size 24->21"
-      },
-      {
-        "text": "Sundew Enclave",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "1, 2, 3 BHK · 610–1,180 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Featured projects",
-        "diff": "weight 700->800"
-      },
-      {
-        "text": "Builder-published developments",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Under construction",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Riverside Commons",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "3 BHK apartments · 1,290–1,880 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "₹95L – ₹1.7Cr",
-        "diff": "size 20->21"
-      },
-      {
-        "text": "Possession Sep 2028",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Browse by locality",
-        "diff": "weight 700->800"
-      },
-      {
-        "text": "New Town",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "Rajarhat",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "Salt Lake",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "Action Area I",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "Action Area II",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "Action Area III",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "Not sure where to start? Tell us what you need.",
-        "diff": "weight 700->800"
-      },
-      {
-        "text": "Guest",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "Not signed in",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Sign in to keep your shortlist and track enquiries and replies in one place.",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Publish your projects and receive buyer enquiries directly.",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Requires verification, admin approval and an active monthly subscription.",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Start builder registration",
-        "diff": "colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Requires PAN and Aadhaar verification and admin approval.",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Start broker registration",
-        "diff": "colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "© 2026 Kam Ki Lead",
-        "diff": "size 14->13; colour rgb(159, 172, 228)->rgb(185, 195, 236)"
-      },
-      {
-        "text": "Kolkata · New Town · Rajarhat · Salt Lake",
-        "diff": "size 14->13; colour rgb(159, 172, 228)->rgb(185, 195, 236)"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [6px] -> [0px | 6px]"
-    ],
-    "score": 92
-  },
-  {
-    "id": "P-03",
-    "width": 390,
-    "shared": 50,
-    "protoOnly": 18,
-    "implOnly": 16,
-    "typo": [
-      {
-        "text": "184",
-        "diff": "size 16->17; weight 600->700; family Public Sans->Archivo"
-      },
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Floor plans",
-        "diff": "size 15->17; weight 600->700; colour rgb(60, 71, 99)->rgb(18, 24, 43); family Public Sans->Archivo"
-      },
-      {
-        "text": "₹78L – ₹1.4Cr",
-        "diff": "size 26->34"
-      },
-      {
-        "text": "Specifications",
-        "diff": "size 19->17"
-      },
-      {
-        "text": "2, 3 BHK",
-        "diff": "size 16->17; weight 600->700; family Public Sans->Archivo"
-      },
-      {
-        "text": "985–1,420 sq ft",
-        "diff": "size 16->17; weight 600->700; family Public Sans->Archivo"
-      },
-      {
-        "text": "G+14",
-        "diff": "size 16->17; weight 600->700; family Public Sans->Archivo"
-      },
-      {
-        "text": "East, North-east",
-        "diff": "size 16->17; weight 600->700; family Public Sans->Archivo"
-      },
-      {
-        "text": "Pricing by configuration",
-        "diff": "size 19->17"
-      },
-      {
-        "text": "2 BHK",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "₹78L",
-        "diff": "weight 400->700; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "3 BHK",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "₹1.4Cr",
-        "diff": "weight 400->700; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Amenities",
-        "diff": "size 19->17"
-      },
-      {
-        "text": "Location",
-        "diff": "size 19->17"
-      },
-      {
-        "text": "Plot 22, Street 8, Action Area II, New Town, Kolkata 700161",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Possession",
-        "diff": "size 19->17"
-      },
-      {
-        "text": "Request a site visit",
-        "diff": "colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Listed by",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Sample Builders Pvt Ltd",
-        "diff": "size 15->16; weight 400->700; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Builder account, verified by Kam Ki Lead before publishing.",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 60
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Homepage%20-%20Portal%20Layout.dc.html\nCall log:\n\u001b[2m  - naviga",
+    "score": -1
   },
   {
     "id": "P-02",
     "width": 390,
-    "shared": 31,
-    "protoOnly": 20,
-    "implOnly": 43,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Location",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Property type",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "BHK",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Budget",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Possession:",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Ready to move",
-        "diff": "size 14->15; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Under construction",
-        "diff": "size 14->15; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "New launch",
-        "diff": "size 14->15; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Applied:",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Sort",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Relevance",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Price: low to high",
-        "diff": "size 14->15; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Price: high to low",
-        "diff": "size 14->15; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "₹78L – ₹1.4Cr",
-        "diff": "size 23->21"
-      },
-      {
-        "text": "Greenview Residency",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "2, 3 BHK · 985–1,420 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "₹1.1Cr – ₹2.2Cr",
-        "diff": "size 23->21"
-      },
-      {
-        "text": "Lakeshore Heights",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "3, 4 BHK · 1,540–2,180 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px | pill] -> [6px | 8px | pill]"
-    ],
-    "score": 56
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
-    "id": "S-17",
+    "id": "P-03",
     "width": 390,
-    "shared": 18,
-    "protoOnly": 23,
-    "implOnly": 28,
-    "typo": [
-      {
-        "text": "Transactions",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Show",
-        "diff": "weight 400->600; colour rgb(90, 100, 128)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "All",
-        "diff": "colour rgb(255, 255, 255)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "PAY-88441",
-        "diff": "size 13->15; colour rgb(90, 100, 128)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "Lead purchase L-4402",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "ORD-10233",
-        "diff": "size 13->15; colour rgb(90, 100, 128)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "−₹1,040",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      },
-      {
-        "text": "Lead purchase L-4455",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "ORD-10211",
-        "diff": "size 13->15; colour rgb(90, 100, 128)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "−₹780",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      },
-      {
-        "text": "PAY-87902",
-        "diff": "size 13->15; colour rgb(90, 100, 128)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "+₹5,000",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      },
-      {
-        "text": "28 Aug 2026",
-        "diff": "colour rgb(90, 100, 128)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "Lead purchase L-4310",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "ORD-10088",
-        "diff": "size 13->15; colour rgb(90, 100, 128)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "−₹950",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 42
-  },
-  {
-    "id": "S-02",
-    "width": 390,
-    "shared": 16,
-    "protoOnly": 3,
-    "implOnly": 4,
-    "typo": [
-      {
-        "text": "Broker & agency registration",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "KYC",
-        "diff": "size 13->14"
-      },
-      {
-        "text": "Review",
-        "diff": "size 13->14"
-      },
-      {
-        "text": "Your business",
-        "diff": "size 30->34"
-      },
-      {
-        "text": "Legal / trade name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Business type",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Areas you work in",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "New Town",
-        "diff": "colour rgb(255, 255, 255)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Continue to KYC",
-        "diff": "size 17->16"
-      },
-      {
-        "text": "Back",
-        "diff": "size 15->16; weight 600->700; colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [0px rgb(27, 59, 179) | 0px rgb(42, 50, 80) | 1px rgb(198, 204, 224)]",
-      "control height [52] -> [16 | 44 | 47]",
-      "button radius [0px | 6px | pill] -> [6px]"
-    ],
-    "score": 40
-  },
-  {
-    "id": "B-16",
-    "width": 390,
-    "shared": 16,
-    "protoOnly": 19,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "All",
-        "diff": "size 14->16; weight 600->700; colour rgb(255, 255, 255)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Unread",
-        "diff": "size 14->16; weight 600->500; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Site visits",
-        "diff": "size 14->16; weight 600->500; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Rina Sen",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "E-8801",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "+91 98300 51134",
-        "diff": "weight 400->500"
-      },
-      {
-        "text": "Arun Das",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "E-8794",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "+91 90514 22207",
-        "diff": "weight 400->500"
-      },
-      {
-        "text": "Manish Kapoor",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "E-8770",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "+91 99031 47781",
-        "diff": "weight 400->500"
-      },
-      {
-        "text": "Sharmila Bose",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "E-8741",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "+91 87772 30026",
-        "diff": "weight 400->500"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 40
-  },
-  {
-    "id": "S-07",
-    "width": 390,
-    "shared": 20,
-    "protoOnly": 29,
-    "implOnly": 37,
-    "typo": [
-      {
-        "text": "All leads",
-        "diff": "family Archivo->Public Sans"
-      },
-      {
-        "text": "Sale · aged leads",
-        "diff": "weight 700->500; family Archivo->Public Sans"
-      },
-      {
-        "text": "Area",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Budget band",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Qualification",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Sort",
-        "diff": "weight 400->600; colour rgb(90, 100, 128)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "L-4471",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Action Area I, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "L-4468",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Rajarhat, Kolkata",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "L-4402",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Action Area II, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [48] -> [44]",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 39
-  },
-  {
-    "id": "B-07",
-    "width": 390,
-    "shared": 15,
-    "protoOnly": 21,
-    "implOnly": 9,
-    "typo": [
-      {
-        "text": "All",
-        "diff": "size 14->16; weight 600->700; colour rgb(255, 255, 255)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "New listing",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Greenview Residency",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Action Area II, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Published 2 Aug 2026 · 184 units · possession Dec 2028",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Lakeshore Heights",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Action Area I, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Published 14 Jun 2026 · 96 units · ready to move",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Orchid Grove",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Action Area III, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Republish",
-        "diff": "size 15->14; weight 600->700; colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Sundew Enclave — Phase 2",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Rajarhat, Kolkata",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Continue editing",
-        "diff": "size 15->14; weight 600->700; colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 38
-  },
-  {
-    "id": "P-10",
-    "width": 390,
-    "shared": 22,
-    "protoOnly": 13,
-    "implOnly": 38,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "₹78L – ₹1.4Cr",
-        "diff": "size 23->21"
-      },
-      {
-        "text": "Greenview Residency",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "2, 3 BHK · 985–1,420 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "₹1.1Cr – ₹2.2Cr",
-        "diff": "size 23->21"
-      },
-      {
-        "text": "Lakeshore Heights",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "3, 4 BHK · 1,540–2,180 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "₹52L – ₹85L",
-        "diff": "size 23->21"
-      },
-      {
-        "text": "Sundew Enclave",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "1, 2, 3 BHK · 610–1,180 sq ft",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 36
-  },
-  {
-    "id": "A-02",
-    "width": 390,
-    "shared": 24,
-    "protoOnly": 33,
-    "implOnly": 6,
-    "typo": [
-      {
-        "text": "Operations dashboard",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "1 reported",
-        "diff": "colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "Leads intaken today",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Qualified",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Listed to marketplace",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Leads sold",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Calls attempted",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Consent captured",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Needs attention",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "3 notifications failed to deliver",
-        "diff": "colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "WhatsApp template rejected for two numbers, one SMS bounce.",
-        "diff": "size 13->16"
-      },
-      {
-        "text": "Missing budget on 9 rows, duplicate number on 3.",
-        "diff": "size 13->16"
-      },
-      {
-        "text": "Payment gateway callbacks retried 14 times in the last hour.",
-        "diff": "size 13->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | 8px] -> [8px]"
-    ],
-    "score": 36
-  },
-  {
-    "id": "A-25",
-    "width": 390,
-    "shared": 16,
-    "protoOnly": 53,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "Qualified",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "00:00",
-        "diff": "size 13->12"
-      },
-      {
-        "text": "00:09",
-        "diff": "size 13->12"
-      },
-      {
-        "text": "Yes, go ahead.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "00:14",
-        "diff": "size 13->12"
-      },
-      {
-        "text": "What budget range are you working with?",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Around one crore, maybe up to one and a half if the project is right.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "01:05",
-        "diff": "size 13->12"
-      },
-      {
-        "text": "And how soon would you want possession?",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Within six months. We are relocating from Salt Lake.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "03:04",
-        "diff": "size 13->12"
-      },
-      {
-        "text": "03:12",
-        "diff": "size 13->12"
-      },
-      {
-        "text": "Yes, that is fine.",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 36
-  },
-  {
-    "id": "S-03",
-    "width": 390,
-    "shared": 10,
-    "protoOnly": 3,
-    "implOnly": 4,
-    "typo": [
-      {
-        "text": "Broker & agency registration",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Review",
-        "diff": "size 13->14"
-      },
-      {
-        "text": "Verify your identity",
-        "diff": "size 30->34"
-      },
-      {
-        "text": "Clear photo or scan of the card",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Both sides, or the e-Aadhaar PDF",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "PAN number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Submit for verification",
-        "diff": "size 17->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(185, 195, 236) | 1px rgb(198, 204, 224)]",
-      "control height [52] -> [47 | 63]",
-      "button radius [6px | 8px] -> [6px]"
-    ],
-    "score": 34
-  },
-  {
-    "id": "S-06",
-    "width": 390,
-    "shared": 21,
-    "protoOnly": 17,
-    "implOnly": 11,
-    "typo": [
-      {
-        "text": "New leads today",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Leads purchased",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Sale-tab leads",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "New leads matching your areas",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Open marketplace →",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Action Area I, New Town · score 82",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "₹950",
-        "diff": "size 16->17; weight 800->700"
-      },
-      {
-        "text": "Rajarhat, Kolkata · score 68",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "₹600",
-        "diff": "size 16->17; weight 800->700"
-      },
-      {
-        "text": "Action Area II, New Town · score 74",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "₹1,040",
-        "diff": "size 16->17; weight 800->700"
-      },
-      {
-        "text": "Recharge credits",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 10px | 50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 34
-  },
-  {
-    "id": "B-11",
-    "width": 390,
-    "shared": 11,
-    "protoOnly": 28,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "Save draft",
-        "diff": "size 15->14"
-      },
-      {
-        "text": "Total units",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Amenities",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Lift",
-        "diff": "colour rgb(255, 255, 255)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Power backup",
-        "diff": "colour rgb(255, 255, 255)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Covered parking",
-        "diff": "colour rgb(42, 50, 80)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Close editor",
-        "diff": "size 15->13; weight 600->400"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [0px rgb(27, 59, 179) | 0px rgb(42, 50, 80) | 1px rgb(198, 204, 224)]",
-      "control height [52] -> [13 | 16 | 47]",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 34
-  },
-  {
-    "id": "A-28",
-    "width": 390,
-    "shared": 18,
-    "protoOnly": 44,
-    "implOnly": 9,
-    "typo": [
-      {
-        "text": "Explicit refusal recorded at 00:48, call C-7728",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "11 Sep 2026",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Channel opt-out honoured across all channels",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "8 Sep 2026",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Ticket AT-538, identity confirmed by OTP",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "2 Sep 2026",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Filtered before any contact attempt",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "29 Aug 2026",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "No qualification calls, at any hour.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "No WhatsApp or SMS, including OTP for a new registration attempt.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "The lead cannot be listed on the marketplace or sold.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Intake rejects the row rather than creating a lead.",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [7px] -> [8px]"
-    ],
-    "score": 34
-  },
-  {
-    "id": "S-08",
-    "width": 390,
-    "shared": 14,
-    "protoOnly": 25,
-    "implOnly": 11,
-    "typo": [
-      {
-        "text": "Lead L-4471",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "L-4471",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "3 BHK · ₹1Cr – ₹1.5Cr",
-        "diff": "size 30->34"
-      },
-      {
-        "text": "Consent captured",
-        "diff": "size 14->13; weight 700->600"
-      },
-      {
-        "text": "Voice call · Hindi",
-        "diff": "size 14->13; colour rgb(60, 71, 99)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Contact details",
-        "diff": "colour rgb(60, 71, 99)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "R••• S••",
-        "diff": "size 16->13"
-      },
-      {
-        "text": "+91 98••• ••34",
-        "diff": "size 16->13"
-      },
-      {
-        "text": "Lead price",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "₹950",
-        "diff": "size 30->34"
-      },
-      {
-        "text": "Back to marketplace",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 32
-  },
-  {
-    "id": "S-25",
-    "width": 390,
-    "shared": 12,
-    "protoOnly": 12,
-    "implOnly": 10,
-    "typo": [
-      {
-        "text": "Profile & settings",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Contact name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Agency",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Alert me when",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "View status",
-        "diff": "size 15->16; colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(198, 204, 224)]",
-      "control height [52] -> [13 | 47]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 32
-  },
-  {
-    "id": "A-14",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 44,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Up to ₹60L",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "₹60L – ₹1Cr",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "₹1Cr – ₹1.5Cr",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "₹1.5Cr and above",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "Whether price varies by locality as well as budget band.",
-        "diff": "size 14->16"
-      },
-      {
-        "text": "Whether the discount steps down further after the Sale window.",
-        "diff": "size 14->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "control height [46 | 48] -> [40]",
-      "button radius [7px] -> [8px]"
-    ],
-    "score": 32
-  },
-  {
-    "id": "A-17",
-    "width": 390,
-    "shared": 18,
-    "protoOnly": 47,
-    "implOnly": 11,
-    "typo": [
-      {
-        "text": "Delivery record",
-        "diff": "size 22->17"
-      },
-      {
-        "text": "ORD-10233",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "LD-88041 · 4 BHK · ₹1.5Cr +",
-        "diff": "size 28->26"
-      },
-      {
-        "text": "12 Sep 2026, 14:22",
-        "diff": "size 16->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Delivered",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Credits deducted",
-        "diff": "weight 400->600"
-      },
-      {
-        "text": "12 Sep, 14:22:04",
-        "diff": "size 15->12; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Lead released to purchaser",
-        "diff": "weight 400->600"
-      },
-      {
-        "text": "Lead removed from the marketplace",
-        "diff": "weight 400->600"
-      },
-      {
-        "text": "12 Sep, 14:26",
-        "diff": "size 15->12; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "14 Sep, 09:11",
-        "diff": "size 15->12; family Public Sans->IBM Plex Mono"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 32
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-04",
     "width": 390,
-    "shared": 18,
-    "protoOnly": 8,
-    "implOnly": 12,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Your name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Send enquiry",
-        "diff": "size 17->16"
-      },
-      {
-        "text": "Next: we verify your number by OTP. Your details stay filled in.",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "control height [52 | 85] -> [47 | 96]",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 31
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-05",
     "width": 390,
-    "shared": 18,
-    "protoOnly": 13,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Your name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Preferred date",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Next: we verify your number by OTP. Your details stay filled in.",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "control height [52 | 85] -> [47 | 96]",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 31
-  },
-  {
-    "id": "S-15",
-    "width": 390,
-    "shared": 10,
-    "protoOnly": 11,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "Choose an amount",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "₹1,000",
-        "diff": "size 17->16"
-      },
-      {
-        "text": "₹2,000",
-        "diff": "size 17->16"
-      },
-      {
-        "text": "₹5,000",
-        "diff": "size 17->16"
-      },
-      {
-        "text": "₹10,000",
-        "diff": "size 17->16"
-      },
-      {
-        "text": "Or enter an amount (₹)",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Credits after recharge",
-        "diff": "size 16->15; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Continue to payment",
-        "diff": "size 17->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [52] -> [47]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 31
-  },
-  {
-    "id": "P-15",
-    "width": 390,
-    "shared": 15,
-    "protoOnly": 13,
-    "implOnly": 20,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)]",
-      "control height [52] -> [13 | 44 | 47]",
-      "button radius [0px | 6px | pill] -> [6px]"
-    ],
-    "score": 30
-  },
-  {
-    "id": "S-22",
-    "width": 390,
-    "shared": 11,
-    "protoOnly": 12,
-    "implOnly": 4,
-    "typo": [
-      {
-        "text": "New ticket",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Lead L-4468 contact number is disconnected",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "T-2291",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Support replied",
-        "diff": "weight 700->600; colour rgb(14, 107, 69)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Invoice for the 2 September recharge",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "T-2274",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Resolved",
-        "diff": "weight 700->600; colour rgb(60, 71, 99)->rgb(14, 107, 69)"
-      },
-      {
-        "text": "KYC rejected — which side of Aadhaar?",
-        "diff": "size 16->17"
-      },
-      {
-        "text": "T-2260",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Awaiting your reply",
-        "diff": "weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 30
-  },
-  {
-    "id": "B-19",
-    "width": 390,
-    "shared": 11,
-    "protoOnly": 34,
-    "implOnly": 11,
-    "typo": [
-      {
-        "text": "Access restrictions",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Not verified",
-        "diff": "weight 700->600; colour rgb(60, 71, 99)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Before KYC submission",
-        "diff": "size 17->13; weight 700->400; colour rgb(18, 24, 43)->rgb(90, 100, 128); family Archivo->Public Sans"
-      },
-      {
-        "text": "Verification pending",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Verified, no subscription",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Approved but not subscribed",
-        "diff": "size 17->13; weight 700->400; colour rgb(18, 24, 43)->rgb(90, 100, 128); family Archivo->Public Sans"
-      },
-      {
-        "text": "Subscription expired",
-        "diff": "weight 700->600; colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "Lapsed subscription",
-        "diff": "size 17->13; weight 700->400; colour rgb(18, 24, 43)->rgb(90, 100, 128); family Archivo->Public Sans"
-      },
-      {
-        "text": "Account suspended",
-        "diff": "weight 700->600; colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "Suspended by an administrator",
-        "diff": "size 17->13; weight 700->400; colour rgb(18, 24, 43)->rgb(90, 100, 128); family Archivo->Public Sans"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 30
-  },
-  {
-    "id": "B-24",
-    "width": 390,
-    "shared": 11,
-    "protoOnly": 17,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Profile & settings",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Company name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Alert me when",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Approved",
-        "diff": "size 16->13; colour rgb(18, 24, 43)->rgb(14, 107, 69)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(198, 204, 224)]",
-      "control height [52] -> [13 | 47]",
-      "button radius [50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 30
-  },
-  {
-    "id": "A-13",
-    "width": 390,
-    "shared": 16,
-    "protoOnly": 56,
-    "implOnly": 16,
-    "typo": [
-      {
-        "text": "LD-88104",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Listed",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "INT-2288 · 14 Sep, 06:00",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "14 Sep, 10:40 · answered",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Intent score 82 · consent given",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "14 Sep, 11:05 · ₹950",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Sold",
-        "diff": "weight 600->400; colour rgb(18, 24, 43)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Not yet",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Consent",
-        "diff": "colour rgb(14, 107, 69)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Given on the call",
-        "diff": "size 16->15"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 30
-  },
-  {
-    "id": "B-15",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 20,
-    "implOnly": 5,
-    "typo": [
-      {
-        "text": "Edit listing",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Save draft",
-        "diff": "size 15->14"
-      },
-      {
-        "text": "Project name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Property type",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Possession target",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Description",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Close editor",
-        "diff": "size 15->13; weight 600->400"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [104 | 52] -> [146 | 44 | 47]",
-      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 29
-  },
-  {
-    "id": "S-19",
-    "width": 390,
-    "shared": 10,
-    "protoOnly": 19,
-    "implOnly": 10,
-    "typo": [
-      {
-        "text": "Invoices",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "INV-2026-0914",
-        "diff": "weight 400->500; colour rgb(18, 24, 43)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "INV-2026-0902",
-        "diff": "weight 400->500; colour rgb(18, 24, 43)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Credit recharge ₹5,000",
-        "diff": "weight 600->400; colour rgb(18, 24, 43)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "₹5,000",
-        "diff": "weight 600->700; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "INV-2026-0821",
-        "diff": "weight 400->500; colour rgb(18, 24, 43)->rgb(27, 59, 179)"
-      },
-      {
-        "text": "Credit recharge ₹1,000",
-        "diff": "weight 600->400; colour rgb(18, 24, 43)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "21 Aug 2026",
-        "diff": "colour rgb(90, 100, 128)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "₹1,000",
-        "diff": "weight 600->700; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 28
-  },
-  {
-    "id": "A-06",
-    "width": 390,
-    "shared": 14,
-    "protoOnly": 44,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "KYC review",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "K-3318",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Company PAN",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Signatory Aadhaar",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Both documents are legible",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Name matches the account",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "PAN format and check digit valid",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "No existing account with this PAN",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Approve verification",
-        "diff": "size 16->14"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px | 8px] -> [6px | 8px]"
-    ],
-    "score": 28
-  },
-  {
-    "id": "A-11",
-    "width": 390,
-    "shared": 13,
-    "protoOnly": 46,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "INT-2291",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "+91 98••• ••21",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Empty — a budget band is required before a lead can be qualified",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "+91 90••• ••04",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Duplicate of an existing lead intaken 12 Sep — merged instead of created",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "+91 87••• ••77",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "On the suppression list — the buyer opted out on 2 Sep",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "+91 99••• ••13",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Value \"New Twon\" does not match the location hierarchy",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 28
-  },
-  {
-    "id": "A-18",
-    "width": 390,
-    "shared": 10,
-    "protoOnly": 53,
-    "implOnly": 32,
-    "typo": [
-      {
-        "text": "Sanjay Paul",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "U-10442",
-        "diff": "size 14->12; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Suman Bhattacharya",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "U-10455",
-        "diff": "size 14->12; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Deb Roy",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "U-10501",
-        "diff": "size 14->12; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "PAY-88441",
-        "diff": "size 13->12"
-      },
-      {
-        "text": "−₹1,040",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      },
-      {
-        "text": "−₹780",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 6px | 7px] -> [8px]"
-    ],
-    "score": 28
-  },
-  {
-    "id": "A-19",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 37,
-    "implOnly": 10,
-    "typo": [
-      {
-        "text": "Credit adjustment",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Direction",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Adds credits — used for goodwill or a confirmed error",
-        "diff": "colour rgb(60, 71, 99)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Amount in credits",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [0px rgb(42, 50, 80) | 1px rgb(198, 204, 224)]",
-      "control height [52 | 85] -> [16 | 47 | 96]",
-      "button radius [0px | 6px | 7px | 8px] -> [6px | 8px]"
-    ],
-    "score": 28
-  },
-  {
-    "id": "A-26",
-    "width": 390,
-    "shared": 14,
-    "protoOnly": 49,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "WhatsApp qualification",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Message delivered",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "Replied to the first question",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "Budget captured",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "Requirement captured",
-        "diff": "weight 600->400"
-      },
-      {
-        "text": "Complete",
-        "diff": "size 12->13; weight 700->600"
-      },
-      {
-        "text": "Stalled · template rejected",
-        "diff": "size 12->13; weight 700->600; colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "Awaiting reply",
-        "diff": "size 12->13; weight 700->600"
-      },
-      {
-        "text": "No reply · closed",
-        "diff": "size 12->13; weight 700->600; colour rgb(60, 71, 99)->rgb(90, 100, 128)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [7px] -> [8px]"
-    ],
-    "score": 28
-  },
-  {
-    "id": "A-31",
-    "width": 390,
-    "shared": 18,
-    "protoOnly": 55,
-    "implOnly": 18,
-    "typo": [
-      {
-        "text": "Credit recharges and subscriptions",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Degraded",
-        "diff": "size 12->13; weight 700->600"
-      },
-      {
-        "text": "Outbound qualification calls",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Transcripts and captured answers",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "WhatsApp qualification journey",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Template rejected",
-        "diff": "size 12->13; weight 700->600; colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "Timeout waiting for the gateway status endpoint",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Template not approved for this message",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Completed with 2 rows skipped — lead already sold mid-sweep",
-        "diff": "size 14->13"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 28
-  },
-  {
-    "id": "S-21",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 10,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "Billing information",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Billing name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "GSTIN (optional)",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Billing address",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Invoice email",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Billing contact",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [52 | 85] -> [47 | 96]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 27
-  },
-  {
-    "id": "B-08",
-    "width": 390,
-    "shared": 6,
-    "protoOnly": 20,
-    "implOnly": 7,
-    "typo": [
-      {
-        "text": "Save draft",
-        "diff": "size 15->14"
-      },
-      {
-        "text": "Project name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Property type",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Possession target",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Description",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Close editor",
-        "diff": "size 15->13; weight 600->400"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [104 | 52] -> [146 | 44 | 47]",
-      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 27
-  },
-  {
-    "id": "B-20",
-    "width": 390,
-    "shared": 7,
-    "protoOnly": 39,
-    "implOnly": 40,
-    "typo": [
-      {
-        "text": "Area",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Budget band",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Configuration",
-        "diff": "size 13->14; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Action Area I, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Rajarhat, Kolkata",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Action Area II, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [48] -> [44]",
-      "button radius [50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 27
-  },
-  {
-    "id": "A-12",
-    "width": 390,
-    "shared": 20,
-    "protoOnly": 42,
-    "implOnly": 9,
-    "typo": [
-      {
-        "text": "Action Area I, New Town",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Rajarhat, Kolkata",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Action Area II, New Town",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Salt Lake, Kolkata",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "New Town",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Rajarhat",
-        "diff": "size 14->13"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
-    ],
-    "score": 27
-  },
-  {
-    "id": "S-01",
-    "width": 390,
-    "shared": 9,
-    "protoOnly": 1,
-    "implOnly": 4,
-    "typo": [
-      {
-        "text": "Broker & agency registration",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Business",
-        "diff": "size 13->14"
-      },
-      {
-        "text": "KYC",
-        "diff": "size 13->14"
-      },
-      {
-        "text": "Review",
-        "diff": "size 13->14"
-      },
-      {
-        "text": "Register as a broker",
-        "diff": "size 30->34"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Agency or your name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Send OTP",
-        "diff": "size 17->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [52] -> [47]"
-    ],
-    "score": 26
-  },
-  {
-    "id": "B-09",
-    "width": 390,
-    "shared": 3,
-    "protoOnly": 24,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Save draft",
-        "diff": "size 15->14"
-      },
-      {
-        "text": "Street address",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Close editor",
-        "diff": "size 15->13; weight 600->400"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [1px rgb(198, 204, 224)]",
-      "control height [52] -> [44 | 47]",
-      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 26
-  },
-  {
-    "id": "B-12",
-    "width": 390,
-    "shared": 3,
-    "protoOnly": 23,
-    "implOnly": 12,
-    "typo": [
-      {
-        "text": "Save draft",
-        "diff": "size 15->14"
-      },
-      {
-        "text": "Add photographs",
-        "diff": "size 15->17; colour rgb(27, 59, 179)->rgb(18, 24, 43); family Public Sans->Archivo"
-      },
-      {
-        "text": "Close editor",
-        "diff": "size 15->13; weight 600->400"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(185, 195, 236) | 1px rgb(198, 204, 224)]",
-      "control height [52] -> [47 | 63]",
-      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 26
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-06",
     "width": 390,
-    "shared": 13,
-    "protoOnly": 7,
-    "implOnly": 15,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "control height [52] -> [47]",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 25
-  },
-  {
-    "id": "P-19",
-    "width": 390,
-    "shared": 15,
-    "protoOnly": 10,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "What is this about?",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "control height [104] -> [146 | 47]",
-      "button radius [0px | 6px | pill] -> [6px]"
-    ],
-    "score": 25
-  },
-  {
-    "id": "S-24",
-    "width": 390,
-    "shared": 6,
-    "protoOnly": 17,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Ticket",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "You",
-        "diff": "size 13->15; colour rgb(27, 59, 179)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Reply",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Send reply",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Mark as resolved",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [85] -> [121]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 25
-  },
-  {
-    "id": "S-14",
-    "width": 390,
-    "shared": 13,
-    "protoOnly": 24,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "Available balance",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "1 rupee = 1 credit. Credits are deducted when a lead purchase succeeds.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "See the proposed states",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "PAY-88441",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Lead purchase L-4402",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "ORD-10233",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "−₹1,040",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 24
-  },
-  {
-    "id": "S-18",
-    "width": 390,
-    "shared": 9,
-    "protoOnly": 13,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "Credit expiry",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Active",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Credits usable now.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Expiring soon",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "A portion of the balance is close to its expiry date.",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Expired",
-        "diff": "weight 700->600; colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "Credits past their validity date, held separately from the usable balance.",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 24
-  },
-  {
-    "id": "B-05",
-    "width": 390,
-    "shared": 10,
-    "protoOnly": 25,
-    "implOnly": 9,
-    "typo": [
-      {
-        "text": "Renewal & expiry",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Listings stay visible",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Listings are hidden",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Grace period, then hidden",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "Renewal due",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Grace",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Expired",
-        "diff": "weight 700->600; colour rgb(122, 33, 25)->rgb(138, 74, 8)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 24
-  },
-  {
-    "id": "B-10",
-    "width": 390,
-    "shared": 4,
-    "protoOnly": 26,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Save draft",
-        "diff": "size 15->14"
-      },
-      {
-        "text": "Close editor",
-        "diff": "size 15->13; weight 600->400"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [0px rgb(27, 59, 179) | 0px rgb(42, 50, 80) | 1px rgb(198, 204, 224)]",
-      "control height [46] -> [16 | 47]",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 24
-  },
-  {
-    "id": "A-20",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 46,
-    "implOnly": 12,
-    "typo": [
-      {
-        "text": "Never completed",
-        "diff": "size 12->13; weight 700->600; colour rgb(60, 71, 99)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Purchase that never completed",
-        "diff": "size 16->15; family Archivo->Public Sans"
-      },
-      {
-        "text": "Delivered",
-        "diff": "size 12->13; weight 700->600"
-      },
-      {
-        "text": "Completed purchase, download retry pending",
-        "diff": "size 16->15; family Archivo->Public Sans"
-      },
-      {
-        "text": "Refund request on a delivered lead",
-        "diff": "size 16->15; family Archivo->Public Sans"
-      },
-      {
-        "text": "RF-118",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "RF-119",
-        "diff": "size 12->13"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 6px | 7px] -> [8px]"
-    ],
-    "score": 24
-  },
-  {
-    "id": "A-24",
-    "width": 390,
-    "shared": 20,
-    "protoOnly": 43,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Voice qualification",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "+91 98••• ••34",
-        "diff": "colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "+91 90••• ••07",
-        "diff": "colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "+91 87••• ••26",
-        "diff": "colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Declined to continue",
-        "diff": "weight 600->400; colour rgb(18, 24, 43)->rgb(42, 50, 80)"
-      },
-      {
-        "text": "+91 99••• ••13",
-        "diff": "colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "No answer · attempt 2 of 3",
-        "diff": "weight 600->400; colour rgb(18, 24, 43)->rgb(42, 50, 80)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 7px] -> [8px]"
-    ],
-    "score": 24
-  },
-  {
-    "id": "S-23",
-    "width": 390,
-    "shared": 6,
-    "protoOnly": 17,
-    "implOnly": 2,
-    "typo": [
-      {
-        "text": "New ticket",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Topic",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Subject",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "What happened?",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [123 | 52] -> [171 | 44 | 47]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 23
-  },
-  {
-    "id": "B-06",
-    "width": 390,
-    "shared": 13,
-    "protoOnly": 17,
-    "implOnly": 15,
-    "typo": [
-      {
-        "text": "Published",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Draft",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Recent enquiries on your listings",
-        "diff": "size 18->17"
-      },
-      {
-        "text": "View all →",
-        "diff": "size 14->15"
-      },
-      {
-        "text": "Site-visit request",
-        "diff": "size 14->15; weight 400->600; colour rgb(90, 100, 128)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "New listing",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 10px | 50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "A-21",
-    "width": 390,
-    "shared": 11,
-    "protoOnly": 37,
-    "implOnly": 6,
-    "typo": [
-      {
-        "text": "U-10455",
-        "diff": "size 14->13; colour rgb(90, 100, 128)->rgb(18, 24, 43); family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "U-10633",
-        "diff": "size 14->13; colour rgb(90, 100, 128)->rgb(18, 24, 43); family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "U-10388",
-        "diff": "size 14->13; colour rgb(90, 100, 128)->rgb(18, 24, 43); family Public Sans->IBM Plex Mono"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
-    ],
-    "score": 21
-  },
-  {
-    "id": "A-23",
-    "width": 390,
-    "shared": 7,
-    "protoOnly": 53,
-    "implOnly": 17,
-    "typo": [
-      {
-        "text": "T-2291",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Send reply",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Mark as resolved",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [85] -> [121 | 72]",
-      "button radius [6px | 7px] -> [6px | 8px]"
-    ],
-    "score": 21
-  },
-  {
-    "id": "P-11",
-    "width": 390,
-    "shared": 12,
-    "protoOnly": 5,
-    "implOnly": 15,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Browse properties",
-        "diff": "colour rgb(255, 255, 255)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 20
-  },
-  {
-    "id": "P-13",
-    "width": 390,
-    "shared": 15,
-    "protoOnly": 15,
-    "implOnly": 18,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Builder responded",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 10px | 6px] -> [6px]"
-    ],
-    "score": 20
-  },
-  {
-    "id": "P-20",
-    "width": 390,
-    "shared": 11,
-    "protoOnly": 12,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Refund policy",
-        "diff": "weight 500->400; colour rgb(42, 50, 80)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 20
-  },
-  {
-    "id": "S-09",
-    "width": 390,
-    "shared": 11,
-    "protoOnly": 11,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "L-4471 · 3 BHK · ₹1Cr – ₹1.5Cr",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "Action Area I, New Town",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "₹950",
-        "diff": "weight 600->700"
-      },
-      {
-        "text": "Balance after purchase",
-        "diff": "size 16->15"
-      },
-      {
-        "text": "Confirm and buy",
-        "diff": "size 17->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 20
-  },
-  {
-    "id": "A-30",
-    "width": 390,
-    "shared": 10,
-    "protoOnly": 45,
-    "implOnly": 52,
-    "typo": [
-      {
-        "text": "KYC approved",
-        "diff": "weight 400->600; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "K-3301",
-        "diff": "colour rgb(18, 24, 43)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Account suspended",
-        "diff": "weight 400->600; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Listing unpublished",
-        "diff": "weight 400->600; colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "P-2204",
-        "diff": "colour rgb(18, 24, 43)->rgb(90, 100, 128)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 7px | pill] -> [8px]"
-    ],
-    "score": 20
-  },
-  {
-    "id": "A-03",
-    "width": 390,
-    "shared": 14,
-    "protoOnly": 43,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Roy Realty",
-        "diff": "size 14->13"
-      },
-      {
-        "text": "Ghosh Developers",
-        "diff": "size 14->13"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
-    ],
-    "score": 19
-  },
-  {
-    "id": "A-27",
-    "width": 390,
-    "shared": 12,
-    "protoOnly": 43,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Notification delivery",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "On suppression list",
-        "diff": "size 14->13; colour rgb(90, 100, 128)->rgb(18, 24, 43); family Public Sans->IBM Plex Mono"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [7px | pill] -> [8px]"
-    ],
-    "score": 19
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-08",
     "width": 390,
-    "shared": 12,
-    "protoOnly": 13,
-    "implOnly": 21,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px | 8px] -> [6px]"
-    ],
-    "score": 18
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-09",
     "width": 390,
-    "shared": 17,
-    "protoOnly": 7,
-    "implOnly": 12,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 18
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "P-10",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "P-11",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-12",
     "width": 390,
-    "shared": 12,
-    "protoOnly": 23,
-    "implOnly": 18,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 10px | 6px] -> [6px]"
-    ],
-    "score": 18
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "P-13",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-14",
     "width": 390,
-    "shared": 12,
-    "protoOnly": 18,
-    "implOnly": 22,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 18
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
-    "id": "P-17",
+    "id": "P-15",
     "width": 390,
-    "shared": 13,
-    "protoOnly": 18,
-    "implOnly": 28,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "P-18",
-    "width": 390,
-    "shared": 13,
-    "protoOnly": 17,
-    "implOnly": 29,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "S-20",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 18,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Invoice",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "Paid",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Billed to",
-        "diff": "size 12->14; weight 400->600"
-      },
-      {
-        "text": "From",
-        "diff": "size 12->14; weight 400->600"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "B-01",
-    "width": 390,
-    "shared": 5,
-    "protoOnly": 4,
-    "implOnly": 4,
-    "typo": [
-      {
-        "text": "Builder registration",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Mobile number",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Company name",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Send OTP",
-        "diff": "size 17->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [52] -> [47]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "B-13",
-    "width": 390,
-    "shared": 5,
-    "protoOnly": 33,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Action Area II, New Town",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Lift",
-        "diff": "size 14->13; weight 400->600; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Power backup",
-        "diff": "size 14->13; weight 400->600; colour rgb(42, 50, 80)->rgb(90, 100, 128)"
-      },
-      {
-        "text": "Close editor",
-        "diff": "size 15->13; weight 600->400"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "B-17",
-    "width": 390,
-    "shared": 6,
-    "protoOnly": 26,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "E-8801",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Their message",
-        "diff": "size 14->17; weight 600->700; colour rgb(42, 50, 80)->rgb(18, 24, 43); family Public Sans->Archivo"
-      },
-      {
-        "text": "Rina Sen",
-        "diff": "size 17->34; weight 600->800; family Public Sans->Archivo"
-      },
-      {
-        "text": "Unresolved ambiguity",
-        "diff": "size 14->17; family Public Sans->Archivo"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "A-01",
-    "width": 390,
-    "shared": 4,
-    "protoOnly": 2,
-    "implOnly": 5,
-    "typo": [
-      {
-        "text": "Kam Ki",
-        "diff": "size 19->20"
-      },
-      {
-        "text": "Staff sign-in",
-        "diff": "size 26->34"
-      },
-      {
-        "text": "Work email",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      },
-      {
-        "text": "Password",
-        "diff": "colour rgb(42, 50, 80)->rgb(18, 24, 43)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control height [52] -> [47]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "A-05",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 41,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "K-3318",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128); family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "K-3322",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128); family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "Metro Habitat",
-        "diff": "family Archivo->Public Sans"
-      },
-      {
-        "text": "K-3309",
-        "diff": "size 15->13; colour rgb(42, 50, 80)->rgb(90, 100, 128); family Public Sans->IBM Plex Mono"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | pill] -> [8px]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "A-15",
-    "width": 390,
-    "shared": 18,
-    "protoOnly": 31,
-    "implOnly": 9,
-    "typo": [
-      {
-        "text": "Apartment",
-        "diff": "weight 400->600"
-      },
-      {
-        "text": "Builder floor",
-        "diff": "weight 400->600"
-      },
-      {
-        "text": "Villa / row house",
-        "diff": "weight 400->600"
-      },
-      {
-        "text": "Plot",
-        "diff": "weight 400->600"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px | 8px] -> [8px]"
-    ],
-    "score": 18
-  },
-  {
-    "id": "B-18",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 11,
-    "implOnly": 6,
-    "typo": [
-      {
-        "text": "Notification states",
-        "diff": "size 22->20; weight 700->800"
-      },
-      {
-        "text": "A buyer has asked about 3 BHK availability.",
-        "diff": "size 14->13; colour rgb(198, 204, 224)->rgb(185, 195, 236)"
-      },
-      {
-        "text": "View",
-        "diff": "size 14->13; colour rgb(18, 24, 43)->rgb(255, 255, 255)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 16
-  },
-  {
-    "id": "A-04",
-    "width": 390,
-    "shared": 9,
-    "protoOnly": 53,
-    "implOnly": 17,
-    "typo": [
-      {
-        "text": "U-10442",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Suspend this account",
-        "diff": "size 15->14"
-      },
-      {
-        "text": "Adjust credit balance",
-        "diff": "size 15->14"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 16
-  },
-  {
-    "id": "A-09",
-    "width": 390,
-    "shared": 10,
-    "protoOnly": 45,
-    "implOnly": 9,
-    "typo": [
-      {
-        "text": "P-2204",
-        "diff": "size 12->13"
-      },
-      {
-        "text": "Reported",
-        "diff": "weight 700->600; colour rgb(122, 33, 25)->rgb(179, 38, 30)"
-      },
-      {
-        "text": "Dismiss the report",
-        "diff": "size 15->14"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 16
-  },
-  {
-    "id": "A-16",
-    "width": 390,
-    "shared": 8,
-    "protoOnly": 45,
-    "implOnly": 5,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
-    ],
-    "score": 15
-  },
-  {
-    "id": "S-12",
-    "width": 390,
-    "shared": 3,
-    "protoOnly": 11,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "You have not bought any leads yet",
-        "diff": "size 19->17"
-      },
-      {
-        "text": "Browse the marketplace",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 14
-  },
-  {
-    "id": "B-21",
-    "width": 390,
-    "shared": 3,
-    "protoOnly": 14,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "You have not bought any leads yet",
-        "diff": "size 19->17"
-      },
-      {
-        "text": "Browse the marketplace",
-        "diff": "size 15->16"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 14
-  },
-  {
-    "id": "B-22",
-    "width": 390,
-    "shared": 3,
-    "protoOnly": 38,
-    "implOnly": 20,
-    "typo": [
-      {
-        "text": "PAY-90114",
-        "diff": "size 14->13; family Public Sans->IBM Plex Mono"
-      },
-      {
-        "text": "+₹3,000",
-        "diff": "weight 800->700; family Archivo->Public Sans"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 14
-  },
-  {
-    "id": "B-23",
-    "width": 390,
-    "shared": 3,
-    "protoOnly": 25,
-    "implOnly": 6,
-    "typo": [
-      {
-        "text": "New ticket",
-        "diff": "size 15->16"
-      },
-      {
-        "text": "Support replied",
-        "diff": "weight 700->600; colour rgb(14, 107, 69)->rgb(27, 59, 179)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 14
-  },
-  {
-    "id": "A-08",
-    "width": 390,
-    "shared": 6,
-    "protoOnly": 32,
-    "implOnly": 5,
-    "typo": [
-      {
-        "text": "Riverside Commons",
-        "diff": "family Archivo->Public Sans"
-      },
-      {
-        "text": "Photographs reported as not matching the site · 1 report",
-        "diff": "size 14->13"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | pill] -> [8px]"
-    ],
-    "score": 14
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
     "id": "P-16",
     "width": 390,
-    "shared": 13,
-    "protoOnly": 13,
-    "implOnly": 28,
-    "typo": [
-      {
-        "text": "Sign in",
-        "diff": "size 16->15; weight 600->400; colour rgb(27, 59, 179)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Buyers",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Professionals",
-        "diff": "size 15->14; weight 700->600"
-      },
-      {
-        "text": "Support & policies",
-        "diff": "size 15->14; weight 700->600"
-      }
-    ],
-    "struct": [
-      "content width 1344 -> 354"
-    ],
-    "score": 13
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
-    "id": "S-05",
+    "id": "P-17",
     "width": 390,
-    "shared": 2,
-    "protoOnly": 10,
-    "implOnly": 6,
-    "typo": [
-      {
-        "text": "Account restricted",
-        "diff": "size 22->20; weight 700->800"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 12
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
-    "id": "B-02",
+    "id": "P-18",
     "width": 390,
-    "shared": 1,
-    "protoOnly": 12,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Company verification",
-        "diff": "size 30->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 8px] -> [8px]"
-    ],
-    "score": 12
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   },
   {
-    "id": "B-03",
+    "id": "P-19",
     "width": 390,
-    "shared": 5,
-    "protoOnly": 25,
-    "implOnly": 11,
-    "typo": [
-      {
-        "text": "Your subscription is active",
-        "diff": "size 30->26"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 12
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "P-20",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "S-01",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-02",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-03",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
   },
   {
     "id": "S-04",
     "width": 390,
-    "shared": 9,
-    "protoOnly": 5,
-    "implOnly": 5,
-    "typo": [
-      {
-        "text": "Broker & agency registration",
-        "diff": "size 15->13"
-      },
-      {
-        "text": "Approved",
-        "diff": "weight 700->600"
-      },
-      {
-        "text": "Your account is verified",
-        "diff": "size 30->34"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358"
-    ],
-    "score": 11
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
   },
   {
-    "id": "A-10",
+    "id": "S-05",
     "width": 390,
-    "shared": 9,
-    "protoOnly": 35,
-    "implOnly": 17,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 7px] -> [8px]"
-    ],
-    "score": 10
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
   },
   {
-    "id": "A-22",
+    "id": "S-06",
     "width": 390,
-    "shared": 4,
-    "protoOnly": 42,
-    "implOnly": 6,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | pill] -> [8px]"
-    ],
-    "score": 10
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
   },
   {
-    "id": "A-29",
+    "id": "S-07",
     "width": 390,
-    "shared": 3,
-    "protoOnly": 42,
-    "implOnly": 11,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
-    ],
-    "score": 10
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-08",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-09",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-12",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
   },
   {
     "id": "S-13",
     "width": 390,
-    "shared": 0,
-    "protoOnly": 39,
-    "implOnly": 3,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 299"
-    ],
-    "score": 5
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-14",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-15",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-17",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-18",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-19",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-20",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-21",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-22",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-23",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-24",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "S-25",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
+    "score": -1
+  },
+  {
+    "id": "B-01",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-02",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-03",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-05",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-06",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-07",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-08",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-09",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-10",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-11",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-12",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-13",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-15",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-16",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-17",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-18",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-19",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-20",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-21",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-22",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-23",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "B-24",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
+    "score": -1
+  },
+  {
+    "id": "A-01",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-02",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-03",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-04",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-05",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-06",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-08",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-09",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-10",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-11",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-12",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-13",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-14",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-15",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-16",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-17",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-18",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-19",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-20",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-21",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-22",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-23",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-24",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-25",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-26",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-27",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-28",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-29",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-30",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
+  },
+  {
+    "id": "A-31",
+    "width": 390,
+    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
+    "score": -1
   }
 ]
