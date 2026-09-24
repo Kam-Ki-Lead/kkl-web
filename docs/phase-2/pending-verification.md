@@ -88,11 +88,11 @@ on screen and announced "Shortlist, 0 saved", so a voice-control user saying
 
 | | |
 |---|---|
-| **Needs** | Firefox, with "Zoom text only" enabled |
-| **Steps** | Set text-only zoom to 200% on the 16 screens `verify-zoom.mjs` covers; confirm no clipping, no overlap, no lost controls |
+| **Needs** | **A real Firefox and a person.** Not a Playwright one — see below |
+| **Steps** | Enable "Zoom text only", set 200% on the 16 screens `verify-zoom.mjs` covers; confirm no clipping, no overlap, no lost controls |
 | **Expected** | The same result `verify-zoom.mjs` reports under its simulation |
-| **Software setup elsewhere?** | **Yes, probably.** Playwright ships a Firefox build and this environment reaches the npm registry; only Chromium is installed here, and the browser download host has not been tested. On any developer machine `npx playwright install firefox` is one command |
-| **Who** | Any developer. Twenty minutes. **This is the cheapest of the five** |
+| **Software setup elsewhere?** | **No — attempted this pass.** `scripts/verify-firefox-text-zoom.mjs` was written and run against Playwright's Firefox build with `browser.zoom.full=false`. **The zoom keystroke never engaged** — Control+= and Control+Equal both leave computed sizes unchanged in that build, because browser-chrome zoom shortcuts are not part of what Playwright drives. The script now detects that and reports NOT EXERCISED rather than failing sixteen screens nobody zoomed. A real desktop Firefox applies the shortcut fine; the check is twenty minutes *in front of one* |
+| **Who** | Any developer at a desktop machine |
 | **Already covered** | `verify-zoom.mjs` simulates it by doubling the root font size — the closest Chromium gets, and stated as a simulation wherever it is reported |
 
 ### 5 · Real-device rendering
@@ -115,7 +115,7 @@ on screen and announced "Shortlist, 0 saved", so a voice-control user saying
 | Accessible names / 2.5.3 | "needs a screen reader" | **Run here.** Found and fixed a 2.5.3 failure. Behaviour still open |
 | Screen-reader behaviour | needs AT | Still open — needs Windows or macOS and a person |
 | Voice control | needs AT | Still open — built into Windows and macOS, no purchase |
-| Firefox text zoom | needs Firefox | Still open — **one install command on any dev machine** |
+| Firefox text zoom | needs Firefox | Still open — **attempted with Playwright's Firefox; its build does not apply zoom shortcuts. Needs a real desktop Firefox and a person** |
 | Real devices | needs devices | Still open — devices or a device cloud |
 
 Three of the six need nothing but a Windows or macOS machine somebody already

@@ -1,6 +1,6 @@
 # Phase 2 frontend — acceptance decision sheet
 
-**Implementation commit:** `011bade` on `claude/phase-2-frontend` (kkl-web)
+**Implementation commit:** `b95e81e` on `claude/phase-2-frontend` (kkl-web)
 **Approved design:** kkl-design `5bc3512`, unmodified — verified on every run
 of `scripts/setup-prototype-review.sh`
 
@@ -13,26 +13,36 @@ One page. Everything on it is either done, or waiting on a named person.
 **None.**
 
 Not "none found" — none remaining that this pass could confirm against the
-approved source. §5 lists what is measured but unclassified, and that is not
-the same as clean.
+approved source. §5 lists what is still measured and how each row is
+classified, and that is not the same as clean.
 
-Fourteen defects were closed over the acceptance passes. The five closed in
-this one:
+Defects were closed over three acceptance passes. The earlier passes closed
+D-1 to D-9: the typography ladder, the field-label colour, the rail footer
+token, mobile header truncation, the section headings an earlier fix had
+demoted, and two accessibility defects found by checks written that pass
+(forced-colors chip boundaries; the 2.5.3 shortlist name).
 
-| # | Defect | Screens | Evidence |
-|---|---|---|---|
-| D-1 | Console header title 26px/800 against the approved 22px/700 | All console screens | `verify-typography.mjs` 4–6 |
-| D-2 | Panel headings 17px against 18px/700 | S-06, B-06, A-02 | `verify-typography.mjs` 7–9 |
-| D-3 | Listing card titles 17px against 18px/700 | P-01 | `verify-typography.mjs` 10 |
-| D-4 | Field labels in ink `#12182B` against body `#2A3250` | 30 screens with forms | `visual/geometry-1440.json` |
-| D-5 | Rail footer label `#8A9AD8` against `#B9C3EC` — regressed by the previous pass | 16 console screens | `visual/geometry-1440.json` |
+**This pass closed the differ's entire remaining working list** — every row
+taken back to the rendered baseline and either fixed or classified. The
+defects, grouped (full table in
+[`visual-differences.md`](visual-differences.md) §1, D-8 to D-17):
 
-Plus two accessibility defects found by checks that had never been written:
-
-| # | Defect | Found by |
+| # | Defect | Screens |
 |---|---|---|
-| D-8 | Status chips lose every boundary in forced-colors mode — the fill carries the meaning and forced-colors discards it | `verify-forced-colors.mjs` |
-| D-9 | WCAG 2.5.3: the shortlist control reads "Shortlist (0)" and announced "Shortlist, 0 saved" | `verify-accessible-names.mjs` |
+| D-8 | Flow-page titles at 34px against the approved **30px/800** — the differ had paired the wrong element; found by direct measurement | 16 flow pages, three consoles |
+| D-9 | Admin rail "Leads" rendered **inactive on its own detail pages** | A-13, all `/admin/leads/*` |
+| D-10 | Chips at 600 weight against **700**; admin table chips 13px against **12px**; danger foreground `#B3261E` against **`#7A2119`** | Every chip, all journeys |
+| D-11 | Reference identifiers in mono where the approved screens use **Public Sans**, at wrong sizes | A-05, A-13, A-16, A-21, A-23, A-27, A-28 |
+| D-12 | Listing rows and enquiry filters not the approved card: pill filters, Archivo titles, the approved four-action set | B-07, B-16 |
+| D-13 | Buttons drawn at two sizes where the baseline draws **four** — form submissions 17px, console actions 15px | Every form and console action |
+| D-14 | Toast in brand-deep against the approved **ink with saffron chip** | B-18 |
+| D-15 | Preview card measures (price 23px/800, possession `#8A4A08`, amenity tiles) | B-13 |
+| D-16 | P-11's filled action inverted; P-13's waiting chip in the wrong tone; P-04/P-05 submit size and OTP note | P-04, P-05, P-11, P-13 |
+| D-17 | Per-screen size/weight/tone corrections, each measured against the approved screen | 30 screens across the consoles |
+
+One check was wrong, not the app: `verify-visual-baseline.mjs` expected a 21px
+stat tile on S-06 where the rendered baseline draws **26px/800** — the row now
+encodes the measured value.
 
 ---
 
@@ -43,11 +53,11 @@ Summary of the five groups:
 
 | Group | Count | Disposition |
 |---|---|---|
-| Implementation defects | 7 | **Fixed** — table above, plus D-6 mobile header truncation and D-7 demoted section headings from the previous pass |
+| Implementation defects | 17 | **Fixed** — §1, across the three passes |
 | Intentional sample-content differences | 6 kinds | **Not defects.** Counts, money, dates, references, relative time, the sample-data banner. Reconciling them would mean inventing data |
-| Measurement and matching artefacts | 6 | **Fixed in the tooling.** Header-versus-footer matches, rail-versus-header matches, stage-versus-viewport width, pill radius notation, neutral text-transform, prototype reviewer chrome |
-| Conflicts inside the approved baseline | 1 | **Resolved by screen precedence** — E-P4 withdrawn, see §3 |
-| Proposed deviations | 3 | **Open** — §4 |
+| Measurement and matching artefacts | 6 + the structural residue | **Fixed in the tooling, or classified row-by-row** — §5 |
+| Conflicts inside the approved baseline | 1 + 3 recorded wobbles | **Resolved by screen precedence** — E-P4 withdrawn, see §3. The 23px/24px price step, P-02's 13px labels and A-19's two-tone notes are recorded baseline inconsistencies, kept as measured |
+| Proposed deviations | 5 | **Open** — §4 |
 
 ### The conflict, resolved
 
@@ -55,7 +65,8 @@ C-02 declares one step. The screens render five:
 
 | Context | Baseline | Class |
 |---|---|---|
-| Page title | 34px / 800 | `.t-title` |
+| Public page title | 34px / 800 | `.t-title` |
+| Flow-page title (register, KYC, payment, confirm) | 30px / 800 | `.t-flow-title` |
 | Public section heading | 26px / 700 | `.t-section-title` |
 | Console header title | 22px / 700 | `.t-console-title` |
 | Console panel heading, listing-card title | 18px / 700 | `.t-panel-title` |
@@ -98,32 +109,45 @@ Full statements in **[`exceptions.md`](exceptions.md)**.
 
 | # | Exception | Decision needed | Owner | Status |
 |---|---|---|---|---|
-| **E-P1** | Browser **Back may leave the listing editor without the custom dialog**. **Forward restores unsaved edits**, with an "Unsaved work restored." notice and the unsaved mark still showing. **Edits are never silently saved** — a second tab reads the listing as it stands on the server | Accept this behaviour, or fund the Next 16 Cache Components route and its four named costs | Client, or the designer who specified B-15 | **Open** |
-| **E-P2a** | Focus indicator gains a dark companion edge | Keep it, or name another remedy | Designer | **Open** (applied) |
-| **E-P2b** | Control border darkened to `#8A8E9C` | Keep it, or name another remedy | Designer | **Open** (applied) |
-| **E-P3** | Review imagery attributes **every** card; the approved P-01 attributes the project cards and not the property cards. Proposed: keep the band now, remove it from property cards when licensed photography replaces the stand-ins | Confirm, or drop the band from property cards now | Designer | **Open** |
+| **E-P1** | Browser **Back may leave the listing editor without the custom dialog**. **Forward restores unsaved edits**, with an "Unsaved work restored." notice and the unsaved mark still showing. **Edits are never silently saved** — a second tab reads the listing as it stands on the server. **Evidence:** [video](evidence/e-p1/e-p1-back-forward-b95e81e.webm) · [labelled frame strip](evidence/e-p1/e-p1-frame-strip-b95e81e.png) · [raw frames](evidence/e-p1/raw/) | Accept this behaviour, or fund the Next 16 Cache Components route and its four named costs | Client, or the designer who specified B-15 | **Open** |
+| **E-P2a** | Focus indicator gains a dark companion edge. **Evidence:** [before/after sheet](evidence/e-p2/e-p2-before-after-b95e81e.png) (before = the approved prototype) | Keep it, or name another remedy | Designer | **Open** (applied) |
+| **E-P2b** | Control border darkened to `#8A8E9C`. **Evidence:** same sheet | Keep it, or name another remedy | Designer | **Open** (applied) |
+| **E-P3** | Review imagery attributes **every** card; the approved P-01 attributes the project cards and not the property cards. The band is a **voluntary, conservative choice** — the Unsplash licence does not require credit; the design's own image loader does, and the approved homepage contradicts it. Proposed: keep the band now, remove it from property cards when licensed photography lands. **Evidence:** [all three screens, both sides, real baseline photographs](evidence/e-p3/e-p3-attribution-b95e81e.png) | Confirm, or drop the band from property cards now | Designer | **Open** |
+| **E-P5** | **B-02 renders inside the Builder console shell; the approved B-02 is a standalone light page.** Found this pass; not restructured unilaterally | Keep the console placement, or rebuild as the approved standalone page | Designer | **Open** |
+| **E-P6** | **B-07's approved listing cards carry a photograph thumbnail; the implementation's rows are text-only.** The sample data has the media; adding the column is a composition call | Add the thumbnail per the approved card, or confirm the text-only row | Designer | **Open** |
 
 **No exception is marked accepted.** Acceptance is a person saying yes.
 
 E-P1 has **not** been worked around with a history trap, and will not be.
 
+Every evidence file is labelled with the implementation commit it shows. The
+`…-011bade` sets show the previous implementation commit and are kept for
+provenance; the `…-b95e81e` sets are the current ones.
+
 ---
 
-## 5 · Measured but unclassified
+## 5 · Measured and classified — the residue
 
-Divergence is not zero and is not claimed to be. After this pass the residue
-is dominated by:
+That working list is now closed. Every row was taken back to the rendered
+baseline and either fixed (§1) or classified; the row-by-row record is
+[`visual-differences.md`](visual-differences.md) §6. What remains in the
+differ output after this pass, and what each row is:
 
-- `weight 700->600` and `weight 600->700` on labels and inline emphasis — in
-  **both** directions, so no single shared cause
-- `family Archivo->Public Sans` on S-07's filter tabs and S-17's ledger
-  amounts; `Public Sans->IBM Plex Mono` on reference identifiers, which is a
-  choice this project made and never recorded
-- 1px differences on secondary text, scattered
+| Row | Classification |
+|---|---|
+| B-02 wordmark/title geometry | **Structural deviation — E-P5, open (§4)** |
+| B-07 listing thumbnails | **Structural deviation — E-P6, open (§4)** |
+| Control border `#8A8E9C` (and `#E1E4EE` on disabled fields) | **E-P2b, applied and awaiting the owner (§4)** |
+| P-02 filter labels 14px vs a 13px header comment; P-02/P-10 prices 24px vs 23px | **Recorded baseline inconsistencies** — the approved screens' own renders measure 14px and 24px; the implementation follows the render |
+| S-06 "₹4,200" ink vs the prototype's unstyled black | **Prototype artefact** — the baseline declares no colour; the implementation applies the approved token |
+| B-11 "Covered parking" tone | **Sample-data selection artefact** — the row's state differs, not the style |
+| Console titles 20px below 1060px | **Intentional responsive step** — the D-6 fix; a 22px title truncates on a phone |
+| Content width 1176px vs the 1440px stage declaration | **Rail arithmetic** — 1440 − 264 rail = 1176; the implementation follows the arithmetic |
+| Control height 47px vs a 52px header comment | **Recorded, deferred** — the approved sheets' own inputs measure 47px |
+| Button radius 6px vs per-screen wobble | **Recorded standardisation** |
+| Stat values | **Invisible to the differ** — short numeric strings are not paired; verified separately by `verify-visual-baseline.mjs` |
 
-**None confirmed as a defect; none claimed clean.** Ranked in
-`visual/geometry-{1440,390}.json`. This is the working list for whoever picks
-it up.
+No row in the residue is an unexamined difference.
 
 ---
 
@@ -138,12 +162,15 @@ Full detail, per check, in **[`pending-verification.md`](pending-verification.md
 | Screen-reader **behaviour** | Open | NVDA (free) on Windows, or VoiceOver on macOS | Accessibility tester — half a day |
 | Windows High Contrast **themes** | Open | A Windows machine | Anyone — an hour |
 | Voice control | Open | Windows Voice Access or macOS Voice Control — both built in | Anyone — an hour |
-| Firefox text-only zoom | Open | `npx playwright install firefox` on any dev machine | Any developer — **twenty minutes** |
+| Firefox text-only zoom | Open — **attempted this pass** | A real desktop Firefox and a person: Playwright's Firefox build was installed and driven, and it does not apply zoom keystrokes to page content (probe in `scripts/verify-firefox-text-zoom.mjs`). The scripted check reports NOT EXERCISED rather than a false pass | Anyone with desktop Firefox — **twenty minutes** |
 | Real devices | Open | Two handsets, or a device cloud | QA — two hours |
 
 **Two of the original five were never blocked** — they needed a script, not a
-platform, and writing them found two real defects. Of what remains, three need
-only a Windows or macOS machine somebody already owns.
+platform, and writing them found two real defects. A third was attempted this
+pass and is genuinely blocked by tooling, not effort: Playwright's Firefox
+does not engage text zoom, so that one check still needs a person and a real
+browser. Of what remains, three need only a Windows or macOS machine somebody
+already owns.
 
 ---
 
@@ -151,7 +178,7 @@ only a Windows or macOS machine somebody already owns.
 
 | # | Asset | Consequence today | Owner |
 |---|---|---|---|
-| **C-1** | The baseline's seven review photographs | `images.unsplash.com` is denied by this environment's network policy. Slot **geometry** is compared with generated stand-ins that say "STAND-IN · not the baseline photograph" on their face. **Photographic fidelity is not compared** | Whoever can allow the host |
+| **C-1** | The baseline's seven review photographs | **Reachable from the current environment** — the E-P3 evidence (§4) renders both sides with the real baseline photographs. The earlier geometry studies used generated stand-ins that say "STAND-IN · not the baseline photograph" on their face; those remain valid for slot geometry and are kept, labelled, for provenance. Photographic fidelity is now reviewable on the E-P3 sheet; final licensed photography is C-2 | Designer, for the E-P3 decision |
 | **C-2** | Licensed project photography | The baseline states every image must be replaced before launch. Every media slot ships its designed no-image fallback | The client |
 
 ---
@@ -187,13 +214,13 @@ not a bug.
 |---|---|
 | typecheck, lint | 0 errors, 0 warnings |
 | unit tests | 27/27 |
-| design tokens | 29/29 tokens, 38/38 literals |
+| design tokens | 30/30 tokens, 42/42 literals |
 | contrast (declared pairs) | 24/24 AA |
 | contrast corrections (rendered) | 12/12 |
 | visual values | 24/24 |
 | typography precedence | 11/11 |
 | zoom (reflow 320px, text 200%) | 32/32 across 16 screens |
-| accessibility | 22/22 |
+| accessibility | 22/22 (+3 pending manual) |
 | accessible names / 2.5.3 | 24/24 across 6 screens |
 | forced-colors | 13/13 across 6 screens |
 | route sweep | 224/224 (112 routes × 2 widths) |
@@ -203,17 +230,23 @@ not a bug.
 | deployment guard | 10/10 with reasons asserted, 2 pending a backend |
 | coverage | 113/113 inventory rows mapped, 0 uncovered |
 
-**A count is not coverage.** Three defects in these passes had a passing check
-sitting on top of them: `verify-visual-baseline.mjs` asserted the Admin rail
-was brand-deep, the deployment-guard suite reported 8/8 from a test that could
-not fail, and forced-colors was filed as blocked rather than written.
+All run at implementation commit `b95e81e` under the review configuration in
+[`local-review.md`](local-review.md) (`next build` + `next start`, not the
+development server).
+
+**A count is not coverage.** Four defects across these passes had a passing
+check sitting on top of them: `verify-visual-baseline.mjs` asserted the Admin
+rail was brand-deep, the deployment-guard suite reported 8/8 from a test that
+could not fail, forced-colors was filed as blocked rather than written, and
+the same visual-baseline suite expected a 21px stat tile where the approved
+S-06 draws 26px — found this pass, harness corrected.
 
 ---
 
 ## 10 · The decision
 
 **Frontend acceptance is not requested.** Category A is empty and the
-verification above is green, but four exceptions are open and none is mine to
+verification above is green, but six exceptions are open and none is mine to
 close.
 
 Acceptance becomes appropriate when:
@@ -221,7 +254,9 @@ Acceptance becomes appropriate when:
 1. **E-P1** is accepted or redirected by the client or designer;
 2. **E-P2a and E-P2b** are signed off by the designer, or another remedy named;
 3. **E-P3** is confirmed;
-4. the four remaining verification checks are run by the people named in §6.
+4. **E-P5 and E-P6** — the structural deviations found this pass — are decided
+   by the designer;
+5. the remaining verification checks are run by the people named in §6.
 
 Nothing on that list is waiting on more frontend work.
 

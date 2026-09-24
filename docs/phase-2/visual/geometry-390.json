@@ -1,560 +1,1663 @@
 [
   {
-    "id": "P-01",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Homepage%20-%20Portal%20Layout.dc.html\nCall log:\n\u001b[2m  - naviga",
-    "score": -1
-  },
-  {
     "id": "P-02",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-03",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-04",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-05",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-06",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-08",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-09",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-10",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-11",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-12",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-13",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-14",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-15",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-16",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-17",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-18",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-19",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "P-20",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Buyer%20Journey.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "S-01",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-02",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-03",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-04",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-05",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-06",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-07",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-08",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-09",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-12",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-13",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-14",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-15",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-17",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-18",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-19",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-20",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
+    "shared": 31,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.94 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 20,
+    "implOnly": 43,
+    "typo": [
+      {
+        "text": "Location",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "Property type",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "BHK",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "Budget",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "₹78L – ₹1.4Cr",
+        "diff": "size 23->24"
+      },
+      {
+        "text": "₹1.1Cr – ₹2.2Cr",
+        "diff": "size 23->24"
+      }
+    ],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px | pill] -> [6px | 8px | pill]"
+    ],
+    "score": 22
   },
   {
     "id": "S-21",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "S-22",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 10,
+    "implOnly": 3,
+    "typo": [
+      {
+        "text": "Billing information",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [47 | 96]",
+      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
     "id": "S-23",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 17,
+    "implOnly": 2,
+    "typo": [
+      {
+        "text": "New ticket",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [123 | 52] -> [171 | 44 | 47]",
+      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
     "id": "S-24",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 17,
+    "implOnly": 8,
+    "typo": [
+      {
+        "text": "Ticket",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [85] -> [121]",
+      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
     "id": "S-25",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Seller%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:",
-    "score": -1
-  },
-  {
-    "id": "B-01",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-02",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-03",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-05",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-06",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-07",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-08",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-09",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-10",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "My credit balance runs low",
+        "note": "proto at 0.55 on rgb(246, 248, 253); impl at 0.28 on rgb(255, 255, 255)"
+      }
+    ],
+    "protoOnly": 12,
+    "implOnly": 10,
+    "typo": [
+      {
+        "text": "Profile & settings",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [13 | 47]",
+      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
     "id": "B-11",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-12",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-13",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 28,
+    "implOnly": 14,
+    "typo": [
+      {
+        "text": "Covered parking",
+        "diff": "colour rgb(42, 50, 80)->rgb(255, 255, 255)"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [0px rgb(255, 255, 255) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [13 | 16 | 47]",
+      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
     "id": "B-15",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-16",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-17",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-18",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-19",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-20",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-21",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-22",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "B-23",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 20,
+    "implOnly": 5,
+    "typo": [
+      {
+        "text": "Edit listing",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [104 | 52] -> [146 | 44 | 47]",
+      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
     "id": "B-24",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Builder%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http",
-    "score": -1
-  },
-  {
-    "id": "A-01",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-02",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-03",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-04",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-05",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-06",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-08",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-09",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-10",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-11",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-12",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-13",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-14",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-15",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-16",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-17",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-18",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 11,
+    "mismatched": [
+      {
+        "text": "Approved",
+        "note": "proto at 0.87 on rgb(246, 248, 253); impl at 0.58 on rgb(227, 243, 234)"
+      }
+    ],
+    "protoOnly": 17,
+    "implOnly": 13,
+    "typo": [
+      {
+        "text": "Profile & settings",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [13 | 47]",
+      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
     "id": "A-19",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 37,
+    "implOnly": 10,
+    "typo": [
+      {
+        "text": "Credit adjustment",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [16 | 47 | 96]",
+      "button radius [0px | 6px | 7px | 8px] -> [6px | 8px]"
+    ],
+    "score": 22
   },
   {
-    "id": "A-20",
+    "id": "P-04",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 18,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 8,
+    "implOnly": 12,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [47 | 96]",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 20
   },
   {
-    "id": "A-21",
+    "id": "P-05",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 18,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 13,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [47 | 96]",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 20
   },
   {
-    "id": "A-22",
+    "id": "P-06",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 13,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 7,
+    "implOnly": 15,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "P-15",
+    "width": 390,
+    "shared": 15,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.83 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 13,
+    "implOnly": 20,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156) | 1px rgb(225, 228, 238)]",
+      "control height [52] -> [13 | 44 | 47]",
+      "button radius [0px | 6px | pill] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "P-19",
+    "width": 390,
+    "shared": 15,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 10,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [104] -> [146 | 47]",
+      "button radius [0px | 6px | pill] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-02",
+    "width": 390,
+    "shared": 16,
+    "mismatched": [],
+    "protoOnly": 3,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [0px rgb(255, 255, 255) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [16 | 44 | 47]",
+      "button radius [0px | 6px | pill] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-03",
+    "width": 390,
+    "shared": 10,
+    "mismatched": [],
+    "protoOnly": 3,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156) | 1px rgb(185, 195, 236)]",
+      "control height [52] -> [47 | 63]",
+      "button radius [6px | 8px] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-07",
+    "width": 390,
+    "shared": 20,
+    "mismatched": [],
+    "protoOnly": 29,
+    "implOnly": 37,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [48] -> [44]",
+      "button radius [0px | 50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-15",
+    "width": 390,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 10,
+    "implOnly": 2,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]",
+      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-08",
+    "width": 390,
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 20,
+    "implOnly": 7,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [104 | 52] -> [146 | 44 | 47]",
+      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-09",
+    "width": 390,
+    "shared": 3,
+    "mismatched": [],
+    "protoOnly": 24,
+    "implOnly": 8,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [44 | 47]",
+      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-10",
+    "width": 390,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 26,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [0px rgb(27, 59, 179) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [46] -> [16 | 47]",
+      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-12",
+    "width": 390,
+    "shared": 3,
+    "mismatched": [],
+    "protoOnly": 23,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156) | 1px rgb(185, 195, 236)]",
+      "control height [52] -> [47 | 63]",
+      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-20",
+    "width": 390,
+    "shared": 7,
+    "mismatched": [],
+    "protoOnly": 39,
+    "implOnly": 40,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [48] -> [44]",
+      "button radius [50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "A-14",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 44,
+    "implOnly": 8,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
+      "control height [46 | 48] -> [40]",
+      "button radius [7px] -> [8px]"
+    ],
+    "score": 20
   },
   {
     "id": "A-23",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-24",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-25",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
-  },
-  {
-    "id": "A-26",
-    "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 7,
+    "mismatched": [],
+    "protoOnly": 53,
+    "implOnly": 17,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [85] -> [121 | 72]",
+      "button radius [6px | 7px] -> [6px | 8px]"
+    ],
+    "score": 20
   },
   {
     "id": "A-27",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 12,
+    "mismatched": [],
+    "protoOnly": 43,
+    "implOnly": 8,
+    "typo": [
+      {
+        "text": "Notification delivery",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
+      "button radius [7px | pill] -> [8px]"
+    ],
+    "score": 17
+  },
+  {
+    "id": "P-10",
+    "width": 390,
+    "shared": 22,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.93 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 13,
+    "implOnly": 38,
+    "typo": [
+      {
+        "text": "₹78L – ₹1.4Cr",
+        "diff": "size 23->24"
+      },
+      {
+        "text": "₹1.1Cr – ₹2.2Cr",
+        "diff": "size 23->24"
+      },
+      {
+        "text": "₹52L – ₹85L",
+        "diff": "size 23->24"
+      }
+    ],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 16
+  },
+  {
+    "id": "S-01",
+    "width": 390,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 1,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "B-01",
+    "width": 390,
+    "shared": 5,
+    "mismatched": [],
+    "protoOnly": 4,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-01",
+    "width": 390,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 2,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-03",
+    "width": 390,
+    "shared": 14,
+    "mismatched": [],
+    "protoOnly": 43,
+    "implOnly": 8,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
+      "button radius [0px | 7px | pill] -> [8px]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-12",
+    "width": 390,
+    "shared": 20,
+    "mismatched": [],
+    "protoOnly": 42,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
+      "button radius [0px | 7px | pill] -> [8px]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-16",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 45,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
+      "button radius [0px | 7px | pill] -> [8px]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-21",
+    "width": 390,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 37,
+    "implOnly": 6,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
+      "button radius [0px | 7px | pill] -> [8px]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "S-05",
+    "width": 390,
+    "shared": 2,
+    "mismatched": [],
+    "protoOnly": 10,
+    "implOnly": 6,
+    "typo": [
+      {
+        "text": "Account restricted",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "S-06",
+    "width": 390,
+    "shared": 22,
+    "mismatched": [],
+    "protoOnly": 16,
+    "implOnly": 12,
+    "typo": [
+      {
+        "text": "₹4,200",
+        "diff": "colour rgb(0, 0, 0)->rgb(18, 24, 43)"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 10px | 50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "S-08",
+    "width": 390,
+    "shared": 14,
+    "mismatched": [],
+    "protoOnly": 25,
+    "implOnly": 11,
+    "typo": [
+      {
+        "text": "Lead L-4471",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "S-17",
+    "width": 390,
+    "shared": 19,
+    "mismatched": [],
+    "protoOnly": 22,
+    "implOnly": 25,
+    "typo": [
+      {
+        "text": "Transactions",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "S-18",
+    "width": 390,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 13,
+    "implOnly": 3,
+    "typo": [
+      {
+        "text": "Credit expiry",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "S-19",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [],
+    "protoOnly": 17,
+    "implOnly": 8,
+    "typo": [
+      {
+        "text": "Invoices",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "S-20",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 18,
+    "implOnly": 13,
+    "typo": [
+      {
+        "text": "Invoice",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "B-02",
+    "width": 390,
+    "shared": 1,
+    "mismatched": [],
+    "protoOnly": 12,
+    "implOnly": 13,
+    "typo": [
+      {
+        "text": "Company verification",
+        "diff": "size 30->20; weight 800->700"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 8px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "B-05",
+    "width": 390,
+    "shared": 10,
+    "mismatched": [],
+    "protoOnly": 25,
+    "implOnly": 9,
+    "typo": [
+      {
+        "text": "Renewal & expiry",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "B-18",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 11,
+    "implOnly": 6,
+    "typo": [
+      {
+        "text": "Notification states",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "B-19",
+    "width": 390,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 34,
+    "implOnly": 11,
+    "typo": [
+      {
+        "text": "Access restrictions",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "A-02",
+    "width": 390,
+    "shared": 24,
+    "mismatched": [],
+    "protoOnly": 33,
+    "implOnly": 6,
+    "typo": [
+      {
+        "text": "Operations dashboard",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [10px | 7px | 8px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "A-06",
+    "width": 390,
+    "shared": 14,
+    "mismatched": [
+      {
+        "text": "Approve verification",
+        "note": "proto at 0.38 on rgb(14, 107, 69); impl at 0.9 on rgb(27, 59, 179)"
+      }
+    ],
+    "protoOnly": 44,
+    "implOnly": 14,
+    "typo": [
+      {
+        "text": "KYC review",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px | 8px] -> [6px | 8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "A-24",
+    "width": 390,
+    "shared": 20,
+    "mismatched": [],
+    "protoOnly": 43,
+    "implOnly": 8,
+    "typo": [
+      {
+        "text": "Voice qualification",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 7px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "A-26",
+    "width": 390,
+    "shared": 14,
+    "mismatched": [],
+    "protoOnly": 49,
+    "implOnly": 13,
+    "typo": [
+      {
+        "text": "WhatsApp qualification",
+        "diff": "size 22->20"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [7px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "P-01",
+    "width": 390,
+    "shared": 62,
+    "mismatched": [
+      {
+        "text": "Builders & developers",
+        "note": "proto at 0.4 on rgb(246, 248, 253); impl at 0.72 on rgb(255, 255, 255)"
+      },
+      {
+        "text": "Publish your projects and receive buyer enquiries directly.",
+        "note": "proto at 0.41 on rgb(246, 248, 253); impl at 0.73 on rgb(255, 255, 255)"
+      },
+      {
+        "text": "Requires verification, admin approval and an active monthly subscription.",
+        "note": "proto at 0.43 on rgb(246, 248, 253); impl at 0.74 on rgb(255, 255, 255)"
+      },
+      {
+        "text": "Brokers & agencies",
+        "note": "proto at 0.5 on rgb(246, 248, 253); impl at 0.77 on rgb(255, 255, 255)"
+      }
+    ],
+    "protoOnly": 29,
+    "implOnly": 21,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [6px] -> [0px | 6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-03",
+    "width": 390,
+    "shared": 50,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.9 on rgb(15, 36, 120)"
+      },
+      {
+        "text": "Listed by",
+        "note": "proto at 0.43 on rgb(246, 248, 253); impl at 0.69 on rgb(255, 255, 255)"
+      },
+      {
+        "text": "Sample Builders Pvt Ltd",
+        "note": "proto at 0.44 on rgb(246, 248, 253); impl at 0.7 on rgb(255, 255, 255)"
+      },
+      {
+        "text": "Builder account, verified by Kam Ki Lead before publishing.",
+        "note": "proto at 0.45 on rgb(246, 248, 253); impl at 0.71 on rgb(255, 255, 255)"
+      }
+    ],
+    "protoOnly": 18,
+    "implOnly": 16,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-08",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.82 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 13,
+    "implOnly": 21,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px | 8px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-09",
+    "width": 390,
+    "shared": 17,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 7,
+    "implOnly": 12,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-11",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 5,
+    "implOnly": 15,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-12",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 23,
+    "implOnly": 20,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 10px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-13",
+    "width": 390,
+    "shared": 17,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 13,
+    "implOnly": 16,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 10px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-14",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.8 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 18,
+    "implOnly": 22,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-17",
+    "width": 390,
+    "shared": 13,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.86 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 18,
+    "implOnly": 28,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-18",
+    "width": 390,
+    "shared": 13,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.86 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 17,
+    "implOnly": 29,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-20",
+    "width": 390,
+    "shared": 11,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+      },
+      {
+        "text": "Refund policy",
+        "note": "proto at 0.25 on rgb(255, 255, 255); impl at 0.91 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 12,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-09",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [],
+    "protoOnly": 10,
+    "implOnly": 2,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-12",
+    "width": 390,
+    "shared": 3,
+    "mismatched": [],
+    "protoOnly": 11,
+    "implOnly": 3,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-14",
+    "width": 390,
+    "shared": 15,
+    "mismatched": [],
+    "protoOnly": 22,
+    "implOnly": 16,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-22",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 15,
+    "implOnly": 7,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [10px | 50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-03",
+    "width": 390,
+    "shared": 5,
+    "mismatched": [
+      {
+        "text": "What the subscription covers",
+        "note": "proto at 0.2 on rgb(255, 247, 232); impl at 0.62 on rgb(255, 255, 255)"
+      }
+    ],
+    "protoOnly": 25,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-06",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "Site-visit request",
+        "note": "proto at 0.52 on rgb(246, 248, 253); impl at 0.17 on rgb(255, 255, 255)"
+      }
+    ],
+    "protoOnly": 18,
+    "implOnly": 16,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 10px | 50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-07",
+    "width": 390,
+    "shared": 15,
+    "mismatched": [],
+    "protoOnly": 21,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-13",
+    "width": 390,
+    "shared": 5,
+    "mismatched": [],
+    "protoOnly": 33,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-16",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [],
+    "protoOnly": 23,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [10px | 50% | 6px | 8px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-17",
+    "width": 390,
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 26,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-21",
+    "width": 390,
+    "shared": 3,
+    "mismatched": [],
+    "protoOnly": 14,
+    "implOnly": 3,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-22",
+    "width": 390,
+    "shared": 2,
+    "mismatched": [],
+    "protoOnly": 39,
+    "implOnly": 21,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-23",
+    "width": 390,
+    "shared": 3,
+    "mismatched": [],
+    "protoOnly": 25,
+    "implOnly": 6,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [10px | 50% | 6px | 8px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-04",
+    "width": 390,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 53,
+    "implOnly": 17,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-05",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 41,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [10px | 7px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-08",
+    "width": 390,
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 32,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [10px | 7px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-09",
+    "width": 390,
+    "shared": 10,
+    "mismatched": [],
+    "protoOnly": 45,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-10",
+    "width": 390,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 35,
+    "implOnly": 17,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-11",
+    "width": 390,
+    "shared": 13,
+    "mismatched": [],
+    "protoOnly": 46,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-13",
+    "width": 390,
+    "shared": 16,
+    "mismatched": [],
+    "protoOnly": 56,
+    "implOnly": 16,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-15",
+    "width": 390,
+    "shared": 18,
+    "mismatched": [],
+    "protoOnly": 31,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px | 8px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-17",
+    "width": 390,
+    "shared": 18,
+    "mismatched": [],
+    "protoOnly": 47,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-18",
+    "width": 390,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 52,
+    "implOnly": 30,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-20",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 46,
+    "implOnly": 12,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-22",
+    "width": 390,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 42,
+    "implOnly": 6,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [10px | 7px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-25",
+    "width": 390,
+    "shared": 16,
+    "mismatched": [],
+    "protoOnly": 53,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
   },
   {
     "id": "A-28",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 18,
+    "mismatched": [],
+    "protoOnly": 44,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [7px] -> [8px]"
+    ],
+    "score": 10
   },
   {
     "id": "A-29",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 3,
+    "mismatched": [],
+    "protoOnly": 42,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
   },
   {
     "id": "A-30",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 10,
+    "mismatched": [],
+    "protoOnly": 45,
+    "implOnly": 52,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [0px | 7px | pill] -> [8px]"
+    ],
+    "score": 10
   },
   {
     "id": "A-31",
     "width": 390,
-    "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8098/KKL%20Admin%20Console.dc.html\nCall log:\n\u001b[2m  - navigating to \"http:/",
-    "score": -1
+    "shared": 18,
+    "mismatched": [],
+    "protoOnly": 55,
+    "implOnly": 18,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358",
+      "button radius [6px | 7px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-16",
+    "width": 390,
+    "shared": 13,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.82 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 13,
+    "implOnly": 28,
+    "typo": [],
+    "struct": [
+      "content width 1344 -> 354"
+    ],
+    "score": 5
+  },
+  {
+    "id": "S-04",
+    "width": 390,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 5,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 358"
+    ],
+    "score": 5
+  },
+  {
+    "id": "S-13",
+    "width": 390,
+    "shared": 0,
+    "mismatched": [],
+    "protoOnly": 39,
+    "implOnly": 3,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 270"
+    ],
+    "score": 5
   }
 ]

@@ -10,6 +10,26 @@ prototypes in kkl-design @ `5bc3512`, the decision register in
 document once asserted a requirement with no source, that is marked and
 withdrawn.
 
+> **Update — later pass, implementation commit `b95e81e`.** This report
+> describes an earlier acceptance pass and is kept as its record. Three
+> statements in it are superseded and corrected here rather than rewritten:
+>
+> 1. **E-P4 is withdrawn.** The 17px/18px question was resolved by
+>    screen-specific semantic styles (§3 of [`decision-sheet.md`](decision-sheet.md));
+>    the tables below that list it as open are historical.
+> 2. **Coverage is no longer "96 of 113 not compared."** All 113 inventory
+>    rows are mapped and the differ's full working list has been classified —
+>    see [`visual-differences.md`](visual-differences.md) §6.
+> 3. **C-1 is no longer blocked.** `images.unsplash.com` is reachable from the
+>    current review environment, and the E-P3 evidence renders both sides with
+>    the real baseline photographs. The stand-in geometry studies remain
+>    valid, labelled, for provenance.
+>
+> Two exceptions were also added after this report — **E-P5** (B-02 console
+> placement) and **E-P6** (B-07 listing thumbnails) — both open, in
+> [`exceptions.md`](exceptions.md). The current state of every item lives in
+> [`decision-sheet.md`](decision-sheet.md).
+
 ---
 
 ## 1. The five categories

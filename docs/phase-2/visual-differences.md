@@ -32,6 +32,29 @@ D-1 to D-3 share one cause and are resolved together in §2 of
 `acceptance.md`: the C-02 library names one step where the screens render
 five.
 
+### This pass — the differ's residue, chased to the baseline
+
+The previous pass left §6 below as an unclassified working list. This pass
+took every remaining row back to the rendered baseline and either fixed it or
+classified it. What was confirmed as a defect and fixed:
+
+| # | Screen(s) | Difference | State |
+|---|---|---|---|
+| D-8 | 16 flow pages across all three consoles (registration, KYC, purchase, payment, recharge, result) | Panel page titles rendered at the 34px page-title step; the approved flow screens render **30px/800 Archivo**. The differ had missed these because it paired the topbar's 22px span, not the panel heading — found by direct measurement. New `.t-flow-title` | Fixed |
+| D-9 | A-13 and every Admin lead detail | The rail's "Leads" item matched `exact`, so it rendered **inactive** on `/admin/leads/LD-*` — the one console section whose own pages disowned it. Rail items gained `excludePrefix` | Fixed |
+| D-10 | Every chip, all four journeys | Chips rendered 600-weight; the baseline draws **700**. Admin table chips rendered 13px; the baseline draws **12px** (new `size="sm"`). Danger-chip foreground `#B3261E` → the baseline's **`#7A2119`**; muted-chip foreground → the baseline's slate **`#3C4763`** | Fixed |
+| D-11 | A-05, A-13, A-16, A-21, A-23, A-27, A-28 and others | Reference identifiers had a mono treatment the approved screens reserve for the Admin ledger and audit contexts; queue and list references are **Public Sans** at the sizes and colours the approved screens render (K-refs 15px body-colour, U-refs 14px muted sans, T-refs 14px sans, LD/E/RF/ORD refs 12px) | Fixed |
+| D-12 | B-07, B-16 | Listing rows rebuilt to the approved card: pill filter chips (14px/600, brand-filled when active) instead of underline tabs — on **both** screens, B-16 included — Archivo titles, 12px chips, and the approved action set: primary **Edit listing**, secondary **Preview**, quiet toggle, quiet-danger **Delete** | Fixed |
+| D-13 | Every form submission and console action | The baseline draws **four** button steps, not two: **lg 17px/700** for form submissions ("Send OTP", "Send enquiry", "Continue to KYC"), md 16px/700 default, **action 15px/700** for console header and row actions, sm 14px. Submissions were at md and console actions scattered. New `quietDanger` (the baseline's underlined destructive link) and `secondaryBrand` (S-25/B-25 "View status": white surface, border, **brand** label) variants, so no className overrides a variant's text colour — two utilities for one property are decided by stylesheet order, not intent | Fixed |
+| D-14 | B-18 | The notification toast was brand-deep; the approved toast is **ink `#12182B`** with a saffron icon chip, `#C6CCE0` body and a white **View** button | Fixed |
+| D-15 | B-13 | The preview card's measures: price **23px/800**, name 19px/700, locality 15px body, possession 14px/700 `#8A4A08`, amenity tiles 14px body on `#F0F2F9` | Fixed |
+| D-16 | P-11, P-13, P-04, P-05 | P-11's one filled action is **"Browse properties"** — the implementation had it secondary and its own added sign-in action primary; swapped. P-13's "Awaiting builder" chip is the **warning** tone (`#8A4A08`), not neutral brand. P-04/P-05 submit at lg with the OTP note at **14px** | Fixed |
+| D-17 | S-02, S-03, S-24, S-25, B-01, B-03, B-05, B-06, B-17, B-19, B-21, B-22, B-23, A-01, A-02, A-04, A-06, A-08, A-09, A-14, A-15, A-17, A-18, A-19, A-20, A-24, A-25, A-26, A-30, A-31 | Per-screen size, weight, family and tone corrections, each measured against the approved screen: legend and label colours, stat-block and ledger typography, chip tones and sizes, button sizes, caption steps. Itemised in the commit message for this pass | Fixed |
+
+One harness row was wrong, not the application: `verify-visual-baseline.mjs`
+expected a 21px `.t-figure` stat tile on S-06; the rendered baseline's tile is
+**26px/800 Archivo**. The row now encodes the measured value.
+
 ## 2 · Intentional sample-content differences — not defects
 
 The prototypes carry illustrative figures; this build carries fixtures. The
@@ -99,23 +122,58 @@ document is self-contained:
 | **E-P2a** | Focus indicator corrected with a dark companion edge — applied, sign-off open | Designer |
 | **E-P2b** | Control border darkened `#C6CCE0` → `#8A8E9C` — applied, sign-off open | Designer |
 | **E-P3** | Review imagery attributes every card; the approved homepage attributes only the project cards | Designer |
+| **E-P5** | **B-02 renders inside the Builder console shell; the approved B-02 is a standalone light page** (20px ink wordmark, 30px/800 title, document-upload cards), not a dark-rail console screen. Found this pass when the differ flagged the wordmark and title; restructuring was not done unilaterally | Designer |
+| **E-P6** | **B-07's approved listing cards carry a left-hand photograph thumbnail; the implementation's rows have no image slot.** The sample data has the media (`PropertyMedia[]` with URLs), so this is a layout gap, not a data gap — but adding an image column changes the approved row's density and was not done unilaterally | Designer |
 
 E-P4 is **withdrawn**: §4 above resolves it from the screens rather than
 needing a ruling.
 
-## 6 · What remains unclassified
+Two **additions** the implementation carries and the baseline does not —
+recorded so they are not mistaken for approved elements, not proposed for
+removal: A-04 has an "Open the KYC queue" action the approved screen omits,
+and P-11's sign-in panel adds a "Sign in or register" action beside the
+approved "Browse properties" (which keeps the filled-primary slot, as
+approved).
 
-Measured divergence is not zero and this pass did not chase it to zero. After
-the fixes above, the residue is dominated by:
+## 6 · What remains — classified, row by row
 
-- **`weight 700->600` and `weight 600->700`** on labels and inline emphasis,
-  in both directions, so there is no single shared cause to fix.
-- **`family Archivo->Public Sans`** on S-07's filter tabs and S-17's ledger
-  amounts, and **`Public Sans->IBM Plex Mono`** on reference identifiers —
-  the second is a deliberate choice this project made and never recorded.
-- **1px size differences** on secondary text, scattered across screens.
+This section used to be an unclassified working list. **It no longer is.**
+After the fixes in §1 (D-8 to D-17), the differ was re-run against the review
+build at the implementation commit on the decision sheet, at 1440 and at 390.
+Everything it still reports is below, with its classification. Nothing is
+carried as "unclassified".
 
-**None of these has been confirmed as a defect and none is claimed to be
-clean.** They are the working list for whoever picks this up, and the ranked
-JSON orders them. Reporting "zero open visual defects" while this section has
-entries would be false, which is why it is here.
+### Typography residue at 1440 — 13 rows, none a defect
+
+| Row | Classification |
+|---|---|
+| B-11 "Covered parking" — colour body → white | **Sample-data artefact.** The impl fixture has that amenity selected (white on brand chip); the baseline's does not. Same chip, different fixture state |
+| P-02 filter labels ("Location", "Property type", "BHK", "Budget") — 13px → 14px | **Baseline-internal inconsistency, recorded.** P-02 draws these labels at 13px where P-01 draws the same role at 14px. The 14px step is kept; noted in `search-filters.tsx` |
+| P-02 and P-10 price ranges — 23px → 24px | **Baseline-internal inconsistency, recorded.** P-01 renders the same price treatment at 24px. The 24px step is kept |
+| B-02 "Kam Ki" wordmark and "Company verification" title | **Structural deviation E-P5** — the approved B-02 is a standalone light page; see §5 |
+| S-06 "₹4,200" — black → ink | **Prototype artefact.** The baseline declares no colour on the stat value, so it inherits the page's default black. The implementation keeps C-01's darkest text token, ink |
+
+### Typography residue at 390 — the same rows, plus one intentional step
+
+| Row | Classification |
+|---|---|
+| Console header titles 22px → 20px, on 20 console screens | **Intentional responsive step.** `console-shell.tsx` sets 20px below 1060px so the title fits beside the drawer toggle without truncating — the fix for D-6. The baseline's 390 frame keeps 22px because its header carries less chrome |
+| Everything else | The same rows as 1440, for the same reasons |
+
+### Structural rows — all accounted for
+
+| Pattern | Count at 1440 | Classification |
+|---|---|---|
+| `content width 1440 -> 1176 / 1184` | 67 | **Measurement artefact.** The differ compares the prototype's full-width stage against the implementation's rail-inset content column (1440 − 264 = 1176, 1440 − 256 = 1184). There is no full-width content box on a console screen to measure against |
+| `content width 1440 -> 620 / 420 / 270` | 7 | **Measurement artefact.** Centred narrow layouts (forms, auth); the widest box narrower than the frame is the form card |
+| `control border … -> … rgb(138, 142, 156)` | 16+ | **E-P2b, intentional.** The corrected control border `#8A8E9C`, awaiting design sign-off |
+| `control border … -> … rgb(225, 228, 238)` | 6 | **E-P2b's stated scope.** Disabled fields (A-14) deliberately render in the card hairline on a tint — 1.4.11 excepts inactive components, and the exceptions document says so |
+| `control height [52] -> [47]` and variants | ~20 | **Recorded, deferred.** The implementation's controls are 44px-minimum with 15px text (47px typical) against the baseline's 52px. A deliberate target-size floor; changing it is a design decision, not a defect fix |
+| `button radius […] -> [6px]` | ~40 | **Recorded.** The implementation standardises on the baseline's dominant 6px (64 occurrences against 4 at 8px in the console documents). The baseline's residual 0/7/8px radii are its own inconsistency |
+
+**What this means:** every measured difference that was a confirmed
+implementation defect is fixed; everything still measured is a named artefact,
+a recorded baseline inconsistency, an intentional correction awaiting sign-off,
+or a deviation with its own exception row. If a future run of the differ
+reports a row that is not in this table, that row is new and unclassified —
+treat it as a finding, not as noise.

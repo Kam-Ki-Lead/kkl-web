@@ -1,6 +1,6 @@
 # Phase 2 — exceptions awaiting a decision
 
-Four things the implementation does differently from the approved design, or
+Six things the implementation does differently from the approved design, or
 in addition to it. **None is closed by more frontend work.** Each names what
 happens, why, what the alternative costs, and who decides.
 
@@ -63,6 +63,20 @@ The trial was reverted.
 browser context and asserts the server still renders the original title, which
 is the check that "retained" has not quietly become "saved".
 
+For review rather than reproduction, captured at implementation commit
+`b95e81e`:
+
+- `evidence/e-p1/e-p1-back-forward-b95e81e.webm` — the whole sequence: edit →
+  Back (no dialog) → Forward → edits restored with the notice.
+- `evidence/e-p1/e-p1-frame-strip-b95e81e.png` — the same sequence as six
+  labelled frames, for reading without a video player.
+- `evidence/e-p1/raw/` — the unlabelled frames, including the independent
+  second-context view showing the server value unchanged and the in-app
+  navigation still raising the approved dialog.
+
+The earlier `…-011bade` set shows the previous implementation commit and is
+kept for provenance; the behaviour is identical.
+
 ### Decision needed
 
 **Accept the behaviour above as the B-15 experience**, or **fund the Cache
@@ -77,6 +91,12 @@ Components route**. Owner: the client, or the designer who specified B-15.
 Both are **applied** in the implementation and verified as rendered
 (`scripts/verify-contrast-corrections.mjs`, 12/12). Both are **reversible in
 one line**. What is open is the design's sign-off, not the code.
+
+Before/after crops at implementation commit `b95e81e`:
+`evidence/e-p2/e-p2-before-after-b95e81e.png`, with the unlabelled crops in
+`evidence/e-p2/raw/`. The "before" side is the **approved prototype** (P-04),
+so it does not change between commits; the label identifies the
+implementation side. The earlier `…-011bade` set is kept for provenance.
 
 ### E-P2a · Focus indicator
 
@@ -132,8 +152,11 @@ properties** cards.
 | Featured *properties* cards (Greenview, Lakeshore, Sundew) | **No band** | **Band present** |
 | P-03 gallery | Band present | Band present |
 
-Evidence: `visual/P-01-1440-photos-baseline.png` against
-`visual/P-01-1440-photos-implementation.png`.
+Evidence: `evidence/e-p3/e-p3-attribution-b95e81e.png` — all three affected
+screens, both sides, captured with the **real baseline photographs** (the
+capture script refuses to publish if any image did not load). Unlabelled
+per-screen captures in `evidence/e-p3/raw/`. The `…-011bade` set shows the
+same treatment on stand-in geometry images and is kept for provenance.
 
 ### Affected assets and screens
 
@@ -153,35 +176,110 @@ Screens affected: **P-01** (hero, 3 property cards, 2 project cards), **P-02**
 (results list), **P-03** (gallery). Only on the review-imagery path, which is
 **off by default**.
 
-### Why the band is there
+### Why the band is there — and what is actually required
 
-Unsplash's terms require visible attribution wherever their photographs
-appear. The baseline's own `image-slot.js` enforces exactly that — an Unsplash
-source with no credit renders an error tile instead of the photograph — and
-then the approved homepage puts uncredited Unsplash images on the property
-cards anyway. **The implementation attributes every slot because attributing
-some and not others is the failure mode the terms are about.**
+Stated precisely, because an earlier draft of this section overstated it:
+
+- **The Unsplash licence does not require attribution.** It grants use
+  without permission and says credit is appreciated. (Using the Unsplash
+  *API* would be different — the API terms do require a credit — but the
+  baseline references `images.unsplash.com` files directly, not through the
+  API.)
+- **The baseline's own `image-slot.js` does require it**: an Unsplash source
+  with no credit renders an error tile instead of the photograph. That is the
+  design's own rule, not the licence's.
+- The approved homepage then puts uncredited Unsplash photographs on the
+  property cards anyway — so the approved package contradicts its own loader.
+
+**So the band on every slot is a voluntary, conservative choice, not a
+licensing obligation.** The implementation attributes every slot because
+attributing some and not others contradicts the design's own loader rule, and
+because while third-party photographs are showing at all, a visible credit is
+the defensible default.
 
 ### Proposed treatment
 
 1. **Now:** keep the band on every slot. It only appears when review imagery
-   is switched on, and it is the conservative reading of the licence.
+   is switched on, and while third-party photographs are showing it is the
+   defensible default — the design's own loader rule, applied consistently.
 2. **Before launch:** the baseline states every image must be replaced with
    licensed project photography. When that lands, **remove the band from the
    property cards** so P-01 matches the approved composition — licensed
-   project photography carries no third-party attribution requirement.
+   project photography carries no third-party attribution consideration.
 
 ### Separate, and not the same question
 
-**Photographic fidelity is not compared at all**, and this exception says
-nothing about it. `images.unsplash.com` is denied by this environment's
-network policy, so slot **geometry** is compared with generated stand-ins that
-say "STAND-IN · not the baseline photograph" on their face. That is asset
-dependency **C-1**, not a design decision. See `visual/README.md`.
+**Photographic fidelity is a different question from attribution**, and this
+exception says nothing about it. The current evidence set
+(`evidence/e-p3/…-b95e81e.png`) was captured with the **real baseline
+photographs** — `images.unsplash.com` is reachable from the network this
+capture was run on — so the treatment is shown on the actual images, not on
+stand-ins. The earlier stand-in set (`evidence/e-p3/…-011bade.png`, labelled
+"STAND-IN · not the baseline photograph") established slot **geometry** only
+and is kept for provenance. See `visual/README.md`.
 
 ### Decision needed
 
 Confirm step 2, or ask for the band dropped from the property cards now.
 Owner: the designer.
+
+**Status: open.**
+
+---
+
+## E-P5 · B-02 renders inside the Builder console shell
+
+### The exact difference
+
+The approved **B-02** ("Company verification") is a **standalone light page**:
+the 20px ink wordmark at the top, a 30px/800 Archivo title, and
+document-upload cards on the page surface — the same pre-console treatment as
+the registration screens. The implementation renders B-02 **inside the
+Builder console shell**: dark rail, console header at 22px/700, the content
+in a panel.
+
+This was found by the differ (the wordmark and title rows it could not pair)
+and confirmed by direct measurement of the prototype. It is a **structural**
+difference, not a style one: which chrome the screen lives inside.
+
+### Why it was not simply restructured
+
+The implementation's choice is defensible — a verification-status screen
+reachable from the console arguably belongs in the console — and the approved
+choice is defensible too: verification is a pre-activation gate, and the
+approved flow draws it outside the console the applicant does not yet have.
+**That is a product decision, and it was not taken unilaterally.**
+
+### Decision needed
+
+Keep B-02 inside the console shell, or rebuild it as the approved standalone
+page. Owner: the designer.
+
+**Status: open.**
+
+---
+
+## E-P6 · B-07's listing cards have no photograph thumbnail
+
+### The exact difference
+
+The approved **B-07** listing rows are **cards with a left-hand image slot** —
+a photograph thumbnail beside the listing title. The implementation's rows
+are text-only: title, chips, locality, meta, actions.
+
+This is not a data gap: the sample listings carry `media: PropertyMedia[]`
+with URLs, and the public cards (P-01, P-02) already render image slots from
+the same data. It is a layout difference on one screen.
+
+### Why it was not simply added
+
+Adding an image column changes the approved row's height and density, and
+where the approved card puts the image relative to the chips and the enquiry
+count is a composition call. Recorded for a decision rather than guessed.
+
+### Decision needed
+
+Add the thumbnail to the B-07 rows per the approved card, or confirm the
+text-only row. Owner: the designer.
 
 **Status: open.**
