@@ -98,7 +98,9 @@ export default async function HomePage() {
                   href={`/search?locality=${locality.id}`}
                   className="rounded-[10px] border border-line bg-tint px-[16px] py-[14px] hover:border-brand"
                 >
-                  <span className="t-card-title block text-ink">{locality.name}</span>
+                  <span className="block font-[family-name:var(--font-heading)] text-[16px] font-bold tracking-[-0.01em] text-ink">
+                    {locality.name}
+                  </span>
                   <span className="t-caption text-muted">
                     {locality.listingCount} {locality.listingCount === 1 ? "listing" : "listings"}
                   </span>
@@ -220,7 +222,7 @@ function FindMyMatchPanel() {
   return (
     <section className="rounded-[12px] border border-[#F3DFB4] bg-[#FFF7E8] p-[24px]">
       <span className="t-eyebrow text-warning">Find my match</span>
-      <h2 className="t-heading mt-[8px] max-w-[22ch] text-ink">
+      <h2 className="t-section-title mt-[8px] max-w-[22ch] text-ink">
         Not sure where to start? Tell us what you need.
       </h2>
       <div className="mt-[12px] flex flex-wrap items-center justify-between gap-[18px]">
@@ -254,11 +256,13 @@ function GuestCard() {
           ◍
         </span>
         <div>
-          <p className="t-card-title text-ink">Guest</p>
-          <p className="t-caption text-muted">Not signed in</p>
+          <p className="font-[family-name:var(--font-heading)] text-[16px] font-bold tracking-[-0.01em] text-ink">
+            Guest
+          </p>
+          <p className="text-[14px] text-muted">Not signed in</p>
         </div>
       </div>
-      <p className="t-caption mt-[12px] text-body">
+      <p className="mt-[12px] text-[15px] leading-[1.6] text-body">
         Sign in to keep your shortlist and track enquiries and replies in one place.
       </p>
       <ButtonLink href="/auth" className="mt-[14px] w-full">
@@ -284,9 +288,9 @@ function RoleCard({
   return (
     <Card as="section" className="p-[18px]">
       <h2 className="t-card-title text-ink">{heading}</h2>
-      <p className="t-caption mt-[6px] text-body">{body}</p>
-      <p className="t-caption mt-[8px] text-muted">{note}</p>
-      <ButtonLink href={href} variant="secondary" className="mt-[14px] w-full">
+      <p className="mt-[6px] text-[15px] leading-[1.6] text-body">{body}</p>
+      <p className="mt-[8px] text-[14px] text-muted">{note}</p>
+      <ButtonLink href={href} variant="outline" className="mt-[14px] w-full">
         {cta}
       </ButtonLink>
     </Card>

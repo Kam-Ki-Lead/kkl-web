@@ -40,7 +40,7 @@ export function OnboardingShell({
         <Link href="/" aria-label="Kam Ki Lead — home">
           <Wordmark />
         </Link>
-        <p className="t-caption text-muted">Broker &amp; agency registration</p>
+        <p className="text-[15px] text-muted">Broker &amp; agency registration</p>
       </header>
 
       <main className="mx-auto max-w-[620px] px-[32px] py-[32px] max-[1060px]:px-[16px]">
@@ -57,7 +57,7 @@ export function OnboardingShell({
                     }`}
                   />
                   <span
-                    className={`t-label mt-[7px] block ${
+                    className={`t-label mt-[7px] block text-[13px] ${
                       state === "todo" ? "text-muted" : "text-ink"
                     }`}
                   >

@@ -47,7 +47,7 @@ export function RechargeForm({
       ) : null}
 
       <fieldset>
-        <legend className="t-label mb-[8px] text-ink">Choose an amount</legend>
+        <legend className="t-label mb-[8px] text-body">Choose an amount</legend>
         <div className="grid grid-cols-4 gap-[10px] max-[560px]:grid-cols-2">
           {PACKS.map((pack) => {
             const selected = parsed === pack;
@@ -57,10 +57,10 @@ export function RechargeForm({
                 type="button"
                 onClick={() => setAmount(String(pack))}
                 aria-pressed={selected}
-                className={`min-h-[48px] rounded-[8px] border-[1.5px] text-[16px] font-bold transition-[background-color,border-color,color] duration-150 ${
+                className={`min-h-[48px] rounded-[8px] border-[1.5px] text-[17px] font-bold transition-[background-color,border-color,color] duration-150 ${
                   selected
                     ? "border-brand bg-chip-neutral-bg text-brand"
-                    : "border-line bg-white text-ink hover:border-[#C6CCE0]"
+                    : "border-control-border bg-white text-ink hover:border-brand"
                 }`}
               >
                 {formatExactInr(pack)}
@@ -92,8 +92,10 @@ export function RechargeForm({
 
       <Card className="bg-tint p-[16px]">
         <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
-          <span className="text-[15px] text-muted">Credits after recharge</span>
-          <span className="text-[16px] font-bold text-ink">{formatCreditBalance(after)}</span>
+          <span className="text-[16px] text-body">Credits after recharge</span>
+          <span className="font-[family-name:var(--font-heading)] text-[16px] font-extrabold text-ink">
+            {formatCreditBalance(after)}
+          </span>
         </div>
         <p className="t-caption mt-[6px] text-muted">
           A preview of what the server will do with this amount. Your balance is whatever the
@@ -102,7 +104,7 @@ export function RechargeForm({
       </Card>
 
       <div>
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Contacting payment…" : "Continue to payment"}
         </Button>
         <p className="t-caption mt-[10px] text-muted">

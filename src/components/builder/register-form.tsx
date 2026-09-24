@@ -64,7 +64,7 @@ export function BuilderRegisterForm({ isSample }: { isSample: boolean }) {
             />
           </Field>
 
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" size="lg" disabled={pending}>
             {pending ? "Sending…" : "Send OTP"}
           </Button>
         </form>

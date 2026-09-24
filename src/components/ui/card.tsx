@@ -111,7 +111,7 @@ export function SectionHeader({
         >
           {title}
         </h2>
-        {subtitle ? <p className="t-caption mt-[3px] text-muted">{subtitle}</p> : null}
+        {subtitle ? <p className="mt-[3px] text-[14px] text-muted">{subtitle}</p> : null}
       </div>
       {action}
     </div>

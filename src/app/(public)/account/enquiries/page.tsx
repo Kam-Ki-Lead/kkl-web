@@ -20,7 +20,9 @@ export function enquiryStatusChip(status: BuyerEnquiry["status"]): {
     case "closed":
       return { tone: "muted", label: "Closed" };
     default:
-      return { tone: "neutral", label: "Awaiting builder" };
+      // The approved P-13 draws this waiting state in the warning tone
+      // (#8A4A08 on its tint), not the neutral brand one.
+      return { tone: "warning", label: "Awaiting builder" };
   }
 }
 

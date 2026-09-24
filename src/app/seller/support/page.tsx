@@ -12,11 +12,13 @@ import type { SupportTicket } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Support" };
 
+/* The approved tones: "Support replied" is the green one (something arrived),
+   "Resolved" is the quiet slate one (nothing more will). They were swapped. */
 const STATUS: Record<SupportTicket["status"], { label: string; tone: ChipTone }> = {
   open: { label: "Open", tone: "neutral" },
   awaiting_reply: { label: "Awaiting your reply", tone: "warning" },
-  replied: { label: "Support replied", tone: "neutral" },
-  resolved: { label: "Resolved", tone: "success" },
+  replied: { label: "Support replied", tone: "success" },
+  resolved: { label: "Resolved", tone: "muted" },
 };
 
 /** S-22 — the Seller's tickets. */
@@ -30,13 +32,19 @@ export default async function SupportPage() {
           <p className="text-[16px] font-bold text-ink">
             {tickets.length} {tickets.length === 1 ? "ticket" : "tickets"}
           </p>
-          <ButtonLink href="/seller/support/new">New ticket</ButtonLink>
+          <ButtonLink href="/seller/support/new" size="action">
+            New ticket
+          </ButtonLink>
         </div>
 
         {tickets.length === 0 ? (
           <StateMessage
             title="You have not opened a ticket"
-            action={<ButtonLink href="/seller/support/new">New ticket</ButtonLink>}
+            action={
+              <ButtonLink href="/seller/support/new" size="action">
+                New ticket
+              </ButtonLink>
+            }
           >
             Raise one about lead quality, payments and credits, KYC, or anything else. Replies
             appear on the ticket.
@@ -49,7 +57,7 @@ export default async function SupportPage() {
                 <li key={ticket.reference}>
                   <Card className="flex flex-wrap items-center justify-between gap-[12px] p-[18px]">
                     <div className="min-w-0">
-                      <h2 className="t-card-title text-ink">
+                      <h2 className="font-[family-name:var(--font-heading)] text-[16px] font-bold tracking-[-0.01em] text-ink">
                         <Link
                           href={`/seller/support/${ticket.reference}`}
                           className="underline-offset-2 hover:underline"
@@ -57,8 +65,11 @@ export default async function SupportPage() {
                           {ticket.subject}
                         </Link>
                       </h2>
-                      <p className="t-caption mt-[2px] text-muted">
-                        <span className="t-mono">{ticket.reference}</span> · {ticket.topic} ·{" "}
+                      {/* The approved ticket subline is 14px Public Sans,
+                          reference included — mono references are the Admin
+                          console's treatment, not this one. */}
+                      <p className="mt-[2px] text-[14px] text-muted">
+                        {ticket.reference} · {ticket.topic} ·{" "}
                         {ticket.status === "resolved" ? "Closed" : "Updated"}{" "}
                         {formatDate(ticket.updatedAt)}
                       </p>

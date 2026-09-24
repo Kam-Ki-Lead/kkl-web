@@ -21,11 +21,12 @@ export default function BuilderRegisterPage() {
         <Link href="/" aria-label="Kam Ki Lead — home">
           <Wordmark />
         </Link>
-        <p className="t-caption text-muted">Builder registration</p>
+        {/* 15px, as the approved B-01 header sets it — not the 13px caption. */}
+        <p className="text-[15px] text-muted">Builder registration</p>
       </header>
 
       <main className="mx-auto max-w-[620px] px-[32px] py-[32px] max-[1060px]:px-[16px]">
-        <h1 className="t-title text-ink">Register as a builder</h1>
+        <h1 className="t-flow-title text-ink">Register as a builder</h1>
         <p className="t-body mt-[8px] text-body">
           Your mobile number is your login. After registration you submit company documents for
           verification; an administrator approves the account before you can publish a listing.

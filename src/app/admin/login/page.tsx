@@ -29,10 +29,12 @@ export default function AdminLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-deep px-4 py-[40px]">
       <Card className="w-full max-w-[420px] p-[28px]">
-        <Wordmark />
+        {/* The approved staff sign-in uses the small (19px) wordmark and a
+            26px/800 title, not the public-header sizes. */}
+        <Wordmark size="sm" />
 
         <p className="t-eyebrow mt-[18px] text-muted">Internal operations</p>
-        <h1 className="t-title mt-[8px] text-ink">Staff sign-in</h1>
+        <h1 className="t-heading mt-[8px] text-ink">Staff sign-in</h1>
         <p className="t-body mt-[8px] text-body">
           Accounts are created by an administrator. There is no self-registration and no public
           route to this screen.

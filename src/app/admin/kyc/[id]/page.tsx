@@ -69,7 +69,7 @@ export default async function AdminKycReviewPage({
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div className="min-w-0">
-              <p className="t-mono text-[13px] text-muted">{application.id}</p>
+              <p className="t-mono text-[12px] text-muted">{application.id}</p>
               <h2 className="t-heading mt-[2px] text-ink">{application.applicantName}</h2>
               <p className="t-body text-body">{application.roleLabel}</p>
             </div>
@@ -142,7 +142,7 @@ export default async function AdminKycReviewPage({
                 >
                   <div className="flex flex-wrap items-center justify-between gap-[10px]">
                     <div className="min-w-0">
-                      <p className="text-[15px] font-semibold text-ink">{document.title}</p>
+                      <p className="text-[15px] font-bold text-ink">{document.title}</p>
                       <p className="t-caption text-muted">{document.fileLabel}</p>
                     </div>
                     <Chip tone={verdict?.tone ?? "muted"}>{verdict?.label ?? "Not checked"}</Chip>
@@ -197,7 +197,7 @@ export default async function AdminKycReviewPage({
                     disabled={decided}
                     data-check={check.key}
                     aria-pressed={check.done}
-                    className={`flex w-full items-center gap-[11px] rounded-[8px] border px-[14px] py-[11px] text-left text-[15px] disabled:cursor-not-allowed ${
+                    className={`flex w-full items-center gap-[11px] rounded-[8px] border px-[14px] py-[11px] text-left text-[14px] disabled:cursor-not-allowed ${
                       check.done ? "border-[#D4DBF3] bg-tint" : "border-line bg-white"
                     }`}
                   >

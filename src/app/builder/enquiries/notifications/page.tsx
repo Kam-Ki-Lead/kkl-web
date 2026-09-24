@@ -27,19 +27,24 @@ export default function NotificationStatesPage() {
           <p className="t-caption mt-[2px] text-muted">
             Shown while the Builder is in the console. A specimen — nothing is delivered here.
           </p>
-          <div className="mt-[14px] flex items-start gap-[12px] rounded-[10px] border border-line bg-brand-deep p-[16px]">
-            <span aria-hidden="true" className="text-[18px] text-white">
+          {/* The approved toast is ink, not brand: saffron icon chip, white
+              title, #C6CCE0 body and a white "View" button. */}
+          <div className="mt-[14px] flex items-start gap-[12px] rounded-[10px] bg-ink p-[16px]">
+            <span
+              aria-hidden="true"
+              className="flex h-[32px] w-[32px] flex-none items-center justify-center rounded-[6px] bg-saffron text-[16px] text-ink"
+            >
               ✉
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-[15px] font-bold text-white">
                 New enquiry · Greenview Residency
               </p>
-              <p className="t-caption mt-[1px] text-rail-seller-item">
+              <p className="mt-[1px] text-[14px] text-[#C6CCE0]">
                 A buyer has asked about 3 BHK availability.
               </p>
             </div>
-            <span className="t-caption flex-none font-bold text-white underline underline-offset-2">
+            <span className="flex-none rounded-[6px] bg-white px-[14px] py-[9px] text-[14px] font-bold text-ink">
               View
             </span>
           </div>

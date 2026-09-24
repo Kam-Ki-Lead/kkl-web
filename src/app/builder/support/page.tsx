@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Support" };
 const STATUS: Record<SupportTicket["status"], { label: string; tone: ChipTone }> = {
   open: { label: "Open", tone: "neutral" },
   awaiting_reply: { label: "Awaiting your reply", tone: "warning" },
-  replied: { label: "Support replied", tone: "neutral" },
+  replied: { label: "Support replied", tone: "success" },
   resolved: { label: "Resolved", tone: "success" },
 };
 
@@ -30,13 +30,19 @@ export default async function SupportPage() {
           <p className="text-[16px] font-bold text-ink">
             {tickets.length} {tickets.length === 1 ? "ticket" : "tickets"}
           </p>
-          <ButtonLink href="/builder/support/new">New ticket</ButtonLink>
+          <ButtonLink href="/builder/support/new" size="action">
+            New ticket
+          </ButtonLink>
         </div>
 
         {tickets.length === 0 ? (
           <StateMessage
             title="You have not opened a ticket"
-            action={<ButtonLink href="/builder/support/new">New ticket</ButtonLink>}
+            action={
+              <ButtonLink href="/builder/support/new" size="action">
+                New ticket
+              </ButtonLink>
+            }
           >
             Raise one about lead quality, payments and credits, KYC, or anything else. Replies
             appear on the ticket.

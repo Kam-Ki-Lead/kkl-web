@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Register as a broker" };
 export default function SellerRegisterPage() {
   return (
     <OnboardingShell step="register">
-      <h1 className="t-title text-ink">Register as a broker</h1>
+      <h1 className="t-flow-title text-ink">Register as a broker</h1>
       <p className="t-body mt-[8px] text-body">
         Your mobile number is your login. After registration you submit PAN and Aadhaar for
         verification; an administrator approves the account before you can buy leads.

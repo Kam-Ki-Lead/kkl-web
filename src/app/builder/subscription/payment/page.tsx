@@ -26,7 +26,7 @@ export default async function SubscriptionPaymentPage() {
         <div className="max-w-[640px]">
           <div className="flex flex-wrap items-center gap-[12px]">
             <Chip tone="success">✓ Active</Chip>
-            <h2 className="t-title text-ink">Your subscription is active</h2>
+            <h2 className="t-flow-title text-ink">Your subscription is active</h2>
           </div>
           <p className="t-body mt-[8px] text-body">
             Publishing is unlocked. Listings you publish stay visible on the public portal while

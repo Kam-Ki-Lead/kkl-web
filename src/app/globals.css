@@ -74,9 +74,25 @@
   --color-chip-success-bg: #e3f3ea;
   --color-chip-success-fg: #0e6b45;
   --color-chip-danger-bg: #fdecea;
-  --color-chip-danger-fg: #b3261e;
+  /*
+   * Danger chip/panel foreground is #7A2119 in the approved screens — a darker
+   * red than the #B3261E used for error text and destructive actions. The two
+   * reds are both in the baseline, in distinct roles; this token had collapsed
+   * them into one. #7A2119 on #FDECEA is about 9:1, so the correction also
+   * improves contrast.
+   */
+  --color-chip-danger-fg: #7a2119;
   --color-chip-muted-bg: #f0f2f9;
-  --color-chip-muted-fg: #5a6480;
+  /*
+   * The approved screens render muted-chip text in slate #3C4763, not in the
+   * body-muted #5A6480 this token previously held — #F0F2F9 + #3C4763 is the
+   * pair the Seller, Builder and inventory sources all write. Slate is also a
+   * text colour in its own right (secondary headings such as S-08's "Contact
+   * details", help text), so it gets a named token and the chip points at the
+   * same value.
+   */
+  --color-slate: #3c4763;
+  --color-chip-muted-fg: #3c4763;
 
   --font-heading: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
@@ -103,6 +119,18 @@
     font-family: var(--font-heading);
     font-weight: 800;
     font-size: 26px;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+  /*
+   * The focused-flow title — registration, KYC, lead detail, subscription
+   * status (S-01…S-04, S-08, B-02, B-03). The approved screens render these
+   * at 30px/800, one step below the portal's 34px subject title.
+   */
+  .t-flow-title {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 30px;
     line-height: 1.15;
     letter-spacing: -0.03em;
   }
@@ -161,11 +189,34 @@
     line-height: 1.3;
     letter-spacing: -0.01em;
   }
+  /*
+   * A sixth measured step, below the public section heading and above the
+   * card title: P-03's detail sections ("Specifications", "Amenities") and
+   * the consoles' empty-state headings (S-12, B-21) render at 19px/700.
+   */
+  .t-subsection {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
   .t-body {
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: 16px;
     line-height: 1.65;
+  }
+  /*
+   * C-02: "Body copy is 16px in the public portal and 15px in the dashboards."
+   * Console body text — transcript lines, audit rows, ledger descriptions —
+   * takes this step, measured on A-25, A-28, S-14 and A-11.
+   */
+  .t-body-sm {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.6;
   }
   .t-label {
     font-family: var(--font-sans);

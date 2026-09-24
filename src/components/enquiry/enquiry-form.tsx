@@ -85,7 +85,8 @@ export function EnquiryForm({
       </Field>
 
       <div className="flex flex-wrap items-center gap-[18px]">
-        <Button type="submit" disabled={pending}>
+        {/* lg, like the baseline's other form submissions ("Send OTP"). */}
+        <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Sending…" : kind === "site_visit" ? "Request site visit" : "Send enquiry"}
         </Button>
         <Link
@@ -96,7 +97,7 @@ export function EnquiryForm({
         </Link>
       </div>
 
-      <p className="t-caption text-muted">
+      <p className="text-[14px] text-muted">
         Next: we verify your number by OTP. Your details stay filled in.
       </p>
     </form>

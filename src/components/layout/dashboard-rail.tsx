@@ -36,6 +36,14 @@ export type RailItem = {
    */
   readonly match?: "prefix" | "exact";
   /**
+   * A child path that belongs to a sibling item and must not activate this
+   * one. The Admin rail's "Leads" is /admin/leads and "Lead intake" is
+   * /admin/leads/intake: plain prefix matching would light both on an intake
+   * screen, and "exact" was leaving "Leads" dark on a lead detail screen —
+   * which the approved A-13 shows lit.
+   */
+  readonly excludePrefix?: string;
+  /**
    * The rail heading this item sits under (A-02's grouped navigation).
    *
    * The Admin rail has nine groups because it has twenty destinations; the
@@ -55,6 +63,7 @@ export type RailFooter = {
 
 function isActive(item: RailItem, pathname: string): boolean {
   if (item.match === "exact") return pathname === item.href;
+  if (item.excludePrefix && pathname.startsWith(item.excludePrefix)) return false;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
@@ -199,7 +208,7 @@ function RailFooterCard({ footer }: { footer: RailFooter }) {
         /* Saffron on a surface is used sparingly, per C-01. The approved rail is
            one of the two places it appears filled — the other is the homepage
            hero — and it carries a short label in ink, not body text. */
-        className="mt-[12px] flex min-h-[44px] items-center justify-center rounded-[8px] bg-saffron px-[14px] text-[15px] font-bold text-ink transition-[background-color] duration-150 hover:bg-[#DE9309]"
+        className="mt-[12px] flex min-h-[44px] items-center justify-center rounded-[8px] bg-saffron px-[14px] text-[14px] font-bold text-ink transition-[background-color] duration-150 hover:bg-[#DE9309]"
       >
         {footer.actionLabel}
       </Link>

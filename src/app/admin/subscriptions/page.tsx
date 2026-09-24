@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { AdminTable, Mono, Primary } from "@/components/admin/admin-table";
+import { AdminTable, Primary } from "@/components/admin/admin-table";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { getServices } from "@/lib/services";
 import type { AdminSubscription } from "@/lib/domain/admin";
@@ -73,9 +73,7 @@ export default async function AdminSubscriptionsPage({
           key: sub.id,
           href: `/admin/users/${sub.accountId}`,
           cells: [
-            <Primary key="org" sub={<Mono>{sub.accountId}</Mono>}>
-              {sub.organisation}
-            </Primary>,
+            <Primary key="org" sub={sub.accountId}>{sub.organisation}</Primary>,
             sub.startedAt,
             <Chip key="state" tone={STATE[sub.state].tone}>
               {STATE[sub.state].label}

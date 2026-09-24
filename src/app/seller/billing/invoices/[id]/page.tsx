@@ -130,7 +130,7 @@ function Party({
 }) {
   return (
     <div>
-      <h3 className="t-label text-muted">{heading}</h3>
+      <h3 className="text-[12px] text-muted">{heading}</h3>
       <p className="mt-[4px] text-[15px] font-bold text-ink">{party.name}</p>
       {party.addressLines.map((line) => (
         <p key={line} className="text-[15px] text-body">

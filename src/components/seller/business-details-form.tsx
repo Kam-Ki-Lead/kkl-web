@@ -51,7 +51,7 @@ export function BusinessDetailsForm({ account }: { account: SellerAccount }) {
         <p className="t-body mt-[6px] text-body">
           Next: PAN and Aadhaar, which an administrator reviews before you can buy leads.
         </p>
-        <ButtonLink href="/seller/kyc" className="mt-[14px]">
+        <ButtonLink href="/seller/kyc" size="lg" className="mt-[14px]">
           Continue to KYC
         </ButtonLink>
       </div>
@@ -85,7 +85,7 @@ export function BusinessDetailsForm({ account }: { account: SellerAccount }) {
       </Field>
 
       <fieldset>
-        <legend className="t-label mb-[8px] text-ink">Areas you work in</legend>
+        <legend className="t-label mb-[8px] text-body">Areas you work in</legend>
         {err.areas ? (
           <p id="areas-error" className="t-caption mb-[8px] text-danger">
             {err.areas}
@@ -99,7 +99,7 @@ export function BusinessDetailsForm({ account }: { account: SellerAccount }) {
                 key={area}
                 className={`inline-flex min-h-[40px] cursor-pointer items-center gap-[8px] rounded-full border-[1.5px] px-[14px] text-[15px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   selected
-                    ? "border-brand bg-chip-neutral-bg text-brand"
+                    ? "border-brand bg-brand text-white"
                     : "border-line bg-white text-body hover:border-[#C6CCE0]"
                 }`}
               >
@@ -140,10 +140,10 @@ export function BusinessDetailsForm({ account }: { account: SellerAccount }) {
       </Field>
 
       <div className="flex flex-wrap items-center gap-[12px]">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Saving…" : "Continue to KYC"}
         </Button>
-        <ButtonLink href="/seller/register" variant="secondary">
+        <ButtonLink href="/seller/register" variant="quiet" size="action">
           Back
         </ButtonLink>
       </div>

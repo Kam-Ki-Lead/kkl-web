@@ -465,7 +465,7 @@ export function SaveDraftButton() {
       type="submit"
       form={context?.formId ?? SECTION_FORM_FALLBACK_ID}
       variant="secondary"
-      size="sm"
+      size="action"
     >
       {settled ? "Draft saved" : "Save draft"}
     </Button>

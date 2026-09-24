@@ -74,7 +74,7 @@ export function SellerProfileForm({
         </Field>
 
         <fieldset className="flex flex-col gap-[10px]">
-          <legend className="t-label mb-[4px] text-ink">Alert me when</legend>
+          <legend className="t-label mb-[4px] text-body">Alert me when</legend>
           <AlertToggle
             name="newLeadsInMyAreas"
             label="New leads match my areas"

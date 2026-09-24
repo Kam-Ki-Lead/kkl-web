@@ -25,11 +25,11 @@ export default async function BillingPage() {
       <div className="flex flex-col gap-[18px]">
         <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-[18px] max-[1200px]:grid-cols-1">
           <Card className="p-[22px]">
-            <p className="t-caption text-muted">Available balance</p>
+            <p className="text-[14px] text-muted">Available balance</p>
             <p className="t-title mt-[2px] text-ink">
               {formatCreditBalance(wallet.balanceCredits)}
             </p>
-            <p className="t-body mt-[6px] text-body">
+            <p className="t-body-sm mt-[6px] text-body">
               1 rupee = 1 credit. Credits are deducted when a lead purchase succeeds.
             </p>
             <div className="mt-[16px] flex flex-wrap gap-[10px]">
@@ -49,7 +49,12 @@ export default async function BillingPage() {
               expired credits can be restored are not decided. Nothing is shown to sellers until
               they are.
             </p>
-            <ButtonLink href="/seller/billing/expiry" variant="secondary" className="mt-[14px]">
+            <ButtonLink
+              href="/seller/billing/expiry"
+              variant="secondary"
+              size="action"
+              className="mt-[14px]"
+            >
               See the proposed states
             </ButtonLink>
             <p className="t-caption mt-[10px] text-muted">{DECISIONS["D-04"].question} — D-04</p>
@@ -84,16 +89,18 @@ export default async function BillingPage() {
                   className="flex flex-wrap items-baseline justify-between gap-[10px] border-b border-line px-[22px] py-[14px] last:border-b-0"
                 >
                   <span>
-                    <span className="block text-[15px] font-bold text-ink">
+                    <span className="block text-[15px] font-semibold text-ink">
                       {entry.description}
                     </span>
-                    <span className="t-caption block text-muted">
-                      {formatDate(entry.occurredAt)} ·{" "}
-                      <span className="t-mono">{entry.id}</span>
+                    {/* The approved ledger subline is 14px Public Sans, reference
+                        included — the mono treatment the screens actually use for
+                        references is the Admin console's, not this one. */}
+                    <span className="block text-[14px] text-muted">
+                      {formatDate(entry.occurredAt)} · {entry.id}
                     </span>
                   </span>
                   <span
-                    className={`text-[15px] font-bold ${
+                    className={`font-[family-name:var(--font-heading)] text-[15px] font-extrabold ${
                       entry.deltaCredits < 0 ? "text-danger" : "text-success"
                     }`}
                   >

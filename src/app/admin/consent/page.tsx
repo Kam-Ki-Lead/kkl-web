@@ -50,10 +50,11 @@ export default async function AdminConsentPage() {
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
                   <span className="t-mono text-[14px] text-ink">{entry.maskedNumber}</span>
-                  <span className="t-caption text-muted">{entry.when}</span>
+                  {/* The approved list sets dates and basis lines at 15px. */}
+                  <span className="text-[15px] text-muted">{entry.when}</span>
                 </div>
                 <p className="mt-[3px] text-[15px] font-semibold text-ink">{entry.source}</p>
-                <p className="t-body mt-[2px] text-body">{entry.basis}</p>
+                <p className="t-body-sm mt-[2px] text-body">{entry.basis}</p>
               </li>
             ))}
           </ul>
@@ -62,7 +63,7 @@ export default async function AdminConsentPage() {
         <div className="grid grid-cols-2 gap-[16px] max-[900px]:grid-cols-1">
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">What a suppression stops</h2>
-            <ul className="t-body mt-[8px] flex list-disc flex-col gap-[5px] pl-[20px] text-body">
+            <ul className="t-body-sm mt-[8px] flex list-disc flex-col gap-[5px] pl-[20px] text-body">
               {effects.map((effect) => (
                 <li key={effect}>{effect}</li>
               ))}

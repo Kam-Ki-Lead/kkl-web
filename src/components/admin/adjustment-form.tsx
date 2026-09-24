@@ -67,7 +67,7 @@ export function AdjustmentForm({
         ) : null}
 
         <fieldset className="flex flex-col gap-[8px]">
-          <legend className="t-label text-ink">Direction</legend>
+          <legend className="t-label text-body">Direction</legend>
           {DIRECTIONS.map((option) => {
             const active = direction === option.key;
             return (
@@ -91,7 +91,12 @@ export function AdjustmentForm({
                   >
                     {option.label}
                   </span>
-                  <span className="t-caption block text-muted">{option.note}</span>
+                  {/* The approved notes are not one colour: the credit note is
+                      slate #3C4763, the debit note the muted caption. Matched
+                      as approved rather than harmonised. */}
+                  <span className={`t-caption block ${option.key === "credit" ? "text-slate" : "text-muted"}`}>
+                    {option.note}
+                  </span>
                 </span>
               </label>
             );

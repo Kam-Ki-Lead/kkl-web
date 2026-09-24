@@ -54,7 +54,9 @@ export default async function AdminTicketPage({
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div className="min-w-0">
-              <p className="t-mono text-[13px] text-muted">{thread.reference}</p>
+              {/* The approved ticket header sets the reference in 14px
+                  Public Sans, not mono. */}
+              <p className="text-[14px] text-muted">{thread.reference}</p>
               <h2 className="t-heading mt-[2px] text-ink">{thread.subject}</h2>
               <p className="t-body text-body">
                 {thread.requesterName} · {thread.requesterRole}

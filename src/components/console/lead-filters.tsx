@@ -54,7 +54,7 @@ export function LeadFilters({
         <input type="hidden" name="sort" value={params.get("sort") as string} />
       ) : null}
 
-      <Field id="lead-area" label="Area">
+      <Field id="lead-area" label="Area" labelSize="sm">
         <Select id="lead-area" name="area" defaultValue={value("area", "All areas")} onChange={submit}>
           {options.areas.map((a) => (
             <option key={a} value={a}>
@@ -64,7 +64,7 @@ export function LeadFilters({
         </Select>
       </Field>
 
-      <Field id="lead-budget" label="Budget band">
+      <Field id="lead-budget" label="Budget band" labelSize="sm">
         <Select
           id="lead-budget"
           name="budget"
@@ -79,7 +79,7 @@ export function LeadFilters({
         </Select>
       </Field>
 
-      <Field id="lead-config" label="Configuration">
+      <Field id="lead-config" label="Configuration" labelSize="sm">
         <Select
           id="lead-config"
           name="config"
@@ -94,7 +94,7 @@ export function LeadFilters({
         </Select>
       </Field>
 
-      <Field id="lead-score" label="Qualification">
+      <Field id="lead-score" label="Qualification" labelSize="sm">
         <Select id="lead-score" name="score" defaultValue={value("score", "")} onChange={submit}>
           <option value="">Any score</option>
           <option value="80">80 and above</option>

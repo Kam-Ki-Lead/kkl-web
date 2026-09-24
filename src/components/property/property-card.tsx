@@ -40,7 +40,14 @@ export function PropertyCard({
       </div>
 
       <div className="flex flex-1 flex-col p-[14px]">
-        {price ? <p className="t-figure text-ink">{price}</p> : null}
+        {/* The approved portal cards lead with the price at 24px/800 (P-01);
+            P-02 and P-10 render the same element at 23px — a 1px wobble inside
+            the baseline itself, recorded in visual-differences.md. */}
+        {price ? (
+          <p className="font-[family-name:var(--font-heading)] text-[24px] font-extrabold leading-[1.2] tracking-[-0.025em] text-ink">
+            {price}
+          </p>
+        ) : null}
         <h3 className="t-panel-title mt-[2px] text-ink">
           <Link href={`/property/${property.slug}`} className="hover:text-brand">
             {property.title}
@@ -48,7 +55,7 @@ export function PropertyCard({
         </h3>
         <p className="t-caption mt-[2px] text-muted">{locality}</p>
 
-        <p className="t-caption mt-[8px] text-body">
+        <p className="mt-[8px] text-[15px] text-body">
           {formatConfigurations(property.configurations)}
           {area ? ` · ${area}` : ""}
         </p>
@@ -156,13 +163,18 @@ export function ProjectCard({ property }: { property: PropertySummary }) {
           </Link>
         </h3>
         <p className="t-caption mt-[2px] text-muted">{locality}</p>
-        <p className="t-caption mt-[8px] text-body">
+        <p className="mt-[8px] text-[15px] text-body">
           {formatConfigurations(property.configurations)} apartments
           {property.areaSummary ? ` · ${property.areaSummary}` : ""}
         </p>
-        {price ? <p className="t-figure mt-[8px] text-ink">{price}</p> : null}
+        {/* The wide project card leads its price at 20px/800 on P-01. */}
+        {price ? (
+          <p className="mt-[8px] font-[family-name:var(--font-heading)] text-[20px] font-extrabold leading-[1.2] tracking-[-0.025em] text-ink">
+            {price}
+          </p>
+        ) : null}
         {property.possession ? (
-          <p className="t-caption text-muted">Possession {property.possession}</p>
+          <p className="text-[14px] text-muted">Possession {property.possession}</p>
         ) : null}
       </div>
     </article>

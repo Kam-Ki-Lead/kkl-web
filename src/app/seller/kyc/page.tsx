@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Verify your identity" };
 export default function SellerKycPage() {
   return (
     <OnboardingShell step="kyc">
-      <h1 className="t-title text-ink">Verify your identity</h1>
+      <h1 className="t-flow-title text-ink">Verify your identity</h1>
       <p className="t-body mt-[8px] text-body">
         PAN and Aadhaar are required by the platform before any lead can be purchased. Documents
         are reviewed by an administrator.

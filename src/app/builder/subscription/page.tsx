@@ -62,7 +62,7 @@ export default async function BuilderSubscriptionPage() {
         <div className="flex flex-col gap-[16px]">
           <Card className="p-[22px]">
             <Chip tone={panel.tone}>{panel.chip}</Chip>
-            <h2 className="t-heading mt-[10px] text-ink">{panel.title}</h2>
+            <h2 className="t-flow-title mt-[10px] text-ink">{panel.title}</h2>
             <p className="t-body mt-[6px] text-body">{panel.body}</p>
 
             <dl className="mt-[18px] grid grid-cols-2 gap-[14px] rounded-[10px] border border-line bg-tint p-[16px] max-[560px]:grid-cols-1">

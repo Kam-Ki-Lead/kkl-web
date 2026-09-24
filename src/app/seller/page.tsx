@@ -60,7 +60,7 @@ export default async function SellerDashboardPage() {
               <h2 className="t-panel-title text-ink">New leads matching your areas</h2>
               <Link
                 href="/seller/leads"
-                className="text-[15px] font-bold text-brand underline underline-offset-2"
+                className="text-[14px] font-bold text-brand underline underline-offset-2"
               >
                 Open marketplace →
               </Link>
@@ -92,7 +92,7 @@ export default async function SellerDashboardPage() {
               <p className="t-caption mt-[2px] text-muted">
                 {DECISIONS["D-04"].pendingCopy}
               </p>
-              <ButtonLink href="/seller/billing/recharge" className="mt-[14px] w-full">
+              <ButtonLink href="/seller/billing/recharge" size="action" className="mt-[14px] w-full">
                 Recharge credits
               </ButtonLink>
             </Card>

@@ -89,12 +89,15 @@ export default async function AdminPropertiesPage({
                       <div className="min-w-0">
                         <span className="flex flex-wrap items-baseline gap-[9px]">
                           <span className="t-mono text-[13px] text-muted">{listing.id}</span>
-                          <span className="text-[16px] font-bold text-ink">{listing.name}</span>
+                          {/* The approved queue sets listing names in Archivo. */}
+                          <span className="font-[family-name:var(--font-heading)] text-[16px] font-bold text-ink">
+                            {listing.name}
+                          </span>
                         </span>
                         <span className="t-body mt-[2px] block text-body">
                           {listing.builder} · {listing.locality}
                         </span>
-                        <span className="t-caption mt-[2px] block text-muted">{listing.note}</span>
+                        <span className="mt-[2px] block text-[14px] text-muted">{listing.note}</span>
                       </div>
                       <div className="flex flex-none flex-col items-end gap-[6px]">
                         <Chip tone={chip.tone}>{chip.label}</Chip>

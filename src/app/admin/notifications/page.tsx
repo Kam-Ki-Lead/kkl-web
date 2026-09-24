@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { AdminTable, Mono, Primary } from "@/components/admin/admin-table";
+import { AdminTable, Primary } from "@/components/admin/admin-table";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { getServices } from "@/lib/services";
 import type { NotificationRecord } from "@/lib/domain/admin";
@@ -74,7 +74,7 @@ export default async function AdminNotificationsPage({
           href: null,
           cells: [
             notification.when,
-            <Primary key="to" sub={<Mono>{notification.recipientNumber}</Mono>}>
+            <Primary key="to" sub={notification.recipientNumber}>
               {notification.recipientName}
             </Primary>,
             notification.channel,

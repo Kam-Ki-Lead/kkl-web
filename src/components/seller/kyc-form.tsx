@@ -70,7 +70,7 @@ export function KycForm({ isSample }: { isSample: boolean }) {
       </Card>
 
       <div>
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Submitting…" : "Submit for verification"}
         </Button>
         <p className="t-caption mt-[10px] text-muted">
@@ -98,7 +98,7 @@ function DocumentSlot({
       <div className="flex flex-wrap items-start justify-between gap-[10px]">
         <div>
           <h2 className="t-card-title text-ink">{title}</h2>
-          <p className="t-caption mt-[1px] text-muted">{hint}</p>
+          <p className="mt-[1px] text-[14px] text-muted">{hint}</p>
         </div>
         <Chip tone="muted">Required</Chip>
       </div>

@@ -43,7 +43,7 @@ export default async function AdminIntakeRunPage({
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-baseline justify-between gap-[12px]">
             <div>
-              <p className="t-mono text-[13px] text-muted">{run.id}</p>
+              <p className="t-mono text-[12px] text-muted">{run.id}</p>
               <h2 className="t-heading mt-[2px] text-ink">{run.source}</h2>
               <p className="t-caption text-muted">{run.when}</p>
             </div>
@@ -76,10 +76,10 @@ export default async function AdminIntakeRunPage({
               >
                 <div className="flex flex-wrap items-baseline gap-[12px]">
                   <span className="t-mono text-[13px] text-muted">row {rejection.row}</span>
-                  <span className="t-mono text-[13px] text-ink">{rejection.maskedNumber}</span>
+                  <span className="t-mono text-[13px] text-body">{rejection.maskedNumber}</span>
                   <span className="text-[15px] font-semibold text-ink">{rejection.field}</span>
                 </div>
-                <p className="t-body mt-[3px] text-body">{rejection.why}</p>
+                <p className="t-body-sm mt-[3px] text-body">{rejection.why}</p>
               </li>
             ))}
           </ul>

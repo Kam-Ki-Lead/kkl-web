@@ -65,7 +65,7 @@ export function TicketReplyForm({
         </Field>
 
         <div>
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" size="action" disabled={pending}>
             {pending ? "Sending…" : "Send reply"}
           </Button>
         </div>
@@ -75,7 +75,7 @@ export function TicketReplyForm({
         <form action={resolveTicket}>
           <input type="hidden" name="reference" value={reference} />
           <input type="hidden" name="scope" value={scope} />
-          <Button type="submit" variant="secondary">
+          <Button type="submit" variant="secondary" size="action">
             Mark as resolved
           </Button>
         </form>

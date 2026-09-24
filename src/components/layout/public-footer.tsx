@@ -42,7 +42,7 @@ export function PublicFooter() {
         <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-[28px] max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
           <div>
             <Wordmark size="sm" onDark />
-            <p className="t-caption mt-[12px] max-w-[34ch] text-[#B9C3EC]">
+            <p className="mt-[12px] max-w-[34ch] text-[15px] leading-[1.6] text-[#B9C3EC]">
               A property portal for Kolkata, and a lead marketplace for verified brokers and
               builders.
             </p>
@@ -50,7 +50,7 @@ export function PublicFooter() {
 
           {COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h2 className="t-label text-white">{col.heading}</h2>
+              <h2 className="text-[15px] font-bold text-white">{col.heading}</h2>
               <ul className="mt-[12px] flex flex-col gap-[8px]">
                 {col.links.map(([label, href]) => (
                   <li key={label}>
@@ -67,9 +67,9 @@ export function PublicFooter() {
           ))}
         </div>
 
-        <div className="mt-[28px] flex flex-wrap items-center justify-between gap-[12px] border-t border-[#2A4199] pt-[16px]">
-          <p className="t-caption text-[#B9C3EC]">© 2026 Kam Ki Lead</p>
-          <p className="t-caption text-[#B9C3EC]">Kolkata · New Town · Rajarhat · Salt Lake</p>
+        <div className="mt-[28px] flex flex-wrap items-center justify-between gap-[12px] border-t border-[#23387F] pt-[16px]">
+          <p className="text-[14px] text-[#9FACE4]">© 2026 Kam Ki Lead</p>
+          <p className="text-[14px] text-[#9FACE4]">Kolkata · New Town · Rajarhat · Salt Lake</p>
         </div>
       </div>
     </footer>

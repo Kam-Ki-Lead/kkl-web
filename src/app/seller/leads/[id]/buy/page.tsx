@@ -58,7 +58,7 @@ export default async function PurchaseReviewPage({
   return (
     <SellerShell title="Confirm purchase" subtitle="Credits are deducted before release">
       <div className="max-w-[720px]">
-        <h2 className="t-title text-ink">Confirm purchase</h2>
+        <h2 className="t-flow-title text-ink">Confirm purchase</h2>
         <p className="t-body mt-[8px] text-body">
           Credits are deducted first. The lead is released to you only if the deduction succeeds,
           and no one else can buy it afterwards.
@@ -175,8 +175,20 @@ function Row({
         strong ? "bg-tint" : ""
       }`}
     >
-      <span className={`text-[15px] ${strong ? "font-bold text-ink" : "text-muted"}`}>{label}</span>
-      <span className="text-[15px] font-bold text-ink">{value}</span>
+      <span className={strong ? "text-[16px] font-bold text-ink" : "text-[15px] text-muted"}>
+        {label}
+      </span>
+      {/* The approved review rows set values at 600; the closing-balance row
+          promotes its figure to Archivo 800, the "number you compare" rule. */}
+      <span
+        className={
+          strong
+            ? "font-[family-name:var(--font-heading)] text-[16px] font-extrabold text-ink"
+            : "text-[15px] font-semibold text-ink"
+        }
+      >
+        {value}
+      </span>
     </div>
   );
 }

@@ -136,7 +136,7 @@ export function SearchFilters({ localities }: { localities: readonly LocalitySum
       </div>
 
       <div className="mt-[14px] flex flex-wrap items-center gap-[10px]">
-        <span className="t-caption text-muted">Possession:</span>
+        <span className="text-[14px] text-muted">Possession:</span>
         {POSSESSION.map((p) => {
           const on = current.possession === p.key;
           return (
@@ -145,8 +145,10 @@ export function SearchFilters({ localities }: { localities: readonly LocalitySum
               type="button"
               aria-pressed={on}
               onClick={() => update({ possession: on ? "" : p.key })}
-              className={`min-h-[44px] rounded-full border-[1.5px] px-[16px] text-[15px] font-semibold ${
-                on ? "border-brand bg-brand text-white" : "border-line bg-white text-ink"
+              className={`min-h-[44px] rounded-full border-[1.5px] px-[16px] text-[14px] font-semibold ${
+                on
+                  ? "border-brand bg-brand text-white"
+                  : "border-control-border bg-white text-body"
               }`}
             >
               {p.label}
@@ -156,7 +158,7 @@ export function SearchFilters({ localities }: { localities: readonly LocalitySum
       </div>
 
       <div className="mt-[14px] flex flex-wrap items-center gap-[10px] rounded-[10px] border border-line bg-tint px-[16px] py-[12px]">
-        <span className="t-label text-ink">Applied:</span>
+        <span className="t-label text-body">Applied:</span>
         {appliedChips.length === 0 ? (
           <span className="t-caption text-muted">
             {localityName ? "No filters beyond location" : "No filters applied"}
@@ -181,7 +183,7 @@ export function SearchFilters({ localities }: { localities: readonly LocalitySum
 }
 
 const selectClass =
-  "min-h-[48px] w-full cursor-pointer rounded-[8px] border border-line bg-white px-[13px] text-[15px] text-ink";
+  "min-h-[48px] w-full cursor-pointer rounded-[8px] border border-control-border bg-white px-[13px] text-[15px] text-ink";
 
 function Field({
   id,
@@ -192,9 +194,13 @@ function Field({
   label: string;
   children: React.ReactNode;
 }) {
+  /* P-02 renders these labels at 13px where P-01 renders the same role at
+     14px — an inconsistency inside the approved baseline, recorded in
+     visual-differences.md. The 14px step is kept; the colour is the defect
+     (body #2A3250, not ink). */
   return (
     <div className="flex flex-col gap-[6px]">
-      <label htmlFor={id} className="t-label text-ink">
+      <label htmlFor={id} className="t-label text-body">
         {label}
       </label>
       {children}
@@ -223,7 +229,7 @@ export function SearchSort() {
 
   return (
     <div className="flex flex-wrap items-center gap-[8px]">
-      <span className="t-caption text-muted">Sort</span>
+      <span className="text-[14px] text-muted">Sort</span>
       {options.map((o) => {
         const on = active === o.key;
         return (
@@ -232,8 +238,10 @@ export function SearchSort() {
             type="button"
             aria-pressed={on}
             onClick={() => choose(o.key)}
-            className={`min-h-[44px] rounded-[8px] border-[1.5px] px-[14px] text-[15px] font-semibold ${
-              on ? "border-brand bg-[#EEF2FD] text-brand" : "border-line bg-white text-ink"
+            className={`min-h-[44px] rounded-[8px] border-[1.5px] px-[14px] text-[14px] font-semibold ${
+              on
+                ? "border-brand bg-[#EEF2FD] text-brand"
+                : "border-control-border bg-white text-body"
             }`}
           >
             {o.label}

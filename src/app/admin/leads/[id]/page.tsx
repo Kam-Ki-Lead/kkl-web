@@ -49,7 +49,7 @@ export default async function AdminLeadPage({ params }: { params: Promise<{ id: 
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div className="min-w-0">
-              <p className="t-mono text-[13px] text-muted">{lead.id}</p>
+              <p className="t-mono text-[12px] text-muted">{lead.id}</p>
               <h2 className="t-heading mt-[2px] text-ink">{lead.requirement}</h2>
               <p className="t-body text-body">
                 {lead.area} · intaken {lead.intakenAt}
@@ -94,9 +94,15 @@ export default async function AdminLeadPage({ params }: { params: Promise<{ id: 
             <Card
               className={`p-[18px] ${lead.consent.given ? "border-[#BFE0CE]" : "border-[#F3C4BF]"}`}
             >
-              <h2 className="t-card-title text-ink">Consent</h2>
+              {/* The approved card carries the consent state in the heading's
+                  colour, and the verdict at 16px. */}
+              <h2
+                className={`t-card-title ${lead.consent.given ? "text-success" : "text-danger"}`}
+              >
+                Consent
+              </h2>
               <p
-                className={`mt-[4px] text-[15px] font-bold ${lead.consent.given ? "text-success" : "text-danger"}`}
+                className={`mt-[4px] text-[16px] font-bold ${lead.consent.given ? "text-success" : "text-danger"}`}
               >
                 {lead.consent.label}
               </p>
@@ -142,12 +148,10 @@ export default async function AdminLeadPage({ params }: { params: Promise<{ id: 
                   }`}
                 />
                 <span className="min-w-0">
-                  <span
-                    className={`block text-[15px] ${step.done ? "font-semibold text-ink" : "text-muted"}`}
-                  >
-                    {step.label}
-                  </span>
-                  <span className="t-caption block text-muted">{step.note}</span>
+                  {/* The approved timeline does not dim future steps; the dot
+                      alone carries done versus not-done. */}
+                  <span className="block text-[15px] font-semibold text-ink">{step.label}</span>
+                  <span className="block text-[14px] text-muted">{step.note}</span>
                 </span>
               </li>
             ))}

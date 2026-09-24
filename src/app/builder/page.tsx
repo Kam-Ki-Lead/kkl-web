@@ -57,7 +57,7 @@ export default async function BuilderDashboardPage() {
               <h2 className="t-panel-title text-ink">Recent enquiries on your listings</h2>
               <Link
                 href="/builder/enquiries"
-                className="text-[15px] font-bold text-brand underline underline-offset-2"
+                className="text-[14px] font-bold text-brand underline underline-offset-2"
               >
                 View all →
               </Link>
@@ -100,7 +100,7 @@ export default async function BuilderDashboardPage() {
                 Six short sections: basics, location, pricing, specifications, media and preview.
                 Save a draft at any point.
               </p>
-              <ButtonLink href="/builder/properties/new" className="mt-[14px] w-full">
+              <ButtonLink href="/builder/properties/new" size="action" className="mt-[14px] w-full">
                 New listing
               </ButtonLink>
             </Card>

@@ -72,7 +72,7 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
             <ol className="mt-[12px] flex flex-col gap-[12px]">
               {call.transcript.map((line) => (
                 <li key={`${line.at}-${line.who}`} className="flex gap-[12px]">
-                  <span className="t-mono w-[44px] flex-none text-[12px] text-muted">
+                  <span className="t-mono w-[44px] flex-none text-[13px] text-muted">
                     {line.at}
                   </span>
                   <span className="min-w-0">
@@ -81,7 +81,9 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
                     >
                       {line.who}
                     </span>
-                    <span className="t-body block text-body">{line.text}</span>
+                    {/* The approved transcript runs at 15px, under the 16px
+                        body step. */}
+                    <span className="t-body-sm block text-body">{line.text}</span>
                   </span>
                 </li>
               ))}

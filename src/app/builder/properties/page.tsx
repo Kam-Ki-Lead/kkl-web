@@ -66,16 +66,18 @@ export default async function BuilderPropertiesPage({
         ) : null}
 
         <div className="flex flex-wrap items-center justify-between gap-[12px]">
-          <div role="tablist" aria-label="Listing status" className="flex gap-[20px] border-b border-line">
+          {/* The approved filter is a row of pills: brand-filled when active,
+              white with a control border when not. */}
+          <div role="tablist" aria-label="Listing status" className="flex flex-wrap gap-[8px]">
             {TABS.map((t) => (
               <Link
                 key={t.key}
                 href={t.key === "all" ? "/builder/properties" : `/builder/properties?tab=${t.key}`}
                 aria-current={t.key === tabKey ? "page" : undefined}
-                className={`-mb-px border-b-[3px] pb-[10px] text-[16px] transition-[color,border-color] duration-150 ${
+                className={`inline-flex min-h-[40px] items-center rounded-full border-[1.5px] px-[14px] py-[9px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   t.key === tabKey
-                    ? "border-brand font-bold text-brand"
-                    : "border-transparent font-medium text-muted hover:text-ink"
+                    ? "border-brand bg-brand text-white"
+                    : "border-control-border bg-white text-body hover:border-brand"
                 }`}
               >
                 {t.label}
@@ -104,7 +106,7 @@ export default async function BuilderPropertiesPage({
                     <div className="flex flex-wrap items-start justify-between gap-[14px]">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-[10px]">
-                          <h2 className="t-card-title text-ink">
+                          <h2 className="t-panel-title text-ink">
                             <Link
                               href={`/builder/properties/${listing.id}/basics`}
                               className="underline-offset-2 hover:underline"
@@ -112,17 +114,25 @@ export default async function BuilderPropertiesPage({
                               {listing.title}
                             </Link>
                           </h2>
-                          <Chip tone={status.tone}>{status.label}</Chip>
-                          {listing.hasMedia ? null : <Chip tone="muted">▣ No photos yet</Chip>}
+                          <Chip tone={status.tone} size="sm">
+                            {status.label}
+                          </Chip>
+                          {listing.hasMedia ? null : (
+                            <Chip tone="muted" size="sm">
+                              ▣ No photos yet
+                            </Chip>
+                          )}
                         </div>
-                        <p className="t-caption mt-[2px] text-muted">{listing.locationLabel}</p>
+                        <p className="mt-[2px] text-[15px] text-body">{listing.locationLabel}</p>
                         <p className="mt-[4px] text-[15px] text-body">
                           {listing.configurationLabel} · {listing.priceLabel}
                         </p>
-                        <p className="t-caption mt-[2px] text-muted">{listing.detailLine}</p>
+                        <p className="mt-[2px] text-[14px] text-muted">{listing.detailLine}</p>
                       </div>
                       <div className="flex-none text-right">
-                        <p className="t-card-title text-ink">{listing.enquiryCount}</p>
+                        <p className="font-[family-name:var(--font-heading)] text-[22px] font-extrabold text-ink">
+                          {listing.enquiryCount}
+                        </p>
                         <p className="t-caption text-muted">
                           {listing.enquiryCount === 1 ? "enquiry" : "enquiries"}
                         </p>

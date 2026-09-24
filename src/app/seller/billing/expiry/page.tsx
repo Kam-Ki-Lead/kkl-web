@@ -51,7 +51,7 @@ export default async function CreditExpiryPage() {
             <p className="t-heading mt-[10px] text-ink">
               {formatCreditBalance(wallet.balanceCredits)}
             </p>
-            <p className="t-body mt-[4px] text-body">Credits usable now.</p>
+            <p className="t-body-sm mt-[4px] text-body">Credits usable now.</p>
             <p className="t-caption mt-[10px] text-muted">
               Shown when the balance is well inside the validity window. This is the only one of
               the three that reflects a real figure — it is your balance, and all of it is usable.
@@ -65,7 +65,7 @@ export default async function CreditExpiryPage() {
                 ? "Not calculable"
                 : formatCreditBalance(wallet.expiringSoonCredits)}
             </p>
-            <p className="t-body mt-[4px] text-body">
+            <p className="t-body-sm mt-[4px] text-body">
               A portion of the balance is close to its expiry date.
             </p>
             <p className="t-caption mt-[10px] text-muted">
@@ -81,7 +81,7 @@ export default async function CreditExpiryPage() {
                 ? "Not calculable"
                 : formatCreditBalance(wallet.expiredCredits)}
             </p>
-            <p className="t-body mt-[4px] text-body">
+            <p className="t-body-sm mt-[4px] text-body">
               Credits past their validity date, held separately from the usable balance.
             </p>
             <p className="t-caption mt-[10px] text-muted">

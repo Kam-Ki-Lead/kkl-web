@@ -34,7 +34,7 @@ export default async function AdminWhatsAppPage() {
             {funnel.map((step) => (
               <li key={step.label}>
                 <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
-                  <span className="text-[15px] text-ink">{step.label}</span>
+                  <span className="text-[15px] font-semibold text-ink">{step.label}</span>
                   <span className="t-caption text-muted">
                     <strong className="text-ink">{step.count.toLocaleString("en-IN")}</strong> ·{" "}
                     {step.percent}
@@ -73,7 +73,7 @@ export default async function AdminWhatsAppPage() {
                   {conversation.step} · {conversation.when}
                 </span>
               </span>
-              <Chip tone={STATE_TONE[conversation.tone] ?? "muted"}>
+              <Chip tone={STATE_TONE[conversation.tone] ?? "muted"} size="sm">
                 {conversation.stateLabel}
               </Chip>
             </div>

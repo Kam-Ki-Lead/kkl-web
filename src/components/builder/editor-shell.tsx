@@ -106,7 +106,7 @@ export function EditorShell({
       <div className="mt-[14px] flex justify-end">
         <Link
           href="/builder/properties"
-          className="t-caption text-brand underline underline-offset-2"
+          className="text-[15px] font-semibold text-brand underline underline-offset-2"
         >
           Close editor
         </Link>

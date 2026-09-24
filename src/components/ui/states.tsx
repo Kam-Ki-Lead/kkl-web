@@ -77,7 +77,9 @@ export function StateMessage({
 }) {
   return (
     <Card className={`${messageSurface[tone]} px-[22px] py-[30px] text-center ${className}`}>
-      <h3 className={`t-card-title ${messageHeading[tone]}`}>{title}</h3>
+      {/* The approved empty states (S-12, B-21) headline at 19px/700, a step
+          above the compact card title. */}
+      <h3 className={`t-subsection ${messageHeading[tone]}`}>{title}</h3>
       <p className="t-body mx-auto mt-[6px] max-w-[46ch] text-body">{children}</p>
       {action ? <div className="mt-[16px] flex justify-center gap-[10px]">{action}</div> : null}
     </Card>

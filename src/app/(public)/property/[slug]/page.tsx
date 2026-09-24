@@ -71,7 +71,13 @@ export default async function PropertyDetailPage({
           </div>
 
           <div className="mt-[12px] flex flex-wrap items-baseline gap-[14px]">
-            {price ? <p className="t-title text-ink">{price}</p> : null}
+            {/* The approved P-03 leads the price at 26px/800 — below the 34px
+                subject, not equal to it. */}
+            {price ? (
+              <p className="font-[family-name:var(--font-heading)] text-[26px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink">
+                {price}
+              </p>
+            ) : null}
             <p
               className={`text-[15px] font-semibold ${ready ? "text-success" : "text-warning"}`}
             >
@@ -89,7 +95,7 @@ export default async function PropertyDetailPage({
                   className={`border-line p-[14px] ${i % 3 !== 2 ? "border-r" : ""} ${i < 3 ? "border-b" : ""} max-[560px]:border-r-0 max-[560px]:border-b`}
                 >
                   <p className="t-caption text-muted">{spec.label}</p>
-                  <p className="t-card-title mt-[2px] text-ink">{spec.value}</p>
+                  <p className="mt-[2px] text-[16px] font-semibold text-ink">{spec.value}</p>
                 </div>
               ))}
             </div>
@@ -108,15 +114,15 @@ export default async function PropertyDetailPage({
                 <tbody>
                   {property.pricingByConfiguration.map((row) => (
                     <tr key={row.configuration} className="border-t border-line">
-                      <td className="px-[14px] py-[12px] text-[15px] font-bold text-ink">
+                      <td className="px-[14px] py-[12px] text-[15px] font-semibold text-ink">
                         {row.configuration}
                       </td>
                       <td className="px-[14px] py-[12px] text-[15px] text-body">
                         {row.carpetArea}
                       </td>
-                      <td className="px-[14px] py-[12px] text-[15px] font-bold text-ink">
+                      <td className="px-[14px] py-[12px] text-[15px] text-body">
                         {row.priceInr === null ? (
-                          <span className="font-normal text-muted">Not published</span>
+                          <span className="text-muted">Not published</span>
                         ) : (
                           formatInr(row.priceInr)
                         )}
@@ -147,7 +153,7 @@ export default async function PropertyDetailPage({
                 <p className="t-caption text-muted">Map — tile provider not yet chosen</p>
               </div>
               <div className="border-t border-line p-[14px]">
-                <p className="text-[15px] text-ink">{property.address}</p>
+                <p className="text-[15px] text-body">{property.address}</p>
                 <p className="t-caption mt-[4px] text-muted">
                   India <span aria-hidden="true">→</span> West Bengal{" "}
                   <span aria-hidden="true">→</span> {property.locationPath.join(" → ")}
@@ -186,7 +192,7 @@ export default async function PropertyDetailPage({
             </ButtonLink>
             <ButtonLink
               href={`/property/${property.slug}/site-visit`}
-              variant="secondary"
+              variant="outline"
               className="mt-[10px] w-full"
             >
               Request a site visit
@@ -194,9 +200,9 @@ export default async function PropertyDetailPage({
           </Card>
 
           <Card className="p-[18px]">
-            <h2 className="t-label text-ink">Listed by</h2>
-            <p className="mt-[4px] text-[16px] font-bold text-ink">{property.builderName}</p>
-            <p className="t-caption mt-[4px] text-muted">
+            <h2 className="text-[15px] font-bold text-ink">Listed by</h2>
+            <p className="mt-[4px] text-[15px] text-body">{property.builderName}</p>
+            <p className="mt-[4px] text-[14px] text-muted">
               Builder account, verified by Kam Ki Lead before publishing.
             </p>
           </Card>
@@ -239,7 +245,7 @@ function Gallery({ property }: { property: PropertyDetail }) {
           />
         </div>
         <div className="box-content flex h-[194px] flex-col items-center justify-center rounded-[8px] border border-line bg-[#EFF1F7] p-[14px] text-center max-[1059px]:h-[150px] max-[619px]:h-[120px]">
-          <p className="t-card-title text-ink">Floor plans</p>
+          <p className="text-[15px] font-semibold text-slate">Floor plans</p>
           <p className="t-caption mt-[2px] text-muted">
             {property.floorPlans.length === 0
               ? "Pending from builder"
@@ -254,7 +260,7 @@ function Gallery({ property }: { property: PropertyDetail }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-[24px]">
-      <h2 className="t-card-title mb-[10px] text-ink">{title}</h2>
+      <h2 className="t-subsection mb-[10px] text-ink">{title}</h2>
       {children}
     </section>
   );

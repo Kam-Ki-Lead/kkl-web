@@ -34,9 +34,11 @@ export default async function AdminSystemPage() {
                 <div className="flex flex-wrap items-start justify-between gap-[10px]">
                   <div className="min-w-0">
                     <h2 className="t-card-title text-ink">{integration.name}</h2>
-                    <p className="t-caption text-muted">{integration.role}</p>
+                    <p className="text-[14px] text-muted">{integration.role}</p>
                   </div>
-                  <Chip tone={state.tone}>{integration.stateLabel}</Chip>
+                  <Chip tone={state.tone} size="sm">
+                    {integration.stateLabel}
+                  </Chip>
                 </div>
                 <dl className="mt-[12px] flex flex-col gap-[6px]">
                   {integration.metrics.map((metric) => (
@@ -46,7 +48,7 @@ export default async function AdminSystemPage() {
                     </div>
                   ))}
                 </dl>
-                <p className="t-caption mt-[12px] border-t border-line pt-[12px] text-body">
+                <p className="mt-[12px] border-t border-line pt-[12px] text-[14px] text-body">
                   {integration.note}
                 </p>
               </Card>
@@ -65,7 +67,8 @@ export default async function AdminSystemPage() {
             >
               <span className="min-w-0">
                 <span className="block text-[15px] font-semibold text-ink">{failure.job}</span>
-                <span className="t-caption block text-muted">{failure.error}</span>
+                {/* 14px, as the approved failure rows set the error line. */}
+                <span className="mt-[1px] block text-[14px] text-muted">{failure.error}</span>
               </span>
               <span className="t-caption flex-none text-muted">
                 {failure.when} · {failure.attempts}

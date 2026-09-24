@@ -87,13 +87,12 @@ export default async function BillingPage() {
                     <span className="block text-[15px] font-bold text-ink">
                       {entry.description}
                     </span>
-                    <span className="t-caption block text-muted">
-                      {formatDate(entry.occurredAt)} ·{" "}
-                      <span className="t-mono">{entry.id}</span>
+                    <span className="block text-[14px] text-muted">
+                      {formatDate(entry.occurredAt)} · {entry.id}
                     </span>
                   </span>
                   <span
-                    className={`text-[15px] font-bold ${
+                    className={`font-[family-name:var(--font-heading)] text-[15px] font-extrabold ${
                       entry.deltaCredits < 0 ? "text-danger" : "text-success"
                     }`}
                   >

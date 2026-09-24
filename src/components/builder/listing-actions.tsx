@@ -28,21 +28,33 @@ export function ListingActions({
   status: ListingStatus;
   canPublish: boolean;
 }) {
+  /*
+   * The approved row draws one filled action (Edit listing), one bordered
+   * action (Preview) and the state-changing actions as underlined links —
+   * brand for the toggle, danger for Delete.
+   */
+  const toggleLabel =
+    status === "published"
+      ? "Unpublish"
+      : status === "unpublished"
+        ? "Republish"
+        : "Continue editing";
+
   return (
     <div className="mt-[14px] flex flex-wrap items-center gap-[10px] border-t border-line pt-[14px]">
-      <ButtonLink href={`/builder/properties/${listingId}/basics`} variant="secondary" size="sm">
-        {status === "draft" ? "Continue editing" : "Edit listing"}
+      <ButtonLink href={`/builder/properties/${listingId}/basics`} size="action">
+        Edit listing
       </ButtonLink>
 
-      <ButtonLink href={`/builder/properties/${listingId}/preview`} variant="secondary" size="sm">
+      <ButtonLink href={`/builder/properties/${listingId}/preview`} variant="secondary" size="action">
         Preview
       </ButtonLink>
 
       {status === "published" ? (
         <form action={unpublishListing}>
           <input type="hidden" name="listingId" value={listingId} />
-          <Button type="submit" variant="secondary" size="sm">
-            Unpublish
+          <Button type="submit" variant="quiet" size="action">
+            {toggleLabel}
           </Button>
         </form>
       ) : null}
@@ -50,15 +62,21 @@ export function ListingActions({
       {status === "unpublished" ? (
         <form action={republishListing}>
           <input type="hidden" name="listingId" value={listingId} />
-          <Button type="submit" variant="secondary" size="sm" disabled={!canPublish}>
-            Republish
+          <Button type="submit" variant="quiet" size="action" disabled={!canPublish}>
+            {toggleLabel}
           </Button>
         </form>
       ) : null}
 
+      {status === "draft" ? (
+        <ButtonLink href={`/builder/properties/${listingId}/basics`} variant="quiet" size="action">
+          {toggleLabel}
+        </ButtonLink>
+      ) : null}
+
       <form action={deleteListing}>
         <input type="hidden" name="listingId" value={listingId} />
-        <Button type="submit" variant="destructive" size="sm">
+        <Button type="submit" variant="quietDanger" size="action">
           Delete
         </Button>
       </form>

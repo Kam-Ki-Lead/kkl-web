@@ -52,14 +52,14 @@ export default async function AdminVoicePage() {
               <span className="min-w-0">
                 <span className="flex flex-wrap items-baseline gap-[10px]">
                   <span className="t-mono text-[13px] text-ink">{call.id}</span>
-                  <span className="t-mono text-[13px] text-muted">{call.maskedNumber}</span>
+                  <span className="t-mono text-[13px] text-body">{call.maskedNumber}</span>
                 </span>
                 <span className="t-caption block text-muted">
                   {call.language} · {call.length}
                 </span>
               </span>
               <span className="flex flex-wrap items-center gap-[12px]">
-                <span className="text-[15px] text-body">{call.outcomeLabel}</span>
+                <span className="text-[15px] font-semibold text-ink">{call.outcomeLabel}</span>
                 <Chip tone={OUTCOME[call.outcome] ?? "muted"}>
                   Consent {call.consentLabel.toLowerCase()}
                 </Chip>

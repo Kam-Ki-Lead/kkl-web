@@ -101,7 +101,7 @@ export default async function LeadMarketplacePage({
               <input key={k} type="hidden" name={k} value={value} />
             ) : null;
           })}
-          <span className="t-label text-ink">Sort</span>
+          <span className="text-[14px] text-muted">Sort</span>
           {SORTS.map((option) => (
             <button
               key={option.value}
@@ -151,13 +151,15 @@ function TabLink({
   children: React.ReactNode;
 }) {
   return (
+    /* The approved marketplace tabs are Archivo 700 in both states; only the
+       colour and the underline move. */
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`-mb-px border-b-[3px] pb-[10px] text-[16px] transition-[color,border-color] duration-150 ${
+      className={`-mb-px border-b-[3px] pb-[10px] font-[family-name:var(--font-heading)] text-[16px] font-bold transition-[color,border-color] duration-150 ${
         active
-          ? "border-brand font-bold text-brand"
-          : "border-transparent font-medium text-muted hover:text-ink"
+          ? "border-brand text-brand"
+          : "border-transparent text-muted hover:text-ink"
       }`}
     >
       {children}

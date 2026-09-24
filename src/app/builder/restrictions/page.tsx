@@ -127,7 +127,9 @@ export default async function BuilderRestrictionsPage() {
                 <Chip tone={r.tone}>{r.label}</Chip>
                 {r.key === current ? <Chip tone="neutral">This account</Chip> : null}
               </div>
-              <p className="t-caption mt-[4px] text-muted">{r.sublabel}</p>
+              {/* The approved card sets the state sublabel as a 17px/700
+                  Archivo heading, not a caption. */}
+              <p className="t-card-title mt-[4px] text-ink">{r.sublabel}</p>
 
               <ul className="mt-[12px] flex flex-col gap-[4px]">
                 {r.allowed.map((item) => (

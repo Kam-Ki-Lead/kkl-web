@@ -31,7 +31,11 @@ export default async function PurchasedLeadsPage() {
         {leads.length === 0 ? (
           <StateMessage
             title="You have not bought any leads yet"
-            action={<ButtonLink href="/seller/leads">Browse the marketplace</ButtonLink>}
+            action={
+              <ButtonLink href="/seller/leads" size="action">
+                Browse the marketplace
+              </ButtonLink>
+            }
           >
             Purchased leads appear here with full contact details and stay available to download.
           </StateMessage>

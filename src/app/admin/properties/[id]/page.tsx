@@ -54,7 +54,7 @@ export default async function AdminPropertyPage({
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div className="min-w-0">
-              <p className="t-mono text-[13px] text-muted">{listing.id}</p>
+              <p className="t-mono text-[12px] text-muted">{listing.id}</p>
               <h2 className="t-heading mt-[2px] text-ink">{listing.name}</h2>
               <p className="t-body text-body">
                 {listing.builder} · {listing.locality}
@@ -117,7 +117,7 @@ export default async function AdminPropertyPage({
               <ButtonLink
                 href={`/admin/properties/${listing.id}?action=unpublish`}
                 variant="destructive"
-                size="sm"
+                size="action"
               >
                 Unpublish this listing
               </ButtonLink>
@@ -125,7 +125,7 @@ export default async function AdminPropertyPage({
                 <ButtonLink
                   href={`/admin/properties/${listing.id}?action=dismiss`}
                   variant="secondary"
-                  size="sm"
+                  size="action"
                 >
                   Dismiss the report
                 </ButtonLink>

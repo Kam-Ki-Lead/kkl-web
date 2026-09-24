@@ -17,6 +17,7 @@ export function Field({
   error,
   children,
   className = "",
+  labelSize = "md",
 }: {
   label: string;
   /** Must match the control's id — it wires the label and the error message. */
@@ -26,13 +27,21 @@ export function Field({
   error?: string;
   children: ReactNode;
   className?: string;
+  /**
+   * The public forms label controls at 14px; the consoles' filter rows draw
+   * the same label at 13px (S-07, B-20). Both are 600 in body #2A3250.
+   */
+  labelSize?: "md" | "sm";
 }) {
   return (
     <div className={`flex flex-col gap-[6px] ${className}`}>
       {/* The approved forms label their controls in body #2A3250, not ink —
           14px/600 appears 14 times at that colour across the Buyer journey and
           once at brand blue, never at ink. */}
-      <label htmlFor={id} className="t-label text-body">
+      <label
+        htmlFor={id}
+        className={`t-label text-body ${labelSize === "sm" ? "text-[13px]" : ""}`}
+      >
         {label}
       </label>
       {children}

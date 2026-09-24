@@ -31,7 +31,7 @@ export default async function PaymentResultPage() {
         <div className="max-w-[640px]">
           <div className="flex flex-wrap items-center gap-[12px]">
             <Chip tone="success">✓ Paid</Chip>
-            <h2 className="t-title text-ink">Credits added</h2>
+            <h2 className="t-flow-title text-ink">Credits added</h2>
           </div>
           <p className="t-body mt-[8px] text-body">
             {formatExactInr(outcome.amountInr)} credited. Your balance is now{" "}

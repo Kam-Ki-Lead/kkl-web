@@ -36,13 +36,15 @@ export default async function BuilderEnquiryPage({
         <div className="flex flex-col gap-[16px]">
           <Card className="p-[22px]">
             <div className="flex flex-wrap items-center gap-[10px]">
-              <p className="t-mono text-[13px] text-muted">{enquiry.id}</p>
+              <p className="t-mono text-[12px] text-muted">{enquiry.id}</p>
               <Chip tone={enquiry.kind === "site_visit" ? "warning" : "neutral"}>
                 {enquiry.kind === "site_visit" ? "Site-visit request" : "Enquiry"}
               </Chip>
               {enquiry.read ? null : <Chip tone="warning">New</Chip>}
             </div>
-            <h2 className="t-title mt-[3px] text-ink">{enquiry.buyerName}</h2>
+            {/* The approved enquiry header sets the buyer's name in 17px/600
+                Public Sans — a label, not a page display title. */}
+            <h2 className="mt-[3px] text-[17px] font-semibold text-ink">{enquiry.buyerName}</h2>
             <p className="t-body mt-[2px] text-muted">
               {enquiry.listingTitle} · {formatDateTime(enquiry.receivedAt)}
             </p>
@@ -57,7 +59,7 @@ export default async function BuilderEnquiryPage({
 
           {enquiry.message ? (
             <Card className="p-[22px]">
-              <h3 className="t-card-title text-ink">Their message</h3>
+              <h3 className="text-[14px] font-semibold text-body">Their message</h3>
               <p className="t-body mt-[8px] whitespace-pre-wrap text-body">{enquiry.message}</p>
             </Card>
           ) : null}
@@ -110,7 +112,7 @@ export default async function BuilderEnquiryPage({
 
         <aside className="flex flex-col gap-[16px]">
           <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
-            <h3 className="t-card-title text-ink">Unresolved ambiguity</h3>
+            <h3 className="text-[14px] font-bold text-ink">Unresolved ambiguity</h3>
             <p className="t-body mt-[6px] text-body">
               The account-roles specification says a Builder is notified of enquiries on their own
               listings, but not whether the notification carries contact details. The development

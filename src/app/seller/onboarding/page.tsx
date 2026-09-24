@@ -11,7 +11,7 @@ export default async function SellerOnboardingPage() {
 
   return (
     <OnboardingShell step="business">
-      <h1 className="t-title text-ink">Your business</h1>
+      <h1 className="t-flow-title text-ink">Your business</h1>
       <p className="t-body mt-[8px] text-body">
         This appears on invoices and helps us route leads in the areas you actually work.
       </p>

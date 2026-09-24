@@ -31,7 +31,7 @@ export function adminRailItems(counts: {
     { group: "LISTINGS", href: "/admin/properties", label: "Property review", badge: badge(counts.listings) },
 
     { group: "LEADS", href: "/admin/leads/intake", label: "Lead intake" },
-    { group: "LEADS", href: "/admin/leads", label: "Leads", match: "exact" },
+    { group: "LEADS", href: "/admin/leads", label: "Leads", excludePrefix: "/admin/leads/intake" },
     { group: "LEADS", href: "/admin/settings/pricing", label: "Pricing & aging" },
 
     { group: "MONEY", href: "/admin/orders", label: "Orders" },

@@ -56,7 +56,7 @@ export default async function AdminUserPage({
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-start justify-between gap-[14px]">
             <div className="min-w-0">
-              <p className="t-mono text-[13px] text-muted">{account.accountId}</p>
+              <p className="t-mono text-[12px] text-muted">{account.accountId}</p>
               <h2 className="t-heading mt-[2px] text-ink">{account.name}</h2>
               <p className="t-body text-body">
                 {account.organisation} · {account.mobile}
@@ -125,18 +125,18 @@ export default async function AdminUserPage({
               <ButtonLink
                 href={`/admin/users/${account.accountId}?action=${suspended ? "reinstate" : "suspend"}`}
                 variant={suspended ? "secondary" : "destructive"}
-                size="sm"
+                size="action"
               >
                 {suspended ? "Reinstate this account" : "Suspend this account"}
               </ButtonLink>
               <ButtonLink
                 href={`/admin/wallets/${account.accountId}/adjust`}
                 variant="secondary"
-                size="sm"
+                size="action"
               >
                 Adjust credit balance
               </ButtonLink>
-              <ButtonLink href="/admin/kyc" variant="secondary" size="sm">
+              <ButtonLink href="/admin/kyc" variant="secondary" size="action">
                 Open the KYC queue
               </ButtonLink>
             </div>

@@ -60,8 +60,10 @@ export default async function AdminWalletsPage({
                 >
                   <div className="flex items-start justify-between gap-[10px]">
                     <div className="min-w-0">
-                      <p className="text-[15px] font-bold text-ink">{wallet.name}</p>
-                      <p className="t-mono text-[12px] text-muted">{wallet.accountId}</p>
+                      <p className="text-[15px] font-semibold text-ink">{wallet.name}</p>
+                      {/* The approved wallet card sets the account reference in
+                          14px Public Sans. */}
+                      <p className="text-[14px] text-muted">{wallet.accountId}</p>
                     </div>
                     {wallet.frozen ? <Chip tone="warning">Frozen</Chip> : null}
                   </div>
@@ -101,11 +103,11 @@ export default async function AdminWalletsPage({
                 >
                   <span className="min-w-0">
                     <span className="block text-[15px] text-ink">{row.what}</span>
-                    <span className="t-mono block text-[12px] text-muted">{row.reference}</span>
+                    <span className="t-mono block text-[13px] text-muted">{row.reference}</span>
                   </span>
                   <span className="flex flex-none items-baseline gap-[16px]">
                     <span
-                      className={`text-[15px] font-bold ${row.deltaInr < 0 ? "text-danger" : "text-success"}`}
+                      className={`font-[family-name:var(--font-heading)] text-[15px] font-extrabold ${row.deltaInr < 0 ? "text-danger" : "text-success"}`}
                     >
                       {formatSignedInr(row.deltaInr)}
                     </span>

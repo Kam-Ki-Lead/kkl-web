@@ -83,12 +83,10 @@ export default async function AdminAuditPage({
                 <summary className="cursor-pointer list-none px-[18px] py-[14px] transition-[background-color] duration-150 hover:bg-[#F6F8FD]">
                   <span className="flex flex-wrap items-baseline justify-between gap-[10px]">
                     <span className="min-w-0">
-                      <span className="block text-[15px] font-semibold text-ink">
-                        {entry.action}
-                      </span>
+                      <span className="block text-[15px] text-body">{entry.action}</span>
                       <span className="t-caption block text-muted">
                         {entry.actor.name} · {entry.actor.team} ·{" "}
-                        <span className="t-mono">{entry.subject}</span>
+                        <span className="t-mono text-ink">{entry.subject}</span>
                       </span>
                     </span>
                     <span className="t-caption flex-none text-muted">{entry.at}</span>

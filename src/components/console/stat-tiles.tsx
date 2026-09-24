@@ -25,8 +25,14 @@ export function StatTiles({ tiles }: { tiles: readonly StatTile[] }) {
     <div className="grid grid-cols-4 gap-[14px] max-[1060px]:grid-cols-2">
       {tiles.map((tile) => (
         <Card key={tile.label} className="p-[18px]">
-          <p className="t-figure text-ink">{tile.value}</p>
-          <p className="mt-[6px] text-[15px] font-semibold text-ink">{tile.label}</p>
+          {/* The approved S-06 tile: 26px/800 value, 14px/600 label, 13px note.
+              The baseline declares no colour on the value, so it inherits the
+              prototype page's default black; C-01's darkest text token is ink,
+              and ink is what stays here — recorded in visual-differences.md. */}
+          <p className="font-[family-name:var(--font-heading)] text-[26px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink">
+            {tile.value}
+          </p>
+          <p className="mt-[6px] text-[14px] font-semibold text-ink">{tile.label}</p>
           <p className="t-caption mt-[2px] text-muted">{tile.note}</p>
         </Card>
       ))}

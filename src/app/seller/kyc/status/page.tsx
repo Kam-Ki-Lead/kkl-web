@@ -54,7 +54,7 @@ export default async function KycStatusPage() {
   return (
     <OnboardingShell step="review">
       <Chip tone={panel.tone}>{panel.chip}</Chip>
-      <h1 className="t-title mt-[10px] text-ink">{panel.title}</h1>
+      <h1 className="t-flow-title mt-[10px] text-ink">{panel.title}</h1>
       <p className="t-body mt-[8px] text-body">{panel.body}</p>
 
       {rejected ? (

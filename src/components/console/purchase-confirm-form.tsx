@@ -46,7 +46,7 @@ export function PurchaseConfirmForm({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-[16px]">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Deducting credits…" : "Confirm and buy"}
         </Button>
         <Link

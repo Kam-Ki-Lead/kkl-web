@@ -86,7 +86,7 @@ export default async function AdminUsersPage({
                 {account.name}
               </Primary>,
               ROLE_LABEL[account.role],
-              <Chip key="status" tone={account.status === "suspended" ? "danger" : "success"}>
+              <Chip key="status" tone={account.status === "suspended" ? "danger" : "success"} size="sm">
                 {account.status === "suspended" ? "Suspended" : "Active"}
               </Chip>,
               account.role === "buyer" ? (
@@ -94,7 +94,7 @@ export default async function AdminUsersPage({
                   Not applicable
                 </span>
               ) : (
-                <Chip key="kyc" tone={kyc.tone}>
+                <Chip key="kyc" tone={kyc.tone} size="sm">
                   {kyc.label}
                 </Chip>
               ),

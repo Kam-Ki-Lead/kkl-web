@@ -52,7 +52,12 @@ export default async function BuilderProfilePage() {
               <Chip tone={verification.tone}>{verification.label}</Chip>
             </div>
             <p className="t-body mt-[8px] text-body">Company PAN and incorporation documents</p>
-            <ButtonLink href="/builder/verification" variant="secondary" className="mt-[12px] w-full">
+            <ButtonLink
+              href="/builder/verification"
+              variant="secondaryBrand"
+              size="action"
+              className="mt-[12px] w-full"
+            >
               View status
             </ButtonLink>
           </Card>

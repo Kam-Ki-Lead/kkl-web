@@ -53,7 +53,12 @@ export default async function SellerProfilePage() {
               <Chip tone={verification.tone}>{verification.label}</Chip>
             </div>
             <p className="t-body mt-[8px] text-body">PAN and Aadhaar</p>
-            <ButtonLink href="/seller/kyc/status" variant="secondary" className="mt-[12px] w-full">
+            <ButtonLink
+              href="/seller/kyc/status"
+              variant="secondaryBrand"
+              size="action"
+              className="mt-[12px] w-full"
+            >
               View status
             </ButtonLink>
           </Card>

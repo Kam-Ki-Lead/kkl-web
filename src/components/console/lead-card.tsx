@@ -29,9 +29,9 @@ export function LeadCard({
     <Card className="flex flex-col p-[18px]">
       <div className="flex items-start justify-between gap-[14px]">
         <div className="min-w-0">
-          <p className="t-mono text-[13px] text-muted">{lead.id}</p>
+          <p className="t-mono text-[12px] text-muted">{lead.id}</p>
           <h3 className="t-card-title mt-[2px] text-ink">{lead.requirement}</h3>
-          <p className="t-caption mt-[1px] text-muted">
+          <p className="mt-[1px] text-[15px] text-body">
             {formatAreaPath(lead.locationPath)}
           </p>
         </div>
@@ -95,11 +95,11 @@ export function LeadRow({
     >
       <span className="min-w-0">
         <span className="block text-[15px] font-bold text-ink">{lead.requirement}</span>
-        <span className="t-caption block text-muted">
+        <span className="block text-[14px] text-muted">
           {formatAreaPath(lead.locationPath)} · score {lead.intentScore}
         </span>
       </span>
-      <span className="t-card-title flex-none text-brand">
+      <span className="flex-none font-[family-name:var(--font-heading)] text-[16px] font-extrabold text-brand">
         {formatExactInr(lead.priceCredits)}
       </span>
     </Link>

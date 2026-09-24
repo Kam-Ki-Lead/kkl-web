@@ -52,7 +52,7 @@ export default async function PurchaseResultPage({
         <div className="max-w-[720px]">
           <div className="flex flex-wrap items-center gap-[12px]">
             <Chip tone="success">✓ Purchased</Chip>
-            <h2 className="t-title text-ink">Lead purchased</h2>
+            <h2 className="t-flow-title text-ink">Lead purchased</h2>
           </div>
           <p className="t-body mt-[8px] text-body">
             {formatExactInr(lead.pricePaidCredits)} deducted. This lead is now yours alone —

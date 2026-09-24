@@ -99,7 +99,7 @@ export function BuilderProfileForm({
         </Field>
 
         <fieldset className="flex flex-col gap-[10px]">
-          <legend className="t-label mb-[4px] text-ink">Alert me when</legend>
+          <legend className="t-label mb-[4px] text-body">Alert me when</legend>
           <Toggle
             name="newEnquiry"
             label="A buyer enquires about one of my listings"

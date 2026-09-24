@@ -6,7 +6,6 @@ import { EditorShell } from "@/components/builder/editor-shell";
 import { SectionForm, SECTION_FORM_ID } from "@/components/builder/section-forms";
 import { PublishForm } from "@/components/builder/publish-form";
 import { Card } from "@/components/ui/card";
-import { Chip } from "@/components/ui/chip";
 import { PropertyImage } from "@/components/property/property-image";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatPriceRange } from "@/lib/format";
@@ -157,9 +156,13 @@ async function PreviewSection({
             }
           />
           <div className="p-[18px]">
-            <p className="t-card-title text-ink">{price ?? "Price on request"}</p>
-            <h3 className="t-heading mt-[2px] text-ink">{listing.title || "Untitled project"}</h3>
-            <p className="t-caption mt-[1px] text-muted">
+            {/* Styled on the approved buyer-preview card: 23px/800 price,
+                19px/700 name, 15px body lines, 14px amenity tiles. */}
+            <p className="font-[family-name:var(--font-heading)] text-[23px] font-extrabold tracking-[-0.025em] text-ink">
+              {price ?? "Price on request"}
+            </p>
+            <h3 className="t-subsection mt-[2px] text-ink">{listing.title || "Untitled project"}</h3>
+            <p className="mt-[1px] text-[15px] text-body">
               {listing.locality
                 ? `${listing.locality}${listing.locality.startsWith("Action Area") ? ", New Town" : ", Kolkata"}`
                 : "Location not entered"}
@@ -171,16 +174,19 @@ async function PreviewSection({
               {listing.propertyType ? ` · ${listing.propertyType}` : ""}
             </p>
             {listing.possessionTarget ? (
-              <p className="t-caption mt-[4px] text-muted">
+              <p className="mt-[4px] text-[14px] font-bold text-warning">
                 ◐ Possession {listing.possessionTarget}
               </p>
             ) : null}
             {listing.amenities.length > 0 ? (
-              <div className="mt-[10px] flex flex-wrap gap-[6px]">
+              <div className="mt-[10px] flex flex-wrap gap-[8px]">
                 {listing.amenities.slice(0, 4).map((a) => (
-                  <Chip key={a} tone="muted">
+                  <span
+                    key={a}
+                    className="rounded-[6px] bg-[#F0F2F9] px-[12px] py-[8px] text-[14px] text-body"
+                  >
                     {a}
-                  </Chip>
+                  </span>
                 ))}
               </div>
             ) : null}

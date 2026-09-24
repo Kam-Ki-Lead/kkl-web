@@ -37,12 +37,15 @@ export default async function AdminDeliveryPage({
         <Card className={`p-[20px] ${order.state === "failed" ? "border-[#F3C4BF]" : ""}`}>
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div className="min-w-0">
-              <p className="t-mono text-[13px] text-muted">{order.id}</p>
-              <h2 className="t-heading mt-[2px] text-ink">{order.leadLabel}</h2>
+              <p className="t-mono text-[12px] text-muted">{order.id}</p>
+              {/* The approved delivery header sets the subject at 28px/800. */}
+              <h2 className="mt-[2px] font-[family-name:var(--font-heading)] text-[28px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink">
+                {order.leadLabel}
+              </h2>
               <p className="t-body text-body">
                 {order.purchaserName} · {order.purchaserOrganisation}
               </p>
-              <p className="t-caption text-muted">{order.when}</p>
+              <p className="text-[16px] text-body">{order.when}</p>
             </div>
             <div className="flex flex-none flex-col items-end gap-[6px]">
               <Chip tone={order.state === "delivered" ? "success" : "danger"}>
@@ -63,7 +66,7 @@ export default async function AdminDeliveryPage({
         </Card>
 
         <Card className="p-[20px]">
-          <h2 className="t-card-title text-ink">Delivery record</h2>
+          <h2 className="t-console-title text-ink">Delivery record</h2>
           <ol className="mt-[12px] flex flex-col">
             {order.events.map((event, index) => (
               <li key={`${event.what}-${index}`} className="flex gap-[12px] border-b border-line py-[10px] last:border-b-0">
@@ -72,10 +75,12 @@ export default async function AdminDeliveryPage({
                   className="mt-[6px] h-[9px] w-[9px] flex-none rounded-full bg-brand"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-semibold text-ink">{event.what}</span>
+                  {/* The approved timeline sets events in 400-weight and their
+                      timestamps in 15px Public Sans, not mono. */}
+                  <span className="block text-[15px] text-ink">{event.what}</span>
                   <span className="t-caption block text-muted">{event.detail}</span>
                 </span>
-                <span className="t-mono flex-none text-[12px] text-muted">{event.when}</span>
+                <span className="flex-none text-[15px] text-muted">{event.when}</span>
               </li>
             ))}
           </ol>

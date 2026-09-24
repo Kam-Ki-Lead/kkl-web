@@ -12,7 +12,7 @@ export default async function RechargePage() {
   return (
     <SellerShell title="Recharge credits" subtitle="1 rupee = 1 credit">
       <div className="max-w-[640px]">
-        <h2 className="t-title text-ink">Recharge credits</h2>
+        <h2 className="t-flow-title text-ink">Recharge credits</h2>
         <p className="t-body mt-[8px] text-body">
           Credits are added after the payment succeeds. 1 rupee buys 1 credit.
         </p>

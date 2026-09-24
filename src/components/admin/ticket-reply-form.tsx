@@ -97,7 +97,7 @@ export function TicketReplyForm({
         </Field>
 
         <div>
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" size="action" disabled={pending}>
             {pending ? "Sending…" : internal ? "Add internal note" : "Send reply"}
           </Button>
         </div>
@@ -127,7 +127,7 @@ export function TicketReplyForm({
             <TextArea id="resolve-reason" name="reason" rows={2} aria-describedby="resolve-reason-helper" />
           </Field>
           <div>
-            <Button type="submit" variant="secondary" disabled={resolving}>
+            <Button type="submit" variant="secondary" size="action" disabled={resolving}>
               {resolving ? "Recording…" : "Mark as resolved"}
             </Button>
           </div>

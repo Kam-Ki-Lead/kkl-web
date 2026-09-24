@@ -37,7 +37,7 @@ export default async function TransactionHistoryPage({
     <SellerShell title="Transactions" subtitle="Every ledger entry on this account">
       <div className="flex flex-col gap-[16px]">
         <div className="flex flex-wrap items-center gap-[10px]">
-          <span className="t-label text-ink">Show</span>
+          <span className="text-[14px] text-muted">Show</span>
           {FILTERS.map((filter) => {
             const active = (show ?? "") === filter.key;
             return (
@@ -47,8 +47,8 @@ export default async function TransactionHistoryPage({
                 aria-current={active ? "page" : undefined}
                 className={`min-h-[36px] rounded-[8px] border-[1.5px] px-[13px] pt-[7px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   active
-                    ? "border-brand bg-chip-neutral-bg text-brand"
-                    : "border-line bg-white text-body hover:border-[#C6CCE0]"
+                    ? "border-brand bg-brand text-white"
+                    : "border-control-border bg-white text-body hover:border-brand"
                 }`}
               >
                 {filter.label}
@@ -84,7 +84,7 @@ export default async function TransactionHistoryPage({
               <tbody>
                 {ledger.map((entry) => (
                   <tr key={entry.id} className="border-b border-line last:border-b-0">
-                    <Td>{formatDate(entry.occurredAt)}</Td>
+                    <Td muted>{formatDate(entry.occurredAt)}</Td>
                     <Td strong>{entry.description}</Td>
                     <Td mono>{entry.id}</Td>
                     <Td align="right" tone={entry.deltaCredits < 0 ? "debit" : "credit"}>
@@ -129,22 +129,35 @@ function Td({
   align = "left",
   strong = false,
   mono = false,
+  muted = false,
   tone,
 }: {
   children: React.ReactNode;
   align?: "left" | "right";
   strong?: boolean;
   mono?: boolean;
+  muted?: boolean;
   tone?: "debit" | "credit";
 }) {
-  const colour =
-    tone === "debit" ? "text-danger font-bold" : tone === "credit" ? "text-success font-bold" : "";
+  /*
+   * One text role per cell, chosen explicitly — the previous version stacked
+   * `text-[15px] text-body` with `t-mono text-[13px]` and got whichever the
+   * stylesheet emitted last, which is how the reference column rendered as
+   * 15px body text against the approved 13px mono.
+   */
+  const text = tone
+    ? `font-[family-name:var(--font-heading)] text-[15px] font-extrabold ${
+        tone === "debit" ? "text-danger" : "text-success"
+      }`
+    : mono
+      ? "t-mono text-[13px] text-muted"
+      : strong
+        ? "text-[15px] font-semibold text-ink"
+        : muted
+          ? "text-[15px] text-muted"
+          : "text-[15px] text-body";
   return (
-    <td
-      className={`px-[16px] py-[13px] text-[15px] ${align === "right" ? "text-right" : "text-left"} ${
-        strong ? "font-bold text-ink" : "text-body"
-      } ${mono ? "t-mono text-[13px]" : ""} ${colour}`}
-    >
+    <td className={`px-[16px] py-[13px] ${align === "right" ? "text-right" : "text-left"} ${text}`}>
       {children}
     </td>
   );

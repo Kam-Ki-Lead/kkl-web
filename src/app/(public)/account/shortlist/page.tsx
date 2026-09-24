@@ -27,10 +27,14 @@ export default function ShortlistPage() {
           footnote="P-11 shortlist · saving is not connected until kkl-backend provides accounts"
           actions={
             <>
-              <ButtonLink href="/auth?next=/account/shortlist">Sign in or register</ButtonLink>
-              <ButtonLink href="/search" variant="secondary">
-                Browse properties
+              {/* The approved P-11 panel's one filled action is "Browse
+                  properties"; the sign-in action is an implementation addition
+                  (the baseline relies on the header), so it takes the
+                  secondary slot. */}
+              <ButtonLink href="/auth?next=/account/shortlist" variant="secondary">
+                Sign in or register
               </ButtonLink>
+              <ButtonLink href="/search">Browse properties</ButtonLink>
             </>
           }
         >

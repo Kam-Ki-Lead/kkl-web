@@ -56,7 +56,12 @@ const CHECKS = [
 
   // Figures — the baseline declares three different sizes, not one.
   { path: '/admin', at: 1440, sel: 'main a[href="/admin/kyc"] span span', prop: 'fontSize', want: '28px', note: "A-02's queue tile, 28px" },
-  { path: '/seller', at: 1440, sel: 'main .t-figure', prop: 'fontSize', want: '21px', note: 'the shared stat-tile step, 21px' },
+  // Measured from the rendered S-06: the tile values are 26px/800 Archivo
+  // (colour undeclared — the prototype inherits black; the implementation
+  // keeps C-01's ink, recorded in visual-differences.md). An earlier version
+  // of this row expected `.t-figure` at 21px, which was the old misreading
+  // this project corrected, not the baseline.
+  { path: '/seller', at: 1440, sel: 'main [class*="text-[26px]"]', prop: 'fontSize', want: '26px', note: "S-06's stat-tile step, 26px" },
 
   // Panels — the warning surface and border used across every console.
   // An attribute selector rather than a class one: Tailwind's arbitrary-value

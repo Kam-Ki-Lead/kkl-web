@@ -83,7 +83,7 @@ export default function RenewalPage() {
           {ALTERNATIVES.map((alt) => (
             <Card key={alt.key} className="flex flex-col p-[20px]">
               <p className="t-eyebrow text-muted">Alternative {alt.key}</p>
-              <h3 className="t-card-title mt-[4px] text-ink">{alt.title}</h3>
+              <h3 className="t-panel-title mt-[4px] text-ink">{alt.title}</h3>
               <p className="t-body mt-[6px] text-body">{alt.body}</p>
               <p className="t-caption mt-[12px] rounded-[8px] bg-tint px-[12px] py-[9px] text-muted">
                 <strong className="text-ink">Buyer sees:</strong> {alt.buyer}
@@ -98,7 +98,7 @@ export default function RenewalPage() {
           <ul className="mt-[12px] flex flex-col gap-[12px]">
             {CONSOLE_STATES.map((s) => (
               <li key={s.label} className="border-b border-line pb-[12px] last:border-b-0 last:pb-0">
-                <Chip tone="warning">{s.label}</Chip>
+                <Chip tone={s.label === "Expired" ? "danger" : "warning"}>{s.label}</Chip>
                 <p className="t-body mt-[6px] text-body">{s.body}</p>
               </li>
             ))}

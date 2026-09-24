@@ -52,7 +52,7 @@ export default async function AdminPricingPage() {
               key={band.band}
               className="grid grid-cols-3 items-center gap-[10px] border-t border-[#EDEFF6] px-[18px] py-[13px]"
             >
-              <span className="text-[15px] text-ink">{band.band}</span>
+              <span className="text-[15px] font-semibold text-ink">{band.band}</span>
               <input
                 type="text"
                 defaultValue={formatExactInr(band.priceInr)}
@@ -73,7 +73,7 @@ export default async function AdminPricingPage() {
 
         <Card className="p-[18px]">
           <h2 className="t-card-title text-ink">Still open</h2>
-          <ul className="t-body mt-[8px] flex list-disc flex-col gap-[5px] pl-[20px] text-body">
+          <ul className="mt-[8px] flex list-disc flex-col gap-[5px] pl-[20px] text-[14px] text-body">
             {OPEN_QUESTIONS.map((question) => (
               <li key={question}>{question}</li>
             ))}

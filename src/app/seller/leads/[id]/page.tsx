@@ -66,9 +66,9 @@ export default async function MaskedLeadPage({
       <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-[18px] max-[1200px]:grid-cols-1">
         <div className="flex flex-col gap-[16px]">
           <Card className="p-[22px]">
-            <p className="t-mono text-[13px] text-muted">{lead.id}</p>
-            <h2 className="t-title mt-[2px] text-ink">{lead.requirement}</h2>
-            <p className="t-body mt-[2px] text-muted">
+            <p className="t-mono text-[12px] text-muted">{lead.id}</p>
+            <h2 className="t-flow-title mt-[2px] text-ink">{lead.requirement}</h2>
+            <p className="t-body mt-[2px] text-body">
               {formatAreaPath(lead.locationPath)}
             </p>
 
@@ -86,30 +86,45 @@ export default async function MaskedLeadPage({
             <h2 className="t-card-title text-ink">Qualification call summary</h2>
             <p className="t-body mt-[8px] text-body">{q.summary}</p>
             <div className="mt-[14px] flex flex-wrap gap-[8px]">
-              <Chip tone="neutral">Intent score {q.intentScore}/100</Chip>
+              {/* The approved S-08 tags are rectangular 14px chips, not the
+                  13px pill: 700 for score and consent, 600 slate for the
+                  channel. */}
+              <span className="rounded-[6px] bg-chip-neutral-bg px-[12px] py-[8px] text-[14px] font-bold text-chip-neutral-fg">
+                Intent score {q.intentScore}/100
+              </span>
               {/* D-14: consent is only ever shown as captured when it was. */}
               {q.consentCaptured ? (
-                <Chip tone="success">Consent captured</Chip>
+                <span className="rounded-[6px] bg-chip-success-bg px-[12px] py-[8px] text-[14px] font-bold text-chip-success-fg">
+                  Consent captured
+                </span>
               ) : (
-                <Chip tone="warning">No consent captured</Chip>
+                <span className="rounded-[6px] bg-chip-warning-bg px-[12px] py-[8px] text-[14px] font-bold text-chip-warning-fg">
+                  No consent captured
+                </span>
               )}
-              <Chip tone="muted">{q.channel}</Chip>
+              <span className="rounded-[6px] bg-chip-muted-bg px-[12px] py-[8px] text-[14px] font-semibold text-slate">
+                {q.channel}
+              </span>
             </div>
           </Card>
 
           <Card className="bg-tint p-[22px]">
-            <h2 className="t-card-title text-ink">Contact details</h2>
+            <h2 className="t-card-title text-slate">Contact details</h2>
             <dl className="mt-[12px] grid grid-cols-2 gap-[14px] max-[560px]:grid-cols-1">
               <div>
                 <dt className="t-caption text-muted">Name</dt>
                 <dd className="mt-[1px]">
-                  <MaskedValue>{lead.contactMask.split(" · ")[0]}</MaskedValue>
+                  <MaskedValue className="text-[16px]">
+                    {lead.contactMask.split(" · ")[0]}
+                  </MaskedValue>
                 </dd>
               </div>
               <div>
                 <dt className="t-caption text-muted">Mobile</dt>
                 <dd className="mt-[1px]">
-                  <MaskedValue>{lead.contactMask.split(" · ")[1] ?? "•••"}</MaskedValue>
+                  <MaskedValue className="text-[16px]">
+                    {lead.contactMask.split(" · ")[1] ?? "•••"}
+                  </MaskedValue>
                 </dd>
               </div>
             </dl>
@@ -123,8 +138,8 @@ export default async function MaskedLeadPage({
 
         <aside className="flex flex-col gap-[16px]">
           <Card className="p-[22px]">
-            <p className="t-caption text-muted">Lead price</p>
-            <p className="t-title mt-[2px] text-ink">{formatExactInr(lead.priceCredits)}</p>
+            <p className="text-[14px] text-muted">Lead price</p>
+            <p className="t-flow-title mt-[2px] text-ink">{formatExactInr(lead.priceCredits)}</p>
             {lead.originalPriceCredits !== null ? (
               <p className="t-caption mt-[1px] text-muted">
                 Reduced from {formatExactInr(lead.originalPriceCredits)} — aged {lead.ageDays} days
@@ -137,7 +152,12 @@ export default async function MaskedLeadPage({
             <ButtonLink href={`/seller/leads/${lead.id}/buy`} className="mt-[16px] w-full">
               Buy this lead
             </ButtonLink>
-            <ButtonLink href="/seller/leads" variant="secondary" className="mt-[10px] w-full">
+            <ButtonLink
+              href="/seller/leads"
+              variant="secondary"
+              size="action"
+              className="mt-[10px] w-full"
+            >
               Back to marketplace
             </ButtonLink>
 

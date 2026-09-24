@@ -87,8 +87,11 @@ export default async function AdminKycQueuePage({
                     <div className="flex flex-wrap items-start justify-between gap-[12px]">
                       <div className="min-w-0">
                         <span className="flex flex-wrap items-center gap-[9px]">
-                          <span className="t-mono text-[13px] text-muted">{application.id}</span>
-                          <span className="text-[16px] font-bold text-ink">
+                          {/* The approved queue sets the reference in 15px
+                              Public Sans in the body colour, and the applicant
+                              name in Archivo. */}
+                          <span className="text-[15px] text-body">{application.id}</span>
+                          <span className="font-[family-name:var(--font-heading)] text-[16px] font-bold text-ink">
                             {application.applicantName}
                           </span>
                           {application.liveConsole ? (

@@ -13,8 +13,8 @@ export const metadata: Metadata = { title: "Ticket" };
 const STATUS: Record<SupportTicket["status"], { label: string; tone: ChipTone }> = {
   open: { label: "Open", tone: "neutral" },
   awaiting_reply: { label: "Awaiting your reply", tone: "warning" },
-  replied: { label: "Support replied", tone: "neutral" },
-  resolved: { label: "Resolved", tone: "success" },
+  replied: { label: "Support replied", tone: "success" },
+  resolved: { label: "Resolved", tone: "muted" },
 };
 
 /** S-24 — the ticket conversation. */
@@ -54,7 +54,15 @@ export default async function TicketPage({
                 }`}
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
-                  <p className="text-[15px] font-bold text-ink">{message.authorLabel}</p>
+                  {/* The approved thread colours the speaker: brand for the
+                      account holder, green for support. */}
+                  <p
+                    className={`text-[13px] font-bold ${
+                      message.author === "support" ? "text-success" : "text-brand"
+                    }`}
+                  >
+                    {message.authorLabel}
+                  </p>
                   <p className="t-caption text-muted">{formatDateTime(message.sentAt)}</p>
                 </div>
                 {/* Pre-wrap, not a markdown renderer: a support message is plain

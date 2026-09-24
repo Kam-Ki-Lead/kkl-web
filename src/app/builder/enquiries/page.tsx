@@ -41,16 +41,18 @@ export default async function BuilderEnquiriesPage({
     <BuilderShell title="Enquiries" subtitle="Buyers who contacted you about your listings">
       <div className="flex flex-col gap-[16px]">
         <div className="flex flex-wrap items-center justify-between gap-[12px]">
-          <div role="tablist" aria-label="Enquiry filter" className="flex gap-[20px] border-b border-line">
+          {/* The approved filter is the same row of pills as B-07's:
+              brand-filled when active, white with a control border when not. */}
+          <div role="tablist" aria-label="Enquiry filter" className="flex flex-wrap gap-[8px]">
             {TABS.map((t) => (
               <Link
                 key={t.key}
                 href={t.key === "all" ? "/builder/enquiries" : `/builder/enquiries?tab=${t.key}`}
                 aria-current={t.key === tab ? "page" : undefined}
-                className={`-mb-px border-b-[3px] pb-[10px] text-[16px] transition-[color,border-color] duration-150 ${
+                className={`inline-flex min-h-[40px] items-center rounded-full border-[1.5px] px-[14px] py-[9px] text-[14px] font-semibold transition-[background-color,border-color,color] duration-150 ${
                   t.key === tab
-                    ? "border-brand font-bold text-brand"
-                    : "border-transparent font-medium text-muted hover:text-ink"
+                    ? "border-brand bg-brand text-white"
+                    : "border-control-border bg-white text-body hover:border-brand"
                 }`}
               >
                 {t.label}
@@ -78,7 +80,7 @@ export default async function BuilderEnquiriesPage({
                 <Card className="flex flex-wrap items-start justify-between gap-[12px] p-[18px]">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-[10px]">
-                      <h2 className="t-card-title text-ink">
+                      <h2 className="font-[family-name:var(--font-heading)] text-[16px] font-bold text-ink">
                         <Link
                           href={`/builder/enquiries/${enquiry.id}`}
                           className="underline-offset-2 hover:underline"
@@ -92,18 +94,15 @@ export default async function BuilderEnquiriesPage({
                       {enquiry.listingTitle} ·{" "}
                       {enquiry.kind === "site_visit" ? "Site-visit request" : "Enquiry"}
                     </p>
-                    <p className="t-caption mt-[1px] text-muted">
-                      <span className="t-mono">{enquiry.id}</span> ·{" "}
-                      {formatDateTime(enquiry.receivedAt)}
+                    <p className="mt-[1px] text-[14px] text-muted">
+                      {enquiry.id} · {formatDateTime(enquiry.receivedAt)}
                     </p>
                   </div>
 
                   <div className="flex-none text-right">
                     {enquiry.contactPhone ? (
                       <>
-                        <p className="t-mono text-[15px] font-medium text-ink">
-                          {enquiry.contactPhone}
-                        </p>
+                        <p className="t-mono text-[15px] text-ink">{enquiry.contactPhone}</p>
                         <p className="t-caption text-success">Contact available</p>
                       </>
                     ) : (

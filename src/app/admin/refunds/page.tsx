@@ -107,7 +107,7 @@ export default async function AdminRefundsPage({
               <div className="flex flex-wrap items-start justify-between gap-[12px]">
                 <div className="min-w-0">
                   <span className="flex flex-wrap items-baseline gap-[10px]">
-                    <span className="t-mono text-[13px] text-muted">{refund.id}</span>
+                    <span className="t-mono text-[12px] text-muted">{refund.id}</span>
                     <span className="text-[16px] font-bold text-ink">
                       {formatExactInr(refund.amountInr)}
                     </span>
@@ -176,8 +176,13 @@ export default async function AdminRefundsPage({
           <div className="mt-[14px] flex flex-col gap-[12px]">
             {CASES.map((item) => (
               <div key={item.title} className="rounded-[10px] border border-line p-[14px]">
-                <Chip tone={item.tone}>{item.chip}</Chip>
-                <h3 className="mt-[8px] text-[15px] font-bold text-ink">{item.title}</h3>
+                <Chip tone={item.tone} size="sm">
+                  {item.chip}
+                </Chip>
+                {/* The approved case cards set their titles in 16px Archivo. */}
+                <h3 className="mt-[8px] font-[family-name:var(--font-heading)] text-[16px] font-bold text-ink">
+                  {item.title}
+                </h3>
                 <p className="t-body mt-[4px] text-body">{item.body}</p>
                 <p className="t-caption mt-[6px] text-muted">{item.handling}</p>
               </div>

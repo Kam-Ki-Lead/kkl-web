@@ -191,7 +191,8 @@ export function Primary({ children, sub }: { children: ReactNode; sub?: ReactNod
   return (
     <span className="block min-w-0">
       <span className="block truncate text-[15px] font-semibold text-ink">{children}</span>
-      {sub ? <span className="t-caption block truncate text-muted">{sub}</span> : null}
+      {/* The approved second line is 14px, a step up from the 13px caption. */}
+      {sub ? <span className="block truncate text-[14px] text-muted">{sub}</span> : null}
     </span>
   );
 }

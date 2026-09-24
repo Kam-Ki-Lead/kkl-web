@@ -275,12 +275,12 @@ function SpecificationFields({ listing }: { listing: ListingDraft }) {
 
       <input type="hidden" name="amenitiesPresent" value="1" />
       <fieldset>
-        <legend className="t-label mb-[8px] text-ink">Amenities</legend>
+        <legend className="t-label mb-[8px] text-body">Amenities</legend>
         <div className="flex flex-wrap gap-[8px]">
           {AMENITIES.map((a) => (
             <label
               key={a}
-              className="inline-flex min-h-[40px] cursor-pointer items-center gap-[8px] rounded-full border-[1.5px] border-line bg-white px-[14px] text-[15px] font-semibold text-body has-[:checked]:border-brand has-[:checked]:bg-chip-neutral-bg has-[:checked]:text-brand"
+              className="inline-flex min-h-[40px] cursor-pointer items-center gap-[8px] rounded-full border-[1.5px] border-line bg-white px-[14px] text-[15px] font-semibold text-body has-[:checked]:border-brand has-[:checked]:bg-brand has-[:checked]:text-white"
             >
               <input
                 type="checkbox"
@@ -329,14 +329,18 @@ function MediaFields({ listing }: { listing: ListingDraft }) {
   return (
     <>
       <Card className="bg-tint p-[18px]">
-        <h3 className="t-card-title text-ink">Add photographs</h3>
-        <p className="t-caption mt-[2px] text-muted">
+        {/* The approved control is a dashed brand button labelled "Add
+            photographs"; the label is that control, since it opens the file
+            picker. */}
+        <label
+          htmlFor="photos"
+          className="inline-flex cursor-pointer items-center rounded-[8px] border-[2px] border-dashed border-[#A9B2CE] bg-white px-[22px] py-[15px] text-[15px] font-bold text-brand transition-[background-color,border-color] duration-150 hover:border-brand hover:bg-[#F6F8FD]"
+        >
+          Add photographs
+        </label>
+        <p className="mt-[6px] text-[14px] text-muted">
           JPG or PNG, up to 5 MB each. The first photograph becomes the cover.
         </p>
-
-        <label htmlFor="photos" className="t-label mt-[14px] block text-ink">
-          Choose photographs
-        </label>
         <input
           id="photos"
           name="photos"

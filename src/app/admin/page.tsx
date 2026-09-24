@@ -20,7 +20,9 @@ const FLAG_TONES = {
 } as const;
 
 const ALERT_TONES = {
-  danger: "border-[#F3C4BF] bg-chip-danger-bg text-danger",
+  /* The approved alert text is the dark danger red #7A2119, not the
+     destructive-action red #B3261E. */
+  danger: "border-[#F3C4BF] bg-chip-danger-bg text-chip-danger-fg",
   warning: "border-[#F3DFB4] bg-[#FFF7E8] text-warning",
 } as const;
 
@@ -72,7 +74,7 @@ export default async function AdminDashboardPage() {
             <div className="mt-[14px] grid grid-cols-3 gap-px overflow-hidden rounded-[8px] border border-line bg-line max-[700px]:grid-cols-2">
               {volumes.map((volume) => (
                 <div key={volume.label} className="bg-white px-[15px] py-[13px]">
-                  <p className="t-caption text-muted">{volume.label}</p>
+                  <p className="text-[12px] text-muted">{volume.label}</p>
                   <p className="mt-[3px] font-[family-name:var(--font-heading)] text-[20px] font-extrabold text-ink">
                     {volume.value}
                   </p>
@@ -99,7 +101,7 @@ export default async function AdminDashboardPage() {
                   className={`rounded-[8px] border p-[13px] ${ALERT_TONES[alert.tone]}`}
                 >
                   <span className="block text-[14px] font-bold">{alert.title}</span>
-                  <span className="t-body mt-[3px] block text-body">{alert.body}</span>
+                  <span className="mt-[3px] block text-[13px] text-body">{alert.body}</span>
                 </Link>
               ))}
             </div>

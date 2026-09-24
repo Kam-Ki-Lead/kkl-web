@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 export function NewListingButton() {
   return (
     <form action={createListing}>
-      <Button type="submit">New listing</Button>
+      <Button type="submit" size="action">
+        New listing
+      </Button>
     </form>
   );
 }

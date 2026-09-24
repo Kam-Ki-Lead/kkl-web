@@ -62,7 +62,7 @@ export default function AdminSettingsPage() {
                 }`}
               >
                 <span className="min-w-0">
-                  <span className="block text-[15px] font-semibold text-ink">{item.label}</span>
+                  <span className="block text-[15px] text-ink">{item.label}</span>
                   <span className="t-caption block text-muted">{item.note}</span>
                 </span>
                 <Chip tone={item.on ? "success" : "muted"}>{item.on ? "In use" : "Off"}</Chip>

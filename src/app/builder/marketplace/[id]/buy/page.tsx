@@ -58,7 +58,7 @@ export default async function PurchaseReviewPage({
   return (
     <BuilderShell title="Confirm purchase" subtitle="Credits are deducted before release">
       <div className="max-w-[720px]">
-        <h2 className="t-title text-ink">Confirm purchase</h2>
+        <h2 className="t-flow-title text-ink">Confirm purchase</h2>
         <p className="t-body mt-[8px] text-body">
           Credits are deducted first. The lead is released to you only if the deduction succeeds,
           and no one else can buy it afterwards.

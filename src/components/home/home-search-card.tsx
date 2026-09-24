@@ -175,7 +175,7 @@ function SearchField({
 }) {
   return (
     <div className={`flex flex-col gap-[6px] ${className}`}>
-      <label htmlFor={id} className="t-label text-ink">
+      <label htmlFor={id} className="t-label text-body">
         {label}
       </label>
       <select
@@ -183,7 +183,7 @@ function SearchField({
         name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-[48px] w-full cursor-pointer rounded-[8px] border border-line bg-white px-[13px] text-[15px] text-ink"
+        className="min-h-[48px] w-full cursor-pointer rounded-[8px] border border-control-border bg-white px-[13px] text-[15px] text-ink"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

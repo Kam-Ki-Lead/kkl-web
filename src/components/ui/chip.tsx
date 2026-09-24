@@ -19,17 +19,25 @@ const tones: Record<ChipTone, string> = {
 
 export function Chip({
   tone = "neutral",
+  size = "md",
   children,
   className = "",
 }: {
   tone?: ChipTone;
+  /**
+   * The approved consoles render status chips at 13px; the Admin screens draw
+   * the same chips at 12px (A-03, A-26, A-31). Both are 700-weight.
+   */
+  size?: "md" | "sm";
   children: ReactNode;
   className?: string;
 }) {
   return (
     <span
       data-chip={tone}
-      className={`chip inline-flex items-center gap-[5px] rounded-full px-[10px] py-[3px] text-[13px] font-semibold ${tones[tone]} ${className}`}
+      className={`chip inline-flex items-center gap-[5px] rounded-full px-[10px] py-[3px] font-bold ${
+        size === "sm" ? "text-[12px]" : "text-[13px]"
+      } ${tones[tone]} ${className}`}
     >
       {children}
     </span>
@@ -65,6 +73,12 @@ export function FilterChip({
  * The real value is never sent to the browser before purchase, so there is nothing
  * here to blur or reveal client-side. This renders the placeholder the server sends.
  */
-export function MaskedValue({ children }: { children: ReactNode }) {
-  return <span className="t-mono text-muted">{children}</span>;
+export function MaskedValue({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <span className={`t-mono text-muted ${className}`}>{children}</span>;
 }
