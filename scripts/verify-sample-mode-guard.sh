@@ -38,10 +38,31 @@ OUT="$(mktemp)"
 FAILURES=0
 
 stop() {
-  for pid in $(ps -eo pid,args | grep "next-server" | grep -v grep | awk '{print $1}'); do
-    kill -9 "$pid" 2>/dev/null
-  done
+  if ps -eo pid,args > /dev/null 2>&1; then
+    for pid in $(ps -eo pid,args | grep "next-server" | grep -v grep | awk '{print $1}'); do
+      kill -9 "$pid" 2>/dev/null
+    done
+  else
+    # Windows Git Bash: ps has no -eo, and netstat's CRLF line endings ride
+    # into the PID field and defeat taskkill. Ask PowerShell to kill whatever
+    # holds the port instead — a stale server answering in place of the
+    # scenario's own is how this suite once reported 200 where the guard had
+    # refused nothing.
+    powershell -NoProfile -Command \
+      "Get-NetTCPConnection -LocalPort ${PORT} -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id \$_.OwningProcess -Force -ErrorAction SilentlyContinue }" \
+      > /dev/null 2>&1
+  fi
   sleep 1
+}
+
+# Every scenario runs with the four guard variables REMOVED first, then its
+# own assignments applied. Without the -u prefix a variable exported in the
+# caller's shell leaks into scenarios that expect it unset, and the suite
+# measures the shell instead of the guard.
+GUARD_VARS="KKL_ENV KKL_DATA_SOURCE NEXT_PUBLIC_KKL_ENV NEXT_PUBLIC_KKL_DATA_SOURCE"
+unsets() {
+  local v
+  for v in $GUARD_VARS; do printf -- '-u %s ' "$v"; done
 }
 
 # build <label> <env-assignments...>
@@ -65,10 +86,18 @@ build() {
 scenario() {
   local label="$1" expect="$2" reason="$3"; shift 3
   stop
-  (env "$@" npx next start -p "$PORT" > "$LOG" 2>&1 &)
-  sleep 6
-  local code body ok=1
-  code=$(curl -s -o "$OUT" -w '%{http_code}' "http://127.0.0.1:${PORT}/")
+  # shellcheck disable=SC2046
+  (env $(unsets) "$@" npx next start -p "$PORT" > "$LOG" 2>&1 &)
+  # Wait for THIS server, not a fixed number of seconds: a boot right after
+  # a build can exceed six seconds on a slow disk, and curl against a
+  # half-started server measures the timing, not the guard.
+  local tries=0 code body ok=1
+  code="000"
+  while [ "$code" = "000" ] && [ "$tries" -lt 30 ]; do
+    sleep 1
+    tries=$((tries + 1))
+    code=$(curl -s -o "$OUT" -w '%{http_code}' "http://127.0.0.1:${PORT}/")
+  done
   body=$(cat "$OUT")
   [ "$code" = "$expect" ] || ok=0
   if [ "$reason" != "-" ] && ! printf '%s' "$body" | grep -qF "$reason"; then
