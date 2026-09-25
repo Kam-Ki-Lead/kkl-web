@@ -2,15 +2,15 @@
   {
     "id": "P-02",
     "width": 390,
-    "shared": 31,
+    "shared": 33,
     "mismatched": [
       {
         "text": "Sign in",
         "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.94 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 20,
-    "implOnly": 43,
+    "protoOnly": 13,
+    "implOnly": 41,
     "typo": [
       {
         "text": "Location",
@@ -38,293 +38,114 @@
       }
     ],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px | pill] -> [6px | 8px | pill]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "S-21",
-    "width": 390,
-    "shared": 8,
-    "mismatched": [],
-    "protoOnly": 10,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "Billing information",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
-      "control height [52 | 85] -> [47 | 96]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "S-23",
-    "width": 390,
-    "shared": 6,
-    "mismatched": [],
-    "protoOnly": 17,
-    "implOnly": 2,
-    "typo": [
-      {
-        "text": "New ticket",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
-      "control height [123 | 52] -> [171 | 44 | 47]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "S-24",
-    "width": 390,
-    "shared": 6,
-    "mismatched": [],
-    "protoOnly": 17,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Ticket",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
-      "control height [85] -> [121]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "S-25",
-    "width": 390,
-    "shared": 12,
-    "mismatched": [
-      {
-        "text": "My credit balance runs low",
-        "note": "proto at 0.55 on rgb(246, 248, 253); impl at 0.28 on rgb(255, 255, 255)"
-      }
-    ],
-    "protoOnly": 12,
-    "implOnly": 10,
-    "typo": [
-      {
-        "text": "Profile & settings",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
-      "control height [52] -> [13 | 47]",
-      "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "B-11",
-    "width": 390,
-    "shared": 11,
-    "mismatched": [],
-    "protoOnly": 28,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "Covered parking",
-        "diff": "colour rgb(42, 50, 80)->rgb(255, 255, 255)"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [0px rgb(255, 255, 255) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
-      "control height [52] -> [13 | 16 | 47]",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "B-15",
-    "width": 390,
-    "shared": 8,
-    "mismatched": [],
-    "protoOnly": 20,
-    "implOnly": 5,
-    "typo": [
-      {
-        "text": "Edit listing",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
-      "control height [104 | 52] -> [146 | 44 | 47]",
-      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "B-24",
-    "width": 390,
-    "shared": 11,
-    "mismatched": [
-      {
-        "text": "Approved",
-        "note": "proto at 0.87 on rgb(246, 248, 253); impl at 0.58 on rgb(227, 243, 234)"
-      }
-    ],
-    "protoOnly": 17,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Profile & settings",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
-      "control height [52] -> [13 | 47]",
-      "button radius [50% | 6px | 8px] -> [6px | 8px]"
-    ],
-    "score": 22
-  },
-  {
-    "id": "A-19",
-    "width": 390,
-    "shared": 8,
-    "mismatched": [],
-    "protoOnly": 37,
-    "implOnly": 10,
-    "typo": [
-      {
-        "text": "Credit adjustment",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
-      "control height [52 | 85] -> [16 | 47 | 96]",
-      "button radius [0px | 6px | 7px | 8px] -> [6px | 8px]"
     ],
     "score": 22
   },
   {
     "id": "P-04",
     "width": 390,
-    "shared": 18,
+    "shared": 20,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 8,
-    "implOnly": 12,
-    "typo": [],
+    "protoOnly": 6,
+    "implOnly": 10,
+    "typo": [
+      {
+        "text": "Send an enquiry",
+        "diff": "size 26->34"
+      }
+    ],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [52 | 85] -> [47 | 96]",
       "button radius [0px | 6px] -> [6px]"
     ],
-    "score": 20
+    "score": 22
   },
   {
     "id": "P-05",
     "width": 390,
-    "shared": 18,
+    "shared": 20,
     "mismatched": [
       {
         "text": "Sign in",
         "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 13,
-    "implOnly": 14,
-    "typo": [],
+    "protoOnly": 11,
+    "implOnly": 12,
+    "typo": [
+      {
+        "text": "Request a site visit",
+        "diff": "size 26->34"
+      }
+    ],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [52 | 85] -> [47 | 96]",
       "button radius [0px | 6px] -> [6px]"
     ],
-    "score": 20
-  },
-  {
-    "id": "P-06",
-    "width": 390,
-    "shared": 13,
-    "mismatched": [
-      {
-        "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
-      }
-    ],
-    "protoOnly": 7,
-    "implOnly": 15,
-    "typo": [],
-    "struct": [
-      "content width 1344 -> 354",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
-      "control height [52] -> [47]",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 20
+    "score": 22
   },
   {
     "id": "P-15",
     "width": 390,
-    "shared": 15,
+    "shared": 17,
     "mismatched": [
       {
         "text": "Sign in",
         "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.83 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 13,
-    "implOnly": 20,
-    "typo": [],
+    "protoOnly": 11,
+    "implOnly": 18,
+    "typo": [
+      {
+        "text": "Profile & settings",
+        "diff": "size 26->34"
+      }
+    ],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156) | 1px rgb(225, 228, 238)]",
       "control height [52] -> [13 | 44 | 47]",
       "button radius [0px | 6px | pill] -> [6px]"
     ],
-    "score": 20
+    "score": 22
   },
   {
     "id": "P-19",
     "width": 390,
-    "shared": 15,
+    "shared": 17,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 10,
-    "implOnly": 13,
-    "typo": [],
+    "protoOnly": 8,
+    "implOnly": 11,
+    "typo": [
+      {
+        "text": "Contact & support",
+        "diff": "size 26->34"
+      }
+    ],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [104] -> [146 | 47]",
       "button radius [0px | 6px | pill] -> [6px]"
     ],
-    "score": 20
+    "score": 22
   },
   {
     "id": "S-02",
@@ -333,14 +154,19 @@
     "mismatched": [],
     "protoOnly": 3,
     "implOnly": 4,
-    "typo": [],
+    "typo": [
+      {
+        "text": "Your business",
+        "diff": "size 24->30"
+      }
+    ],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [0px rgb(255, 255, 255) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
       "control height [52] -> [16 | 44 | 47]",
       "button radius [0px | 6px | pill] -> [6px]"
     ],
-    "score": 20
+    "score": 22
   },
   {
     "id": "S-03",
@@ -349,28 +175,147 @@
     "mismatched": [],
     "protoOnly": 3,
     "implOnly": 4,
-    "typo": [],
+    "typo": [
+      {
+        "text": "Verify your identity",
+        "diff": "size 24->30"
+      }
+    ],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156) | 1px rgb(185, 195, 236)]",
       "control height [52] -> [47 | 63]",
       "button radius [6px | 8px] -> [6px]"
+    ],
+    "score": 22
+  },
+  {
+    "id": "B-11",
+    "width": 390,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 15,
+    "implOnly": 14,
+    "typo": [
+      {
+        "text": "Covered parking",
+        "diff": "colour rgb(42, 50, 80)->rgb(255, 255, 255)"
+      }
+    ],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [0px rgb(255, 255, 255) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [13 | 16 | 47]",
+      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 22
+  },
+  {
+    "id": "B-24",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "Approved",
+        "note": "proto at 0.85 on rgb(246, 248, 253); impl at 0.58 on rgb(227, 243, 234)"
+      }
+    ],
+    "protoOnly": 4,
+    "implOnly": 12,
+    "typo": [
+      {
+        "text": "Active",
+        "diff": "size 16->13; weight 600->700; colour rgb(18, 24, 43)->rgb(14, 107, 69)"
+      }
+    ],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [13 | 47]",
+      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 22
+  },
+  {
+    "id": "P-01",
+    "width": 390,
+    "shared": 66,
+    "mismatched": [],
+    "protoOnly": 25,
+    "implOnly": 17,
+    "typo": [
+      {
+        "text": "Ivy Court, Action Area I",
+        "diff": "size 26->38"
+      },
+      {
+        "text": "₹1.05Cr – ₹1.6Cr",
+        "diff": "size 22->28"
+      },
+      {
+        "text": "Buy",
+        "diff": "size 17->16; family Archivo->Public Sans"
+      },
+      {
+        "text": "+ More filters (property type)",
+        "diff": "weight 700->600"
+      },
+      {
+        "text": "Featured properties",
+        "diff": "size 21->26"
+      },
+      {
+        "text": "Featured projects",
+        "diff": "size 21->26"
+      },
+      {
+        "text": "Browse by locality",
+        "diff": "size 21->26"
+      },
+      {
+        "text": "Not sure where to start? Tell us what you need.",
+        "diff": "size 21->26"
+      }
+    ],
+    "struct": [
+      "content width 390 -> 354"
+    ],
+    "score": 21
+  },
+  {
+    "id": "P-06",
+    "width": 390,
+    "shared": 15,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 5,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 354",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]",
+      "button radius [0px | 6px] -> [6px]"
     ],
     "score": 20
   },
   {
     "id": "S-07",
     "width": 390,
-    "shared": 20,
+    "shared": 21,
     "mismatched": [],
-    "protoOnly": 29,
-    "implOnly": 37,
+    "protoOnly": 20,
+    "implOnly": 36,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [48] -> [44]",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [8px]"
+      "button radius [0px | 50% | 6px] -> [8px]"
     ],
     "score": 20
   },
@@ -379,14 +324,83 @@
     "width": 390,
     "shared": 11,
     "mismatched": [],
-    "protoOnly": 10,
+    "protoOnly": 0,
     "implOnly": 2,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [52] -> [47]",
+      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-21",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 0,
+    "implOnly": 3,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [47 | 96]",
+      "button radius [50% | 6px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-23",
+    "width": 390,
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 7,
+    "implOnly": 2,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [123 | 52] -> [171 | 44 | 47]",
       "button radius [50% | 6px | 8px | pill] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-24",
+    "width": 390,
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 7,
+    "implOnly": 8,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [85] -> [121]",
+      "button radius [50% | 6px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-25",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [
+      {
+        "text": "My credit balance runs low",
+        "note": "proto at 0.56 on rgb(246, 248, 253); impl at 0.28 on rgb(255, 255, 255)"
+      }
+    ],
+    "protoOnly": 2,
+    "implOnly": 10,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [13 | 47]",
+      "button radius [50% | 6px | 8px] -> [6px | 8px]"
     ],
     "score": 20
   },
@@ -395,11 +409,11 @@
     "width": 390,
     "shared": 6,
     "mismatched": [],
-    "protoOnly": 20,
+    "protoOnly": 7,
     "implOnly": 7,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [104 | 52] -> [146 | 44 | 47]",
       "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
@@ -411,11 +425,11 @@
     "width": 390,
     "shared": 3,
     "mismatched": [],
-    "protoOnly": 24,
+    "protoOnly": 11,
     "implOnly": 8,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [1px rgb(138, 142, 156)]",
       "control height [52] -> [44 | 47]",
       "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
@@ -427,11 +441,11 @@
     "width": 390,
     "shared": 4,
     "mismatched": [],
-    "protoOnly": 26,
+    "protoOnly": 13,
     "implOnly": 13,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [0px rgb(27, 59, 179) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
       "control height [46] -> [16 | 47]",
       "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
@@ -443,11 +457,11 @@
     "width": 390,
     "shared": 3,
     "mismatched": [],
-    "protoOnly": 23,
+    "protoOnly": 10,
     "implOnly": 11,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156) | 1px rgb(185, 195, 236)]",
       "control height [52] -> [47 | 63]",
       "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
@@ -455,34 +469,66 @@
     "score": 20
   },
   {
-    "id": "B-20",
+    "id": "B-15",
     "width": 390,
-    "shared": 7,
+    "shared": 8,
     "mismatched": [],
-    "protoOnly": 39,
-    "implOnly": 40,
+    "protoOnly": 7,
+    "implOnly": 5,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [104 | 52] -> [146 | 44 | 47]",
+      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-20",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 27,
+    "implOnly": 39,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [48] -> [44]",
-      "button radius [50% | 6px | 8px] -> [8px]"
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 20
   },
   {
     "id": "A-14",
     "width": 390,
-    "shared": 8,
+    "shared": 9,
     "mismatched": [],
-    "protoOnly": 44,
-    "implOnly": 8,
+    "protoOnly": 15,
+    "implOnly": 7,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
       "control height [46 | 48] -> [40]",
-      "button radius [7px] -> [8px]"
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "A-19",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 7,
+    "implOnly": 10,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [16 | 47 | 96]",
+      "button radius [0px | 6px | 8px] -> [6px | 8px]"
     ],
     "score": 20
   },
@@ -491,50 +537,34 @@
     "width": 390,
     "shared": 7,
     "mismatched": [],
-    "protoOnly": 53,
+    "protoOnly": 23,
     "implOnly": 17,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [85] -> [121 | 72]",
-      "button radius [6px | 7px] -> [6px | 8px]"
+      "button radius [6px] -> [6px | 8px]"
     ],
     "score": 20
   },
   {
-    "id": "A-27",
-    "width": 390,
-    "shared": 12,
-    "mismatched": [],
-    "protoOnly": 43,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Notification delivery",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [7px | pill] -> [8px]"
-    ],
-    "score": 17
-  },
-  {
     "id": "P-10",
     "width": 390,
-    "shared": 22,
+    "shared": 24,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.93 on rgb(15, 36, 120)"
+        "note": "proto at 0 on rgb(255, 255, 255); impl at 0.93 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 13,
-    "implOnly": 38,
+    "protoOnly": 11,
+    "implOnly": 36,
     "typo": [
+      {
+        "text": "Matching homes",
+        "diff": "size 26->34"
+      },
       {
         "text": "₹78L – ₹1.4Cr",
         "diff": "size 23->24"
@@ -549,10 +579,10 @@
       }
     ],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px] -> [6px]"
     ],
-    "score": 16
+    "score": 18
   },
   {
     "id": "S-01",
@@ -561,24 +591,29 @@
     "mismatched": [],
     "protoOnly": 1,
     "implOnly": 4,
-    "typo": [],
+    "typo": [
+      {
+        "text": "Register as a broker",
+        "diff": "size 24->30"
+      }
+    ],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [52] -> [47]"
     ],
-    "score": 15
+    "score": 17
   },
   {
     "id": "B-01",
     "width": 390,
-    "shared": 5,
+    "shared": 7,
     "mismatched": [],
-    "protoOnly": 4,
-    "implOnly": 4,
+    "protoOnly": 2,
+    "implOnly": 5,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [52] -> [47]"
     ],
@@ -593,7 +628,7 @@
     "implOnly": 5,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [52] -> [47]"
     ],
@@ -602,89 +637,156 @@
   {
     "id": "A-03",
     "width": 390,
-    "shared": 14,
+    "shared": 18,
     "mismatched": [],
-    "protoOnly": 43,
-    "implOnly": 8,
+    "protoOnly": 3,
+    "implOnly": 4,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
+      "button radius [0px | 6px | pill] -> [8px]"
     ],
     "score": 15
   },
   {
     "id": "A-12",
     "width": 390,
-    "shared": 20,
+    "shared": 27,
     "mismatched": [],
-    "protoOnly": 42,
-    "implOnly": 9,
+    "protoOnly": 1,
+    "implOnly": 2,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
+      "button radius [0px | 6px | pill] -> [8px]"
     ],
     "score": 15
   },
   {
     "id": "A-16",
     "width": 390,
-    "shared": 8,
+    "shared": 11,
     "mismatched": [],
-    "protoOnly": 45,
-    "implOnly": 5,
+    "protoOnly": 1,
+    "implOnly": 2,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
+      "button radius [0px | 6px | pill] -> [8px]"
     ],
     "score": 15
   },
   {
     "id": "A-21",
     "width": 390,
-    "shared": 11,
+    "shared": 15,
     "mismatched": [],
-    "protoOnly": 37,
-    "implOnly": 6,
+    "protoOnly": 1,
+    "implOnly": 2,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
-      "button radius [0px | 7px | pill] -> [8px]"
+      "button radius [0px | 6px | pill] -> [8px]"
     ],
     "score": 15
   },
   {
-    "id": "S-05",
+    "id": "A-27",
     "width": 390,
-    "shared": 2,
+    "shared": 15,
     "mismatched": [],
-    "protoOnly": 10,
-    "implOnly": 6,
+    "protoOnly": 4,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(225, 228, 238)]",
+      "button radius [6px | pill] -> [8px]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-17",
+    "width": 390,
+    "shared": 18,
+    "mismatched": [],
+    "protoOnly": 17,
+    "implOnly": 11,
     "typo": [
       {
-        "text": "Account restricted",
-        "diff": "size 22->20"
+        "text": "Delivery record",
+        "diff": "size 19->22"
+      },
+      {
+        "text": "LD-88041 · 4 BHK · ₹1.5Cr +",
+        "diff": "size 23->28"
       }
     ],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 14
+  },
+  {
+    "id": "P-03",
+    "width": 390,
+    "shared": 52,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0 on rgb(255, 255, 255); impl at 0.9 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 16,
+    "implOnly": 14,
+    "typo": [
+      {
+        "text": "Greenview Residency",
+        "diff": "size 26->34"
+      }
+    ],
+    "struct": [
+      "content width 390 -> 354",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "P-09",
+    "width": 390,
+    "shared": 18,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 6,
+    "implOnly": 11,
+    "typo": [
+      {
+        "text": "Check your requirement",
+        "diff": "size 26->34"
+      }
+    ],
+    "struct": [
+      "content width 390 -> 354",
+      "button radius [0px | 6px] -> [6px]"
     ],
     "score": 12
   },
   {
     "id": "S-06",
     "width": 390,
-    "shared": 22,
+    "shared": 25,
     "mismatched": [],
-    "protoOnly": 16,
-    "implOnly": 12,
+    "protoOnly": 8,
+    "implOnly": 9,
     "typo": [
       {
         "text": "₹4,200",
@@ -692,8 +794,8 @@
       }
     ],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 10px | 50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [0px | 10px | 50% | 6px | 8px] -> [8px]"
     ],
     "score": 12
   },
@@ -702,368 +804,130 @@
     "width": 390,
     "shared": 14,
     "mismatched": [],
-    "protoOnly": 25,
+    "protoOnly": 16,
     "implOnly": 11,
     "typo": [
       {
-        "text": "Lead L-4471",
-        "diff": "size 22->20"
+        "text": "3 BHK · ₹1Cr – ₹1.5Cr",
+        "diff": "size 24->30"
       }
     ],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 12
   },
   {
-    "id": "S-17",
+    "id": "S-14",
     "width": 390,
-    "shared": 19,
+    "shared": 17,
     "mismatched": [],
-    "protoOnly": 22,
-    "implOnly": 25,
+    "protoOnly": 13,
+    "implOnly": 14,
     "typo": [
       {
-        "text": "Transactions",
-        "diff": "size 22->20"
+        "text": "₹4,200 credits",
+        "diff": "size 38->34"
       }
     ],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 12
   },
   {
     "id": "S-18",
     "width": 390,
-    "shared": 9,
-    "mismatched": [],
-    "protoOnly": 13,
-    "implOnly": 3,
-    "typo": [
-      {
-        "text": "Credit expiry",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "S-19",
-    "width": 390,
-    "shared": 12,
-    "mismatched": [],
-    "protoOnly": 17,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Invoices",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "S-20",
-    "width": 390,
-    "shared": 8,
-    "mismatched": [],
-    "protoOnly": 18,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Invoice",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "B-02",
-    "width": 390,
-    "shared": 1,
-    "mismatched": [],
-    "protoOnly": 12,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "Company verification",
-        "diff": "size 30->20; weight 800->700"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 8px] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "B-05",
-    "width": 390,
     "shared": 10,
     "mismatched": [],
-    "protoOnly": 25,
-    "implOnly": 9,
+    "protoOnly": 3,
+    "implOnly": 2,
     "typo": [
       {
-        "text": "Renewal & expiry",
-        "diff": "size 22->20"
+        "text": "₹4,200 credits",
+        "diff": "size 24->26"
       }
     ],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "B-03",
+    "width": 390,
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 12,
+    "implOnly": 10,
+    "typo": [
+      {
+        "text": "Your subscription is active",
+        "diff": "size 24->30"
+      }
+    ],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [6px | 8px]"
     ],
     "score": 12
   },
   {
     "id": "B-18",
     "width": 390,
-    "shared": 8,
+    "shared": 10,
     "mismatched": [],
-    "protoOnly": 11,
-    "implOnly": 6,
+    "protoOnly": 0,
+    "implOnly": 4,
     "typo": [
       {
-        "text": "Notification states",
-        "diff": "size 22->20"
+        "text": "Enquiries",
+        "diff": "size 15->16; weight 700->500; colour rgb(255, 255, 255)->rgb(185, 195, 236)"
       }
     ],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 12
-  },
-  {
-    "id": "B-19",
-    "width": 390,
-    "shared": 11,
-    "mismatched": [],
-    "protoOnly": 34,
-    "implOnly": 11,
-    "typo": [
-      {
-        "text": "Access restrictions",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "A-02",
-    "width": 390,
-    "shared": 24,
-    "mismatched": [],
-    "protoOnly": 33,
-    "implOnly": 6,
-    "typo": [
-      {
-        "text": "Operations dashboard",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | 8px] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "A-06",
-    "width": 390,
-    "shared": 14,
-    "mismatched": [
-      {
-        "text": "Approve verification",
-        "note": "proto at 0.38 on rgb(14, 107, 69); impl at 0.9 on rgb(27, 59, 179)"
-      }
-    ],
-    "protoOnly": 44,
-    "implOnly": 14,
-    "typo": [
-      {
-        "text": "KYC review",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px | 8px] -> [6px | 8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "A-24",
-    "width": 390,
-    "shared": 20,
-    "mismatched": [],
-    "protoOnly": 43,
-    "implOnly": 8,
-    "typo": [
-      {
-        "text": "Voice qualification",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 7px] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "A-26",
-    "width": 390,
-    "shared": 14,
-    "mismatched": [],
-    "protoOnly": 49,
-    "implOnly": 13,
-    "typo": [
-      {
-        "text": "WhatsApp qualification",
-        "diff": "size 22->20"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [7px] -> [8px]"
-    ],
-    "score": 12
-  },
-  {
-    "id": "P-01",
-    "width": 390,
-    "shared": 62,
-    "mismatched": [
-      {
-        "text": "Builders & developers",
-        "note": "proto at 0.4 on rgb(246, 248, 253); impl at 0.72 on rgb(255, 255, 255)"
-      },
-      {
-        "text": "Publish your projects and receive buyer enquiries directly.",
-        "note": "proto at 0.41 on rgb(246, 248, 253); impl at 0.73 on rgb(255, 255, 255)"
-      },
-      {
-        "text": "Requires verification, admin approval and an active monthly subscription.",
-        "note": "proto at 0.43 on rgb(246, 248, 253); impl at 0.74 on rgb(255, 255, 255)"
-      },
-      {
-        "text": "Brokers & agencies",
-        "note": "proto at 0.5 on rgb(246, 248, 253); impl at 0.77 on rgb(255, 255, 255)"
-      }
-    ],
-    "protoOnly": 29,
-    "implOnly": 21,
-    "typo": [],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [6px] -> [0px | 6px]"
-    ],
-    "score": 10
-  },
-  {
-    "id": "P-03",
-    "width": 390,
-    "shared": 50,
-    "mismatched": [
-      {
-        "text": "Sign in",
-        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.9 on rgb(15, 36, 120)"
-      },
-      {
-        "text": "Listed by",
-        "note": "proto at 0.43 on rgb(246, 248, 253); impl at 0.69 on rgb(255, 255, 255)"
-      },
-      {
-        "text": "Sample Builders Pvt Ltd",
-        "note": "proto at 0.44 on rgb(246, 248, 253); impl at 0.7 on rgb(255, 255, 255)"
-      },
-      {
-        "text": "Builder account, verified by Kam Ki Lead before publishing.",
-        "note": "proto at 0.45 on rgb(246, 248, 253); impl at 0.71 on rgb(255, 255, 255)"
-      }
-    ],
-    "protoOnly": 18,
-    "implOnly": 16,
-    "typo": [],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
-    ],
-    "score": 10
   },
   {
     "id": "P-08",
     "width": 390,
-    "shared": 12,
+    "shared": 13,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.82 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.82 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 13,
-    "implOnly": 21,
+    "protoOnly": 12,
+    "implOnly": 20,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px | 8px] -> [6px]"
-    ],
-    "score": 10
-  },
-  {
-    "id": "P-09",
-    "width": 390,
-    "shared": 17,
-    "mismatched": [
-      {
-        "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
-      }
-    ],
-    "protoOnly": 7,
-    "implOnly": 12,
-    "typo": [],
-    "struct": [
-      "content width 1344 -> 354",
-      "button radius [0px | 6px] -> [6px]"
     ],
     "score": 10
   },
   {
     "id": "P-11",
     "width": 390,
-    "shared": 12,
+    "shared": 14,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 5,
-    "implOnly": 15,
+    "protoOnly": 3,
+    "implOnly": 13,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px] -> [6px]"
     ],
     "score": 10
@@ -1071,18 +935,18 @@
   {
     "id": "P-12",
     "width": 390,
-    "shared": 12,
+    "shared": 13,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.81 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 23,
-    "implOnly": 20,
+    "protoOnly": 22,
+    "implOnly": 19,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 10px | 6px] -> [6px]"
     ],
     "score": 10
@@ -1090,18 +954,18 @@
   {
     "id": "P-13",
     "width": 390,
-    "shared": 17,
+    "shared": 18,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.79 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 13,
-    "implOnly": 16,
+    "protoOnly": 11,
+    "implOnly": 15,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 10px | 6px] -> [6px]"
     ],
     "score": 10
@@ -1109,18 +973,18 @@
   {
     "id": "P-14",
     "width": 390,
-    "shared": 12,
+    "shared": 14,
     "mismatched": [
       {
         "text": "Sign in",
         "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.8 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 18,
-    "implOnly": 22,
+    "protoOnly": 16,
+    "implOnly": 20,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px] -> [6px]"
     ],
     "score": 10
@@ -1128,18 +992,18 @@
   {
     "id": "P-17",
     "width": 390,
-    "shared": 13,
+    "shared": 15,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.86 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.86 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 18,
-    "implOnly": 28,
+    "protoOnly": 16,
+    "implOnly": 26,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px] -> [6px]"
     ],
     "score": 10
@@ -1147,18 +1011,18 @@
   {
     "id": "P-18",
     "width": 390,
-    "shared": 13,
+    "shared": 15,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.86 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.86 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 17,
-    "implOnly": 29,
+    "protoOnly": 15,
+    "implOnly": 27,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px] -> [6px]"
     ],
     "score": 10
@@ -1166,7 +1030,7 @@
   {
     "id": "P-20",
     "width": 390,
-    "shared": 11,
+    "shared": 13,
     "mismatched": [
       {
         "text": "Sign in",
@@ -1174,108 +1038,145 @@
       },
       {
         "text": "Refund policy",
-        "note": "proto at 0.25 on rgb(255, 255, 255); impl at 0.91 on rgb(15, 36, 120)"
+        "note": "proto at 0.15 on rgb(255, 255, 255); impl at 0.91 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 12,
-    "implOnly": 14,
+    "protoOnly": 10,
+    "implOnly": 12,
     "typo": [],
     "struct": [
-      "content width 1344 -> 354",
+      "content width 390 -> 354",
       "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-05",
+    "width": 390,
+    "shared": 2,
+    "mismatched": [],
+    "protoOnly": 0,
+    "implOnly": 6,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "S-09",
     "width": 390,
-    "shared": 12,
+    "shared": 13,
     "mismatched": [],
-    "protoOnly": 10,
-    "implOnly": 2,
+    "protoOnly": 0,
+    "implOnly": 1,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
+      "content width 390 -> 358",
+      "button radius [0px | 50% | 6px] -> [6px | 8px]"
     ],
     "score": 10
   },
   {
     "id": "S-12",
     "width": 390,
-    "shared": 3,
+    "shared": 4,
     "mismatched": [],
-    "protoOnly": 11,
-    "implOnly": 3,
+    "protoOnly": 2,
+    "implOnly": 2,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
-    "id": "S-14",
+    "id": "S-17",
     "width": 390,
-    "shared": 15,
+    "shared": 20,
     "mismatched": [],
-    "protoOnly": 22,
-    "implOnly": 16,
+    "protoOnly": 8,
+    "implOnly": 24,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-19",
+    "width": 390,
+    "shared": 12,
+    "mismatched": [],
+    "protoOnly": 2,
+    "implOnly": 8,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [0px | 50% | 6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-20",
+    "width": 390,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 8,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "S-22",
     "width": 390,
-    "shared": 8,
+    "shared": 9,
     "mismatched": [],
-    "protoOnly": 15,
-    "implOnly": 7,
+    "protoOnly": 6,
+    "implOnly": 6,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [10px | 50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
-    "id": "B-03",
+    "id": "B-05",
     "width": 390,
-    "shared": 5,
-    "mismatched": [
-      {
-        "text": "What the subscription covers",
-        "note": "proto at 0.2 on rgb(255, 247, 232); impl at 0.62 on rgb(255, 255, 255)"
-      }
-    ],
-    "protoOnly": 25,
-    "implOnly": 11,
+    "shared": 10,
+    "mismatched": [],
+    "protoOnly": 12,
+    "implOnly": 9,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "B-06",
     "width": 390,
-    "shared": 12,
+    "shared": 14,
     "mismatched": [
       {
         "text": "Site-visit request",
-        "note": "proto at 0.52 on rgb(246, 248, 253); impl at 0.17 on rgb(255, 255, 255)"
+        "note": "proto at 0.44 on rgb(246, 248, 253); impl at 0.17 on rgb(255, 255, 255)"
       }
     ],
-    "protoOnly": 18,
-    "implOnly": 16,
+    "protoOnly": 13,
+    "implOnly": 14,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "button radius [0px | 10px | 50% | 6px | 8px] -> [8px]"
     ],
     "score": 10
@@ -1283,14 +1184,14 @@
   {
     "id": "B-07",
     "width": 390,
-    "shared": 15,
+    "shared": 17,
     "mismatched": [],
-    "protoOnly": 21,
-    "implOnly": 9,
+    "protoOnly": 8,
+    "implOnly": 10,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 50% | 6px | 8px | pill] -> [6px | 8px]"
+      "content width 390 -> 358",
+      "button radius [0px | 50% | 6px | pill] -> [6px | 8px]"
     ],
     "score": 10
   },
@@ -1299,11 +1200,11 @@
     "width": 390,
     "shared": 5,
     "mismatched": [],
-    "protoOnly": 33,
-    "implOnly": 13,
+    "protoOnly": 20,
+    "implOnly": 14,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
+      "content width 390 -> 358",
       "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
     ],
     "score": 10
@@ -1313,12 +1214,12 @@
     "width": 390,
     "shared": 12,
     "mismatched": [],
-    "protoOnly": 23,
+    "protoOnly": 11,
     "implOnly": 9,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 50% | 6px | 8px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [10px | 50% | 6px | pill] -> [8px]"
     ],
     "score": 10
   },
@@ -1327,54 +1228,82 @@
     "width": 390,
     "shared": 6,
     "mismatched": [],
-    "protoOnly": 26,
+    "protoOnly": 13,
     "implOnly": 13,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-19",
+    "width": 390,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 21,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "B-21",
     "width": 390,
-    "shared": 3,
+    "shared": 4,
     "mismatched": [],
-    "protoOnly": 14,
-    "implOnly": 3,
+    "protoOnly": 2,
+    "implOnly": 2,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "B-22",
     "width": 390,
-    "shared": 2,
+    "shared": 3,
     "mismatched": [],
-    "protoOnly": 39,
-    "implOnly": 21,
+    "protoOnly": 28,
+    "implOnly": 20,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [50% | 6px | 8px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [50% | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "B-23",
     "width": 390,
-    "shared": 3,
+    "shared": 4,
     "mismatched": [],
-    "protoOnly": 25,
+    "protoOnly": 14,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [10px | 50% | 6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-02",
+    "width": 390,
+    "shared": 24,
+    "mismatched": [],
+    "protoOnly": 3,
     "implOnly": 6,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 50% | 6px | 8px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [10px | 6px | 8px] -> [8px]"
     ],
     "score": 10
   },
@@ -1383,40 +1312,40 @@
     "width": 390,
     "shared": 9,
     "mismatched": [],
-    "protoOnly": 53,
+    "protoOnly": 23,
     "implOnly": 17,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-05",
     "width": 390,
-    "shared": 8,
+    "shared": 9,
     "mismatched": [],
-    "protoOnly": 41,
-    "implOnly": 13,
+    "protoOnly": 12,
+    "implOnly": 12,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [10px | 6px | pill] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-08",
     "width": 390,
-    "shared": 6,
+    "shared": 7,
     "mismatched": [],
-    "protoOnly": 32,
-    "implOnly": 5,
+    "protoOnly": 3,
+    "implOnly": 4,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [10px | 6px | pill] -> [8px]"
     ],
     "score": 10
   },
@@ -1425,26 +1354,26 @@
     "width": 390,
     "shared": 10,
     "mismatched": [],
-    "protoOnly": 45,
+    "protoOnly": 15,
     "implOnly": 9,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-10",
     "width": 390,
-    "shared": 9,
+    "shared": 10,
     "mismatched": [],
-    "protoOnly": 35,
-    "implOnly": 17,
+    "protoOnly": 6,
+    "implOnly": 16,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [0px | 6px] -> [8px]"
     ],
     "score": 10
   },
@@ -1453,12 +1382,12 @@
     "width": 390,
     "shared": 13,
     "mismatched": [],
-    "protoOnly": 46,
+    "protoOnly": 12,
     "implOnly": 14,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
@@ -1467,82 +1396,82 @@
     "width": 390,
     "shared": 16,
     "mismatched": [],
-    "protoOnly": 56,
+    "protoOnly": 26,
     "implOnly": 16,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-15",
     "width": 390,
-    "shared": 18,
+    "shared": 20,
     "mismatched": [],
-    "protoOnly": 31,
-    "implOnly": 9,
+    "protoOnly": 3,
+    "implOnly": 7,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px | 8px] -> [8px]"
-    ],
-    "score": 10
-  },
-  {
-    "id": "A-17",
-    "width": 390,
-    "shared": 18,
-    "mismatched": [],
-    "protoOnly": 47,
-    "implOnly": 11,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px | 8px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-18",
     "width": 390,
-    "shared": 11,
+    "shared": 12,
     "mismatched": [],
-    "protoOnly": 52,
-    "implOnly": 30,
+    "protoOnly": 18,
+    "implOnly": 29,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [0px | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-20",
     "width": 390,
-    "shared": 8,
+    "shared": 9,
     "mismatched": [],
-    "protoOnly": 46,
-    "implOnly": 12,
+    "protoOnly": 17,
+    "implOnly": 11,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [0px | 6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-22",
     "width": 390,
-    "shared": 4,
+    "shared": 5,
     "mismatched": [],
-    "protoOnly": 42,
-    "implOnly": 6,
+    "protoOnly": 13,
+    "implOnly": 5,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [10px | 7px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [10px | 6px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-24",
+    "width": 390,
+    "shared": 20,
+    "mismatched": [],
+    "protoOnly": 7,
+    "implOnly": 8,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [0px | 6px] -> [8px]"
     ],
     "score": 10
   },
@@ -1551,88 +1480,107 @@
     "width": 390,
     "shared": 16,
     "mismatched": [],
-    "protoOnly": 53,
+    "protoOnly": 23,
     "implOnly": 14,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-26",
+    "width": 390,
+    "shared": 14,
+    "mismatched": [],
+    "protoOnly": 19,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-28",
     "width": 390,
-    "shared": 18,
+    "shared": 19,
     "mismatched": [],
-    "protoOnly": 44,
-    "implOnly": 9,
+    "protoOnly": 11,
+    "implOnly": 8,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-29",
     "width": 390,
-    "shared": 3,
+    "shared": 4,
     "mismatched": [],
-    "protoOnly": 42,
-    "implOnly": 11,
+    "protoOnly": 13,
+    "implOnly": 10,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-30",
     "width": 390,
-    "shared": 10,
+    "shared": 6,
     "mismatched": [],
-    "protoOnly": 45,
-    "implOnly": 52,
+    "protoOnly": 5,
+    "implOnly": 56,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [0px | 7px | pill] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [0px | 6px | pill] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "A-31",
     "width": 390,
-    "shared": 18,
+    "shared": 19,
     "mismatched": [],
-    "protoOnly": 55,
-    "implOnly": 18,
+    "protoOnly": 26,
+    "implOnly": 17,
     "typo": [],
     "struct": [
-      "content width 1440 -> 358",
-      "button radius [6px | 7px] -> [8px]"
+      "content width 390 -> 358",
+      "button radius [6px] -> [8px]"
     ],
     "score": 10
   },
   {
     "id": "P-16",
     "width": 390,
-    "shared": 13,
+    "shared": 15,
     "mismatched": [
       {
         "text": "Sign in",
-        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.82 on rgb(15, 36, 120)"
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.82 on rgb(15, 36, 120)"
       }
     ],
-    "protoOnly": 13,
-    "implOnly": 28,
-    "typo": [],
-    "struct": [
-      "content width 1344 -> 354"
+    "protoOnly": 11,
+    "implOnly": 26,
+    "typo": [
+      {
+        "text": "Notifications",
+        "diff": "size 26->34"
+      }
     ],
-    "score": 5
+    "struct": [
+      "content width 390 -> 354"
+    ],
+    "score": 7
   },
   {
     "id": "S-04",
@@ -1641,22 +1589,58 @@
     "mismatched": [],
     "protoOnly": 5,
     "implOnly": 5,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 358"
+    "typo": [
+      {
+        "text": "Your account is verified",
+        "diff": "size 24->30"
+      }
     ],
-    "score": 5
+    "struct": [
+      "content width 390 -> 358"
+    ],
+    "score": 7
+  },
+  {
+    "id": "A-06",
+    "width": 390,
+    "shared": 14,
+    "mismatched": [],
+    "protoOnly": 14,
+    "implOnly": 14,
+    "typo": [
+      {
+        "text": "Approve verification",
+        "diff": "size 16->14"
+      }
+    ],
+    "struct": [
+      "content width 390 -> 358"
+    ],
+    "score": 7
   },
   {
     "id": "S-13",
     "width": 390,
     "shared": 0,
     "mismatched": [],
-    "protoOnly": 39,
+    "protoOnly": 29,
     "implOnly": 3,
     "typo": [],
     "struct": [
-      "content width 1440 -> 270"
+      "content width 390 -> 270"
+    ],
+    "score": 5
+  },
+  {
+    "id": "B-02",
+    "width": 390,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 9,
+    "implOnly": 15,
+    "typo": [],
+    "struct": [
+      "content width 390 -> 358"
     ],
     "score": 5
   }

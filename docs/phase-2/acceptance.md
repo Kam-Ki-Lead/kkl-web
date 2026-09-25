@@ -26,8 +26,12 @@ withdrawn.
 >    valid, labelled, for provenance.
 >
 > Two exceptions were also added after this report — **E-P5** (B-02 console
-> placement) and **E-P6** (B-07 listing thumbnails) — both open, in
-> [`exceptions.md`](exceptions.md). The current state of every item lives in
+> placement) and **E-P6** (B-07 listing thumbnails) — in
+> [`exceptions.md`](exceptions.md). Both were subsequently **reclassified by
+> the owner as corrections to match the approved baseline** and are **closed**:
+> B-02 is restored to the approved standalone light page and B-07 to the
+> approved image-bearing cards, at the implementation commit named on the
+> decision sheet. The current state of every item lives in
 > [`decision-sheet.md`](decision-sheet.md).
 
 ---

@@ -66,12 +66,14 @@ photo ids the baseline names. **They are not the baseline photographs and are
 not presented as them** — each one says `STAND-IN · not the baseline
 photograph` on its face, and carries corner marks so a crop is obvious.
 
-They exist because this environment's egress policy denies
-`images.unsplash.com` (re-confirmed: the proxy rejects CONNECT), so the real
-photographs cannot be fetched here at all. Both sides receive the identical
-file, which means **photographic fidelity is not being tested and cannot be**.
-What the image-present state tests is slot geometry: aspect ratio, crop
-behaviour, rounding, overlay and caption placement.
+They exist because an earlier environment's egress policy denied
+`images.unsplash.com`, so the real photographs could not be fetched there.
+**The current review environment reaches `images.unsplash.com`**, and the
+captures that need photographic fidelity use the real baseline photographs:
+the E-P3 attribution sheet, the E-P2 contrast sheet, and the refreshed
+B-02/B-07 pairs. The stand-in sets remain valid for what they were captured
+for — slot geometry: aspect ratio, crop behaviour, rounding, overlay and
+caption placement — and are kept, labelled, for provenance.
 
 Two things to know when reading those captures:
 
@@ -95,7 +97,10 @@ dashboard/editor/enquiries/restrictions, Admin dashboard/KYC review/wallet
 adjustment/support/audit, and the shared mobile navigation.
 
 The image-present state covers the three public screens that carry photography
-(P-01, P-02, P-03). The consoles render none, so there is nothing there for it
+(P-01, P-02, P-03) and, since the E-P6 correction restored B-07's
+image-bearing cards, the Builder's property list — whose pair shows both the
+image-present rows and the approved "No photos yet" missing-photo state on the
+seeded draft. The other consoles render none, so there is nothing there for it
 to show.
 
 The differences that remain — deliberate departures, and the ones still open —

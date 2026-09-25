@@ -146,7 +146,16 @@ async function protoPage(file) {
   const page = await ctx.newPage();
   await page.goto(`${PROTO}/${encodeURIComponent(file)}`, { waitUntil: 'load', timeout: 40000 });
   await page.waitForTimeout(2500);
-  await page.click(`button[aria-pressed]:text-is("${WIDTH}")`).catch(() => {});
+  await page.click(`button[aria-pressed]:text-is("${WIDTH}")`).catch(async () => {
+    // :text-is is whitespace-sensitive and the template renders the label with
+    // padding whitespace; fall back to a manual trimmed-text match, the same
+    // way capture-visual-comparison.mjs does. Without this the prototype
+    // silently stays on its default 1440 frame and every "390" measurement
+    // compares against a desktop render.
+    for (const t of await page.$$('button')) {
+      if ((await t.textContent())?.trim() === String(WIDTH)) { await t.click(); break; }
+    }
+  });
   await page.waitForTimeout(1000);
   protoPages.set(file, page);
   return page;

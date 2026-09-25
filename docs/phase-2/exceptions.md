@@ -1,8 +1,14 @@
 # Phase 2 — exceptions awaiting a decision
 
-Six things the implementation does differently from the approved design, or
-in addition to it. **None is closed by more frontend work.** Each names what
-happens, why, what the alternative costs, and who decides.
+Three things the implementation does differently from the approved design, or
+in addition to it, remain **open** (E-P1, E-P2, E-P3). **None is closed by
+more frontend work.** Each names what happens, why, what the alternative
+costs, and who decides.
+
+Two further items recorded here earlier — E-P5 (B-02's chrome) and E-P6
+(B-07's listing cards) — were reclassified by the owner as **corrections to
+match the approved baseline**, not deviations needing approval. Both are now
+closed; the correction sections below say what changed and name the commit.
 
 Nothing here is marked accepted. Acceptance is a person saying yes.
 
@@ -92,11 +98,14 @@ Both are **applied** in the implementation and verified as rendered
 (`scripts/verify-contrast-corrections.mjs`, 12/12). Both are **reversible in
 one line**. What is open is the design's sign-off, not the code.
 
-Before/after crops at implementation commit `b95e81e`:
-`evidence/e-p2/e-p2-before-after-b95e81e.png`, with the unlabelled crops in
-`evidence/e-p2/raw/`. The "before" side is the **approved prototype** (P-04),
-so it does not change between commits; the label identifies the
-implementation side. The earlier `…-011bade` set is kept for provenance.
+Comparison sheet at implementation commit `b9e7e53`:
+`evidence/e-p2/e-p2-prototype-vs-corrected-b9e7e53.png`, with the unlabelled
+crops in `evidence/e-p2/raw/`. The sheet is labelled accurately: it shows the
+**approved prototype versus the accessibility-corrected implementation** —
+the left side is the approved prototype (P-04), which does not change between
+commits, and the right side is this application with the corrections applied.
+It is **not** an earlier revision of this application. The earlier
+`…-b95e81e` and `…-011bade` sets are kept for provenance.
 
 ### E-P2a · Focus indicator
 
@@ -152,11 +161,13 @@ properties** cards.
 | Featured *properties* cards (Greenview, Lakeshore, Sundew) | **No band** | **Band present** |
 | P-03 gallery | Band present | Band present |
 
-Evidence: `evidence/e-p3/e-p3-attribution-b95e81e.png` — all three affected
+Evidence: `evidence/e-p3/e-p3-attribution-b95e81e.png` — the three portal
 screens, both sides, captured with the **real baseline photographs** (the
 capture script refuses to publish if any image did not load). Unlabelled
 per-screen captures in `evidence/e-p3/raw/`. The `…-011bade` set shows the
-same treatment on stand-in geometry images and is kept for provenance.
+same treatment on stand-in geometry images and is kept for provenance. B-07's
+restored thumbnails draw the same band from the same component; the refreshed
+pair `visual/B-07-1440-implementation.png` shows it in place.
 
 ### Affected assets and screens
 
@@ -173,8 +184,10 @@ Seven photographs, referenced by URL in the baseline and credited per slot:
 | f | `photo-1755735340764-3b077cab0c5c` | Photo by Anton Ryazanov on Unsplash |
 
 Screens affected: **P-01** (hero, 3 property cards, 2 project cards), **P-02**
-(results list), **P-03** (gallery). Only on the review-imagery path, which is
-**off by default**.
+(results list), **P-03** (gallery), and — since the E-P6 correction restored
+B-07's image-bearing cards — **B-07** (listing thumbnails), whose slots draw
+the same band from the same component. Only on the review-imagery path, which
+is **off by default**.
 
 ### Why the band is there — and what is actually required
 
@@ -227,59 +240,73 @@ Owner: the designer.
 
 ---
 
-## E-P5 · B-02 renders inside the Builder console shell
+## E-P5 · B-02 renders inside the Builder console shell — CLOSED (correction)
 
-### The exact difference
+### What it was
 
 The approved **B-02** ("Company verification") is a **standalone light page**:
-the 20px ink wordmark at the top, a 30px/800 Archivo title, and
-document-upload cards on the page surface — the same pre-console treatment as
-the registration screens. The implementation renders B-02 **inside the
-Builder console shell**: dark rail, console header at 22px/700, the content
-in a panel.
+the 20px ink wordmark at the top, the three-step bar it shares with B-01, a
+30px/800 Archivo title, and document-upload cards on the page surface. An
+earlier implementation rendered B-02 **inside the Builder console shell**:
+dark rail, console header, the content in a panel.
 
-This was found by the differ (the wordmark and title rows it could not pair)
-and confirmed by direct measurement of the prototype. It is a **structural**
-difference, not a style one: which chrome the screen lives inside.
+### Resolution
 
-### Why it was not simply restructured
+The owner reclassified this as a **correction to match the approved
+baseline**, not a deviation needing approval. B-02 is rebuilt as the approved
+standalone page at implementation commit `b9e7e53`:
 
-The implementation's choice is defensible — a verification-status screen
-reachable from the console arguably belongs in the console — and the approved
-choice is defensible too: verification is a pre-activation gate, and the
-approved flow draws it outside the console the applicant does not yet have.
-**That is a product decision, and it was not taken unilaterally.**
+- New `BuilderOnboardingShell` carries the approved chrome — wordmark header,
+  static Register / Verification / Subscribe step bar, centred 640px column at
+  the approved padding steps — and B-01 adopts it too (the approved chrome is
+  shared, and B-01 was missing its steps bar).
+- The approved four document cards, hints, dashed upload buttons, amber
+  not-settled note and intro are restored verbatim; the approved validation
+  shows the single submit-line error ("Upload PAN and Aadhaar at least before
+  submitting."), and the per-document error box the approved source reserves
+  for its simulated format rejection is not rendered on submit.
+- Working behaviour preserved: sample mode still keeps no bytes and says so;
+  the pending/approved states keep their status panel, timeline and the way
+  back to the console; navigation is unchanged.
 
-### Decision needed
+Evidence: the refreshed pairs `visual/B-02-1440-{baseline,implementation}.png`
+and `visual/B-02-390-{baseline,implementation}.png`, and the re-derived
+geometry rows in `visual-differences.md` §6.
 
-Keep B-02 inside the console shell, or rebuild it as the approved standalone
-page. Owner: the designer.
-
-**Status: open.**
+**Status: closed — corrected to the approved baseline at `b9e7e53`.**
 
 ---
 
-## E-P6 · B-07's listing cards have no photograph thumbnail
+## E-P6 · B-07's listing cards have no photograph thumbnail — CLOSED (correction)
 
-### The exact difference
+### What it was
 
-The approved **B-07** listing rows are **cards with a left-hand image slot** —
-a photograph thumbnail beside the listing title. The implementation's rows
-are text-only: title, chips, locality, meta, actions.
+The approved **B-07** listing rows are **cards with an image slot** — a
+photograph beside the listing facts, with a designed "No photos yet" state
+where a listing has none. An earlier implementation's rows were text-only.
 
-This is not a data gap: the sample listings carry `media: PropertyMedia[]`
-with URLs, and the public cards (P-01, P-02) already render image slots from
-the same data. It is a layout difference on one screen.
+### Resolution
 
-### Why it was not simply added
+The owner reclassified this as a **correction to match the approved
+baseline**. B-07's cards are restored at implementation commit `b9e7e53`:
 
-Adding an image column changes the approved row's height and density, and
-where the approved card puts the image relative to the chips and the enquiry
-count is a composition call. Recorded for a decision rather than guessed.
+- The approved card composition: image slot at the approved responsive
+  dimensions on the approved surface, the approved margins between locality,
+  price and meta, the enquiries block, and the actions row (Edit listing ·
+  Preview · pause toggle · Delete) without the divider the implementation had
+  added. Listing actions, status filters and responsive behaviour are
+  preserved.
+- `ListingSummary.coverImage` resolves the first renderable photograph, else
+  the review session's stand-in cover for the seeded listings, else null.
+- The approved missing-photo state renders where a listing has no media (the
+  seeded Sundew draft carries it, as the approved fixture does). A listing
+  whose photograph was chosen but never stored — sample mode keeps no bytes —
+  says "No file kept — sample mode" instead; claiming no photos would be
+  untrue.
+- The restored thumbnails draw the same attribution band as the portal cards
+  on the review-imagery path — see E-P3, which stays open.
 
-### Decision needed
+Evidence: the refreshed pairs `visual/B-07-1440-{baseline,implementation}.png`
+and `visual/B-07-390-{baseline,implementation}.png`.
 
-Add the thumbnail to the B-07 rows per the approved card, or confirm the
-text-only row. Owner: the designer.
-
-**Status: open.**
+**Status: closed — corrected to the approved baseline at `b9e7e53`.**

@@ -1,15 +1,18 @@
 /**
- * E-P2 evidence capture — the two contrast corrections, before and after,
- * on a real control on a real screen.
+ * E-P2 evidence capture — the approved prototype against the
+ * accessibility-corrected implementation, on a real control on a real
+ * screen.
  *
- * WHAT "BEFORE" IS HERE
- * ---------------------
- * The BEFORE crops are captured from the approved baseline itself: the local
- * review copy of kkl-design @ 5bc3512 (scripts/setup-prototype-review.sh —
+ * WHAT THE PROTOTYPE SIDE IS HERE
+ * -------------------------------
+ * The prototype crops are captured from the approved baseline itself: the
+ * local review copy of kkl-design @ 5bc3512 (scripts/setup-prototype-review.sh —
  * kkl-design is never modified). They are not reconstructions, not historical
  * screenshots of this repository's earlier code, and not re-labelled
  * stand-ins: they are the approved prototype rendering its own declared
  * values (#F2A20C focus ring with no companion; #C6CCE0 control border).
+ * The comparison is "approved prototype versus accessibility-corrected
+ * implementation" — it does not show an earlier revision of this application.
  *
  * The AFTER crops are the implementation at the commit named in the
  * filenames, same screen (the P-04 enquiry form), same control.
@@ -100,11 +103,11 @@ const protoSelector = await proto.evaluate((el) => {
 if (!protoSelector) throw new Error("No focusable text input found in the prototype's P-04.");
 
 await crop(proto, protoSelector, "p04-field-resting-BASELINE",
-  "BEFORE · resting field, approved baseline (kkl-design 5bc3512, local review copy). Declared control border #C6CCE0 — 1.60:1 on white.");
+  "APPROVED PROTOTYPE · resting field (kkl-design 5bc3512, local review copy). Declared control border #C6CCE0 — 1.60:1 on white.");
 await proto.click(protoSelector);
 await proto.waitForTimeout(500);
 await crop(proto, protoSelector, "p04-field-focused-BASELINE",
-  "BEFORE · focused field, approved baseline. Saffron #F2A20C ring alone — 2.11:1 on white, below the 3:1 WCAG 1.4.11 asks of a focus indicator.");
+  "APPROVED PROTOTYPE · focused field. Saffron #F2A20C ring alone — 2.11:1 on white, below the 3:1 WCAG 1.4.11 asks of a focus indicator.");
 await protoCtx.close();
 
 // -------------------------------------------------------- implementation side
@@ -114,11 +117,11 @@ await impl.goto(`${BASE}/property/greenview-residency/enquiry`, { waitUntil: "ne
 await impl.waitForTimeout(600);
 
 await crop(impl, "#name", "p04-field-resting-implementation",
-  "AFTER · resting field, this implementation. Control border corrected to #8A8E9C — 3.27:1 on white (E-P2b).");
+  "CORRECTED IMPLEMENTATION · resting field. Control border corrected to #8A8E9C — 3.27:1 on white (E-P2b).");
 await impl.click("#name");
 await impl.waitForTimeout(500);
 await crop(impl, "#name", "p04-field-focused-implementation",
-  "AFTER · focused field, this implementation. The saffron ring is unchanged; a 1px ink #12182B companion now sits inside it — 17.63:1 on white (E-P2a).");
+  "CORRECTED IMPLEMENTATION · focused field. The saffron ring is unchanged; a 1px ink #12182B companion now sits inside it — 17.63:1 on white (E-P2a).");
 await implCtx.close();
 
 await browser.close();
@@ -139,10 +142,10 @@ const html = `<!doctype html><meta charset="utf-8"><style>
   figcaption { margin-top: 8px; }
   code { display: block; margin-top: 4px; font-size: 12px; color: #2A3250; word-break: break-all; }
 </style>
-<h1>E-P2 — Contrast corrections, before and after</h1>
+<h1>E-P2 — Approved prototype versus accessibility-corrected implementation</h1>
 <p class="meta">Implementation commit ${COMMIT} · captured ${new Date().toISOString().slice(0, 10)}.
-BEFORE crops are the approved baseline (kkl-design 5bc3512) rendered by its local review copy — not reconstructions.
-AFTER crops are kkl-web at ${COMMIT}. Same screen (P-04 enquiry), the corresponding name field on each side — label wording differs as sample content; what is being compared is the control's chrome: its border and its focus indicator. Raw crops are unaltered; captions sit beneath them.
+APPROVED PROTOTYPE crops are the approved baseline (kkl-design 5bc3512) rendered by its local review copy — not reconstructions, and not an earlier revision of this application.
+CORRECTED IMPLEMENTATION crops are kkl-web at ${COMMIT}. Same screen (P-04 enquiry), the corresponding name field on each side — label wording differs as sample content; what is being compared is the control's chrome: its border and its focus indicator. Raw crops are unaltered; captions sit beneath them.
 Both corrections are applied and reversible in one line; design sign-off stays OPEN.</p>
 ${pair(shots[0], shots[2])}
 ${pair(shots[1], shots[3])}`;
@@ -151,7 +154,7 @@ writeFileSync(sheetPath, html);
 const sheet = await (await chromium.launch()).newContext({ viewport: { width: 1500, height: 1000 } });
 const sheetPage = await sheet.newPage();
 await sheetPage.goto(`file:///${sheetPath.replace(/\\/g, "/")}`);
-const sheetName = `e-p2-before-after-${COMMIT}.png`;
+const sheetName = `e-p2-prototype-vs-corrected-${COMMIT}.png`;
 await sheetPage.screenshot({ path: join(OUT, sheetName), fullPage: true });
 await sheet.browser().close();
 rmSync(sheetPath); // intermediate; the PNG is the artifact

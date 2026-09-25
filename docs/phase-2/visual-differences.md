@@ -55,6 +55,24 @@ One harness row was wrong, not the application: `verify-visual-baseline.mjs`
 expected a 21px `.t-figure` stat tile on S-06; the rendered baseline's tile is
 **26px/800 Archivo**. The row now encodes the measured value.
 
+### This pass — the owner-reclassified corrections (E-P5, E-P6) and one shared step
+
+The owner reclassified E-P5 and E-P6 as **corrections to match the approved
+baseline**, not deviations needing approval. Both are closed:
+
+| # | Screen(s) | Difference | State |
+|---|---|---|---|
+| D-18 | B-02 (and B-01) | B-02 rendered inside the Builder console shell; the approved B-02 is a **standalone light page** sharing B-01's pre-console chrome. Restored: new `BuilderOnboardingShell` (approved wordmark header, static three-step bar, centred 640px column at the approved 16 / 20·22 / 24·28 padding steps), the approved title steps (24/27/30px), intro and amber note verbatim, the four approved document cards with their hints and dashed upload buttons, and the approved validation — a single submit-line error, no per-document errors on submit (the per-document box in the approved source is the simulated format-rejection state, unreachable in sample mode). B-01 adopts the same shell — the approved chrome is shared and B-01 was missing its steps bar | Fixed |
+| D-19 | B-07 | Listing rows were text-only; the approved rows are **image-bearing cards**. Restored: the approved image slot (100%×180 / 200×170 / 250×186 on `#EEF0F7`), the approved margins, the actions row without the added divider, and the approved **"No photos yet"** missing-photo state (the Sundew draft carries it, as in the approved fixture). `ListingSummary.coverImage` resolves the first renderable photograph, else the review session's stand-in cover; a listing whose photo was chosen but never stored (sample mode keeps no bytes) says **"No file kept — sample mode"** rather than claiming no photos. `PropertyImage` now renders its designed fallback for an empty-URL media record instead of a broken `img` — this also fixes B-13's preview for such listings | Fixed |
+| D-20 | Every console screen @390 and tablet | Console header title rendered 20px below 1060px; the approved steps are **19px** below 620px and **21px** at 620–1059 (`pageTitleSize: pick('19px','21px','22px')`). Surfaced only after the geometry harness fix below — earlier 390 runs had measured the prototype's desktop frame, and the row had been classified against a 22px baseline that the 390 frame never rendered | Fixed |
+
+One harness row was wrong, not the application: `verify-screen-geometry.mjs`
+clicked the prototype's width tab with a whitespace-sensitive selector that
+never matched, so its 390px runs silently measured the prototype's **default
+1440px frame**. The click now falls back to a trimmed-text match, the same way
+`capture-visual-comparison.mjs` already did, and geometry-390 has been
+regenerated. Every §6 row that cited a 390 measurement was re-derived.
+
 ## 2 · Intentional sample-content differences — not defects
 
 The prototypes carry illustrative figures; this build carries fixtures. The
@@ -84,6 +102,8 @@ appear twice.
 | Pill radius notation | `999px` against `3.35544e+07px` | The same pill. Chromium clamps an enormous radius to 2²⁵px; the baseline writes 999px. Normalised |
 | Text-transform on already-uppercase text | `transform none->uppercase`, 231 times | Both sides render the same glyphs. Excluded when the matched text is already uppercase |
 | Prototype reviewer chrome | 92 of 93 screens "diverging" on the first run | The tool was reading the prototype's screen picker and width tabs. Scoped to the emulated frame |
+| Prototype width-tab click | Every 390px geometry run measured the prototype's **desktop frame** | The differ's `:text-is()` selector never matched the tab's padded label, and the failure was swallowed. Fixed with the same trimmed-text fallback the capture script already used; geometry-390 regenerated, and one long-standing misclassification (console titles) corrected as D-20 |
+| B-02's upload button label | "Choose File" in the implementation against "Choose file" in the approved render | The approved composition **is** a file input's native chooser button; "Choose File" is the browser's own label for that control, not page copy. Styling (dashed border, brand ink, 15px/700, 8px radius) matches the approved drawing; the caption text is the platform's |
 
 ## 4 · Conflicts inside the approved baseline — resolved by screen precedence
 
@@ -122,11 +142,11 @@ document is self-contained:
 | **E-P2a** | Focus indicator corrected with a dark companion edge — applied, sign-off open | Designer |
 | **E-P2b** | Control border darkened `#C6CCE0` → `#8A8E9C` — applied, sign-off open | Designer |
 | **E-P3** | Review imagery attributes every card; the approved homepage attributes only the project cards | Designer |
-| **E-P5** | **B-02 renders inside the Builder console shell; the approved B-02 is a standalone light page** (20px ink wordmark, 30px/800 title, document-upload cards), not a dark-rail console screen. Found this pass when the differ flagged the wordmark and title; restructuring was not done unilaterally | Designer |
-| **E-P6** | **B-07's approved listing cards carry a left-hand photograph thumbnail; the implementation's rows have no image slot.** The sample data has the media (`PropertyMedia[]` with URLs), so this is a layout gap, not a data gap — but adding an image column changes the approved row's density and was not done unilaterally | Designer |
 
-E-P4 is **withdrawn**: §4 above resolves it from the screens rather than
-needing a ruling.
+E-P5 and E-P6 were **reclassified by the owner as corrections to match the
+approved baseline** and are closed — see §1 (D-18, D-19). E-P4 is
+**withdrawn**: §4 above resolves it from the screens rather than needing a
+ruling.
 
 Two **additions** the implementation carries and the baseline does not —
 recorded so they are not mistaken for approved elements, not proposed for
@@ -150,14 +170,14 @@ carried as "unclassified".
 | B-11 "Covered parking" — colour body → white | **Sample-data artefact.** The impl fixture has that amenity selected (white on brand chip); the baseline's does not. Same chip, different fixture state |
 | P-02 filter labels ("Location", "Property type", "BHK", "Budget") — 13px → 14px | **Baseline-internal inconsistency, recorded.** P-02 draws these labels at 13px where P-01 draws the same role at 14px. The 14px step is kept; noted in `search-filters.tsx` |
 | P-02 and P-10 price ranges — 23px → 24px | **Baseline-internal inconsistency, recorded.** P-01 renders the same price treatment at 24px. The 24px step is kept |
-| B-02 "Kam Ki" wordmark and "Company verification" title | **Structural deviation E-P5** — the approved B-02 is a standalone light page; see §5 |
 | S-06 "₹4,200" — black → ink | **Prototype artefact.** The baseline declares no colour on the stat value, so it inherits the page's default black. The implementation keeps C-01's darkest text token, ink |
 
-### Typography residue at 390 — the same rows, plus one intentional step
+### Typography residue at 390 — the same rows, minus one fixed, plus one harness correction
 
 | Row | Classification |
 |---|---|
-| Console header titles 22px → 20px, on 20 console screens | **Intentional responsive step.** `console-shell.tsx` sets 20px below 1060px so the title fits beside the drawer toggle without truncating — the fix for D-6. The baseline's 390 frame keeps 22px because its header carries less chrome |
+| Console header titles | **Fixed (D-20).** Earlier 390 runs of the differ had measured the prototype's default desktop frame — its width-tab click never landed — so this row was classified against a 22px the approved 390 frame never rendered. With the harness fixed, the approved mobile step measured **19px** (tablet 21px); the implementation's flat 20px was corrected to the approved 19/21 steps and the row is gone |
+| A-17 "Delivery record" — 19px → 22px | **Cross-element pairing, surfacing a recorded composition difference.** The approved A-17's console title is "Delivery record" (19px at 390); the implementation titles its shell with the order reference ("Order ORD-…", at the corrected 19px) and keeps "Delivery record" as a panel heading at 22px, where the approved events panel is headed "Delivery & download record" at 17px/700. At 1440 the coincidence 22 = 22 hid this. Surfaced by the harness fix this pass; **recorded, not corrected** — which words title a screen is a content decision, and this pass's mandate is the E-P5/E-P6 corrections |
 | Everything else | The same rows as 1440, for the same reasons |
 
 ### Structural rows — all accounted for
@@ -166,6 +186,8 @@ carried as "unclassified".
 |---|---|---|
 | `content width 1440 -> 1176 / 1184` | 67 | **Measurement artefact.** The differ compares the prototype's full-width stage against the implementation's rail-inset content column (1440 − 264 = 1176, 1440 − 256 = 1184). There is no full-width content box on a console screen to measure against |
 | `content width 1440 -> 620 / 420 / 270` | 7 | **Measurement artefact.** Centred narrow layouts (forms, auth); the widest box narrower than the frame is the form card |
+| `content width 1440 -> 640` (B-01, B-02) | 2 | **Measurement artefact.** The prototype's onboarding outer container spans the frame; the approved content column inside it is 640px, which is what the implementation renders as its widest box. Same class as the centred-layout rows above |
+| `button radius [6px | 8px] -> [6px]` (B-02) | 1 | **Measurement limitation.** The approved upload button (8px) is rendered by the implementation as the file input's `::file-selector-button` — the approved composition's own control — and a pseudo-element's radius is invisible to the differ, which only reads the input itself. Visually verified in the B-02 pairs |
 | `control border … -> … rgb(138, 142, 156)` | 16+ | **E-P2b, intentional.** The corrected control border `#8A8E9C`, awaiting design sign-off |
 | `control border … -> … rgb(225, 228, 238)` | 6 | **E-P2b's stated scope.** Disabled fields (A-14) deliberately render in the card hairline on a tint — 1.4.11 excepts inactive components, and the exceptions document says so |
 | `control height [52] -> [47]` and variants | ~20 | **Recorded, deferred.** The implementation's controls are 44px-minimum with 15px text (47px typical) against the baseline's 52px. A deliberate target-size floor; changing it is a design decision, not a defect fix |

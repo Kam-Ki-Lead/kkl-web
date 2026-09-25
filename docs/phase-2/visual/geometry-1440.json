@@ -252,15 +252,10 @@
   {
     "id": "B-24",
     "width": 1440,
-    "shared": 21,
-    "mismatched": [
-      {
-        "text": "Approved",
-        "note": "proto at 0.87 on rgb(246, 248, 253); impl at 0.12 on rgb(227, 243, 234)"
-      }
-    ],
-    "protoOnly": 7,
-    "implOnly": 14,
+    "shared": 20,
+    "mismatched": [],
+    "protoOnly": 8,
+    "implOnly": 15,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -438,13 +433,13 @@
   {
     "id": "B-01",
     "width": 1440,
-    "shared": 5,
+    "shared": 7,
     "mismatched": [],
-    "protoOnly": 4,
-    "implOnly": 4,
+    "protoOnly": 2,
+    "implOnly": 5,
     "typo": [],
     "struct": [
-      "content width 1440 -> 620",
+      "content width 1440 -> 640",
       "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
       "control height [52] -> [47]"
     ],
@@ -471,7 +466,7 @@
     "shared": 45,
     "mismatched": [],
     "protoOnly": 12,
-    "implOnly": 9,
+    "implOnly": 10,
     "typo": [],
     "struct": [
       "content width 1440 -> 1184",
@@ -596,17 +591,31 @@
     "score": 10
   },
   {
+    "id": "B-02",
+    "width": 1440,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 2,
+    "implOnly": 7,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 640",
+      "button radius [6px | 8px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
     "id": "B-03",
     "width": 1440,
     "shared": 15,
     "mismatched": [
       {
         "text": "What the subscription covers",
-        "note": "proto at 0.2 on rgb(255, 247, 232); impl at 0.67 on rgb(255, 255, 255)"
+        "note": "proto at 0.2 on rgb(255, 247, 232); impl at 0.73 on rgb(255, 255, 255)"
       }
     ],
     "protoOnly": 15,
-    "implOnly": 11,
+    "implOnly": 12,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -617,10 +626,10 @@
   {
     "id": "B-07",
     "width": 1440,
-    "shared": 24,
+    "shared": 25,
     "mismatched": [],
-    "protoOnly": 12,
-    "implOnly": 10,
+    "protoOnly": 11,
+    "implOnly": 12,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -634,7 +643,7 @@
     "shared": 15,
     "mismatched": [],
     "protoOnly": 23,
-    "implOnly": 15,
+    "implOnly": 19,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -674,28 +683,6 @@
       "button radius [6px | 7px | 8px] -> [6px | 8px]"
     ],
     "score": 10
-  },
-  {
-    "id": "B-02",
-    "width": 1440,
-    "shared": 2,
-    "mismatched": [],
-    "protoOnly": 11,
-    "implOnly": 24,
-    "typo": [
-      {
-        "text": "Kam Ki",
-        "diff": "size 20->17; colour rgb(18, 24, 43)->rgb(215, 221, 246)"
-      },
-      {
-        "text": "Company verification",
-        "diff": "size 30->22; weight 800->700"
-      }
-    ],
-    "struct": [
-      "content width 1440 -> 1176"
-    ],
-    "score": 9
   },
   {
     "id": "S-06",

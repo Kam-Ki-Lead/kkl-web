@@ -231,21 +231,31 @@ const bver = await ctx.newPage();
 await bver.goto(`${BASE}/builder/review-state?kyc=not_submitted&to=/builder/verification`, {
   waitUntil: 'load',
 });
-await bver.fill('#panNumber', 'NOPE');
 await submit(bver, 'Submit for verification');
 const bverBody = await bver.textContent('body');
-ok('24. B-02 validates the PAN and both documents without JavaScript',
-   bverBody.includes('five letters, four digits and a letter') &&
-     bverBody.includes('Choose a photo or scan of the company PAN') &&
-     bverBody.includes('incorporation certificate'),
-   'all three errors together');
+ok('24. B-02 validates the required documents without JavaScript',
+   bverBody.includes('Upload PAN and Aadhaar at least before submitting.'),
+   'the approved submit-line error, server-rendered');
+
+// The approved success path: PAN and Aadhaar chosen, the two proposed
+// documents left empty.
+await bver.setInputFiles('#panDocument', {
+  name: 'company-pan.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('no-js-pan'),
+});
+await bver.setInputFiles('#aadhaarDocument', {
+  name: 'signatory-aadhaar.jpg', mimeType: 'image/jpeg', buffer: Buffer.from('no-js-aadhaar'),
+});
+await submit(bver, 'Submit for verification');
+ok('25. B-02 submits the two required documents without JavaScript',
+   (await bver.textContent('body')).includes('Your documents are with an administrator'),
+   'the in-review state renders from a full page post');
 
 // --------------------------------------------------------- B-08 to B-12 editor
 await reset();
 const bnew = await ctx.newPage();
 await bnew.goto(`${BASE}/builder/properties/new`, { waitUntil: 'load' });
 await submit(bnew, 'New listing');
-ok('25. Creating a listing works without JavaScript',
+ok('26. Creating a listing works without JavaScript',
    /\/builder\/properties\/[^/]+\/basics$/.test(bnew.url()),
    `landed on ${bnew.url().replace(BASE, '')}`);
 const newId = bnew.url().split('/properties/')[1].split('/')[0];
@@ -253,7 +263,7 @@ const newId = bnew.url().split('/properties/')[1].split('/')[0];
 await bnew.fill('#title', 'No-JS Gardens');
 await bnew.selectOption('#propertyType', 'Apartment');
 await submit(bnew, 'Save draft');
-ok('26. Saving an editor section works without JavaScript',
+ok('27. Saving an editor section works without JavaScript',
    (await bnew.textContent('body')).includes('Draft saved'),
    'the saved state renders from a full page post');
 
@@ -261,7 +271,7 @@ await bnew.goto(`${BASE}/builder/properties/${newId}/location`, { waitUntil: 'lo
 await bnew.selectOption('#locality', 'Rajarhat');
 await bnew.fill('#addressLine', 'Plot 3, Street 9');
 await submit(bnew, 'Next: Pricing');
-ok('27. The editor advances between sections without JavaScript',
+ok('28. The editor advances between sections without JavaScript',
    bnew.url().includes('/pricing'),
    `landed on ${bnew.url().replace(BASE, '')}`);
 
@@ -274,13 +284,13 @@ await submit(bnew, 'Save draft');
 
 await bnew.goto(`${BASE}/builder/properties/${newId}/preview`, { waitUntil: 'load' });
 await submit(bnew, 'Publish listing');
-ok('28. B-13 publishes without JavaScript',
+ok('29. B-13 publishes without JavaScript',
    bnew.url().includes('/builder/properties') && bnew.url().includes('published='),
    `landed on ${bnew.url().replace(BASE, '')}`);
 
 const portal = await ctx.newPage();
 await portal.goto(`${BASE}/search`, { waitUntil: 'load' });
-ok('29. The listing published without JavaScript reaches the portal',
+ok('30. The listing published without JavaScript reaches the portal',
    (await portal.textContent('body')).includes('No-JS Gardens'),
    'the join does not depend on the browser either');
 
@@ -291,7 +301,7 @@ await Promise.all([
   bprops.waitForLoadState('load'),
   bprops.locator('form:has(button:has-text("Unpublish"))').first().locator('button').click(),
 ]);
-ok('30. B-07 unpublish works without JavaScript',
+ok('31. B-07 unpublish works without JavaScript',
    (await bprops.textContent('body')).includes('Unpublished'),
    'each listing action is its own form');
 
@@ -302,7 +312,7 @@ await bunlock.goto(`${BASE}/builder/review-state?contact=unlock&to=/builder/enqu
   waitUntil: 'load',
 });
 await submit(bunlock, 'Unlock for');
-ok('31. B-17 unlocks a contact without JavaScript',
+ok('32. B-17 unlocks a contact without JavaScript',
    (await bunlock.textContent('body')).includes('98300 51134'),
    'the credit deduction and the reveal both happen on a plain form post');
 
@@ -313,7 +323,7 @@ await bsub.goto(`${BASE}/builder/review-state?subscription=none&to=/builder/subs
   waitUntil: 'load',
 });
 await submit(bsub, 'Activate a subscription');
-ok('32. B-03 starts a subscription without JavaScript',
+ok('33. B-03 starts a subscription without JavaScript',
    bsub.url().includes('/builder/subscription/payment'),
    `landed on ${bsub.url().replace(BASE, '')}`);
 
@@ -323,13 +333,13 @@ const bprof = await ctx.newPage();
 await bprof.goto(`${BASE}/builder/profile`, { waitUntil: 'load' });
 await bprof.fill('#companyName', '');
 await submit(bprof, 'Save changes');
-ok('33. B-24 validates without JavaScript',
+ok('34. B-24 validates without JavaScript',
    (await bprof.textContent('body')).includes('Enter the company name'),
    'server-side validation');
 
 await bprof.fill('#companyName', 'No-JS Builders Pvt Ltd');
 await submit(bprof, 'Save changes');
-ok('34. B-24 saves without JavaScript',
+ok('35. B-24 saves without JavaScript',
    (await bprof.textContent('body')).includes('Your details were saved'),
    'confirmation from a full page post');
 
@@ -339,13 +349,13 @@ await bticket.goto(`${BASE}/builder/support/new`, { waitUntil: 'load' });
 await bticket.fill('#subject', 'Raised from the Builder console with scripting off');
 await bticket.fill('#body', 'Checking that the scope field routes this to the Builder queue.');
 await submit(bticket, 'Submit ticket');
-ok('35. B-23 creates a ticket in the Builder queue without JavaScript',
+ok('36. B-23 creates a ticket in the Builder queue without JavaScript',
    /\/builder\/support\/T-\d+/.test(bticket.url()),
    `landed on ${bticket.url().replace(BASE, '')} — the scope field kept it out of the Seller queue`);
 
 const sellerQueue = await ctx.newPage();
 await sellerQueue.goto(`${BASE}/seller/support`, { waitUntil: 'load' });
-ok('36. That ticket did not land in the Seller queue',
+ok('37. That ticket did not land in the Seller queue',
    !(await sellerQueue.textContent('body')).includes('scripting off'),
    'the two queues stay separate even on the no-JavaScript path');
 
@@ -362,21 +372,21 @@ const suspend = await ctx.newPage();
 await suspend.goto(`${BASE}/admin/users/U-10442?action=suspend`, { waitUntil: 'load' });
 await suspend.click('button:has-text("Suspend account")');
 await suspend.waitForTimeout(400);
-ok('37. A-04 refuses a decision with no reason without JavaScript',
+ok('38. A-04 refuses a decision with no reason without JavaScript',
    (await suspend.textContent('body')).includes('A reason is required'),
    'the gate is in the store, so it holds on a plain form post');
 
 await suspend.fill('#reason', 'Three buyer complaints, recorded without scripting');
 await suspend.click('button:has-text("Suspend account")');
 await suspend.waitForTimeout(600);
-ok('38. A-04 records the suspension without JavaScript',
+ok('39. A-04 records the suspension without JavaScript',
    (await suspend.textContent('body')).includes('Recorded'),
    'and the confirmation says verification was not changed');
 
 const suspendedAccount = await ctx.newPage();
 await suspendedAccount.goto(`${BASE}/admin/users/U-10442`, { waitUntil: 'load' });
 const accountBody = await suspendedAccount.textContent('body');
-ok('39. The suspension did not rewrite verification, without JavaScript either',
+ok('40. The suspension did not rewrite verification, without JavaScript either',
    accountBody.includes('Account suspended') && accountBody.includes('Verification approved'),
    'the two axes stay separate on the no-JavaScript path');
 
@@ -386,7 +396,7 @@ const adminKyc = await ctx.newPage();
 await adminKyc.goto(`${BASE}/admin/kyc/K-3322`, { waitUntil: 'load' });
 await adminKyc.click('button:has-text("Approve verification")');
 await adminKyc.waitForTimeout(500);
-ok('40. A-06 refuses an approval with an incomplete checklist, without JavaScript',
+ok('41. A-06 refuses an approval with an incomplete checklist, without JavaScript',
    (await adminKyc.textContent('body')).includes('Work through the checklist first'),
    'each checklist line is its own form post, and the gate is server-side');
 
@@ -396,19 +406,19 @@ for (let i = 0; i < 6; i++) {
   await box.click();
   await adminKyc.waitForTimeout(400);
 }
-ok('41. A-06\'s checklist can be completed without JavaScript',
+ok('42. A-06\'s checklist can be completed without JavaScript',
    (await adminKyc.$$('button[data-check][aria-pressed="false"]')).length === 0,
    'four separate posts, each one persisted');
 
 await adminKyc.click('button:has-text("Approve verification")');
 await adminKyc.waitForTimeout(700);
-ok('42. A-06 approves once the checklist is complete, without JavaScript',
+ok('43. A-06 approves once the checklist is complete, without JavaScript',
    (await adminKyc.textContent('body')).includes('Decision recorded'),
    'and the decision reaches the Seller console');
 
 const sellerKyc = await ctx.newPage();
 await sellerKyc.goto(`${BASE}/seller/kyc/status`, { waitUntil: 'load' });
-ok('43. That decision reached the Seller console, without JavaScript',
+ok('44. That decision reached the Seller console, without JavaScript',
    /approved/i.test(await sellerKyc.textContent('body')),
    'the cross-role join does not depend on the client either');
 
@@ -417,7 +427,7 @@ const adjust = await ctx.newPage();
 await adjust.goto(`${BASE}/admin/wallets/U-10442/adjust`, { waitUntil: 'load' });
 await adjust.click('button:has-text("Record this adjustment")');
 await adjust.waitForTimeout(500);
-ok('44. A-19 refuses an adjustment with no amount, without JavaScript',
+ok('45. A-19 refuses an adjustment with no amount, without JavaScript',
    (await adjust.textContent('body')).includes('whole number of credits'),
    'both gates are in the store');
 
@@ -425,13 +435,13 @@ await adjust.fill('#amount', '500');
 await adjust.fill('#reason', 'Goodwill credit recorded without scripting');
 await adjust.click('button:has-text("Record this adjustment")');
 await adjust.waitForTimeout(800);
-ok('45. A-19 records the adjustment without JavaScript',
+ok('46. A-19 records the adjustment without JavaScript',
    adjust.url().includes('/admin/wallets?adjusted='),
    `landed on ${adjust.url().replace(BASE, '')}`);
 
 const sellerHistory = await ctx.newPage();
 await sellerHistory.goto(`${BASE}/seller/billing/history`, { waitUntil: 'load' });
-ok('46. The adjustment reached the Seller\'s ledger with its reason, without JavaScript',
+ok('47. The adjustment reached the Seller\'s ledger with its reason, without JavaScript',
    (await sellerHistory.textContent('body')).includes('Goodwill credit recorded without scripting'),
    'the reason travels with the entry, not only into the audit log');
 
@@ -446,19 +456,19 @@ await reply.goto(`${BASE}/admin/support/T-2291`, { waitUntil: 'load' });
 await reply.fill('#body', marker);
 await reply.click('button:has-text("Send reply")');
 await reply.waitForTimeout(800);
-ok('47. A-23 sends a reply without JavaScript',
+ok('48. A-23 sends a reply without JavaScript',
    (await reply.textContent('body')).includes(marker),
    'and the mode field keeps its rendered default rather than becoming undefined');
 
 const sellerThread = await ctx.newPage();
 await sellerThread.goto(`${BASE}/seller/support/T-2291`, { waitUntil: 'load' });
-ok('48. That reply reached the requester\'s thread, without JavaScript',
+ok('49. That reply reached the requester\'s thread, without JavaScript',
    (await sellerThread.textContent('body')).includes(marker),
    'delivered by the ticket\'s recorded console');
 
 const builderQueueNoJs = await ctx.newPage();
 await builderQueueNoJs.goto(`${BASE}/builder/support`, { waitUntil: 'load' });
-ok('49. And did not reach the Builder console, without JavaScript',
+ok('50. And did not reach the Builder console, without JavaScript',
    !(await builderQueueNoJs.textContent('body')).includes(marker),
    'the negative check holds on the plain-form path too');
 
@@ -469,7 +479,7 @@ ok('49. And did not reach the Builder console, without JavaScript',
 // tool, because what is being checked is the response, not a rendered page.
 const csvResponse = await ctx.request.get(`${BASE}/admin/reports/funnel.csv`);
 const csvBody = await csvResponse.text();
-ok('50. A-29 exports its CSV without JavaScript',
+ok('51. A-29 exports its CSV without JavaScript',
    csvResponse.status() === 200 &&
      (csvResponse.headers()['content-type'] ?? '').includes('text/csv') &&
      csvBody.includes('Stage,Count') &&
