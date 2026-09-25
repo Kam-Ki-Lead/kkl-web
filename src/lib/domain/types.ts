@@ -604,6 +604,12 @@ export type ListingSummary = {
   readonly detailLine: string;
   readonly enquiryCount: number;
   readonly hasMedia: boolean;
+  /**
+   * The listing's first renderable photograph — B-07's thumbnail. Null when
+   * the listing has no media, or when a file was chosen but no bytes were
+   * kept (sample mode), in which case B-07 says so rather than faking one.
+   */
+  readonly coverImage: PropertyMedia | null;
   readonly sectionsComplete: number;
   readonly sectionsTotal: number;
 };

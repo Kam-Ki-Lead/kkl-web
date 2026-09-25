@@ -36,7 +36,9 @@ export function PropertyImage({
 }) {
   const sizing = fill ? { height: "100%", width: "100%" } : { aspectRatio: ratio };
 
-  if (media === null) {
+  // A media record with no URL means a file was chosen but no bytes were kept
+  // (sample mode) — render the designed fallback, not a broken <img src="">.
+  if (media === null || media.url === "") {
     return (
       <div
         role="img"

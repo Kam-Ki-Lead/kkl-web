@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BuilderShell } from "@/components/builder/builder-shell";
 import { ListingActions } from "@/components/builder/listing-actions";
 import { NewListingButton } from "@/components/builder/new-listing-button";
-import { Card } from "@/components/ui/card";
+import { PropertyImage } from "@/components/property/property-image";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
@@ -97,54 +97,80 @@ export default async function BuilderPropertiesPage({
               : "Switch tabs to see your other listings."}
           </StateMessage>
         ) : (
-          <ul className="flex flex-col gap-[12px]">
+          <ul className="flex flex-col gap-[14px]">
             {listings.map((listing) => {
               const status = STATUS[listing.status];
               return (
                 <li key={listing.id}>
-                  <Card className="p-[18px]">
-                    <div className="flex flex-wrap items-start justify-between gap-[14px]">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-[10px]">
-                          <h2 className="t-panel-title text-ink">
-                            <Link
-                              href={`/builder/properties/${listing.id}/basics`}
-                              className="underline-offset-2 hover:underline"
-                            >
-                              {listing.title}
-                            </Link>
-                          </h2>
-                          <Chip tone={status.tone} size="sm">
-                            {status.label}
-                          </Chip>
-                          {listing.hasMedia ? null : (
-                            <Chip tone="muted" size="sm">
-                              ▣ No photos yet
-                            </Chip>
-                          )}
+                  {/*
+                   * The approved B-07 card (E-P6 correction): an image slot on
+                   * the left (stacked on top below 620px) with the approved
+                   * "No photos yet" state, then the listing facts, then the
+                   * actions row. A plain <article>, not Card — the approved
+                   * radius is 10px and Card's own 12px would fight it.
+                   */}
+                  <article className="flex overflow-hidden rounded-[10px] border border-line bg-white max-[619px]:flex-col">
+                    <div className="relative flex-none bg-[#EEF0F7] max-[619px]:h-[180px] max-[619px]:w-full min-[620px]:max-[1059px]:h-[170px] min-[620px]:max-[1059px]:w-[200px] min-[1060px]:h-[186px] min-[1060px]:w-[250px]">
+                      {listing.coverImage ? (
+                        <PropertyImage media={listing.coverImage} fill quiet label={listing.title} />
+                      ) : (
+                        <div
+                          role="img"
+                          aria-label={
+                            listing.hasMedia
+                              ? `Photograph for ${listing.title} was chosen but no file is kept in sample mode`
+                              : `No photographs yet — ${listing.title}`
+                          }
+                          className="flex h-full w-full flex-col items-center justify-center gap-[6px] text-muted"
+                        >
+                          <span aria-hidden="true" className="text-[22px] leading-none">
+                            ▣
+                          </span>
+                          <span className="px-[8px] text-center text-[13px]">
+                            {listing.hasMedia ? "No file kept — sample mode" : "No photos yet"}
+                          </span>
                         </div>
-                        <p className="mt-[2px] text-[15px] text-body">{listing.locationLabel}</p>
-                        <p className="mt-[4px] text-[15px] text-body">
-                          {listing.configurationLabel} · {listing.priceLabel}
-                        </p>
-                        <p className="mt-[2px] text-[14px] text-muted">{listing.detailLine}</p>
-                      </div>
-                      <div className="flex-none text-right">
-                        <p className="font-[family-name:var(--font-heading)] text-[22px] font-extrabold text-ink">
-                          {listing.enquiryCount}
-                        </p>
-                        <p className="t-caption text-muted">
-                          {listing.enquiryCount === 1 ? "enquiry" : "enquiries"}
-                        </p>
-                      </div>
+                      )}
                     </div>
+                    <div className="min-w-0 flex-1 px-[18px] py-[16px]">
+                      <div className="flex flex-wrap justify-between gap-[14px]">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-[10px]">
+                            <h2 className="t-panel-title text-ink">
+                              <Link
+                                href={`/builder/properties/${listing.id}/basics`}
+                                className="underline-offset-2 hover:underline"
+                              >
+                                {listing.title}
+                              </Link>
+                            </h2>
+                            <Chip tone={status.tone} size="sm">
+                              {status.label}
+                            </Chip>
+                          </div>
+                          <p className="mt-[4px] text-[15px] text-body">{listing.locationLabel}</p>
+                          <p className="mt-[8px] text-[15px] text-body">
+                            {listing.configurationLabel} · {listing.priceLabel}
+                          </p>
+                          <p className="mt-[6px] text-[14px] text-muted">{listing.detailLine}</p>
+                        </div>
+                        <div className="flex-none whitespace-nowrap text-right">
+                          <p className="font-[family-name:var(--font-heading)] text-[22px] font-extrabold text-ink">
+                            {listing.enquiryCount}
+                          </p>
+                          <p className="t-caption text-muted">
+                            {listing.enquiryCount === 1 ? "enquiry" : "enquiries"}
+                          </p>
+                        </div>
+                      </div>
 
-                    <ListingActions
-                      listingId={listing.id}
-                      status={listing.status}
-                      canPublish={canPublish}
-                    />
-                  </Card>
+                      <ListingActions
+                        listingId={listing.id}
+                        status={listing.status}
+                        canPublish={canPublish}
+                      />
+                    </div>
+                  </article>
                 </li>
               );
             })}

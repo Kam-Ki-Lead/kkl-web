@@ -1,121 +1,137 @@
 "use client";
 
-import { useActionState } from "react";
-import {
-  submitVerification,
-  type VerificationFormState,
-} from "@/app/actions/builder-verification";
+import { useActionState, useState } from "react";
+import { submitVerification } from "@/app/actions/builder-verification";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import { Field, TextInput } from "@/components/ui/field";
 
 /**
- * B-02's form.
+ * B-02's four document cards — the approved layout (E-P5 correction).
  *
- * The file inputs are real — choosing a file shows its name and leaving one
- * empty is a validation error, so the flow behaves the way it will when uploads
- * exist. What does not happen is the upload, and the screen says so.
+ * The approved screen asks for the company PAN and the authorised signatory's
+ * Aadhaar (required), plus the incorporation certificate and RERA
+ * registration (proposed, flagged for client confirmation). There is no
+ * PAN-number text field: the approved validation is "PAN and Aadhaar files
+ * at least", and the masked-PAN echo never appears in the approved design.
+ *
+ * Real file inputs, styled as the approved dashed upload button with the
+ * chosen file's name beside it (the native control's own rendering — that is
+ * exactly what the approved prototype shows). The chip flips to "Ready" when
+ * a file is chosen; without JavaScript it stays "Required"/"Optional" and
+ * the server-side validation carries the flow.
+ *
+ * The approved validation is a single submit-line error — "Upload PAN and
+ * Aadhaar at least before submitting." — and that is what renders. The
+ * approved per-document error box exists for format rejection, a state
+ * sample mode cannot reach: no file is ever examined, because no file is
+ * ever uploaded.
+ *
+ * Sample mode: files are never uploaded; the store records only that a file
+ * was chosen. The compact notice below the cards says so — required by the
+ * sample-mode honesty safeguards.
  */
-export function VerificationForm({ isSample }: { isSample: boolean }) {
-  const [state, action, pending] = useActionState<VerificationFormState, FormData>(
-    submitVerification,
-    {},
-  );
-  const err = state.errors ?? {};
-  const v = state.values ?? {};
 
+type DocSpec = {
+  readonly id: string;
+  readonly title: string;
+  readonly hint: string;
+  readonly required: boolean;
+};
+
+const DOCUMENTS: readonly DocSpec[] = [
+  { id: "panDocument", title: "Company PAN", hint: "Required", required: true },
+  {
+    id: "aadhaarDocument",
+    title: "Authorised signatory Aadhaar",
+    hint: "Required",
+    required: true,
+  },
+  {
+    id: "companyDocument",
+    title: "Incorporation / registration certificate",
+    hint: "Proposed — client to confirm",
+    required: false,
+  },
+  {
+    id: "reraDocument",
+    title: "RERA registration",
+    hint: "Proposed — client to confirm whether mandatory",
+    required: false,
+  },
+];
+
+function DocumentSlot({ spec }: { readonly spec: DocSpec }) {
+  const [fileChosen, setFileChosen] = useState(false);
   return (
-    <form action={action} encType="multipart/form-data" className="flex flex-col gap-[16px]">
-      <DocumentSlot
-        id="panDocument"
-        title="Company PAN"
-        hint="Clear photo or scan"
-        error={err.hasPanDocument}
-      />
-      <DocumentSlot
-        id="companyDocument"
-        title="Incorporation certificate or partnership deed"
-        hint="PDF preferred"
-        error={err.hasCompanyDocument}
-      />
-
-      <Field id="panNumber" label="Company PAN number" error={err.panNumber}>
-        <TextInput
-          id="panNumber"
-          name="panNumber"
-          autoCapitalize="characters"
-          placeholder="AAACS1234Q"
-          maxLength={10}
-          defaultValue={v.panNumber ?? ""}
-          invalid={Boolean(err.panNumber)}
-          aria-describedby={err.panNumber ? "panNumber-error" : undefined}
-        />
-      </Field>
-
-      <Card className="bg-tint p-[16px]">
-        <p className="t-caption text-warning">
-          <strong>Nothing is uploaded yet.</strong> The file you choose is not sent or stored:
-          document storage, virus scanning, access logging and a retention rule are
-          kkl-backend&rsquo;s and do not exist. This form records that you selected a file, and the
-          PAN number, so the flow can be reviewed end to end.
-          {isSample ? " No administrator will see anything." : ""}
-        </p>
-      </Card>
-
-      <div>
-        <Button type="submit" disabled={pending}>
-          {pending ? "Submitting…" : "Submit for verification"}
-        </Button>
-        <p className="t-caption mt-[10px] text-muted">
-          Submitting moves your account to <strong>in review</strong>. It does not approve it — an
-          administrator decides, and no turnaround time is promised.
-        </p>
+    <div className="rounded-[10px] border border-line bg-white p-[18px]">
+      <div className="flex flex-wrap items-start justify-between gap-[14px]">
+        <div className="min-w-0">
+          <h3 className="t-card-title text-ink">{spec.title}</h3>
+          <p className="mt-[3px] text-[14px] text-muted">{spec.hint}</p>
+        </div>
+        <Chip tone={fileChosen ? "success" : "muted"}>
+          {fileChosen ? "Ready" : spec.required ? "Required" : "Optional"}
+        </Chip>
       </div>
-    </form>
+      <div className="mt-[14px]">
+        <label htmlFor={spec.id} className="sr-only">
+          {spec.title} — choose file
+        </label>
+        <input
+          id={spec.id}
+          name={spec.id}
+          type="file"
+          accept="image/jpeg,image/png,application/pdf"
+          onChange={(event) =>
+            setFileChosen(Boolean(event.target.files?.length))
+          }
+          className="block w-full cursor-pointer text-[14px] text-muted file:mr-[12px] file:cursor-pointer file:rounded-[8px] file:border-2 file:border-dashed file:border-[#A9B2CE] file:bg-white file:px-[20px] file:py-[14px] file:text-[15px] file:font-bold file:text-brand hover:file:border-brand hover:file:bg-[#F6F8FD]"
+        />
+      </div>
+    </div>
   );
 }
 
-function DocumentSlot({
-  id,
-  title,
-  hint,
-  error,
-}: {
-  id: string;
-  title: string;
-  hint: string;
-  error?: string;
-}) {
+export function VerificationForm({ isSample }: { readonly isSample: boolean }) {
+  const [state, formAction, pending] = useActionState(submitVerification, {});
+
   return (
-    <Card className="p-[18px]">
-      <div className="flex flex-wrap items-start justify-between gap-[10px]">
-        <div>
-          <h3 className="t-card-title text-ink">{title}</h3>
-          <p className="t-caption mt-[1px] text-muted">{hint}</p>
-        </div>
-        <Chip tone="muted">Required</Chip>
+    <form action={formAction} className="mt-[20px] flex flex-col gap-[14px]">
+      {DOCUMENTS.map((spec) => (
+        <DocumentSlot key={spec.id} spec={spec} />
+      ))}
+
+      {/* Approved flag note, verbatim. */}
+      <div className="rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[16px] py-[14px] text-[15px] leading-[1.6] text-body">
+        Which company documents are mandatory — incorporation certificate, GST,
+        RERA registration — is not settled in either source document. The four
+        above are a design proposal, flagged for client confirmation.
       </div>
 
-      <div className="mt-[12px]">
-        <label htmlFor={id} className="t-label block text-ink">
-          <span className="sr-only">{title} — </span>Choose file
-        </label>
-        <input
-          id={id}
-          name={id}
-          type="file"
-          accept="image/jpeg,image/png,application/pdf"
-          aria-invalid={Boolean(error) || undefined}
-          aria-describedby={error ? `${id}-error` : undefined}
-          className="mt-[6px] block w-full cursor-pointer rounded-[8px] border border-dashed border-[#B9C3EC] bg-white px-[13px] py-[11px] text-[15px] text-body file:mr-[12px] file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-chip-neutral-bg file:px-[13px] file:py-[8px] file:text-[14px] file:font-semibold file:text-brand"
-        />
-        {error ? (
-          <p id={`${id}-error`} className="t-caption mt-[6px] text-danger">
-            {error}
+      {isSample ? (
+        <div className="rounded-[8px] border border-line bg-tint px-[16px] py-[14px]">
+          <p className="t-caption text-warning">
+            Nothing is uploaded yet — the sample service records that a file
+            was chosen, not its contents. Upload, virus scanning and retention
+            are backend work (D-15).
           </p>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-[12px]">
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending ? "Submitting…" : "Submit for verification"}
+        </Button>
+        {state.submitError ? (
+          <span role="alert" className="text-[14px] text-danger">
+            {state.submitError}
+          </span>
         ) : null}
       </div>
-    </Card>
+      <p className="t-caption text-muted">
+        Submitting moves your account to in review; an administrator decides.
+        You can keep building listings in the meantime.
+      </p>
+    </form>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BuilderShell } from "@/components/builder/builder-shell";
+import { BuilderOnboardingShell } from "@/components/builder/onboarding-shell";
 import { VerificationForm } from "@/components/builder/verification-form";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
@@ -39,7 +39,22 @@ const PANEL: Record<KycStatus, { chip: string; tone: ChipTone; title: string; bo
   },
 };
 
-/** B-02 — company verification and its status. */
+/**
+ * B-02 — company verification.
+ *
+ * The approved screen is a **standalone light page**, not a console screen:
+ * the same pre-console chrome as B-01, because verification is the gate
+ * before the console is earned. An earlier implementation rendered it inside
+ * the Builder console shell; that departure was recorded as E-P5 and is
+ * corrected here back to the approved layout.
+ *
+ * The approved screen draws the submission state: title, intro, one upload
+ * card per document, the amber not-settled note, and the submit row. The two
+ * states it does not draw — documents in review, and an approved account —
+ * keep their status panels here in the same approved chrome, with the
+ * timeline and the way back to the console that the standalone page does not
+ * provide on its own.
+ */
 export default async function BuilderVerificationPage() {
   const services = getServices().builder;
   const [account, timeline] = await Promise.all([
@@ -51,23 +66,38 @@ export default async function BuilderVerificationPage() {
   const canSubmit = account.kycStatus === "not_submitted" || account.kycStatus === "rejected";
 
   return (
-    <BuilderShell title="Company verification" subtitle="Reviewed before you can publish">
-      <div className="grid max-w-[1000px] grid-cols-[minmax(0,1fr)_320px] gap-[18px] max-[1060px]:grid-cols-1">
-        <div className="flex flex-col gap-[16px]">
+    <BuilderOnboardingShell step={1}>
+      {/* The approved onboarding title steps 24/27/30px with the frame;
+          t-flow-title is the 30px desktop step, utilities carry the two
+          smaller ones. */}
+      <h1 className="t-flow-title text-ink max-[619px]:text-[24px] min-[620px]:max-[1059px]:text-[27px]">
+        Company verification
+      </h1>
+
+      {canSubmit ? (
+        <>
+          <p className="mt-[8px] text-[16px] leading-[1.6] text-body">
+            Builders submit the same PAN and Aadhaar as brokers, plus company documents. An
+            administrator reviews them before you can subscribe.
+          </p>
+
+          {account.kycStatus === "rejected" ? (
+            <div className="mt-[14px] rounded-[8px] bg-chip-danger-bg px-[14px] py-[11px]">
+              <p className="text-[14px] font-semibold text-danger">Why it was rejected</p>
+              <p className="t-body mt-[2px] text-body">
+                The company incorporation document was not readable. Please re-upload a clear scan.
+              </p>
+            </div>
+          ) : null}
+
+          <VerificationForm isSample={runtimeConfig.isSampleMode} />
+        </>
+      ) : (
+        <div className="mt-[20px] flex flex-col gap-[16px]">
           <Card className="p-[22px]">
             <Chip tone={panel.tone}>{panel.chip}</Chip>
             <h2 className="t-heading mt-[10px] text-ink">{panel.title}</h2>
             <p className="t-body mt-[6px] text-body">{panel.body}</p>
-
-            {account.kycStatus === "rejected" ? (
-              <div className="mt-[14px] rounded-[8px] bg-chip-danger-bg px-[14px] py-[11px]">
-                <p className="text-[14px] font-semibold text-danger">Why it was rejected</p>
-                <p className="t-body mt-[2px] text-body">
-                  The company incorporation document was not readable. Please re-upload a clear
-                  scan.
-                </p>
-              </div>
-            ) : null}
 
             {/* D-11. The timeline shows what happened, never what will. */}
             <p className="t-caption mt-[12px] text-muted">
@@ -76,19 +106,6 @@ export default async function BuilderVerificationPage() {
             </p>
           </Card>
 
-          {canSubmit ? (
-            <Card className="p-[22px]">
-              <h2 className="t-card-title text-ink">
-                {account.kycStatus === "rejected" ? "Re-submit documents" : "Submit documents"}
-              </h2>
-              <div className="mt-[14px]">
-                <VerificationForm isSample={runtimeConfig.isSampleMode} />
-              </div>
-            </Card>
-          ) : null}
-        </div>
-
-        <aside className="flex flex-col gap-[16px]">
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">Timeline</h2>
             <ol className="mt-[10px] flex flex-col">
@@ -109,18 +126,23 @@ export default async function BuilderVerificationPage() {
           <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
             <h2 className="t-card-title text-ink">Which documents?</h2>
             <p className="t-body mt-[6px] text-body">
-              The company PAN and an incorporation certificate or partnership deed are asked for
-              here. Which documents a Builder must actually submit is not confirmed, so this list
-              may grow.
+              The company PAN and the authorised signatory&rsquo;s Aadhaar are required; the
+              incorporation certificate and RERA registration are proposed. Which documents a
+              Builder must actually submit is not confirmed, so this list may grow.
             </p>
             <p className="t-caption mt-[8px] text-muted">{DECISIONS["D-15"].question} — D-15</p>
           </Card>
 
-          <ButtonLink href="/builder/restrictions" variant="secondary" className="w-full">
-            What each state allows
-          </ButtonLink>
-        </aside>
-      </div>
-    </BuilderShell>
+          <div className="flex flex-wrap gap-[12px]">
+            <ButtonLink href="/builder" variant="secondary">
+              Back to your dashboard
+            </ButtonLink>
+            <ButtonLink href="/builder/restrictions" variant="secondary">
+              What each state allows
+            </ButtonLink>
+          </div>
+        </div>
+      )}
+    </BuilderOnboardingShell>
   );
 }

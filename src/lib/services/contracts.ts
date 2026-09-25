@@ -360,11 +360,17 @@ export interface BuilderAccountService {
     email: string | null;
     reraId: string | null;
   }): Promise<BuilderAccount>;
-  /** B-02. Moves to `pending`; never approves. Approval is A-06's. */
+  /**
+   * B-02. Moves to `pending`; never approves. Approval is A-06's.
+   *
+   * The approved screen collects no PAN number — only the documents — so the
+   * contract records which files were chosen, nothing more.
+   */
   submitVerification(input: {
-    panNumber: string;
     hasPanDocument: boolean;
+    hasAadhaarDocument: boolean;
     hasCompanyDocument: boolean;
+    hasReraDocument: boolean;
   }): Promise<KycSubmission>;
   verificationTimeline(): Promise<readonly KycTimelineEntry[]>;
   /**

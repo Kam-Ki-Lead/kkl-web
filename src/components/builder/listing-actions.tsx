@@ -41,7 +41,7 @@ export function ListingActions({
         : "Continue editing";
 
   return (
-    <div className="mt-[14px] flex flex-wrap items-center gap-[10px] border-t border-line pt-[14px]">
+    <div className="mt-[14px] flex flex-wrap items-center gap-[10px]">
       <ButtonLink href={`/builder/properties/${listingId}/basics`} size="action">
         Edit listing
       </ButtonLink>

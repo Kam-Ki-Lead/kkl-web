@@ -20,6 +20,7 @@ import type {
   SubscriptionOutcome,
 } from "@/lib/services/contracts";
 import { processState } from "./process-state";
+import { reviewCoverFor } from "./review-imagery";
 import { formatPriceRange } from "@/lib/format";
 
 /**
@@ -426,19 +427,23 @@ export function getKyc(): KycSubmission {
 }
 
 export function submitVerification(input: {
-  panNumber: string;
   hasPanDocument: boolean;
+  hasAadhaarDocument: boolean;
   hasCompanyDocument: boolean;
+  hasReraDocument: boolean;
 }): KycSubmission {
-  const masked = input.panNumber
-    ? `${input.panNumber.slice(0, 5)}••••${input.panNumber.slice(-1)}`
-    : null;
+  // The approved B-02 collects no PAN number, so a fresh submission records
+  // no masked PAN. The seeded history may still carry one. The document flags
+  // are validated in the action; the sample store keeps no per-document
+  // record — only the status transition — because KycSubmission has no field
+  // for them and inventing one would imply a backend shape D-15 has not set.
+  void input;
   state().kyc = {
     status: "pending",
     submittedAt: new Date().toISOString(),
     decidedAt: null,
     rejectionReason: null,
-    panMasked: masked,
+    panMasked: null,
     aadhaarMasked: null,
   };
   state().account = { ...state().account, kycStatus: "pending" };
@@ -595,6 +600,18 @@ export function publishBlockers(listing: ListingDraft): readonly PublishBlocker[
   return blockers;
 }
 
+/**
+ * Which portal fixture a seeded Builder listing stands in for, for review
+ * imagery only. This duplicates portal-bridge.ts's OWNED map on purpose:
+ * portal-bridge imports this store, so the store must not import it back.
+ * Keep the three entries in step with OWNED.
+ */
+const PORTAL_COUNTERPART: Readonly<Record<string, string>> = {
+  "bl-greenview": "p-greenview",
+  "bl-lakeshore": "p-lakeshore",
+  "bl-orchid": "p-orchid-grove",
+};
+
 export function listSummaries(filter?: { status?: ListingStatus }): readonly ListingSummary[] {
   return state()
     .listings.filter((l) => (filter?.status ? l.status === filter.status : true))
@@ -605,10 +622,11 @@ export function listSummaries(filter?: { status?: ListingStatus }): readonly Lis
           ? "Pricing not entered"
           : (formatPriceRange({ minInr: listing.priceMinInr, maxInr: listing.priceMaxInr }) ??
             "Pricing not entered");
+      const title = listing.title || "Untitled project";
 
       return {
         id: listing.id,
-        title: listing.title || "Untitled project",
+        title,
         status: listing.status,
         locationLabel: listing.locality
           ? `${listing.locality}, ${listing.locality.startsWith("Action Area") ? "New Town" : "Kolkata"}`
@@ -621,6 +639,13 @@ export function listSummaries(filter?: { status?: ListingStatus }): readonly Lis
         detailLine: detailLineFor(listing),
         enquiryCount: listing.enquiryCount,
         hasMedia: listing.media.length > 0,
+        // A real photograph wins; in a review session the approved baseline's
+        // stand-in imagery fills the seeded listings' slots so the
+        // image-bearing card can be compared at all. A listing whose photos
+        // were "chosen" in sample mode has no bytes, so no cover.
+        coverImage:
+          listing.media.find((m) => m.kind === "image" && m.url !== "") ??
+          reviewCoverFor(PORTAL_COUNTERPART[listing.id] ?? "", title),
         sectionsComplete: done,
         sectionsTotal: SECTION_LABELS.length,
       };
