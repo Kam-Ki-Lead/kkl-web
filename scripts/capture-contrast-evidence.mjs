@@ -26,6 +26,7 @@
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { selectProtoWidth } from "./proto-width.mjs";
 
 const { chromium } = await import(process.env.PLAYWRIGHT ?? "playwright");
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3811";
@@ -83,8 +84,9 @@ const protoCtx = await browser.newContext({ viewport: { width: 1700, height: 140
 const proto = await protoCtx.newPage();
 await proto.goto(`${PROTO}/${encodeURIComponent(BUYER_FILE)}`, { waitUntil: "load", timeout: 40000 });
 await proto.waitForTimeout(2500);
-await proto.click('button[aria-pressed]:text-is("1440")').catch(() => {});
-await proto.waitForTimeout(800);
+// 1440 is the prototype's default frame, but select it explicitly and prove
+// the frame took it — a swallowed failure here is how D-20 happened.
+await selectProtoWidth(proto, 1440);
 await proto.selectOption('select[aria-label="Jump to screen"]', "P-04");
 await proto.waitForTimeout(1200);
 

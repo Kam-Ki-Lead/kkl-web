@@ -5,6 +5,8 @@
 of `scripts/setup-prototype-review.sh`
 
 One page. Everything on it is either done, or waiting on a named person.
+For the review itself, [`owner-review.md`](owner-review.md) is the concise
+entry point — this sheet is the full record behind it.
 
 > Commit hygiene: `707d77b` on this branch was a **harness-only** change
 > (verification scripts and evidence tooling — no application code). The
@@ -60,7 +62,11 @@ stat tile on S-06 where the rendered baseline draws **26px/800** — the row now
 encodes the measured value. A second harness fault surfaced in the latest
 pass: the geometry differ's 390px runs had never actually switched the
 prototype to its 390 frame (a whitespace-sensitive selector, silently
-swallowed); fixed, and every 390 classification re-derived.
+swallowed); fixed, every 390 classification re-derived, and the evidence
+impact closed out — the affected revisions are marked superseded
+(`visual/README.md`), the harness now fails explicitly on a wrong-width frame
+(`scripts/proto-width.mjs`, negative-tested), and the rows the corrected sweep
+surfaced are classified in `visual-differences.md` §6.
 
 ---
 
@@ -130,7 +136,7 @@ Full statements in **[`exceptions.md`](exceptions.md)**.
 | **E-P1** | Browser **Back may leave the listing editor without the custom dialog**. **Forward restores unsaved edits**, with an "Unsaved work restored." notice and the unsaved mark still showing. **Edits are never silently saved** — a second tab reads the listing as it stands on the server. **Evidence:** [video](evidence/e-p1/e-p1-back-forward-b95e81e.webm) · [labelled frame strip](evidence/e-p1/e-p1-frame-strip-b95e81e.png) · [raw frames](evidence/e-p1/raw/) | Accept this behaviour, or fund the Next 16 Cache Components route and its four named costs | Client, or the designer who specified B-15 | **Open** |
 | **E-P2a** | Focus indicator gains a dark companion edge. **Evidence:** [comparison sheet](evidence/e-p2/e-p2-prototype-vs-corrected-b9e7e53.png) — **approved prototype versus accessibility-corrected implementation** (the left side is the approved prototype, not an earlier revision of this application) | Keep it, or name another remedy | Designer | **Open** (applied) |
 | **E-P2b** | Control border darkened to `#8A8E9C`. **Evidence:** same sheet | Keep it, or name another remedy | Designer | **Open** (applied) |
-| **E-P3** | Review imagery attributes **every** card; the approved P-01 attributes the project cards and not the property cards. The band is a **voluntary, conservative choice** — the Unsplash licence does not require credit; the design's own image loader does, and the approved homepage contradicts it. Proposed: keep the band now, remove it from property cards when licensed photography lands. Since the E-P6 correction, B-07's restored thumbnails draw the same band from the same component. **Evidence:** [the portal screens, both sides, real baseline photographs](evidence/e-p3/e-p3-attribution-b95e81e.png) · [B-07 pair](visual/B-07-1440-implementation.png) | Confirm, or drop the band from property cards now | Designer | **Open** |
+| **E-P3** | Review imagery attributes **every** card; the approved P-01 attributes the project cards and not the property cards. The band is a **voluntary, conservative choice** — the Unsplash licence does not require credit; the design's own image loader does, and the approved homepage contradicts it. Proposed: keep the band now, remove it from property cards when licensed photography lands. Since the E-P6 correction, B-07's restored thumbnails draw the same band from the same component — and the approved B-07 slots carry it too, so that screen is parity. **Evidence:** [all four screens, both sides, real baseline photographs](evidence/e-p3/e-p3-attribution-b9e7e53.png) at `b9e7e53` · [three-screen sheet at `b95e81e`](evidence/e-p3/e-p3-attribution-b95e81e.png) kept for provenance | Confirm, or drop the band from property cards now | Designer | **Open** |
 
 **Closed this pass — reclassified as corrections, not deviations:** E-P5 (B-02
 restored to the approved standalone light page) and E-P6 (B-07 restored to the
@@ -144,9 +150,10 @@ E-P1 has **not** been worked around with a history trap, and will not be.
 
 Every evidence file is labelled with the implementation commit it shows. The
 `…-011bade` sets show the first implementation commit and are kept for
-provenance; the `…-b95e81e` sets show the previous one; the E-P2 sheet is
-current at `b9e7e53` (its content is chrome-free field crops, identical across
-these commits — only the label advances).
+provenance; the `…-b95e81e` sets show the previous one; the E-P2 and E-P3
+sheets are current at `b9e7e53` (the E-P2 content is chrome-free field crops,
+identical across these commits — only the label advances; the E-P3 sheet adds
+the B-07 pair, which did not exist before the E-P6 correction).
 
 ---
 

@@ -1,6 +1,6 @@
 /**
  * E-P3 evidence capture — the attribution band on review imagery, on all
- * three affected screens, against the approved baseline.
+ * four affected screens, against the approved baseline.
  *
  * WHAT THE IMAGES ARE IN THIS RUN
  * -------------------------------
@@ -36,6 +36,7 @@
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { selectProtoWidth } from "./proto-width.mjs";
 
 const { chromium } = await import(process.env.PLAYWRIGHT ?? "playwright");
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3811";
@@ -52,6 +53,7 @@ mkdirSync(RAW, { recursive: true });
 
 const BUYER_FILE = "KKL Buyer Journey.dc.html";
 const HOME_FILE = "KKL Homepage - Portal Layout.dc.html";
+const BUILDER_FILE = "KKL Builder Console.dc.html";
 
 /** Count loaded vs broken images; refuse to evidence a broken-image run.
  *  The baseline renders photographs inside a shadow-DOM web component
@@ -96,8 +98,9 @@ async function protoPage(file, screen) {
   const page = await ctx.newPage();
   await page.goto(`${PROTO}/${encodeURIComponent(file)}`, { waitUntil: "load", timeout: 40000 });
   await page.waitForTimeout(2500);
-  await page.click('button[aria-pressed]:text-is("1440")').catch(() => {});
-  await page.waitForTimeout(800);
+  // 1440 is the default frame, but select it explicitly and prove the frame
+  // took it — a swallowed failure here is how D-20 happened.
+  await selectProtoWidth(page, 1440);
   if (screen) {
     await page.selectOption('select[aria-label="Jump to screen"]', screen);
     await page.waitForTimeout(1500);
@@ -170,6 +173,33 @@ const FRAME_SEL = 'div[style*="transform:scale"], div[style*="transform: scale"]
   await ctx2.close();
 }
 
+// ------------------------------------------------------------------- B-07
+// Added when the E-P6 correction restored B-07's image-bearing cards: the
+// approved slots carry credit/credit-href (Builder Console, the B-07 row
+// markup), so the band is approved here and this pair shows PARITY — plus
+// the approved "No photos yet" state on the seeded draft, which has no
+// photograph and therefore nothing to attribute.
+{
+  const { ctx, page } = await protoPage(BUILDER_FILE, "B-07");
+  await assertImagesLoaded(page, "baseline B-07");
+  await shot(page, "b07-BASELINE",
+    "B-07 BEFORE · approved baseline, My properties. The restored thumbnails carry the credit band — it is approved on this screen — and the draft row shows the approved missing-photo state.",
+    { selector: FRAME_SEL });
+  await ctx.close();
+
+  const ctx2 = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const impl = await ctx2.newPage();
+  // Reset the review session so the seeded set is the one captured.
+  await impl.goto(`${BASE}/builder/review-state?reset=1`, { waitUntil: "networkidle", timeout: 60000 });
+  await impl.goto(`${BASE}/builder/properties`, { waitUntil: "networkidle", timeout: 60000 });
+  await impl.waitForTimeout(1500);
+  await assertImagesLoaded(impl, "implementation B-07");
+  await shot(impl, "b07-implementation",
+    "B-07 AFTER · this implementation. Band present on every thumbnail, as the approved screen has it; the Sundew draft carries the approved “No photos yet” state.",
+    { fullPage: true });
+  await ctx2.close();
+}
+
 await browser.close();
 
 // ------------------------------------------------------------- labelled sheet
@@ -188,14 +218,15 @@ const html = `<!doctype html><meta charset="utf-8"><style>
   img { width: 100%; border: 1px solid #8A8E9C; border-radius: 6px; }
   figcaption { margin-top: 8px; }
 </style>
-<h1>E-P3 — Attribution on review imagery, all three affected screens</h1>
+<h1>E-P3 — Attribution on review imagery, all four affected screens</h1>
 <p class="meta">Implementation commit ${COMMIT} · captured ${new Date().toISOString().slice(0, 10)}.
 BOTH sides show the ACTUAL photographs the baseline references, hotlinked from images.unsplash.com — this environment reaches that host, so these are not the geometric stand-ins.
 The photographs are the baseline's own illustrative stock choices and every one must be replaced with licensed project photography before launch; this sheet is about WHERE THE CREDIT BAND APPEARS, not about photographic fidelity.
-The exception: the implementation attributes every slot; the approved P-01 attributes the project cards and not the property cards. Decision stays OPEN.</p>
+The exception: the implementation attributes every slot; the approved P-01 attributes the project cards and not the property cards. On P-03 and B-07 the band is approved and both sides carry it — those pairs show parity, and B-07 also shows the approved "No photos yet" state on the seeded draft. Decision stays OPEN.</p>
 ${pair(shots[0], shots[1])}
 ${pair(shots[2], shots[3])}
-${pair(shots[4], shots[5])}`;
+${pair(shots[4], shots[5])}
+${pair(shots[6], shots[7])}`;
 const sheetPath = join(RAW, "sheet.html");
 writeFileSync(sheetPath, html);
 const sheetBrowser = await chromium.launch();

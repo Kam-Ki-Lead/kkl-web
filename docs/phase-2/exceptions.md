@@ -160,14 +160,18 @@ properties** cards.
 | Featured *projects* cards (Orchid Grove, Riverside Commons) | Band present — "Photo by Anton Ryazanov on Unsplash" | Band present |
 | Featured *properties* cards (Greenview, Lakeshore, Sundew) | **No band** | **Band present** |
 | P-03 gallery | Band present | Band present |
+| B-07 listing thumbnails | Band present (the approved slots carry `credit`/`credit-href`) | Band present |
 
-Evidence: `evidence/e-p3/e-p3-attribution-b95e81e.png` — the three portal
-screens, both sides, captured with the **real baseline photographs** (the
-capture script refuses to publish if any image did not load). Unlabelled
-per-screen captures in `evidence/e-p3/raw/`. The `…-011bade` set shows the
-same treatment on stand-in geometry images and is kept for provenance. B-07's
-restored thumbnails draw the same band from the same component; the refreshed
-pair `visual/B-07-1440-implementation.png` shows it in place.
+Evidence: `evidence/e-p3/e-p3-attribution-b9e7e53.png` — **all four screens**,
+both sides, captured with the **real baseline photographs** at implementation
+commit `b9e7e53` (the capture script refuses to publish if any image did not
+load). The B-07 pair shows parity — the band is approved there — plus the
+approved "No photos yet" state on the seeded draft. Unlabelled per-screen
+captures in `evidence/e-p3/raw/`. The earlier
+`evidence/e-p3/e-p3-attribution-b95e81e.png` covers the three portal screens
+at commit `b95e81e` and is kept, labelled with that commit, for provenance;
+the `…-011bade` set shows the same treatment on stand-in geometry images and
+is kept for provenance.
 
 ### Affected assets and screens
 
@@ -224,12 +228,12 @@ the defensible default.
 
 **Photographic fidelity is a different question from attribution**, and this
 exception says nothing about it. The current evidence set
-(`evidence/e-p3/…-b95e81e.png`) was captured with the **real baseline
+(`evidence/e-p3/…-b9e7e53.png`) was captured with the **real baseline
 photographs** — `images.unsplash.com` is reachable from the network this
 capture was run on — so the treatment is shown on the actual images, not on
-stand-ins. The earlier stand-in set (`evidence/e-p3/…-011bade.png`, labelled
-"STAND-IN · not the baseline photograph") established slot **geometry** only
-and is kept for provenance. See `visual/README.md`.
+stand-ins. The earlier sets (`…-b95e81e`, real photographs, three portal
+screens; `…-011bade`, labelled "STAND-IN · not the baseline photograph",
+slot **geometry** only) are kept for provenance. See `visual/README.md`.
 
 ### Decision needed
 

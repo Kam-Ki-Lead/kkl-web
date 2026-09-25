@@ -3,6 +3,19 @@
 Side-by-side captures of the approved prototype and the implementation, at
 matching states and widths.
 
+## Superseded measurements
+
+**`geometry-390.json` as committed at `dfb0165`, `969ae3d` and `1591aa0` is
+superseded.** Those revisions were produced while the geometry harness's
+prototype width-tab click never landed (D-20): every "390" measurement in
+them is the prototype's default **1440px** frame. The corrected regeneration
+— produced with the fixed selector — is first committed at `7afe140`, and the
+harness now asserts the frame width and fails the run rather than measure the
+wrong frame (`scripts/proto-width.mjs`). No other artifact is affected: 1440
+geometry measured the frame it intended, and the PNG captures used a script
+that already had the working fallback. The differences the corrected run
+surfaced are classified in `../visual-differences.md` §6.
+
 ## Two states, captured separately
 
 | Files | State |

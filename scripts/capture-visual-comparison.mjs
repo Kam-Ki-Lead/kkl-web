@@ -32,6 +32,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PAIRS } from './screen-map.mjs';
+import { selectProtoWidth } from './proto-width.mjs';
 
 const { chromium } = await import(process.env.PLAYWRIGHT ?? 'playwright');
 
@@ -66,13 +67,9 @@ async function protoPage(file, width) {
   const page = await context.newPage();
   await page.goto(`${PROTO}/${encodeURIComponent(file)}`, { waitUntil: 'load', timeout: 40000 });
   await page.waitForTimeout(2500);
-  // Its own width tab, so the prototype reflows as designed.
-  await page.click(`button[aria-pressed]:text-is("${width}")`).catch(async () => {
-    for (const t of await page.$$('button')) {
-      if ((await t.textContent())?.trim() === String(width)) { await t.click(); break; }
-    }
-  });
-  await page.waitForTimeout(1000);
+  // Its own width tab, so the prototype reflows as designed. Throws if the
+  // frame does not take the requested width — never capture the wrong frame.
+  await selectProtoWidth(page, width);
   protoPages.set(key, page);
   return page;
 }
