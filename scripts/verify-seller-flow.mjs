@@ -167,7 +167,7 @@ ok('10. An unverified account cannot reach the confirm control',
 const browse = await A.newPage();
 await browse.goto(`${BASE}/seller/leads`, { waitUntil: 'networkidle' });
 ok('11. An unverified account can still browse the marketplace',
-   (await browse.textContent('body')).includes('Lead marketplace'),
+   (await browse.textContent('body')).includes('Buy Leads'),
    'D-07 is open; this implementation allows browsing and blocks the purchase, and says so');
 
 // --------------------------------------------------------------- suspended

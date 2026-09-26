@@ -9,6 +9,7 @@ import {
   type BuilderAccountService,
   type BuilderEnquiryService,
   type ListingService,
+  type LeadRequestService,
   type SellerAccountService,
   type SupportService,
   type HomepageContent,
@@ -22,6 +23,7 @@ import * as enquiryStore from "./enquiry-store";
 import * as adminStore from "./admin-store";
 import * as sellerStore from "./seller-store";
 import * as builderStore from "./builder-store";
+import * as leadRequestStore from "./lead-request-store";
 import {
   builderCredits,
   builderLeadMarket,
@@ -37,6 +39,16 @@ import {
   SAMPLE_LOCALITIES,
   sampleDetailFor,
 } from "./fixtures";
+import {
+  LAUNCH_CITY_ID,
+  areaLabel,
+  childrenOf,
+  displayPath,
+  getLocation,
+  isWithin,
+  searchAreas,
+} from "./locations";
+import type { LocationService } from "@/lib/services/contracts";
 
 /**
  * Sample implementation of the service contracts.
@@ -54,9 +66,9 @@ const PAGE_SIZE = 9;
 
 function matches(property: PropertySummary, filters: Parameters<PropertyService["search"]>[0]["filters"]): boolean {
   if (filters.locationId) {
-    const wanted = filters.locationId.replace(/-/g, " ").toLowerCase();
-    const inPath = property.locationPath.some((p) => p.toLowerCase() === wanted);
-    if (!inPath) return false;
+    // Id-based, hierarchical (CR05): a locality covers its sub-localities.
+    // An unknown id matches nothing rather than everything.
+    if (!isWithin(property.locationId, filters.locationId)) return false;
   }
   if (filters.configurations && filters.configurations.length > 0) {
     const wanted = new Set(filters.configurations.map((c) => c.replace(/\D/g, "")));
@@ -102,6 +114,34 @@ function live() {
   return livePortalProperties();
 }
 
+/**
+ * The location service (CR05) over the central records in locations.ts.
+ *
+ * Read-only here: maintaining state, city and locality records is a
+ * kkl-backend capability (change-confirmation decision 8 is open), so the
+ * sample exposes lookups and search but no writes.
+ */
+const locationService: LocationService = {
+  async launchChain() {
+    return [getLocation("in"), getLocation("in-wb"), getLocation(LAUNCH_CITY_ID)].filter(
+      (n): n is NonNullable<typeof n> => n !== null,
+    );
+  },
+  async children(parentId) {
+    return childrenOf(parentId);
+  },
+  async areaOptions({ cityId, query }) {
+    return searchAreas(cityId, query ?? "").map((a) => ({ id: a.id, label: areaLabel(a.id) }));
+  },
+  async displayPath(locationId) {
+    return displayPath(locationId);
+  },
+  async getMany(ids) {
+    return ids.map((id) => getLocation(id)).filter((n): n is NonNullable<typeof n> => n !== null);
+  },
+};
+
+/** Every area in the launch city — the list the search pickers offer. */
 const propertyService: PropertyService = {
   async getHomepage(): Promise<HomepageContent> {
     const bySlug = (slug: string) => live().find((p) => p.slug === slug) ?? null;
@@ -153,10 +193,7 @@ const propertyService: PropertyService = {
   async match(requirement) {
     const scored = live().filter((p) => {
       const localityOk =
-        !requirement.locationId ||
-        p.locationPath.some(
-          (seg) => seg.toLowerCase() === requirement.locationId!.replace(/-/g, " ").toLowerCase(),
-        );
+        !requirement.locationId || isWithin(p.locationId, requirement.locationId);
       const configOk =
         requirement.configurations.length === 0 ||
         p.configurations.some((c) => requirement.configurations.includes(c));
@@ -306,6 +343,28 @@ const leadMarketService: LeadMarketService = {
   },
 };
 
+/**
+ * CR03 — Request Leads, over the sample store.
+ *
+ * The journey is real end to end: a request created here is listed here and
+ * appears in the Admin queue, and public replies and status moves travel back.
+ * The storage is process memory and says so — see lead-request-store.ts for
+ * what that does and does not satisfy.
+ */
+const leadRequestService: LeadRequestService = {
+  async create(input) {
+    return leadRequestStore.createRequest(input);
+  },
+  async listMine() {
+    return leadRequestStore.listMine();
+  },
+  async getMine(id) {
+    const found = leadRequestStore.getMine(id);
+    if (!found) throw new ServiceError("not_found", `No lead request ${id} on this account.`);
+    return found;
+  },
+};
+
 const creditService: CreditService = {
   async wallet() {
     return sellerStore.wallet();
@@ -430,6 +489,42 @@ const adminService: AdminService = {
     return adminStore.priceBands();
   },
 
+  // CR03 — the lead-requests queue, over the same store the Seller writes to.
+  async listLeadRequests(filter) {
+    return leadRequestStore.listRequests(filter);
+  },
+  async getLeadRequest(id) {
+    return leadRequestStore.getRequest(id);
+  },
+  async respondToLeadRequest(input) {
+    const result = leadRequestStore.respondToRequest(input);
+    if (!result.ok) return result;
+    // Same rule as ticket replies: the message on the record is the record,
+    // so there is no separate audit entry.
+    return { ok: true, auditId: "—" };
+  },
+  async setLeadRequestStatus(input) {
+    // Capture the status BEFORE the mutation: the store returns its live
+    // record, not a copy, so reading it afterwards would always compare equal.
+    const previousStatus = leadRequestStore.getRequest(input.requestId)?.status;
+    const reference = leadRequestStore.getRequest(input.requestId)?.reference;
+    const result = leadRequestStore.setRequestStatus(input);
+    if (!result.ok) return result;
+    if (previousStatus !== undefined && previousStatus !== input.status) {
+      const auditId = adminStore.recordAudit({
+        actor: input.actor,
+        category: "support",
+        action: "Lead request status changed",
+        subject: input.requestId,
+        subjectLabel: `Lead request ${reference ?? input.requestId}`,
+        reason: input.note?.trim() || "Status updated from the lead-requests queue",
+        changes: [{ field: "status", before: previousStatus, after: input.status }],
+      });
+      return { ok: true, auditId };
+    }
+    return { ok: true, auditId: "—" };
+  },
+
   async listOrders(filter) {
     return adminStore.listOrders(filter);
   },
@@ -517,6 +612,9 @@ export const sampleReviewControls = {
     // leave the two views disagreeing, which is exactly what this console is
     // supposed to make impossible.
     adminStore.resetForReview();
+    // CR03: lead requests live in their own store but are visible from both
+    // the Seller console and the Admin queue — same argument as above.
+    leadRequestStore.resetLeadRequestsForReview();
   },
   /** The ledger invariant, so a test can assert it instead of trusting a comment. */
   reconcile: sellerStore.reconcile,
@@ -668,8 +766,10 @@ export const sampleServices: Services = {
   enquiries: enquiryService,
   profile: profileService,
   notifications: notificationService,
+  locations: locationService,
   sellerAccount: sellerAccountService,
   leadMarket: leadMarketService,
+  leadRequests: leadRequestService,
   credits: creditService,
   support: supportService,
   builder: {

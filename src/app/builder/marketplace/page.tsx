@@ -9,7 +9,7 @@ import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
 import type { LeadSort } from "@/lib/services/contracts";
 
-export const metadata: Metadata = { title: "Lead marketplace" };
+export const metadata: Metadata = { title: "Buy Leads" };
 
 const SORTS: readonly { value: LeadSort; label: string }[] = [
   { value: "newest", label: "Newest" },
@@ -40,7 +40,7 @@ export default async function BuilderMarketplacePage({
   const onSaleOnly = one(params.tab) === "sale";
 
   const page = await getServices().builder.leadMarket.list({
-    area: one(params.area),
+    areaId: one(params.area),
     budgetBand: one(params.budget),
     configuration: one(params.config),
     minScore: one(params.score) ? Number(one(params.score)) : undefined,
@@ -60,7 +60,7 @@ export default async function BuilderMarketplacePage({
   };
 
   return (
-    <BuilderShell title="Lead marketplace" subtitle="Qualified buyer leads · Builder access">
+    <BuilderShell title="Buy Leads" subtitle="Qualified buyer leads · Builder access">
       <div className="flex flex-col gap-[16px]">
         <div role="tablist" aria-label="Lead set" className="flex gap-[22px] border-b border-line">
           {[

@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
+import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
 import type { ListingDraft, ListingSectionId } from "@/lib/domain/types";
 
 /**
@@ -28,13 +29,6 @@ import type { ListingDraft, ListingSectionId } from "@/lib/domain/types";
  */
 
 const PROPERTY_TYPES = ["Apartment", "Builder floor", "Villa / row house", "Plot"];
-const LOCALITIES = [
-  "Action Area I",
-  "Action Area II",
-  "Action Area III",
-  "Rajarhat",
-  "Salt Lake",
-];
 const CONFIGURATIONS = ["1", "2", "3", "4", "5"];
 const AMENITIES = [
   "Lift",
@@ -62,12 +56,15 @@ export const SECTION_FORM_ID = "listing-section-form";
 export function SectionForm({
   listing,
   section,
+  areas,
   previousHref,
   nextHref,
   nextLabel,
 }: {
   listing: ListingDraft;
   section: ListingSectionId;
+  /** The launch city's area records, from the location service (CR05). */
+  areas: readonly AreaOption[];
   previousHref: string | null;
   nextHref: string;
   nextLabel: string;
@@ -94,7 +91,7 @@ export function SectionForm({
       ) : null}
 
       {section === "basics" ? <BasicsFields listing={listing} /> : null}
-      {section === "location" ? <LocationFields listing={listing} /> : null}
+      {section === "location" ? <LocationFields listing={listing} areas={areas} /> : null}
       {section === "pricing" ? <PricingFields listing={listing} /> : null}
       {section === "specifications" ? <SpecificationFields listing={listing} /> : null}
       {section === "media" ? <MediaFields listing={listing} /> : null}
@@ -173,18 +170,25 @@ function BasicsFields({ listing }: { listing: ListingDraft }) {
   );
 }
 
-function LocationFields({ listing }: { listing: ListingDraft }) {
+function LocationFields({
+  listing,
+  areas,
+}: {
+  listing: ListingDraft;
+  areas: readonly AreaOption[];
+}) {
   return (
     <>
       <Field id="locality" label="Locality">
-        <Select id="locality" name="locality" defaultValue={listing.locality ?? ""}>
-          <option value="">Choose a locality</option>
-          {LOCALITIES.map((l) => (
-            <option key={l} value={l}>
-              {l}
-            </option>
-          ))}
-        </Select>
+        {/* Searchable over the location records; the draft stores the record
+            id, never a typed name (CR05). */}
+        <AreaPicker
+          id="locality"
+          name="locality"
+          areas={areas}
+          defaultValue={listing.localityId ?? ""}
+          allLabel="Choose a locality"
+        />
       </Field>
 
       <Field

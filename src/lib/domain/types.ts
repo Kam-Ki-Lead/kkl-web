@@ -81,6 +81,13 @@ export type PropertySummary = {
   readonly id: string;
   readonly slug: string;
   readonly title: string;
+  /**
+   * The property's area as a location-record id (CR05). Filtering matches on
+   * this, never on a display name; selecting a locality includes its
+   * sub-localities.
+   */
+  readonly locationId: string;
+  /** Display path of names, city-first — derived from `locationId`'s record. */
   readonly locationPath: readonly string[];
   readonly configurations: readonly string[];
   /** Carpet-area range as the builder stated it, e.g. "985–1,420 sq ft". */
@@ -479,6 +486,81 @@ export type Subscription = {
   readonly priceInr: number | null;
 };
 
+// ------------------------------------------------------ lead requests (CR03) --
+
+/**
+ * CR03 — a Seller's request for leads ("Request Leads").
+ *
+ * A request is not a purchase: it describes the leads a broker needs when no
+ * suitable lead is currently listed, and it carries no entitlement to contact
+ * details. Whether an accepted request converts into a quote or a purchase
+ * order is change-confirmation decision 3 — open.
+ *
+ * The field set and the status names below are the confirmation document's
+ * *proposal* (its decision 2), not settled rules; the screens built over them
+ * say so.
+ */
+export type LeadRequestStatus =
+  | "submitted"
+  | "under_review"
+  | "needs_clarification"
+  | "fulfilled"
+  | "closed";
+
+/** One movement of a request through its statuses. */
+export type LeadRequestStatusEntry = {
+  readonly status: LeadRequestStatus;
+  readonly at: string;
+  /** Why it moved, when the staff member recorded one. Null when none was given. */
+  readonly note: string | null;
+};
+
+/**
+ * A reply the requester may read.
+ *
+ * There is deliberately no `internal` field and no internal-note type reachable
+ * from this one. Staff internal notes exist only on the Admin view
+ * (`AdminLeadRequest.internalNotes`), the same containment the support console
+ * uses: a filter can be forgotten on the next screen, a missing field cannot.
+ */
+export type LeadRequestResponse = {
+  readonly id: string;
+  readonly authorLabel: string;
+  readonly body: string;
+  readonly at: string;
+};
+
+export type LeadRequest = {
+  readonly id: string;
+  /** The human reference the Seller quotes, e.g. "LR-1042". */
+  readonly reference: string;
+  readonly status: LeadRequestStatus;
+  /**
+   * Areas as location-record ids (CR05). An array because the confirmation
+   * document asks whether more than one area is supported; the form currently
+   * collects one.
+   */
+  readonly areaIds: readonly string[];
+  /** Composed display labels for `areaIds`, derived from the records. */
+  readonly areaLabels: readonly string[];
+  readonly propertyType: string | null;
+  readonly configurations: readonly string[];
+  readonly budgetBand: string | null;
+  /** Buy/rent interest where applicable — null when the requester did not say. */
+  readonly intent: "buy" | "rent" | null;
+  /** How many leads are needed. Null when not stated — whether it is required is unconfirmed. */
+  readonly quantity: number | null;
+  /** When the leads are needed, free text ("Within a month"). Null when not stated. */
+  readonly timing: string | null;
+  /** Additional requirements, free text. Never a promise of availability or delivery time. */
+  readonly notes: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  /** Public replies only. Internal notes are not part of this type. */
+  readonly responses: readonly LeadRequestResponse[];
+  readonly history: readonly LeadRequestStatusEntry[];
+};
+
 // ------------------------------------------------------------- pagination --
 
 export type Page<T> = {
@@ -576,7 +658,11 @@ export type ListingDraft = {
   readonly propertyType: string | null;
   readonly possessionTarget: string | null;
   readonly description: string;
-  readonly locality: string | null;
+  /**
+   * The listing's area as a location-record id (CR05), null until chosen.
+   * Display names are derived from the record; the draft never stores one.
+   */
+  readonly localityId: string | null;
   readonly addressLine: string;
   readonly configurations: readonly string[];
   readonly priceMinInr: number | null;

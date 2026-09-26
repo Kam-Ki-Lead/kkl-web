@@ -170,7 +170,10 @@ await editor.fill('#possessionTarget', 'Mar 2030');
 await click(editor, 'Save draft');
 
 await editor.goto(`${BASE}/builder/properties/${newId}/location`, { waitUntil: 'networkidle' });
-await editor.selectOption('#locality', 'Rajarhat');
+// The locality field is the searchable area picker (CR05): type, then Enter
+// chooses the highlighted match and stores the record id.
+await editor.fill('#locality', 'Rajarhat');
+await editor.press('#locality', 'Enter');
 await editor.fill('#addressLine', 'Plot 11, Street 2');
 await click(editor, 'Save draft');
 

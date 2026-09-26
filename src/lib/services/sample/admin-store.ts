@@ -596,6 +596,24 @@ export function listAudit(category?: AuditCategory): readonly AuditEntry[] {
   return category ? all.filter((e) => e.category === category) : all;
 }
 
+/**
+ * Record an action whose record lives outside this module — today the
+ * lead-request queue (CR03), stored in lead-request-store but handled by
+ * staff whose actions belong in this same append-only log.
+ */
+export function recordAudit(input: {
+  actor: StaffRef;
+  category: AuditCategory;
+  action: string;
+  subject: string;
+  subjectLabel: string;
+  reason: string;
+  reasonCategory?: string | null;
+  changes: readonly FieldChange[];
+}): string {
+  return record(input);
+}
+
 export function getAudit(id: string): AuditEntry | null {
   return state().audit.find((e) => e.id === id) ?? null;
 }

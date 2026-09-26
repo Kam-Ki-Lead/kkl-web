@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { countMatchingProperties } from "@/app/actions/search-count";
-import type { LocalitySummary } from "@/lib/services/contracts";
+import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
 
 /**
  * The homepage search card (P-01): the primary action on the page.
@@ -27,16 +27,17 @@ const CONFIGURATIONS = ["Any BHK", "1 BHK", "2 BHK", "3 BHK", "4 BHK"];
 const TYPES = ["Apartment", "Villa", "Plot", "Commercial"];
 
 export function HomeSearchCard({
-  localities,
+  areas,
   initialCount,
 }: {
-  localities: readonly LocalitySummary[];
+  /** Every area in the launch city, from the location service (CR05). */
+  areas: readonly AreaOption[];
   initialCount: number;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
 
-  const [locality, setLocality] = useState(localities[0]?.id ?? "");
+  const [locality, setLocality] = useState("");
   const [propertyType, setPropertyType] = useState(TYPES[0] as string);
   const [configuration, setConfiguration] = useState("");
   const [budgetLabel, setBudgetLabel] = useState(BUDGETS[0]?.label as string);
@@ -94,15 +95,21 @@ export function HomeSearchCard({
           property type behind a disclosure — four selects side by side does not
           survive a phone, and the approved mobile layout moves it out of the way. */}
       <div className="grid grid-cols-4 gap-[12px] max-[900px]:grid-cols-2">
-        <SearchField
-          id="home-locality"
-          name="locality"
-          label="Location"
-          value={locality}
-          onChange={setLocality}
-          options={localities.map((l) => ({ value: l.id, label: `${l.name}, Kolkata` }))}
-          className="max-[900px]:col-span-2"
-        />
+        <div className="flex flex-col gap-[6px] max-[900px]:col-span-2">
+          <label htmlFor="home-locality" className="t-label text-body">
+            Location
+          </label>
+          {/* Searchable over every area in the launch city (CR05); submits the
+              record id. Empty means all of Kolkata. */}
+          <AreaPicker
+            id="home-locality"
+            name="locality"
+            areas={areas}
+            value={locality}
+            allLabel="All of Kolkata"
+            onSelect={setLocality}
+          />
+        </div>
         <SearchField
           id="home-type"
           name="type"

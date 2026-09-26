@@ -8,7 +8,7 @@ import { PublishForm } from "@/components/builder/publish-form";
 import { Card } from "@/components/ui/card";
 import { PropertyImage } from "@/components/property/property-image";
 import { DECISIONS } from "@/lib/config/business-rules";
-import { formatPriceRange } from "@/lib/format";
+import { formatAreaPath, formatPriceRange } from "@/lib/format";
 import { getServices } from "@/lib/services";
 import type { ListingSectionId } from "@/lib/domain/types";
 
@@ -40,10 +40,12 @@ export default async function ListingSectionPage({
   const section = raw as ListingSectionId;
 
   const services = getServices().builder;
-  const [listing, sections, account] = await Promise.all([
+  const [listing, sections, account, areas] = await Promise.all([
     services.listings.get(id),
     services.listings.sections(id),
     services.account.get(),
+    // The location section's picker options — the launch city's area records.
+    getServices().locations.areaOptions({ cityId: "in-wb-kol" }),
   ]);
   if (!listing) notFound();
 
@@ -77,6 +79,7 @@ export default async function ListingSectionPage({
           <SectionForm
             listing={listing}
             section={section}
+            areas={areas}
             previousHref={previous}
             nextHref={next ?? `/builder/properties/${id}/preview`}
             nextLabel={`Next: ${sections[index + 1]?.label ?? "Preview"}`}
@@ -100,6 +103,10 @@ async function PreviewSection({
 }) {
   const blockers = await getServices().builder.listings.publishBlockers(listingId);
   const price = formatPriceRange({ minInr: listing.priceMinInr, maxInr: listing.priceMaxInr });
+  // The location label comes from the record (CR05) — no name-prefix logic.
+  const locationLabel = listing.localityId
+    ? formatAreaPath(await getServices().locations.displayPath(listing.localityId))
+    : "Location not entered";
 
   const accountBlocked =
     account.accountStatus === "suspended"
@@ -163,9 +170,7 @@ async function PreviewSection({
             </p>
             <h3 className="t-subsection mt-[2px] text-ink">{listing.title || "Untitled project"}</h3>
             <p className="mt-[1px] text-[15px] text-body">
-              {listing.locality
-                ? `${listing.locality}${listing.locality.startsWith("Action Area") ? ", New Town" : ", Kolkata"}`
-                : "Location not entered"}
+              {locationLabel}
             </p>
             <p className="mt-[6px] text-[15px] text-body">
               {listing.configurations.length > 0

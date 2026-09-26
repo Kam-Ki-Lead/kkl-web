@@ -1,6 +1,7 @@
 import type { BuyerEnquiry, PropertyDetail, PropertySummary } from "@/lib/domain/types";
 import type { LocalitySummary } from "@/lib/services/contracts";
 import { reviewCoverFor, reviewGalleryFor } from "./review-imagery";
+import { displayPath, getLocation, isWithin, FEATURED_AREA_IDS } from "./locations";
 
 /**
  * Deterministic synthetic fixtures.
@@ -27,11 +28,15 @@ const L = 100_000;
 const CR = 10_000_000;
 
 function property(
-  input: Omit<PropertySummary, "coverImage"> & Partial<Pick<PropertySummary, "coverImage">>,
+  input: Omit<PropertySummary, "coverImage" | "locationPath"> &
+    Partial<Pick<PropertySummary, "coverImage">>,
 ): PropertySummary {
+  // The display path is derived from the location record (CR05) — a fixture
+  // states *which area* and the record says how the path reads.
+  const locationPath = displayPath(input.locationId);
   // Null unless review imagery is switched on, so the designed no-image
   // fallback is the default everywhere.
-  return { coverImage: reviewCoverFor(input.id, input.title), ...input };
+  return { coverImage: reviewCoverFor(input.id, input.title), locationPath, ...input };
 }
 
 export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
@@ -39,7 +44,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-ivy-court",
     slug: "ivy-court-action-area-i",
     title: "Ivy Court, Action Area I",
-    locationPath: ["Kolkata", "New Town", "Action Area I"],
+    locationId: "action-area-i",
     configurations: ["3"],
     areaSummary: "1,320–1,690 sq ft",
     price: { minInr: 1.05 * CR, maxInr: 1.6 * CR },
@@ -53,7 +58,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-greenview",
     slug: "greenview-residency",
     title: "Greenview Residency",
-    locationPath: ["Kolkata", "New Town", "Action Area II"],
+    locationId: "action-area-ii",
     configurations: ["2", "3"],
     areaSummary: "985–1,420 sq ft",
     price: { minInr: 78 * L, maxInr: 1.4 * CR },
@@ -67,7 +72,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-lakeshore",
     slug: "lakeshore-heights",
     title: "Lakeshore Heights",
-    locationPath: ["Kolkata", "New Town", "Action Area I"],
+    locationId: "action-area-i",
     configurations: ["3", "4"],
     areaSummary: "1,540–2,180 sq ft",
     price: { minInr: 1.1 * CR, maxInr: 2.2 * CR },
@@ -81,7 +86,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-sundew",
     slug: "sundew-enclave",
     title: "Sundew Enclave",
-    locationPath: ["Kolkata", "Rajarhat"],
+    locationId: "rajarhat",
     configurations: ["1", "2", "3"],
     areaSummary: "610–1,180 sq ft",
     price: { minInr: 52 * L, maxInr: 85 * L },
@@ -95,7 +100,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-orchid-grove",
     slug: "orchid-grove",
     title: "Orchid Grove",
-    locationPath: ["Kolkata", "New Town", "Action Area III"],
+    locationId: "action-area-iii",
     configurations: ["2", "3"],
     areaSummary: "745–1,310 sq ft",
     price: { minInr: 64 * L, maxInr: 1.05 * CR },
@@ -109,7 +114,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-riverside-commons",
     slug: "riverside-commons",
     title: "Riverside Commons",
-    locationPath: ["Kolkata", "Salt Lake"],
+    locationId: "salt-lake",
     configurations: ["3"],
     areaSummary: "1,290–1,880 sq ft",
     price: { minInr: 95 * L, maxInr: 1.7 * CR },
@@ -123,7 +128,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-palm-meadows",
     slug: "palm-meadows",
     title: "Palm Meadows",
-    locationPath: ["Kolkata", "New Town", "Action Area III"],
+    locationId: "action-area-iii",
     configurations: ["2", "3"],
     areaSummary: "910–1,365 sq ft",
     price: { minInr: 95 * L, maxInr: 1.6 * CR },
@@ -137,7 +142,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-the-pinnacle",
     slug: "the-pinnacle",
     title: "The Pinnacle",
-    locationPath: ["Kolkata", "New Town", "Action Area II"],
+    locationId: "action-area-ii",
     configurations: ["3", "4"],
     areaSummary: "1,610–2,240 sq ft",
     price: { minInr: 1.3 * CR, maxInr: 2.4 * CR },
@@ -151,7 +156,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
     id: "p-willow-court",
     slug: "willow-court",
     title: "Willow Court",
-    locationPath: ["Kolkata", "New Town", "Action Area II"],
+    locationId: "action-area-ii",
     configurations: ["2"],
     areaSummary: "720–960 sq ft",
     price: { minInr: 65 * L, maxInr: 90 * L },
@@ -228,32 +233,30 @@ function formatConfigList(configs: readonly string[]): string {
 }
 
 /**
- * Locality counts are derived from the fixtures above, never written by hand.
+ * The featured areas on the approved homepage grid (P-01), with counts derived
+ * from the fixtures above, never written by hand.
  *
  * The baseline prototype showed illustrative totals (244 listings, 128 in New
  * Town) against a much smaller sample set. Those numbers cannot be carried over:
  * a homepage claiming 128 listings that searches to six is incoherent, and
  * cross-screen consistency is a requirement. The layout is identical; only the
  * magnitudes follow the data.
+ *
+ * Since CR05 the areas come from the central location records — this is the
+ * featured subset (FEATURED_AREA_IDS), not a list of its own. The search
+ * pickers offer every area in the launch city through the location service.
  */
-const LOCALITY_ORDER: ReadonlyArray<{ id: string; name: string }> = [
-  { id: "new-town", name: "New Town" },
-  { id: "rajarhat", name: "Rajarhat" },
-  { id: "salt-lake", name: "Salt Lake" },
-  { id: "action-area-i", name: "Action Area I" },
-  { id: "action-area-ii", name: "Action Area II" },
-  { id: "action-area-iii", name: "Action Area III" },
-];
-
-export const SAMPLE_LOCALITIES: readonly LocalitySummary[] = LOCALITY_ORDER.map(
-  ({ id, name }) => ({
+export const SAMPLE_LOCALITIES: readonly LocalitySummary[] = FEATURED_AREA_IDS.map((id) => {
+  const record = getLocation(id);
+  if (!record) throw new Error(`Featured area ${id} is not a location record.`);
+  return {
     id,
-    name,
-    listingCount: SAMPLE_PROPERTIES.filter((p) =>
-      p.locationPath.some((segment) => segment === name),
-    ).length,
-  }),
-);
+    name: record.name,
+    // A locality counts its sub-localities, as the approved grid does: New
+    // Town's figure includes the Action Areas.
+    listingCount: SAMPLE_PROPERTIES.filter((p) => isWithin(p.locationId, id)).length,
+  };
+});
 
 export const SAMPLE_TOTAL_LISTINGS = SAMPLE_PROPERTIES.length;
 

@@ -51,9 +51,11 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const services = getServices();
-  const localities = (await services.properties.getHomepage()).localities;
+  // The picker's options are the launch city's area records (CR05), fetched
+  // through the location service — not a list this page maintains.
+  const areas = await services.locations.areaOptions({ cityId: "in-wb-kol" });
 
-  const localityName = localities.find((l) => l.id === one(params.locality))?.name;
+  const localityName = areas.find((l) => l.id === one(params.locality))?.label;
 
   return (
     <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[24px] max-[1060px]:px-[18px]">
@@ -67,7 +69,7 @@ export default async function SearchPage({
 
       <div className="mt-[18px]">
         <Suspense fallback={<SkeletonBlock className="h-[180px]" />}>
-          <SearchFilters localities={localities} />
+          <SearchFilters areas={areas} />
         </Suspense>
       </div>
 

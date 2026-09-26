@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { saveProfile, type ProfileFormState } from "@/app/actions/profile";
 import type { BuyerProfile } from "@/lib/domain/types";
-import type { LocalitySummary } from "@/lib/services/contracts";
+import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
 import { Field, TextInput } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -17,11 +17,12 @@ import { Chip } from "@/components/ui/chip";
  */
 export function ProfileForm({
   profile,
-  localities,
+  areas,
   isSample,
 }: {
   profile: BuyerProfile;
-  localities: readonly LocalitySummary[];
+  /** The launch city's area records, from the location service (CR05). */
+  areas: readonly AreaOption[];
   isSample: boolean;
 }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveProfile, {
@@ -91,19 +92,15 @@ export function ProfileForm({
       </Field>
 
       <Field id="preferredLocalityId" label="Preferred locality">
-        <select
+        {/* Searchable over the location records; the saved value is the
+            record id, as it already was (CR05). */}
+        <AreaPicker
           id="preferredLocalityId"
           name="preferredLocalityId"
+          areas={areas}
           defaultValue={valueFor("preferredLocalityId", current.preferredLocalityId ?? "")}
-          className="min-h-[44px] w-full cursor-pointer rounded-[8px] border border-line bg-white px-[13px] text-[15px] text-ink"
-        >
-          <option value="">No preference</option>
-          {localities.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name}, Kolkata
-            </option>
-          ))}
-        </select>
+          allLabel="No preference"
+        />
       </Field>
 
       <fieldset className="flex flex-col gap-[10px]">

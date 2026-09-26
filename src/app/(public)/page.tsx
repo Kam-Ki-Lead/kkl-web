@@ -16,14 +16,19 @@ import { StateMessage } from "@/components/ui/states";
  */
 export default async function HomePage() {
   const services = getServices();
-  const home = await services.properties.getHomepage();
+  const [home, areas] = await Promise.all([
+    services.properties.getHomepage(),
+    // The search card's picker offers every area in the launch city (CR05);
+    // the browse-by-locality grid below keeps the approved featured set.
+    services.locations.areaOptions({ cityId: "in-wb-kol" }),
+  ]);
 
   return (
     <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[20px] max-[1060px]:px-[18px]">
       {home.featuredHero ? <FeaturedHero property={home.featuredHero} /> : null}
 
       <HomeSearchCard
-        localities={home.localities}
+        areas={areas}
         initialCount={home.totalPublishedListings}
       />
 

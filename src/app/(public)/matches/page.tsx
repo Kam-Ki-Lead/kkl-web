@@ -24,12 +24,16 @@ export default async function MatchesPage({
   const params = await searchParams;
   const requirement = parseRequirement(params);
   const services = getServices();
-  const [matches, localities] = await Promise.all([
+  const [matches, localityRecords] = await Promise.all([
     services.properties.match(requirement),
-    services.properties.getHomepage().then((h) => h.localities),
+    // The name comes from the location records (CR05), so any area id —
+    // not only the featured six — resolves.
+    requirement.locationId
+      ? services.locations.getMany([requirement.locationId])
+      : Promise.resolve([]),
   ]);
 
-  const localityName = localities.find((l) => l.id === requirement.locationId)?.name;
+  const localityName = localityRecords[0]?.name;
   const summary = [
     localityName,
     requirement.configurations.length ? `${requirement.configurations.join(", ")} BHK` : null,

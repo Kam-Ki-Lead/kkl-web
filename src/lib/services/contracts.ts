@@ -3,6 +3,7 @@ import type {
   AdminAccount,
   AdminActionResult,
   AdminLead,
+  AdminLeadRequest,
   AdminLedgerRow,
   AdminOrder,
   AdminSubscription,
@@ -50,6 +51,9 @@ import type {
   KycSubmission,
   KycTimelineEntry,
   LedgerEntry,
+  LeadRequest,
+  LeadRequestStatus,
+  LocationNode,
   MarketplaceLead,
   MarketplaceLeadDetail,
   PurchasedLead,
@@ -248,7 +252,11 @@ export interface SellerAccountService {
 export type LeadSort = "newest" | "price" | "score";
 
 export type LeadMarketQuery = {
-  readonly area?: string;
+  /**
+   * A location-record id (CR05), never a name. Selecting a locality includes
+   * its sub-localities — "New Town" covers the Action Areas.
+   */
+  readonly areaId?: string;
   readonly budgetBand?: string;
   readonly configuration?: string;
   readonly minScore?: number;
@@ -269,7 +277,15 @@ export type LeadMarketPage = {
    */
   readonly withheld: { readonly count: number; readonly reason: string } | null;
   readonly filterOptions: {
-    readonly areas: readonly string[];
+    /**
+     * Areas with at least one listed lead, as location-record id + name + a
+     * composed picker label ("Action Area I, New Town") (CR05).
+     */
+    readonly areas: ReadonlyArray<{
+      readonly id: string;
+      readonly name: string;
+      readonly label: string;
+    }>;
     readonly budgetBands: readonly string[];
     readonly configurations: readonly string[];
   };
@@ -450,13 +466,94 @@ export interface BuilderEnquiryService {
   >;
 }
 
+/**
+ * Centrally maintained location records (CR05).
+ *
+ * The hierarchy is India → State → City → Area, launching with India → West
+ * Bengal → Kolkata → Area. Components never carry their own city or locality
+ * lists: every picker is fed through this service, so adding a record is a
+ * data change, not a code change across screens. Identifiers are stable —
+ * a saved filter or URL refers to a record id, never a display name.
+ *
+ * The same model serves property search, listing forms, marketplace filters
+ * and lead requests.
+ */
+export interface LocationService {
+  /** The launch chain, root-first: country, state, city. */
+  launchChain(): Promise<readonly LocationNode[]>;
+  /** Direct children of a node — states of a country, cities of a state, areas of a city. */
+  children(parentId: string): Promise<readonly LocationNode[]>;
+  /**
+   * Picker options for a city's areas: record id plus a composed display
+   * label ("Action Area I, New Town"), optionally narrowed by a name query.
+   *
+   * The narrowing runs server-side. A small launch set may ship whole and be
+   * filtered by the picker; a large record set must be narrowed here — the
+   * browser is never the store of record.
+   */
+  areaOptions(input: {
+    cityId: string;
+    query?: string;
+  }): Promise<ReadonlyArray<{ readonly id: string; readonly label: string }>>;
+  /** The display path of names, city-first: ["Kolkata", "New Town", "Action Area I"]. */
+  displayPath(locationId: string): Promise<readonly string[]>;
+  /** Resolves ids to records. Unknown ids are omitted, never invented. */
+  getMany(ids: readonly string[]): Promise<readonly LocationNode[]>;
+}
+
+/**
+ * CR03 — "Request Leads": a Seller describes the leads they need.
+ *
+ * Separate from `LeadMarketService` on purpose: a request is not a purchase of
+ * an available lead, not a paid order, and not an entitlement to contact
+ * details. Whether an accepted request becomes a quote or an order is
+ * change-confirmation decision 3 — open.
+ *
+ * The requester is never an input. The service associates the authenticated
+ * account from the session server-side; a form that could name the account
+ * would let one Seller file requests as another. In the sample build the
+ * identity is the single sample Seller, and the screens say so.
+ *
+ * The field set and status names are the confirmation document's proposal
+ * (decision 2), labelled as proposed on the screens.
+ */
+export interface LeadRequestService {
+  /**
+   * Files a request. Idempotent on `idempotencyKey`: a double submit or a
+   * retried POST returns the first request's reference and records nothing
+   * new. Validation failures throw a `ValidationError` naming the fields.
+   */
+  create(input: {
+    idempotencyKey: string;
+    /** At least one location-record id (CR05). Unknown ids are rejected. */
+    areaIds: readonly string[];
+    propertyType: string | null;
+    configurations: readonly string[];
+    budgetBand: string | null;
+    intent: "buy" | "rent" | null;
+    quantity: number | null;
+    timing: string | null;
+    notes: string | null;
+  }): Promise<{ readonly requestId: string; readonly reference: string; readonly duplicate: boolean }>;
+  /** The requester's own requests, newest first. */
+  listMine(): Promise<readonly LeadRequest[]>;
+  /**
+   * One of the requester's own requests. Throws `not_found` when the id does
+   * not exist **or belongs to somebody else** — the two are indistinguishable
+   * to the caller, so ownership cannot be probed by guessing ids.
+   */
+  getMine(id: string): Promise<LeadRequest>;
+}
+
 export type Services = {
   readonly properties: PropertyService;
   readonly enquiries: EnquiryService;
   readonly profile: ProfileService;
   readonly notifications: NotificationService;
+  readonly locations: LocationService;
   readonly sellerAccount: SellerAccountService;
   readonly leadMarket: LeadMarketService;
+  readonly leadRequests: LeadRequestService;
   readonly credits: CreditService;
   readonly support: SupportService;
   /**
@@ -565,6 +662,36 @@ export interface AdminService {
   listLeads(state?: AdminLead["state"]): Promise<readonly AdminLead[]>;
   getLead(id: string): Promise<AdminLead | null>;
   priceBands(): Promise<readonly { band: string; priceInr: number; saleInr: number }[]>;
+
+  /**
+   * CR03 — the lead-requests queue. Staff see the same record the Seller sees,
+   * plus the requester and the internal notes.
+   *
+   * `respondToLeadRequest` keeps the support console's rule: a public reply
+   * lands on the requester's record; an internal note is stored for staff only
+   * and no requester-facing type can carry one.
+   *
+   * `setLeadRequestStatus` appends to the status history rather than
+   * overwriting, so the record shows how it arrived where it is. The status
+   * names themselves are the confirmation document's proposal (decision 2).
+   */
+  listLeadRequests(filter?: {
+    status?: LeadRequestStatus;
+    areaId?: string;
+  }): Promise<readonly AdminLeadRequest[]>;
+  getLeadRequest(id: string): Promise<AdminLeadRequest | null>;
+  respondToLeadRequest(input: {
+    actor: StaffRef;
+    requestId: string;
+    body: string;
+    internal: boolean;
+  }): Promise<AdminActionResult>;
+  setLeadRequestStatus(input: {
+    actor: StaffRef;
+    requestId: string;
+    status: LeadRequestStatus;
+    note?: string;
+  }): Promise<AdminActionResult>;
 
   // A-16 to A-21
   listOrders(filter?: "delivered" | "failed"): Promise<readonly AdminOrder[]>;

@@ -10,7 +10,7 @@ import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
 import type { LeadSort } from "@/lib/services/contracts";
 
-export const metadata: Metadata = { title: "Lead marketplace" };
+export const metadata: Metadata = { title: "Buy Leads" };
 
 const SORTS: readonly { value: LeadSort; label: string }[] = [
   { value: "newest", label: "Newest" },
@@ -43,7 +43,7 @@ export default async function LeadMarketplacePage({
   const onSaleOnly = one(params.tab) === "sale";
 
   const query = {
-    area: one(params.area),
+    areaId: one(params.area),
     budgetBand: one(params.budget),
     configuration: one(params.config),
     minScore: one(params.score) ? Number(one(params.score)) : undefined,
@@ -65,7 +65,7 @@ export default async function LeadMarketplacePage({
   };
 
   return (
-    <SellerShell title="Lead marketplace" subtitle="Qualified buyer leads in your areas">
+    <SellerShell title="Buy Leads" subtitle="Qualified buyer leads in your areas">
       <div className="flex flex-col gap-[16px]">
         <div role="tablist" aria-label="Lead set" className="flex gap-[22px] border-b border-line">
           <TabLink href={tabHref("all")} active={!onSaleOnly}>
@@ -91,6 +91,13 @@ export default async function LeadMarketplacePage({
           ) : null}
           <p className="t-caption mt-[6px]">
             <PendingRule>{DECISIONS["D-03"].pendingCopy}</PendingRule>
+          </p>
+          <p className="t-caption mt-[6px] text-muted">
+            Can&rsquo;t find what you need?{" "}
+            <Link href="/seller/requests/new" className="font-semibold text-brand">
+              Request leads
+            </Link>{" "}
+            and the team picks it up — a request is not a purchase and moves no credits.
           </p>
         </div>
 

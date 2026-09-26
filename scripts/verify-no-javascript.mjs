@@ -167,11 +167,11 @@ ok('16. S-07 filters expose a submit control without JavaScript',
    applyVisible !== null,
    'the Apply button is server-rendered and only hidden once the change handler is live');
 
-await market.selectOption('#lead-area', 'Rajarhat');
+await market.selectOption('#lead-area', 'rajarhat');
 await submit(market, 'Apply filters');
 ok('17. S-07 filtering works without JavaScript',
-   market.url().includes('area=Rajarhat'),
-   `filter state went to the URL: ${market.url().replace(BASE, '')}`);
+   market.url().includes('area=rajarhat'),
+   `filter state went to the URL as a location-record id: ${market.url().replace(BASE, '')}`);
 
 // ----------------------------------------------------------- S-21 billing
 const billing = await ctx.newPage();
@@ -268,7 +268,9 @@ ok('27. Saving an editor section works without JavaScript',
    'the saved state renders from a full page post');
 
 await bnew.goto(`${BASE}/builder/properties/${newId}/location`, { waitUntil: 'load' });
-await bnew.selectOption('#locality', 'Rajarhat');
+// Options carry the location-record id as their value (CR05); the label is
+// the composed path ("Rajarhat, Kolkata"), so select by id.
+await bnew.selectOption('#locality', 'rajarhat');
 await bnew.fill('#addressLine', 'Plot 3, Street 9');
 await submit(bnew, 'Next: Pricing');
 ok('28. The editor advances between sections without JavaScript',

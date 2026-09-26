@@ -1,5 +1,6 @@
 import type { PropertySummary } from "@/lib/domain/types";
 import { SAMPLE_PROPERTIES } from "./fixtures";
+import { displayPath } from "./locations";
 import * as builderStore from "./builder-store";
 import * as enquiryStore from "./enquiry-store";
 
@@ -66,14 +67,18 @@ export function livePortalProperties(): readonly PropertySummary[] {
 }
 
 function toPortalSummary(listing: ReturnType<typeof builderStore.portalListings>[number]): PropertySummary {
-  const locality = listing.locality ?? "New Town";
-  const inNewTown = locality.startsWith("Action Area");
+  // The listing stores a location-record id (CR05); the portal summary carries
+  // the id for filtering and the derived display path for rendering. A listing
+  // whose locality was never chosen cannot be published, so the fallback id is
+  // unreachable for a live listing — but the summary still has to typecheck.
+  const locationId = listing.localityId ?? "new-town";
 
   return {
     id: listing.id,
     slug: slugify(listing.title || `listing-${listing.id}`),
     title: listing.title || "Untitled project",
-    locationPath: inNewTown ? ["Kolkata", "New Town", locality] : ["Kolkata", locality],
+    locationId,
+    locationPath: displayPath(locationId),
     configurations: listing.configurations,
     areaSummary:
       listing.areaMin && listing.areaMax ? `${listing.areaMin}–${listing.areaMax}` : null,

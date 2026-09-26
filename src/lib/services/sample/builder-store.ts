@@ -21,7 +21,8 @@ import type {
 } from "@/lib/services/contracts";
 import { processState } from "./process-state";
 import { reviewCoverFor } from "./review-imagery";
-import { formatPriceRange } from "@/lib/format";
+import { formatAreaPath, formatPriceRange } from "@/lib/format";
+import { displayPath } from "./locations";
 
 /**
  * In-process Builder state for a review session.
@@ -97,7 +98,7 @@ function emptyDraft(id: string): ListingDraft {
     propertyType: null,
     possessionTarget: null,
     description: "",
-    locality: null,
+    localityId: null,
     addressLine: "",
     configurations: [],
     priceMinInr: null,
@@ -138,7 +139,7 @@ function seedListings(): ListingDraft[] {
       possessionTarget: "Dec 2028",
       description:
         "A landscaped development within reach of the Biswa Bangla Convention Centre, with a sample flat open on site.",
-      locality: "Action Area II",
+      localityId: "action-area-ii",
       addressLine: "Plot 22, Street 8, Action Area II",
       configurations: ["2", "3"],
       priceMinInr: 78 * 100_000,
@@ -161,7 +162,7 @@ function seedListings(): ListingDraft[] {
       propertyType: "Apartment",
       possessionTarget: null,
       description: "Ready-to-move apartments overlooking the central lake.",
-      locality: "Action Area I",
+      localityId: "action-area-i",
       addressLine: "Plot 4, Street 21, Action Area I",
       configurations: ["3", "4"],
       priceMinInr: 1.1 * 10_000_000,
@@ -184,7 +185,7 @@ function seedListings(): ListingDraft[] {
       propertyType: "Apartment",
       possessionTarget: "Jun 2029",
       description: "Two- and three-bedroom homes beside the Action Area III park.",
-      locality: "Action Area III",
+      localityId: "action-area-iii",
       addressLine: "Plot 9, Street 3, Action Area III",
       configurations: ["2", "3"],
       priceMinInr: 64 * 100_000,
@@ -207,7 +208,7 @@ function seedListings(): ListingDraft[] {
       propertyType: "Apartment",
       possessionTarget: "Mar 2029",
       description: "",
-      locality: "Rajarhat",
+      localityId: "rajarhat",
       addressLine: "",
       configurations: ["1", "2", "3"],
       priceMinInr: null,
@@ -540,7 +541,7 @@ function sectionComplete(listing: ListingDraft, section: ListingSectionId): bool
     case "basics":
       return listing.title.trim().length > 0 && listing.propertyType !== null;
     case "location":
-      return listing.locality !== null && listing.addressLine.trim().length > 0;
+      return listing.localityId !== null && listing.addressLine.trim().length > 0;
     case "pricing":
       return listing.configurations.length > 0 && listing.priceMinInr !== null;
     case "specifications":
@@ -580,7 +581,7 @@ export function publishBlockers(listing: ListingDraft): readonly PublishBlocker[
   if (listing.addressLine.trim().length === 0) {
     blockers.push({ section: "location", sectionNumber: 2, message: "Street address is missing" });
   }
-  if (listing.locality === null) {
+  if (listing.localityId === null) {
     blockers.push({ section: "location", sectionNumber: 2, message: "Locality is not chosen" });
   }
   if (listing.configurations.length === 0) {
@@ -628,8 +629,8 @@ export function listSummaries(filter?: { status?: ListingStatus }): readonly Lis
         id: listing.id,
         title,
         status: listing.status,
-        locationLabel: listing.locality
-          ? `${listing.locality}, ${listing.locality.startsWith("Action Area") ? "New Town" : "Kolkata"}`
+        locationLabel: listing.localityId
+          ? formatAreaPath(displayPath(listing.localityId))
           : "Location not entered",
         configurationLabel:
           listing.configurations.length > 0
@@ -712,7 +713,7 @@ export function saveSection(input: {
     propertyType: nullable("propertyType", listing.propertyType),
     possessionTarget: nullable("possessionTarget", listing.possessionTarget),
     description: str("description", listing.description),
-    locality: nullable("locality", listing.locality),
+    localityId: nullable("locality", listing.localityId),
     addressLine: str("addressLine", listing.addressLine),
     configurations: Array.isArray(v.configurations)
       ? (v.configurations as readonly string[])

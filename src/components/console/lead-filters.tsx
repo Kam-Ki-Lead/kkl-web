@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useHydrated } from "@/lib/use-hydrated";
 import { Field, Select } from "@/components/ui/field";
+import { AreaPicker } from "@/components/location/area-picker";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -26,7 +27,8 @@ export function LeadFilters({
   /** Where the filter form submits — the two marketplaces have separate routes. */
   action?: string;
   options: {
-    readonly areas: readonly string[];
+    /** Areas with listings, as location-record id + picker label (CR05). */
+    readonly areas: ReadonlyArray<{ readonly id: string; readonly label: string }>;
     readonly budgetBands: readonly string[];
     readonly configurations: readonly string[];
   };
@@ -55,13 +57,16 @@ export function LeadFilters({
       ) : null}
 
       <Field id="lead-area" label="Area" labelSize="sm">
-        <Select id="lead-area" name="area" defaultValue={value("area", "All areas")} onChange={submit}>
-          {options.areas.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
-          ))}
-        </Select>
+        {/* Searchable over the location records; submits the record id. The
+            no-JS fallback is a plain select over the same options. */}
+        <AreaPicker
+          id="lead-area"
+          name="area"
+          areas={options.areas.map((a) => ({ id: a.id, label: a.label }))}
+          defaultValue={value("area", "")}
+          allLabel="All areas"
+          onSelect={submit}
+        />
       </Field>
 
       <Field id="lead-budget" label="Budget band" labelSize="sm">

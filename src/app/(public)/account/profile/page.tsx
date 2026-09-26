@@ -9,9 +9,9 @@ export const metadata: Metadata = { title: "Profile & settings" };
 /** P-15 — profile & settings. */
 export default async function ProfilePage() {
   const services = getServices();
-  const [profile, localities] = await Promise.all([
+  const [profile, areas] = await Promise.all([
     services.profile.get(),
-    services.properties.getHomepage().then((h) => h.localities),
+    services.locations.areaOptions({ cityId: "in-wb-kol" }),
   ]);
 
   return (
@@ -24,7 +24,7 @@ export default async function ProfilePage() {
       <Card className="mt-[18px] p-[22px]">
         <ProfileForm
           profile={profile}
-          localities={localities}
+          areas={areas}
           isSample={runtimeConfig.isSampleMode}
         />
       </Card>

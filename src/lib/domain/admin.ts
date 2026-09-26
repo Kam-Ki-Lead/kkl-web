@@ -1,5 +1,5 @@
 import type { AccountRole, StaffRef } from "./identity";
-import type { KycStatus } from "./types";
+import type { KycStatus, LeadRequest } from "./types";
 
 /**
  * The Admin console's record shapes (A-01 to A-31).
@@ -266,6 +266,23 @@ export type AdminTicketMessage = {
 
 export type AdminThread = AdminTicket & {
   readonly messages: readonly AdminTicketMessage[];
+};
+
+// ------------------------------------------------------ lead requests (CR03) --
+
+/**
+ * The staff view of a lead request: everything the requester sees, plus who
+ * asked and the internal handling notes.
+ *
+ * `internalNotes` exists only on this type. The requester's own `LeadRequest`
+ * has no field that could carry one — the separation is structural, not a
+ * filter (service-contract.md §2.8 states the rule for tickets; it applies
+ * here for the same reason).
+ */
+export type AdminLeadRequest = LeadRequest & {
+  /** The account that asked, as staff need to see it. */
+  readonly requesterLabel: string;
+  readonly internalNotes: readonly AdminTicketMessage[];
 };
 
 // ------------------------------------------------------------ qualification --

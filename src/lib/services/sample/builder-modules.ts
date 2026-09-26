@@ -22,6 +22,7 @@ import {
   type UsageMonth,
 } from "@/lib/services/contracts";
 import { processState } from "./process-state";
+import { areaOptionsFor, displayPath, isWithin } from "./locations";
 import * as builderStore from "./builder-store";
 
 /**
@@ -42,7 +43,11 @@ const SEED_BALANCE_SOURCE = () => builderStore.balance();
 
 // ---------------------------------------------------------------- lead pool --
 
-type SeedLead = MarketplaceLeadDetail & { readonly contact: PurchasedLead["contact"] };
+type SeedLead = MarketplaceLeadDetail & {
+  readonly contact: PurchasedLead["contact"];
+  /** The lead's area as a location-record id (CR05); the path derives from it. */
+  readonly locationId: string;
+};
 
 /** Distinct from the Seller's pool: different references, areas and prices. */
 function seedLeads(): readonly SeedLead[] {
@@ -50,7 +55,8 @@ function seedLeads(): readonly SeedLead[] {
     {
       id: "L-4530",
       requirement: "3 BHK · ₹90L – ₹1.2Cr",
-      locationPath: ["Kolkata", "New Town", "Action Area II"],
+      locationId: "action-area-ii",
+    locationPath: displayPath("action-area-ii"),
       configuration: "3 BHK",
       budgetBand: "₹80L – ₹1Cr",
       intentBand: "hot",
@@ -80,7 +86,8 @@ function seedLeads(): readonly SeedLead[] {
     {
       id: "L-4521",
       requirement: "4 BHK · ₹2Cr +",
-      locationPath: ["Kolkata", "New Town", "Action Area I"],
+      locationId: "action-area-i",
+    locationPath: displayPath("action-area-i"),
       configuration: "4 BHK",
       budgetBand: "₹1.5Cr and above",
       intentBand: "warm",
@@ -110,7 +117,8 @@ function seedLeads(): readonly SeedLead[] {
     {
       id: "L-4498",
       requirement: "2 BHK · ₹55L – ₹70L",
-      locationPath: ["Kolkata", "Rajarhat"],
+      locationId: "rajarhat",
+    locationPath: displayPath("rajarhat"),
       configuration: "2 BHK",
       budgetBand: "₹60L – ₹80L",
       intentBand: "mild",
@@ -243,8 +251,9 @@ export const builderLeadMarket: LeadMarketService = {
     let leads = available.filter((l) =>
       query.onSaleOnly === true ? l.status === "on_sale" : true,
     );
-    if (query.area && query.area !== "All areas") {
-      leads = leads.filter((l) => l.locationPath.includes(query.area as string));
+    if (query.areaId) {
+      // Id-based and hierarchical (CR05): a locality covers its sub-localities.
+      leads = leads.filter((l) => isWithin(l.locationId, query.areaId as string));
     }
     if (query.budgetBand && query.budgetBand !== "All budgets") {
       leads = leads.filter((l) => l.budgetBand === query.budgetBand);
@@ -267,7 +276,8 @@ export const builderLeadMarket: LeadMarketService = {
       total: sorted.length,
       withheld: null,
       filterOptions: {
-        areas: ["All areas", "New Town", "Rajarhat", "Action Area I", "Action Area II"],
+        // Derived from the leads actually listed, through the location records.
+        areas: areaOptionsFor(available.map((l) => l.locationId)),
         budgetBands: ["All budgets", "₹60L – ₹80L", "₹80L – ₹1Cr", "₹1.5Cr and above"],
         configurations: ["All configurations", "2 BHK", "3 BHK", "4 BHK"],
       },

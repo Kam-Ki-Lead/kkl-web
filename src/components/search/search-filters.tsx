@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import type { LocalitySummary } from "@/lib/services/contracts";
+import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
 import { FilterChip } from "@/components/ui/chip";
 
 /**
@@ -29,7 +29,7 @@ const POSSESSION: ReadonlyArray<{ key: string; label: string }> = [
   { key: "new_launch", label: "New launch" },
 ];
 
-export function SearchFilters({ localities }: { localities: readonly LocalitySummary[] }) {
+export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -53,7 +53,7 @@ export function SearchFilters({ localities }: { localities: readonly LocalitySum
   }
 
   const localityName =
-    localities.find((l) => l.id === current.locality)?.name ?? null;
+    areas.find((l) => l.id === current.locality)?.label ?? null;
 
   const appliedChips: ReadonlyArray<{ label: string; clear: Partial<typeof current> }> = [
     ...(current.type !== "Any type"
@@ -78,19 +78,16 @@ export function SearchFilters({ localities }: { localities: readonly LocalitySum
     <div>
       <div className="grid grid-cols-4 gap-[14px] max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
         <Field id="f-locality" label="Location">
-          <select
+          {/* Searchable over the launch city's area records (CR05); the URL
+              carries the record id. */}
+          <AreaPicker
             id="f-locality"
+            name="locality"
+            areas={areas}
             value={current.locality}
-            onChange={(e) => update({ locality: e.target.value })}
-            className={selectClass}
-          >
-            <option value="">All of Kolkata</option>
-            {localities.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}, Kolkata
-              </option>
-            ))}
-          </select>
+            allLabel="All of Kolkata"
+            onSelect={(id) => update({ locality: id })}
+          />
         </Field>
 
         <Field id="f-type" label="Property type">
