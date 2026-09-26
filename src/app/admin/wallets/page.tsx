@@ -67,8 +67,9 @@ export default async function AdminWalletsPage({
                     </div>
                     {wallet.frozen ? <Chip tone="warning">Frozen</Chip> : null}
                   </div>
+                  {/* The approved A-18 row sets the balance at 19px/800. */}
                   <p
-                    className={`t-title mt-[10px] ${wallet.frozen ? "text-warning" : "text-ink"}`}
+                    className={`mt-[10px] font-[family-name:var(--font-heading)] text-[19px] font-extrabold ${wallet.frozen ? "text-warning" : "text-ink"}`}
                   >
                     {formatExactInr(wallet.balanceInr)}
                   </p>

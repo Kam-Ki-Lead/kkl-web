@@ -35,7 +35,7 @@ export default async function TicketPage({
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div>
-              <h2 className="t-heading text-ink">{thread.subject}</h2>
+              <h2 className="t-subsection text-ink">{thread.subject}</h2>
               <p className="t-caption mt-[2px] text-muted">
                 <span className="t-mono">{thread.reference}</span> · {thread.topic} · opened{" "}
                 {formatDate(thread.createdAt)}

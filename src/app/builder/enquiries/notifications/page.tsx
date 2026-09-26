@@ -56,11 +56,15 @@ export default function NotificationStatesPage() {
             The count beside Enquiries in the rail. This one is live — it reflects your actual
             unread enquiries.
           </p>
-          <div className="mt-[14px] inline-flex items-center gap-[10px] rounded-[8px] bg-brand-deep px-[17px] py-[11px]">
-            <span className="text-[16px] font-medium text-rail-seller-item">Enquiries</span>
-            <span className="rounded-full bg-saffron px-[9px] py-[2px] text-[12px] font-bold text-ink">
-              3 new
-            </span>
+          {/* The approved specimen draws the active rail row: a brand-deep
+              well holding a brand row, the label at 15px/700 white. */}
+          <div className="mt-[14px] max-w-[240px] rounded-[8px] bg-brand-deep p-[10px]">
+            <div className="flex items-center justify-between gap-[10px] rounded-[8px] bg-brand px-[12px] py-[13px]">
+              <span className="text-[15px] font-bold text-white">Enquiries</span>
+              <span className="rounded-full bg-saffron px-[8px] py-[3px] text-[12px] font-bold text-ink">
+                3 new
+              </span>
+            </div>
           </div>
         </Card>
 

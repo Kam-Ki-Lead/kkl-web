@@ -68,9 +68,8 @@ export default async function BuilderVerificationPage() {
   return (
     <BuilderOnboardingShell step={1}>
       {/* The approved onboarding title steps 24/27/30px with the frame;
-          t-flow-title is the 30px desktop step, utilities carry the two
-          smaller ones. */}
-      <h1 className="t-flow-title text-ink max-[619px]:text-[24px] min-[620px]:max-[1059px]:text-[27px]">
+          t-flow-title carries all three steps. */}
+      <h1 className="t-flow-title text-ink">
         Company verification
       </h1>
 
@@ -96,7 +95,10 @@ export default async function BuilderVerificationPage() {
         <div className="mt-[20px] flex flex-col gap-[16px]">
           <Card className="p-[22px]">
             <Chip tone={panel.tone}>{panel.chip}</Chip>
-            <h2 className="t-heading mt-[10px] text-ink">{panel.title}</h2>
+            {/* The status panel title is the same role as the seller's KYC
+                panel title (S-04), which the approved source sets at the
+                console flow-title step. */}
+            <h2 className="t-flow-title mt-[10px] text-ink">{panel.title}</h2>
             <p className="t-body mt-[6px] text-body">{panel.body}</p>
 
             {/* D-11. The timeline shows what happened, never what will. */}

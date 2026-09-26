@@ -29,5 +29,7 @@ export function sellerRailFooter(balanceLabel: string): RailFooter {
     value: balanceLabel,
     actionHref: "/seller/billing/recharge",
     actionLabel: "Recharge",
+    // Approved Seller Console rail footer: the balance is 24px/800 Archivo.
+    valueClassName: "text-[24px]",
   };
 }

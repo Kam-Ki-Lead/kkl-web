@@ -49,7 +49,9 @@ export async function BuilderShell({
       subtitle={subtitle}
       aside={
         <>
-          <Chip tone={status.tone} className="max-[560px]:hidden">
+          {/* Approved Builder console header: the subscription chip is 14px/700
+              (larger than a status chip) and stays visible down to 480px. */}
+          <Chip tone={status.tone} size="lg" className="max-[479px]:hidden">
             {status.label}
           </Chip>
           <AvatarBadge name={account.contactName} />

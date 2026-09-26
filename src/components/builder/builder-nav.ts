@@ -32,5 +32,7 @@ export function builderRailFooter(state: string, renewsLabel: string): RailFoote
     value: state,
     actionHref: "/builder/subscription",
     actionLabel: renewsLabel,
+    // Approved Builder Console rail footer: the state is 17px/800 Archivo.
+    valueClassName: "text-[17px]",
   };
 }

@@ -25,7 +25,8 @@ export function KycApproveForm({ applicationId }: { applicationId: string }) {
       <form action={action}>
         <input type="hidden" name="applicationId" value={applicationId} />
         <input type="hidden" name="decision" value="approved" />
-        <Button type="submit" size="sm" disabled={pending}>
+        {/* A-06 sets the decision buttons at 16px/700 — the md step. */}
+        <Button type="submit" size="md" disabled={pending}>
           {pending ? "Recording…" : "Approve verification"}
         </Button>
       </form>

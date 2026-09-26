@@ -171,11 +171,13 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
         <span className="t-mono text-[11px] tracking-[0.14em] text-[#FAD9A3]">
           FEATURED PROJECT
         </span>
+        {/* The approved banner title steps 26/32/38px and the price
+            22/26/28px at the 620/1060 frame breaks — the sizes live in the
+            classes because an inline fontSize would defeat them. */}
         <h1
-          className="text-white max-[900px]:text-[24px]"
+          className="text-white text-[38px] max-[619px]:text-[26px] min-[620px]:max-[1059px]:text-[32px]"
           style={{
             fontFamily: "var(--font-heading)",
-            fontSize: 38,
             fontWeight: 800,
             letterSpacing: "-0.03em",
             lineHeight: 1.05,
@@ -194,10 +196,9 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
         <div className="flex flex-wrap items-center gap-[14px] max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-[10px]">
           {price ? (
             <span
-              className="text-white max-[900px]:text-[22px]"
+              className="text-white text-[28px] max-[619px]:text-[22px] min-[620px]:max-[1059px]:text-[26px]"
               style={{
                 fontFamily: "var(--font-heading)",
-                fontSize: 28,
                 fontWeight: 800,
                 letterSpacing: "-0.02em",
               }}

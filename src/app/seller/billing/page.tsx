@@ -26,7 +26,7 @@ export default async function BillingPage() {
         <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-[18px] max-[1200px]:grid-cols-1">
           <Card className="p-[22px]">
             <p className="text-[14px] text-muted">Available balance</p>
-            <p className="t-title mt-[2px] text-ink">
+            <p className="t-balance mt-[2px] text-ink">
               {formatCreditBalance(wallet.balanceCredits)}
             </p>
             <p className="t-body-sm mt-[6px] text-body">

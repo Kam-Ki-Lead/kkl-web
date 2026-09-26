@@ -139,7 +139,11 @@ export default async function MaskedLeadPage({
         <aside className="flex flex-col gap-[16px]">
           <Card className="p-[22px]">
             <p className="text-[14px] text-muted">Lead price</p>
-            <p className="t-flow-title mt-[2px] text-ink">{formatExactInr(lead.priceCredits)}</p>
+            {/* The approved S-08 aside sets the price at 30px/800 flat — not
+                the stepping flow title. */}
+            <p className="mt-[2px] font-[family-name:var(--font-heading)] text-[30px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink">
+              {formatExactInr(lead.priceCredits)}
+            </p>
             {lead.originalPriceCredits !== null ? (
               <p className="t-caption mt-[1px] text-muted">
                 Reduced from {formatExactInr(lead.originalPriceCredits)} — aged {lead.ageDays} days

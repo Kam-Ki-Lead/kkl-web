@@ -38,7 +38,8 @@ export default async function InvoiceDetailPage({
         <Card className="p-[24px]">
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div>
-              <h2 className="t-heading text-ink">
+              {/* The approved S-20 sets the invoice subject at 21px/800 flat. */}
+              <h2 className="font-[family-name:var(--font-heading)] text-[21px] font-extrabold leading-[1.2] tracking-[-0.025em] text-ink">
                 Invoice <span className="t-mono">{invoice.number}</span>
               </h2>
               <p className="t-caption mt-[2px] text-muted">

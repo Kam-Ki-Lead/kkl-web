@@ -275,14 +275,14 @@ export default async function AdminKycReviewPage({
               <ButtonLink
                 href={`/admin/kyc/${application.id}?action=reject`}
                 variant="destructive"
-                size="sm"
+                size="md"
               >
                 Reject
               </ButtonLink>
               <ButtonLink
                 href={`/admin/kyc/${application.id}?action=resubmit`}
                 variant="secondary"
-                size="sm"
+                size="md"
               >
                 Ask for the documents again
               </ButtonLink>

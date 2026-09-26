@@ -31,7 +31,7 @@ export default async function PurchasedLeadPage({
               <p className="t-mono text-[13px] text-muted">{lead.id}</p>
               <Chip tone="success">Purchased</Chip>
             </div>
-            <h2 className="t-title mt-[3px] text-ink">{lead.requirement}</h2>
+            <h2 className="t-flow-title mt-[3px] text-ink">{lead.requirement}</h2>
             <p className="t-body mt-[2px] text-muted">
               {formatAreaPath(lead.locationPath)}
             </p>

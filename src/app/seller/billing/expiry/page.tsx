@@ -48,7 +48,8 @@ export default async function CreditExpiryPage() {
         <div className="grid grid-cols-3 gap-[14px] max-[1060px]:grid-cols-1">
           <Card className="p-[20px]">
             <Chip tone="success">Active</Chip>
-            <p className="t-heading mt-[10px] text-ink">
+            {/* The approved S-18 expiry amounts are 24px/800 flat. */}
+            <p className="mt-[10px] font-[family-name:var(--font-heading)] text-[24px] font-extrabold text-ink">
               {formatCreditBalance(wallet.balanceCredits)}
             </p>
             <p className="t-body-sm mt-[4px] text-body">Credits usable now.</p>
@@ -60,7 +61,7 @@ export default async function CreditExpiryPage() {
 
           <Card className="p-[20px]">
             <Chip tone="warning">Expiring soon</Chip>
-            <p className="t-heading mt-[10px] text-muted">
+            <p className="mt-[10px] font-[family-name:var(--font-heading)] text-[24px] font-extrabold text-muted">
               {wallet.expiringSoonCredits === null
                 ? "Not calculable"
                 : formatCreditBalance(wallet.expiringSoonCredits)}
@@ -76,7 +77,7 @@ export default async function CreditExpiryPage() {
 
           <Card className="p-[20px]">
             <Chip tone="danger">Expired</Chip>
-            <p className="t-heading mt-[10px] text-muted">
+            <p className="mt-[10px] font-[family-name:var(--font-heading)] text-[24px] font-extrabold text-muted">
               {wallet.expiredCredits === null
                 ? "Not calculable"
                 : formatCreditBalance(wallet.expiredCredits)}

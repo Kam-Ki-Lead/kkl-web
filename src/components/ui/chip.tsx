@@ -27,16 +27,23 @@ export function Chip({
   /**
    * The approved consoles render status chips at 13px; the Admin screens draw
    * the same chips at 12px (A-03, A-26, A-31). Both are 700-weight.
+   *
+   * "lg" is the Builder console's header subscription chip, which the approved
+   * console draws larger than a status chip: 14px/700 with 8px 13px padding.
    */
-  size?: "md" | "sm";
+  size?: "md" | "sm" | "lg";
   children: ReactNode;
   className?: string;
 }) {
   return (
     <span
       data-chip={tone}
-      className={`chip inline-flex items-center gap-[5px] rounded-full px-[10px] py-[3px] font-bold ${
-        size === "sm" ? "text-[12px]" : "text-[13px]"
+      className={`chip inline-flex items-center gap-[5px] rounded-full font-bold ${
+        size === "sm"
+          ? "px-[10px] py-[3px] text-[12px]"
+          : size === "lg"
+            ? "px-[13px] py-[8px] text-[14px]"
+            : "px-[10px] py-[3px] text-[13px]"
       } ${tones[tone]} ${className}`}
     >
       {children}

@@ -59,6 +59,12 @@ export type RailFooter = {
   readonly value: string;
   readonly actionHref: string;
   readonly actionLabel: string;
+  /**
+   * The approved footers draw the value at 800-weight Archivo in a per-console
+   * size: the Seller's credit balance is 24px, the Builder's subscription
+   * state is 17px. Each console's nav module declares its step here.
+   */
+  readonly valueClassName: string;
 };
 
 function isActive(item: RailItem, pathname: string): boolean {
@@ -202,7 +208,11 @@ function RailFooterCard({ footer }: { footer: RailFooter }) {
           ITEM colour, not the group-label colour. Swapping the hardcoded value
           for the muted token in an earlier pass dimmed it on 16 screens. */}
       <p className={`text-[13px] ${RAIL_TONES.console.item}`}>{footer.label}</p>
-      <p className="t-card-title mt-[2px] text-white">{footer.value}</p>
+      <p
+        className={`mt-[2px] font-[family-name:var(--font-heading)] font-extrabold leading-[1.3] text-white ${footer.valueClassName}`}
+      >
+        {footer.value}
+      </p>
       <Link
         href={footer.actionHref}
         /* Saffron on a surface is used sparingly, per C-01. The approved rail is

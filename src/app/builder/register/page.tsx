@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: "Register as a builder" };
 export default function BuilderRegisterPage() {
   return (
     <BuilderOnboardingShell step={0}>
-      <h1 className="t-flow-title text-ink max-[619px]:text-[24px] min-[620px]:max-[1059px]:text-[27px]">
+      <h1 className="t-flow-title text-ink">
         Register as a builder
       </h1>
       <p className="mt-[8px] text-[16px] leading-[1.6] text-body">

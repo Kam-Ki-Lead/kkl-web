@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { AvatarBadge, ConsoleShell } from "@/components/layout/console-shell";
 import { sellerRailFooter, sellerRailItems } from "./seller-nav";
-import { Chip } from "@/components/ui/chip";
 import { formatCreditBalance } from "@/lib/format";
 import { getServices } from "@/lib/services";
 
@@ -39,9 +39,18 @@ export async function SellerShell({
       subtitle={subtitle}
       aside={
         <>
-          <Chip tone="neutral" className="max-[560px]:hidden">
-            ◈ {balance}
-          </Chip>
+          {/* Approved Seller Console header: the balance is an outlined pill
+              button to billing — 15px/700 ink on #F6F8FD with a #D4DBF3
+              border — visible down to 480px. Not a status chip. */}
+          <Link
+            href="/seller/billing"
+            className="flex items-center gap-[8px] whitespace-nowrap rounded-full border-[1.5px] border-[#D4DBF3] bg-[#F6F8FD] px-[14px] py-[9px] text-[15px] font-bold text-ink max-[479px]:hidden"
+          >
+            <span aria-hidden="true" className="text-brand">
+              ◈
+            </span>
+            {balance}
+          </Link>
           <AvatarBadge name={account.contactName} />
         </>
       }

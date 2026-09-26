@@ -34,7 +34,9 @@ export default function AdminLoginPage() {
         <Wordmark size="sm" />
 
         <p className="t-eyebrow mt-[18px] text-muted">Internal operations</p>
-        <h1 className="t-heading mt-[8px] text-ink">Staff sign-in</h1>
+        {/* A-01 sets the login title at 26px/800 flat — it does not step
+            with the frame, so it stays off the stepping t-heading class. */}
+        <h1 className="mt-[8px] font-[family-name:var(--font-heading)] text-[26px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink">Staff sign-in</h1>
         <p className="t-body mt-[8px] text-body">
           Accounts are created by an administrator. There is no self-registration and no public
           route to this screen.

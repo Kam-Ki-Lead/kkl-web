@@ -31,7 +31,7 @@ export default async function EnquiryConfirmedPage({
       <Card className="border-[#BFE0CE] bg-chip-success-bg p-[24px]">
         <div className="flex flex-wrap items-center gap-[12px]">
           <Chip tone="success">Enquiry sent</Chip>
-          <h1 className="t-heading text-success">The builder has your enquiry</h1>
+          <h1 className="t-title text-success">The builder has your enquiry</h1>
         </div>
         <p className="t-body mt-[10px] text-body">
           Your enquiry about <strong className="text-ink">{enquiry.propertyTitle}</strong> has a

@@ -38,8 +38,9 @@ export default async function AdminDeliveryPage({
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div className="min-w-0">
               <p className="t-mono text-[12px] text-muted">{order.id}</p>
-              {/* The approved delivery header sets the subject at 28px/800. */}
-              <h2 className="mt-[2px] font-[family-name:var(--font-heading)] text-[28px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink">
+              {/* The approved A-17 subject steps 23/26/28 with the frame —
+                  the admin detail-subject role. */}
+              <h2 className="t-heading mt-[2px] text-ink">
                 {order.leadLabel}
               </h2>
               <p className="t-body text-body">
@@ -66,7 +67,10 @@ export default async function AdminDeliveryPage({
         </Card>
 
         <Card className="p-[20px]">
-          <h2 className="t-console-title text-ink">Delivery record</h2>
+          {/* The approved events panel is headed at 17px/700 ("Delivery &
+              download record"). The impl's shorter wording is a recorded
+              content difference; the type role matches the approved panel. */}
+          <h2 className="t-card-title text-ink">Delivery record</h2>
           <ol className="mt-[12px] flex flex-col">
             {order.events.map((event, index) => (
               <li key={`${event.what}-${index}`} className="flex gap-[12px] border-b border-line py-[10px] last:border-b-0">

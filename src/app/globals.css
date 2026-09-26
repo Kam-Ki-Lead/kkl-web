@@ -108,30 +108,81 @@
  * classes rather than raw utilities so a change here reaches every screen.
  */
 @layer components {
+  /*
+   * The approved screens step their display type with the frame
+   * (pick(mobile, tablet, desktop) at 620/1060px in every journey file), so
+   * the classes carry the steps — a call site should never restate them.
+   */
   .t-title {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: 34px;
+    font-size: 26px;
     line-height: 1.1;
     letter-spacing: -0.035em;
   }
+  @media (min-width: 620px) {
+    .t-title {
+      font-size: 30px;
+    }
+  }
+  @media (min-width: 1060px) {
+    .t-title {
+      font-size: 34px;
+    }
+  }
+  /*
+   * The Admin console's detail subject (A-05, A-06, A-09, A-17…) — the
+   * approved h1 there steps 23/26/28, one rung below the consoles' flow
+   * title. Public page titles are .t-title; this class is the admin subject.
+   */
   .t-heading {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: 26px;
+    font-size: 23px;
     line-height: 1.15;
     letter-spacing: -0.03em;
   }
+  @media (min-width: 620px) {
+    .t-heading {
+      font-size: 26px;
+    }
+  }
+  @media (min-width: 1060px) {
+    .t-heading {
+      font-size: 28px;
+    }
+  }
   /*
    * The focused-flow title — registration, KYC, lead detail, subscription
-   * status (S-01…S-04, S-08, B-02, B-03). The approved screens render these
-   * at 30px/800, one step below the portal's 34px subject title.
+   * status (S-01…S-04, S-08, B-02, B-03). The approved screens step these
+   * 24/27/30 with the frame, one rung below the portal's 26/30/34 page title.
    */
   .t-flow-title {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: 30px;
+    font-size: 24px;
     line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+  @media (min-width: 620px) {
+    .t-flow-title {
+      font-size: 27px;
+    }
+  }
+  @media (min-width: 1060px) {
+    .t-flow-title {
+      font-size: 30px;
+    }
+  }
+  /*
+   * The wallet balance figure on S-14 and B-22 — the approved consoles set
+   * it at 38px/800 at every width (flat, no steps).
+   */
+  .t-balance {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 38px;
+    line-height: 1.1;
     letter-spacing: -0.03em;
   }
   .t-figure {
@@ -164,9 +215,19 @@
   .t-section-title {
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 26px;
+    font-size: 21px;
     line-height: 1.2;
     letter-spacing: -0.02em;
+  }
+  @media (min-width: 620px) {
+    .t-section-title {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1060px) {
+    .t-section-title {
+      font-size: 26px;
+    }
   }
   .t-console-title {
     font-family: var(--font-heading);

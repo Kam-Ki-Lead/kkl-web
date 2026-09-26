@@ -55,7 +55,7 @@ export function EditorShell({
           <p className="t-eyebrow text-muted">
             Listing editor · section {index + 1} of {sections.length}
           </p>
-          <h2 className="t-title mt-[4px] text-ink">
+          <h2 className="t-flow-title mt-[4px] text-ink">
             {label}
             {editing && listingTitle ? (
               <span className="t-body text-muted"> · editing {listingTitle}</span>
