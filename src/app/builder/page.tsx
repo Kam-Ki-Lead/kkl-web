@@ -109,7 +109,7 @@ export default async function BuilderDashboardPage() {
               <h2 className="t-card-title text-ink">Also available to you</h2>
               <ul className="mt-[10px] flex flex-col">
                 {[
-                  ["/builder/marketplace", "Lead marketplace"],
+                  ["/builder/marketplace", "Buy Leads"],
                   ["/builder/leads", "My purchased leads"],
                   ["/builder/billing", "Billing & credits"],
                   ["/builder/support", "Support"],
