@@ -18,10 +18,16 @@ const COLUMNS: ReadonlyArray<{ heading: string; links: ReadonlyArray<[string, st
     links: [
       ["For builders", "/builders"],
       ["For brokers", "/brokers"],
-      ["Lead marketplace", "/brokers"],
+      ["Buy Leads", "/brokers"],
       ["Verification & KYC", "/brokers"],
       ["Sign in", "/auth"],
     ],
+  },
+  {
+    // CR02: the individual owner's route is distinct from the professionals'
+    // — an owner posting their own property is not a broker buying leads.
+    heading: "Owners",
+    links: [["Post your property", "/post-property"]],
   },
   {
     heading: "Support & policies",
@@ -39,7 +45,7 @@ export function PublicFooter() {
   return (
     <footer className="mt-[40px] bg-brand-deep text-[#D7DDF6]">
       <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[24px] pt-[38px] max-[1060px]:px-[18px]">
-        <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-[28px] max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
+        <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr_0.8fr] gap-[28px] max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
           <div>
             <Wordmark size="sm" onDark />
             <p className="mt-[12px] max-w-[34ch] text-[15px] leading-[1.6] text-[#B9C3EC]">
