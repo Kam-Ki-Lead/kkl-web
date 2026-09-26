@@ -13,10 +13,14 @@ export function sellerRailItems(newLeadCount: number | null): readonly RailItem[
     { href: "/seller", label: "Dashboard", match: "exact" },
     {
       href: "/seller/leads",
-      label: "Lead marketplace",
+      // CR01: the marketplace entry is named for the action — buying leads.
+      label: "Buy Leads",
       badge: newLeadCount && newLeadCount > 0 ? `${newLeadCount} new` : null,
     },
     { href: "/seller/purchased", label: "My leads" },
+    // CR03: Request Leads is its own journey, separate from buying an
+    // available lead — the rail names it for what it is.
+    { href: "/seller/requests", label: "Lead requests" },
     { href: "/seller/billing", label: "Billing & credits" },
     { href: "/seller/support", label: "Support" },
     { href: "/seller/profile", label: "Profile" },

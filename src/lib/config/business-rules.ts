@@ -44,7 +44,8 @@ export type UnresolvedRule = {
 
 export type DecisionId =
   | "D-01" | "D-02" | "D-03" | "D-04" | "D-05" | "D-06" | "D-07" | "D-08"
-  | "D-09" | "D-10" | "D-11" | "D-12" | "D-13" | "D-14" | "D-15" | "D-16";
+  | "D-09" | "D-10" | "D-11" | "D-12" | "D-13" | "D-14" | "D-15" | "D-16"
+  | "D-17" | "D-18";
 
 export type DecisionImpact = "blocks-launch" | "changes-flow" | "wording";
 
@@ -154,6 +155,25 @@ export const DECISIONS: Readonly<Record<DecisionId, Decision>> = {
     question: "Whether staff sign-in requires a second factor",
     impact: "wording",
     pendingCopy: "No second factor is configured",
+  },
+  // CR03 — confirmation-document decision 2. The request form's fields and
+  // the queue's status names are the client's written proposal, not yet
+  // confirmed, and the screens that render them say so.
+  "D-17": {
+    id: "D-17",
+    question: "Lead-request field set, status names and handling workflow",
+    impact: "changes-flow",
+    pendingCopy: "Fields and statuses shown here are the proposal awaiting confirmation",
+  },
+  // CR02 — confirmation-document decisions 1, 5 and 7. The owner journey is
+  // confirmed to exist; everything about how it charges, moderates, routes
+  // enquiries, handles rentals and verifies is not.
+  "D-18": {
+    id: "D-18",
+    question:
+      "Individual-owner Post Property policy: charges, moderation timing, enquiry routing, rentals, verification requirement",
+    impact: "changes-flow",
+    pendingCopy: "Owner policy is not yet confirmed — this journey is prepared for review, not open for submissions",
   },
 };
 
