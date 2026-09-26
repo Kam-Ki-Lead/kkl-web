@@ -48,7 +48,7 @@ export default async function MaskedLeadPage({
             <div className="mt-[16px] flex flex-wrap gap-[10px]">
               <ButtonLink href={`/seller/purchased/${id}`}>Open the lead</ButtonLink>
               <ButtonLink href="/seller/leads" variant="secondary">
-                Back to marketplace
+                Back to Buy Leads
               </ButtonLink>
             </div>
           </Card>
@@ -162,7 +162,7 @@ export default async function MaskedLeadPage({
               size="action"
               className="mt-[10px] w-full"
             >
-              Back to marketplace
+              Back to Buy Leads
             </ButtonLink>
 
             {affordable ? null : (

@@ -33,7 +33,7 @@ export default async function PurchasedLeadsPage() {
             title="You have not bought any leads yet"
             action={
               <ButtonLink href="/builder/marketplace" size="action">
-                Browse the marketplace
+                Browse Buy Leads
               </ButtonLink>
             }
           >

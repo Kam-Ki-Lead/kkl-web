@@ -105,7 +105,7 @@ export default async function PurchaseResultPage({
               <>
                 <ButtonLink href="/seller/billing/recharge">Recharge credits</ButtonLink>
                 <ButtonLink href="/seller/leads" variant="secondary">
-                  Back to marketplace
+                  Back to Buy Leads
                 </ButtonLink>
               </>
             }

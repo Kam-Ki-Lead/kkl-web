@@ -11,7 +11,8 @@ export function builderRailItems(unreadEnquiries: number): readonly RailItem[] {
       badge: unreadEnquiries > 0 ? `${unreadEnquiries} new` : null,
     },
     { href: "/builder/subscription", label: "Subscription" },
-    { href: "/builder/marketplace", label: "Lead marketplace" },
+    // CR01: the marketplace entry is named for the action — buying leads.
+    { href: "/builder/marketplace", label: "Buy Leads" },
     { href: "/builder/leads", label: "My leads" },
     { href: "/builder/billing", label: "Billing & credits" },
     { href: "/builder/support", label: "Support" },

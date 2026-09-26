@@ -91,7 +91,7 @@ export default async function PurchaseReviewPage({
               <>
                 <ButtonLink href="/seller/billing/recharge">Recharge credits</ButtonLink>
                 <ButtonLink href="/seller/leads" variant="secondary">
-                  Back to marketplace
+                  Back to Buy Leads
                 </ButtonLink>
               </>
             }
@@ -115,7 +115,7 @@ export default async function PurchaseReviewPage({
               <>
                 <ButtonLink href="/seller/kyc/status">View verification status</ButtonLink>
                 <ButtonLink href="/seller/leads" variant="secondary">
-                  Back to marketplace
+                  Back to Buy Leads
                 </ButtonLink>
               </>
             }

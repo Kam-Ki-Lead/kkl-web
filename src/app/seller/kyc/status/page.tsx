@@ -69,7 +69,7 @@ export default async function KycStatusPage() {
 
       <div className="mt-[18px] flex flex-wrap gap-[10px]">
         {account.kycStatus === "approved" ? (
-          <ButtonLink href="/seller/leads">Go to marketplace</ButtonLink>
+          <ButtonLink href="/seller/leads">Go to Buy Leads</ButtonLink>
         ) : null}
         {account.kycStatus === "not_submitted" || rejected ? (
           <ButtonLink href="/seller/kyc">
@@ -77,7 +77,7 @@ export default async function KycStatusPage() {
           </ButtonLink>
         ) : null}
         {account.kycStatus === "pending" ? (
-          <ButtonLink href="/seller/leads">Browse the marketplace</ButtonLink>
+          <ButtonLink href="/seller/leads">Browse Buy Leads</ButtonLink>
         ) : null}
         <ButtonLink href="/seller/support/new" variant="secondary">
           Contact support

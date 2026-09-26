@@ -62,7 +62,7 @@ export default async function SellerDashboardPage() {
                 href="/seller/leads"
                 className="text-[14px] font-bold text-brand underline underline-offset-2"
               >
-                Open marketplace →
+                Buy Leads →
               </Link>
             </div>
             {market.leads.length === 0 ? (

@@ -96,7 +96,7 @@ export default async function PurchaseReviewPage({
               <>
                 <ButtonLink href="/builder/billing/recharge">Recharge credits</ButtonLink>
                 <ButtonLink href="/builder/marketplace" variant="secondary">
-                  Back to marketplace
+                  Back to Buy Leads
                 </ButtonLink>
               </>
             }
@@ -120,7 +120,7 @@ export default async function PurchaseReviewPage({
               <>
                 <ButtonLink href="/builder/verification">View verification status</ButtonLink>
                 <ButtonLink href="/builder/marketplace" variant="secondary">
-                  Back to marketplace
+                  Back to Buy Leads
                 </ButtonLink>
               </>
             }

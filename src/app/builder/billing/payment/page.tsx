@@ -46,7 +46,7 @@ export default async function PaymentResultPage() {
           </Card>
 
           <div className="mt-[16px] flex flex-wrap gap-[10px]">
-            <ButtonLink href="/builder/marketplace">Back to marketplace</ButtonLink>
+            <ButtonLink href="/builder/marketplace">Back to Buy Leads</ButtonLink>
             <ButtonLink href={`/builder/billing/invoices/${outcome.invoiceId}`} variant="secondary">
               View invoice
             </ButtonLink>

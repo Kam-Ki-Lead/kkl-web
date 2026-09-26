@@ -86,7 +86,7 @@ export default async function RestrictedPage() {
               <>
                 <ButtonLink href="/seller/kyc/status">View verification status</ButtonLink>
                 <ButtonLink href="/seller/leads" variant="secondary">
-                  Browse the marketplace
+                  Browse Buy Leads
                 </ButtonLink>
               </>
             }
