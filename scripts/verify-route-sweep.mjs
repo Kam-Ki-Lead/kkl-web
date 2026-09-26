@@ -37,6 +37,8 @@ const ROUTES = [
   '/account/shortlist', '/account/profile', '/account/notifications',
   '/builders', '/brokers', '/support', '/legal/terms', '/legal/privacy',
   '/legal/refunds', '/enquiry/unavailable?reason=expired',
+  // CR02 — the owner Post Property skeleton, labelled proposed
+  '/post-property',
   // Seller
   '/seller', '/seller/register', '/seller/onboarding', '/seller/kyc',
   '/seller/kyc/status', '/seller/restricted', '/seller/leads',
@@ -46,6 +48,8 @@ const ROUTES = [
   '/seller/billing/invoices/INV-2026-0821', '/seller/billing/details',
   '/seller/billing/expiry', '/seller/support', '/seller/support/new',
   '/seller/support/T-2260', '/seller/profile',
+  // CR03 — Request Leads
+  '/seller/requests', '/seller/requests/new', '/seller/requests/lr-seed-1',
   // Builder
   '/builder', '/builder/register', '/builder/verification', '/builder/restrictions',
   '/builder/subscription', '/builder/subscription/renewal',
@@ -73,6 +77,8 @@ const ROUTES = [
   '/admin/voice/C-7741', '/admin/voice/C-7722', '/admin/whatsapp',
   '/admin/notifications', '/admin/consent', '/admin/reports', '/admin/audit',
   '/admin/system',
+  // CR03 — the lead-requests queue
+  '/admin/requests', '/admin/requests/lr-seed-1',
 ];
 
 const WIDTHS = [

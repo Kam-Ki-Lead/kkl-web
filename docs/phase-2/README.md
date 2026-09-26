@@ -4,6 +4,8 @@ Start here.
 
 | Document | What it answers |
 |---|---|
+| **[change-register.md](change-register.md)** | **The client change request (CR01–CR07).** Source, affected surfaces, confirmed vs proposed, and the blocking decisions — start here for the new work |
+| **[kyc-policy-matrix.md](kyc-policy-matrix.md)** | CR07's role/action verification matrix, prepared for confirmation — the document/call conflict is unresolved |
 | **[decision-sheet.md](decision-sheet.md)** | **Start here.** One page: the commit, what is open, who decides each item |
 | [visual-differences.md](visual-differences.md) | Every measured difference, classified — defect, sample content, artefact, baseline conflict, or proposed deviation |
 | [exceptions.md](exceptions.md) | The four exceptions in plain language, each with its owner |
@@ -48,8 +50,9 @@ check in this repository had been passing over:
 - **Nine backend capabilities** are missing. The frontend for each is complete:
   interface, sample implementation, built and verified states. **These are not
   unfinished frontend work.**
-- **Sixteen client decisions** are open, six of which block launch. Several
-  screens are deliberately inert because of them.
+- **Sixteen client decisions** are open, six of which block launch — plus two
+  more (D-17, D-18) opened by the change request. Several screens are
+  deliberately inert because of them.
 - **All 113 rows are mapped**: 97 screens captured as pairs at 1440 and 390,
   4 nested states named against their parent, 12 library rows against the
   screens they are judged in. `coverage.md` has the matrix.
@@ -70,17 +73,17 @@ check in this repository had been passing over:
 |---|---|---|
 | Types, lint | `npm run typecheck`, `npm run lint` | 0 errors, 0 warnings |
 | Unit tests | `npm test` | 27/27 — `node:test`, no framework added |
-| Design tokens | `verify-design-tokens.mjs` | 28 tokens, 37 literals, all in the baseline |
+| Design tokens | `verify-design-tokens.mjs` | 30 tokens, 43 literals, all in the baseline |
 | Contrast | `verify-contrast.mjs` | 24/24 AA, **2 design findings** |
 | Zoom | `verify-zoom.mjs` | 32/32 across 16 screens |
 | Accessibility | `verify-accessibility.mjs` | 22/22, **3 pending** |
 | Visual values | `verify-visual-baseline.mjs` | 24/24 |
-| Route sweep | `verify-route-sweep.mjs` | 224/224 — 112 routes × 2 widths |
+| Route sweep | `verify-route-sweep.mjs` | 236/236 — 118 routes × 2 widths |
 | Buyer enquiry | `verify-enquiry-flow.mjs` | 17/17 + 3 limitations |
 | Seller | `verify-seller-flow.mjs` | 26/26 + 2 limitations |
 | Builder | `verify-builder-flow.mjs` | 48/48 + 3 limitations |
 | Admin | `verify-admin-flow.mjs` | 36/36 + 3 limitations |
-| Without JavaScript | `verify-no-javascript.mjs` | 50/50 forms |
+| Without JavaScript | `verify-no-javascript.mjs` | 51/51 forms |
 | Deployment guard | `verify-sample-mode-guard.sh` | 10/10, **2 pending** |
 | Screen geometry | `verify-screen-geometry.mjs` | 93 screens ranked by divergence, both widths |
 | B-15 navigation | `verify-b15-navigation.mjs` | 9/9 — Back and Forward, both arrival paths |
@@ -88,6 +91,7 @@ check in this repository had been passing over:
 | Contrast corrections | `verify-contrast-corrections.mjs` | 12/12 rendered states |
 | Accessible names / 2.5.3 | `verify-accessible-names.mjs` | 24/24 across 6 screens |
 | Forced-colors | `verify-forced-colors.mjs` | 13/13 across 6 screens |
+| Lead requests (CR03) | `verify-lead-request-flow.mjs` | 15/15 — validation, duplicate submit, both consoles, note separation, audit |
 
 Run twice against one server with identical results.
 

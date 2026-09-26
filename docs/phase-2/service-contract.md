@@ -161,6 +161,53 @@ reason and field-level before/after. Some pairs are recorded **unchanged** on
 purpose — a suspension logs `kyc_status` as it was — so the log can prove what
 was *not* touched. Nothing may edit or delete an entry.
 
+### 2.11 Locations (CR05) — **Proposed**
+
+The client requires India → State → City → Area with centrally maintained
+records and stable identifiers; launch values are India → West Bengal →
+Kolkata → Area. The frontend reads every locality option through the location
+service (`launchChain`, `children`, `areaOptions`, `displayPath`, `getMany`)
+and stores the **record id**, never a name, on listings, searches, lead
+filters and lead requests.
+
+| Need | Notes |
+|---|---|
+| Location records with stable ids | One maintained tree; the frontend must not hardcode city or locality logic |
+| Dependent selection | Children of a parent (state → city → area), for pickers and filters |
+| Search within a city | `areaOptions({ cityId, query })` backs the searchable locality combobox |
+| Display paths | Pre-composed labels (e.g. "Action Area I, New Town") so screens never assemble names ad hoc |
+| Hierarchy-aware matching | A filter on a parent locality must include its sub-areas (New Town includes Action Areas I–III) |
+
+Rental support and rental price units are part of the same model and remain
+explicit — see the change register (CR05) and decision 6.
+
+### 2.12 Lead requests (CR03) — **Proposed**, persistence **required by the client**
+
+"Request Leads": a Seller describes the area and kind of leads they need,
+receives a reference, and tracks the request; staff see and handle the same
+record. The field set and status names are the confirmation document's
+proposal (D-17), not confirmed rules.
+
+**Permanent storage is an explicit client requirement.** The sample
+implementation keeps records in process memory so the journey can be reviewed
+end to end; it does not satisfy the requirement, and persistence is not
+claimed until records survive a restart and are retrieved with appropriate
+account access.
+
+| Need | Notes |
+|---|---|
+| Create request | Idempotent on a client-minted key — a retried or double submit returns the first request's reference and records nothing new |
+| Requester association | From the **authenticated session server-side**, never from a form field; the frontend carries no account input, hidden or otherwise |
+| List / detail, per account | A requester sees **only their own** requests; another account's id is indistinguishable from nonexistent (`not_found` either way) |
+| Staff queue and detail | Same record, plus requester identity and internal notes |
+| Public replies vs internal notes | Same structural rule as §2.8: the requester-facing type has no field that could carry an internal note |
+| Status history | Appended, never overwritten; the record shows how it arrived where it is |
+| Audit | Staff status moves are audit-logged like every other staff action (§2.10) |
+
+A request is **not** an order: handling one moves no credits and releases no
+contact details. Whether an accepted request converts into a quote or an order
+is change-confirmation decision 3 — open.
+
 ---
 
 ## 3. Three invariants the frontend depends on

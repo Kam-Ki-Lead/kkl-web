@@ -1,6 +1,7 @@
 # Client Decision Register
 
-Sixteen decisions the client has not taken. They are listed separately from
+Sixteen decisions the client has not taken, plus two more opened by the client
+change request (CR01–CR07; see `change-register.md`). They are listed separately from
 defects and from backend dependencies because they are a different kind of
 outstanding: **nobody can build these until somebody decides them**, and
 several screens are deliberately inert as a result.
@@ -129,6 +130,41 @@ security control.
 
 ---
 
+## Opened by the client change request — two
+
+These two arrive with CR01–CR07 (`change-register.md`). The confirmation
+document's own ten-item decision list is reproduced in that register; the two
+below are the ones the screens themselves have to reckon with at render time,
+so they live in `business-rules.ts` like the rest.
+
+### D-17 · Lead-request field set, status names and handling workflow (CR03)
+
+The Request Leads journey is confirmed to exist; its fields and status names
+are the confirmation document's **proposal** (its decision 2). The form, the
+Seller's tracking view and the Admin queue all render the D-17 pending copy so
+the proposal cannot be mistaken for an agreed rule.
+
+*Consequence of deciding:* the pending copy comes off; field or status changes
+land in one map (`request-status.ts`) and one form.
+*Consequence of not deciding:* nothing is blocked — the journey works end to
+end as a proposal.
+
+### D-18 · Individual-owner Post Property policy (CR02)
+
+Charges, moderation timing, enquiry routing, rental support and the
+verification requirement for owner publication are all unconfirmed
+(confirmation-document decisions 1, 5 and 7, the last of which is the
+document/call conflict). `/post-property` therefore renders the journey and
+the specification's guided form **disabled**, and says why.
+
+*Consequence of deciding:* the fieldset loses `disabled` and gains a server
+action, an owner role shape, and whatever charging/moderation the decision
+sets.
+*Consequence of not deciding:* owners cannot post — the skeleton stays a
+review artifact.
+
+---
+
 ## How to read an inert control
 
 | What you see | Which decision | Not a defect because |
@@ -142,12 +178,14 @@ security control.
 | A-15 read-only | D-09 | Editable controls imply the taxonomy is agreed |
 | No MFA on A-01 | D-16 | A drawn second factor implies one exists |
 | Live listings survive expiry | D-02 | Hiding them would pick one of three alternatives |
+| Post Property form disabled | D-18 | Owner charges, moderation and verification are unconfirmed |
+| "Proposal awaiting confirmation" on Request Leads | D-17 | Fields and statuses are the client's written proposal, not yet agreed |
 
 ---
 
 ## What decisions do not unblock
 
-Deciding all sixteen would **not** make this frontend production-ready. Every
+Deciding all eighteen would **not** make this frontend production-ready. Every
 backend capability in `service-contract.md` would still be missing, and there
 would still be no authentication, no authorization and no staff roles.
 
