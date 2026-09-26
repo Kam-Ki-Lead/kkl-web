@@ -192,9 +192,10 @@ approved).
 
 This section used to be an unclassified working list. **It no longer is.**
 After the fixes in §1 (D-8 to D-17), the differ was re-run against the review
-build at the implementation commit on the decision sheet, at 1440 and at 390.
-Everything it still reports is below, with its classification. Nothing is
-carried as "unclassified".
+build at the implementation commit on the decision sheet, at 1440 and at 390;
+the responsive-type pass (`5c3a658`) added the 768 tablet sweep. Everything
+it still reports is below, with its classification. Nothing is carried as
+"unclassified".
 
 ### Typography residue at 1440 — 13 rows, none a defect
 
@@ -205,59 +206,104 @@ carried as "unclassified".
 | P-02 and P-10 price ranges — 23px → 24px | **Baseline-internal inconsistency, recorded.** P-01 renders the same price treatment at 24px. The 24px step is kept |
 | S-06 "₹4,200" — black → ink | **Prototype artefact.** The baseline declares no colour on the stat value, so it inherits the page's default black. The implementation keeps C-01's darkest text token, ink |
 
-### Typography at 390 — surfaced by the harness fix
+### Typography at 390 and 768 — corrected in the responsive-type pass
 
 The corrected 390 sweep (harness assertion in `scripts/proto-width.mjs`;
-regeneration first committed at `7afe140`) surfaces rows the broken runs had
+regeneration first committed at `7afe140`) surfaced rows the broken runs had
 hidden, because the broken runs never rendered the prototype's mobile frame.
-Each row below was taken back to the approved source before classification.
+The owner then authorised the bounded responsive-typography correction, and it
+landed at `5c3a658`: every row below was taken back to the approved source,
+corrected with the semantic style that owns the role and the approved
+620/1060 breakpoints, and re-measured at 390, 768 and 1440. The tablet sweep
+is new this pass — the screen map carries only the two extreme widths, so a
+wrapper extends the affected pairs in memory for a 768 run; the frame-width
+assertion is kept, and the run is recorded in `visual/README.md`.
 
 **Class A — the approved screens step display type down at mobile; the
-implementation holds the desktop step.** The approved steps are the sources'
-own `pick(mobile, tablet, desktop)` declarations. **Recorded, not corrected** —
-a responsive-type pass across the four journeys is a cycle of its own and is
-the owner's to schedule.
+implementation held the desktop step. Fixed.** The approved steps are the
+sources' own `pick(mobile, tablet, desktop)` declarations, now carried by the
+semantic classes that own each role:
 
-| Approved step | Rows | Where |
+| Approved step | Rows | Fix at `5c3a658` |
 |---|---|---|
-| **26 / 30 / 34** — Buyer Journey page titles | 8 | P-03, P-04, P-05, P-09, P-10, P-15, P-16, P-19 hold 34px at 390 |
-| **24 / 27 / 30** — console flow titles | 6 | S-01, S-02, S-03, S-04, S-08, B-03 hold 30px at 390 |
-| **21 / 24 / 26** — portal section headings | 4 | P-01 "Featured properties/projects", "Browse by locality", "Not sure where to start?" hold 26px at 390 |
-| **26 / 32 / 38** — portal featured-card title | 1 | P-01 "Ivy Court, Action Area I" holds 38px at 390 |
-| **22 / 26 / 28** — portal featured-card price | 1 | P-01 "₹1.05Cr – ₹1.6Cr" holds 28px at 390 |
-| **19 / 21 / 22** — Admin section heading | 1 | A-17 "Delivery record" — see the pairing note below |
-| **23 / 26 / 28** — Admin detail subject | 1 | A-17 "LD-88041 · 4 BHK · ₹1.5Cr +" holds 28px at 390. This also resolves §4's unmeasured context: the approved subject is now measured at both ends — 28px at 1440, 23px at 390 — and the implementation holds 28px |
+| **26 / 30 / 34** — Buyer Journey page titles | 8 | `.t-title` carries the steps. P-13's confirmation title moved to it too — its desktop 26px was also wrong against the approved 34px |
+| **24 / 27 / 30** — console flow titles | 6 | `.t-flow-title` carries the steps; the editor wizard title and the three detail pages that had borrowed `.t-title` moved to it |
+| **21 / 24 / 26** — portal section headings | 4 | `.t-section-title` carries the steps |
+| **26 / 32 / 38** — portal featured-card title | 1 | P-01 hero title steps on the class; an inline `fontSize` had been defeating it and pinned 38px at every width |
+| **22 / 26 / 28** — portal featured-card price | 1 | P-01 hero price steps |
+| **19 / 21 / 22** — Admin section heading | 1 | A-17 — see the pairing note below; the events-panel heading is now the approved 17px/700 |
+| **23 / 26 / 28** — Admin detail subject | 1 | `.t-heading` carries the steps. The three support-ticket subjects moved off it to `.t-subsection` (approved 19px/700), which is what measured clean |
 
-**Class B — flat approved sizes the implementation renders differently.**
-These are not responsive steps: the approved source declares one size at all
-widths. They surface only at 390 because at 1440 the same text appears twice
-on a side and the differ (correctly) declines to pair it. **Recorded, not
-corrected** — same mandate.
+**Class B — flat approved sizes the implementation rendered differently.
+Fixed.** These are not responsive steps: the approved source declares one
+size at all widths. They surfaced only at 390 because at 1440 the same text
+appears twice on a side and the differ (correctly) declines to pair it.
 
-| Row | Approved (flat) | Implementation at 390 |
+| Row | Approved (flat) | Fix at `5c3a658` |
 |---|---|---|
-| S-14 "₹4,200 credits" — size 38 → 34 | 38px/800 (Seller Console, wallet balance) | `.t-title`, 34px |
-| S-18 "₹4,200 credits" — size 24 → 26 | 24px/800 (Seller Console, expiry-state amount and rail balance) | `.t-heading`, 26px |
-| P-01 "Buy" — size 17 → 16, family Archivo → Public Sans | 17px/700 Archivo (Portal Layout, search-panel tab) | 16px Public Sans |
-| A-06 "Approve verification" — size 16 → 14 | 16px/700 (Admin Console, KYC actions) | sm button, 14px |
+| S-14 "₹4,200 credits" | 38px/800 (Seller Console, wallet balance) | `.t-balance`, a new semantic class for the role |
+| B-22 wallet balance | 38px/800 (Builder Console) | `.t-balance` |
+| S-18 "₹4,200 credits" | 24px/800 (Seller Console, expiry-state amount and rail balance) | inline 24px/800 on the three expiry amounts |
+| P-01 "Buy" | 17px/700 Archivo (Portal Layout, search-panel tab) | 17px Archivo on the tab |
+| A-06 "Approve verification" | 16px/700 (Admin Console, KYC actions) | md buttons, 16px |
+| S-20 invoice subject — **found by the source review this pass; no differ row had flagged it** | 21px/800 flat (Seller Console, invoice) | inline 21px/800 |
 
-**Class C — one non-size row.** P-01 "+ More filters (property type)" —
-weight 700 → 600. The approved mobile filter toggle is 15px/**700**; the
-implementation renders 600. Recorded with the classes above.
+**Class C — one non-size row. Fixed.** P-01 "+ More filters (property type)"
+is now 15px/**700**, the approved mobile filter-toggle weight.
 
-**Pairing suspects — not classified as differences.** B-18 "Enquiries"
-(15 → 16) and B-24 "Active" (16 → 13) pair across different elements (rail
-label against drawer heading; chip against chip in another state) — the §3
-artefact class, visible only because the mobile frame collapses the desktop
-layout's disambiguating duplicates. The S-14/S-18 structural row
-`button radius [50% | 6px] -> [8px]` is the prototype's mobile pill button
+**Pairing suspects — resolved, and both were real.** B-18 "Enquiries"
+(15 → 16) was a real specimen mismatch: the approved B-18 notification
+specimen is a 15px/700 white label on a brand row inside a brand-deep well,
+and the implementation's specimen page drew a different composition — rebuilt
+to the approved one (the real rail item was already correct). B-24 "Active"
+(16 → 13) did pair across elements, but the aside behind it was a real
+composition difference: the approved B-24 panel is one "Account status" card
+of 12px-label / 16px-600-value tiles with "Verification" and "Subscription"
+actions. The aside is rebuilt to that panel; the implementation's extra
+Suspension card is kept and recorded as an addition. The S-14/S-18 structural
+row `button radius [50% | 6px] -> [8px]` is the prototype's mobile pill button
 against the implementation's 8px — recorded with the standardisation note in
 the structural table below.
+
+### Console chrome — surfaced by the tablet sweep
+
+The 768 run pairs elements the extreme widths cannot: at 1440 the rail and
+the header carry the same label and the differ (correctly) declines to pair
+duplicates, and at 390 the chrome is hidden. Four rows, each taken back to
+the approved console templates and **fixed at `5c3a658`**:
+
+| Row | Approved | Fix |
+|---|---|---|
+| Builder header subscription chip — 13px → 14px | 14px/700, visible at frame width ≥ 480 (Builder Console header) | `Chip size="lg"`; the hide threshold moves from 560px to the approved 480px |
+| Builder rail footer value ("Active") — 700 → 800 | 17px/**800** Archivo | per-console value step on the rail footer |
+| Seller rail footer value (balance) — 17px/700 → 24px/800 | 24px/800 Archivo — the same approved value the Class B table cites for S-18 | per-console value step on the rail footer |
+| Seller header balance — neutral chip → outlined pill | a pill **button** to billing: 15px/700 ink on #F6F8FD with a #D4DBF3 border, visible ≥ 480px | it navigates; it is not a status chip |
+
+The Admin header's identity tag is **not** a difference to correct: the
+prototype draws "OPS · FULL ACCESS", implying an access level that does not
+exist — recorded in `acceptance.md` against the D-2 dependency.
+
+**Further findings recorded this pass:**
+
+- **A-18 "Balances by account"** — the approved screen is a row list (name
+  15px/600, balance 19px/800, "Ledger →" 14px/700); the implementation renders
+  cards. The amounts are fixed to the approved 19px/800; the cards-versus-rows
+  composition is recorded for the owner, not changed unilaterally.
+- **A-01 login title** — approved at 26px/800 **flat**. Leaving it on the
+  newly stepped `.t-heading` would have created a fresh mobile mismatch; it is
+  inline 26px/800 with a comment saying why.
+- **Builder marketplace and purchased-lead detail pages** have no approved
+  counterpart screens; they are aligned to the approved S-08 pattern (the
+  approved copy states the builder's marketplace access is identical to the
+  broker's). Recorded so a future approved frame is matched deliberately.
+- **B-24 "Suspension" card** — an implementation addition the approved panel
+  does not draw. Kept, retitled, and recorded here so it is not mistaken for
+  an approved element.
 
 | Row | Classification |
 |---|---|
 | Console header titles | **Fixed (D-20).** Earlier 390 runs of the differ had measured the prototype's default desktop frame — its width-tab click never landed — so this row was classified against a 22px the approved 390 frame never rendered. With the harness fixed, the approved mobile step measured **19px** (tablet 21px); the implementation's flat 20px was corrected to the approved 19/21 steps and the row is gone |
-| A-17 "Delivery record" — 19px → 22px | **Cross-element pairing, surfacing a recorded composition difference.** The approved A-17's console title is "Delivery record" (19px at 390); the implementation titles its shell with the order reference ("Order ORD-…", at the corrected 19px) and keeps "Delivery record" as a panel heading at 22px, where the approved events panel is headed "Delivery & download record" at 17px/700. At 1440 the coincidence 22 = 22 hid this. Surfaced by the harness fix this pass; **recorded, not corrected** — which words title a screen is a content decision, and this pass's mandate is the E-P5/E-P6 corrections |
+| A-17 "Delivery record" — 19px → 22px | **Cross-element pairing, surfacing a recorded composition difference.** The approved A-17's console title is "Delivery record" (19px at 390); the implementation titles its shell with the order reference ("Order ORD-…", at the corrected 19px) and keeps "Delivery record" as a panel heading — now at the approved events-panel step, 17px/700 ("Delivery & download record"). At 1440 the coincidence 22 = 22 hid this. The wording difference is **recorded, not corrected** — which words title a screen is a content decision, referred to the owner |
 | The 1440 residue rows | The same rows as 1440, for the same reasons |
 
 ### Structural rows — all accounted for

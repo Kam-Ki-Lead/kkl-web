@@ -1,6 +1,6 @@
 # Phase 2 frontend — acceptance decision sheet
 
-**Implementation commit:** `b9e7e53` on `claude/phase-2-frontend` (kkl-web)
+**Implementation commit:** `5c3a658` on `claude/phase-2-frontend` (kkl-web)
 **Approved design:** kkl-design `5bc3512`, unmodified — verified on every run
 of `scripts/setup-prototype-review.sh`
 
@@ -263,9 +263,11 @@ not a bug.
 | deployment guard | 10/10 with reasons asserted, 2 pending a backend |
 | coverage | 113/113 inventory rows mapped, 0 uncovered |
 
-All run at implementation commit `b9e7e53` under the review configuration in
+All run at implementation commit `5c3a658` under the review configuration in
 [`local-review.md`](local-review.md) (`next build` + `next start`, not the
-development server). The no-JavaScript count rose 50 → 51: the B-02 checks
+development server) — the full battery re-run after the responsive-type and
+console-chrome corrections, at unchanged counts. The no-JavaScript count rose
+50 → 51 in an earlier pass: the B-02 checks
 were rewritten for the approved validation (one submit-line error; the
 file-chooser success path is now exercised too).
 
@@ -277,7 +279,14 @@ same visual-baseline suite expected a 21px stat tile where the approved
 S-06 draws 26px, and the geometry differ's 390px runs measured the
 prototype's desktop frame for months because a selector never matched and the
 failure was swallowed — found this pass, harness corrected, one long-standing
-misclassification (console titles) put right as D-20.
+misclassification (console titles) put right as D-20. The responsive-type
+pass added two more: the differ's duplicate-pairing rule — correct in itself —
+had hidden the Builder header subscription chip at both committed widths,
+visible only once the tablet sweep paired it (14px approved against 13px,
+fixed at `5c3a658`); and `visual/index.json` as committed at `4f125ec` had
+been truncated to two screens by an ONLY-filtered capture run, so the
+committed coverage matrix asserted 97 pairs against an index that evidenced 2
+— restored from `b9e7e53` with the affected screens refreshed.
 
 ---
 

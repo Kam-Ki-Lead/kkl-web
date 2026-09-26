@@ -1,0 +1,646 @@
+[
+  {
+    "id": "P-02",
+    "width": 768,
+    "shared": 33,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.96 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 18,
+    "implOnly": 41,
+    "typo": [
+      {
+        "text": "Location",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "Property type",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "BHK",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "Budget",
+        "diff": "size 13->14"
+      },
+      {
+        "text": "₹78L – ₹1.4Cr",
+        "diff": "size 23->24"
+      },
+      {
+        "text": "₹1.1Cr – ₹2.2Cr",
+        "diff": "size 23->24"
+      }
+    ],
+    "struct": [
+      "content width 768 -> 732",
+      "button radius [0px | 6px | pill] -> [6px | 8px | pill]"
+    ],
+    "score": 22
+  },
+  {
+    "id": "P-04",
+    "width": 768,
+    "shared": 20,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.92 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 6,
+    "implOnly": 10,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 732",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [47 | 96]",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "P-05",
+    "width": 768,
+    "shared": 20,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.92 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 11,
+    "implOnly": 12,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 732",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52 | 85] -> [47 | 96]",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "P-15",
+    "width": 768,
+    "shared": 17,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.93 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 11,
+    "implOnly": 18,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 732",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156) | 1px rgb(225, 228, 238)]",
+      "control height [52] -> [13 | 44 | 47]",
+      "button radius [0px | 6px | pill] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "P-19",
+    "width": 768,
+    "shared": 17,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.92 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 8,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 732",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [104] -> [146 | 47]",
+      "button radius [0px | 6px | pill] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-02",
+    "width": 768,
+    "shared": 16,
+    "mismatched": [],
+    "protoOnly": 3,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 620",
+      "control border [1px rgb(198, 204, 224)] -> [0px rgb(255, 255, 255) | 0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [16 | 44 | 47]",
+      "button radius [0px | 6px | pill] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-03",
+    "width": 768,
+    "shared": 10,
+    "mismatched": [],
+    "protoOnly": 3,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 620",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156) | 1px rgb(185, 195, 236)]",
+      "control height [52] -> [47 | 63]",
+      "button radius [6px | 8px] -> [6px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "S-24",
+    "width": 768,
+    "shared": 6,
+    "mismatched": [
+      {
+        "text": "Reply",
+        "note": "proto at 0.75 on rgb(255, 255, 255); impl at 0.47 on rgb(244, 246, 251)"
+      }
+    ],
+    "protoOnly": 8,
+    "implOnly": 8,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [85] -> [121]",
+      "button radius [50% | 6px | pill] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-08",
+    "width": 768,
+    "shared": 7,
+    "mismatched": [],
+    "protoOnly": 7,
+    "implOnly": 7,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [104 | 52] -> [146 | 44 | 47]",
+      "button radius [0px | 50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "B-24",
+    "width": 768,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 4,
+    "implOnly": 10,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "control border [1px rgb(198, 204, 224) | 1px rgb(225, 228, 238)] -> [0px rgb(42, 50, 80) | 1px rgb(138, 142, 156)]",
+      "control height [52] -> [13 | 47]",
+      "button radius [50% | 6px | 8px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "A-23",
+    "width": 768,
+    "shared": 7,
+    "mismatched": [],
+    "protoOnly": 24,
+    "implOnly": 17,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [85] -> [121 | 72]",
+      "button radius [6px] -> [6px | 8px]"
+    ],
+    "score": 20
+  },
+  {
+    "id": "P-10",
+    "width": 768,
+    "shared": 24,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.96 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 11,
+    "implOnly": 36,
+    "typo": [
+      {
+        "text": "₹78L – ₹1.4Cr",
+        "diff": "size 23->24"
+      },
+      {
+        "text": "₹1.1Cr – ₹2.2Cr",
+        "diff": "size 23->24"
+      },
+      {
+        "text": "₹52L – ₹85L",
+        "diff": "size 23->24"
+      }
+    ],
+    "struct": [
+      "content width 768 -> 732",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 16
+  },
+  {
+    "id": "S-01",
+    "width": 768,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 1,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 620",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "B-01",
+    "width": 768,
+    "shared": 7,
+    "mismatched": [],
+    "protoOnly": 2,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 640",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-01",
+    "width": 768,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 2,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 420",
+      "control border [1px rgb(198, 204, 224)] -> [1px rgb(138, 142, 156)]",
+      "control height [52] -> [47]"
+    ],
+    "score": 15
+  },
+  {
+    "id": "A-17",
+    "width": 768,
+    "shared": 18,
+    "mismatched": [],
+    "protoOnly": 18,
+    "implOnly": 11,
+    "typo": [
+      {
+        "text": "Delivery record",
+        "diff": "size 21->17"
+      }
+    ],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 12
+  },
+  {
+    "id": "P-01",
+    "width": 768,
+    "shared": 64,
+    "mismatched": [],
+    "protoOnly": 28,
+    "implOnly": 19,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 732",
+      "button radius [6px] -> [0px | 6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-03",
+    "width": 768,
+    "shared": 52,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.96 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 16,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 732",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-09",
+    "width": 768,
+    "shared": 18,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.01 on rgb(255, 255, 255); impl at 0.92 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 6,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 732",
+      "button radius [0px | 6px] -> [6px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-08",
+    "width": 768,
+    "shared": 14,
+    "mismatched": [],
+    "protoOnly": 15,
+    "implOnly": 11,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-09",
+    "width": 768,
+    "shared": 12,
+    "mismatched": [],
+    "protoOnly": 0,
+    "implOnly": 2,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 720",
+      "button radius [0px | 50% | 6px | pill] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-14",
+    "width": 768,
+    "shared": 16,
+    "mismatched": [],
+    "protoOnly": 13,
+    "implOnly": 15,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-18",
+    "width": 768,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 3,
+    "implOnly": 3,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "S-20",
+    "width": 768,
+    "shared": 8,
+    "mismatched": [],
+    "protoOnly": 9,
+    "implOnly": 13,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px | pill] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-03",
+    "width": 768,
+    "shared": 6,
+    "mismatched": [],
+    "protoOnly": 12,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px] -> [6px | 8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-05",
+    "width": 768,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 12,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-18",
+    "width": 768,
+    "shared": 11,
+    "mismatched": [],
+    "protoOnly": 0,
+    "implOnly": 4,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "B-22",
+    "width": 768,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 28,
+    "implOnly": 20,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [50% | 6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-04",
+    "width": 768,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 24,
+    "implOnly": 17,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-09",
+    "width": 768,
+    "shared": 10,
+    "mismatched": [],
+    "protoOnly": 16,
+    "implOnly": 9,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-11",
+    "width": 768,
+    "shared": 13,
+    "mismatched": [],
+    "protoOnly": 13,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-13",
+    "width": 768,
+    "shared": 16,
+    "mismatched": [],
+    "protoOnly": 27,
+    "implOnly": 16,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-18",
+    "width": 768,
+    "shared": 12,
+    "mismatched": [],
+    "protoOnly": 19,
+    "implOnly": 29,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [0px | 6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "A-25",
+    "width": 768,
+    "shared": 16,
+    "mismatched": [],
+    "protoOnly": 24,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736",
+      "button radius [6px] -> [8px]"
+    ],
+    "score": 10
+  },
+  {
+    "id": "P-16",
+    "width": 768,
+    "shared": 15,
+    "mismatched": [
+      {
+        "text": "Sign in",
+        "note": "proto at 0.02 on rgb(255, 255, 255); impl at 0.93 on rgb(15, 36, 120)"
+      }
+    ],
+    "protoOnly": 11,
+    "implOnly": 26,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 760"
+    ],
+    "score": 5
+  },
+  {
+    "id": "S-04",
+    "width": 768,
+    "shared": 9,
+    "mismatched": [],
+    "protoOnly": 5,
+    "implOnly": 5,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 620"
+    ],
+    "score": 5
+  },
+  {
+    "id": "B-02",
+    "width": 768,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 9,
+    "implOnly": 15,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 640"
+    ],
+    "score": 5
+  },
+  {
+    "id": "A-06",
+    "width": 768,
+    "shared": 14,
+    "mismatched": [],
+    "protoOnly": 15,
+    "implOnly": 14,
+    "typo": [],
+    "struct": [
+      "content width 768 -> 736"
+    ],
+    "score": 5
+  }
+]

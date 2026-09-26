@@ -58,7 +58,7 @@
     "shared": 28,
     "mismatched": [],
     "protoOnly": 21,
-    "implOnly": 39,
+    "implOnly": 38,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -74,7 +74,7 @@
     "shared": 20,
     "mismatched": [],
     "protoOnly": 1,
-    "implOnly": 5,
+    "implOnly": 4,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -90,7 +90,7 @@
     "shared": 17,
     "mismatched": [],
     "protoOnly": 1,
-    "implOnly": 6,
+    "implOnly": 5,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -106,7 +106,7 @@
     "shared": 15,
     "mismatched": [],
     "protoOnly": 8,
-    "implOnly": 5,
+    "implOnly": 4,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -123,11 +123,11 @@
     "mismatched": [
       {
         "text": "Reply",
-        "note": "proto at 0.75 on rgb(255, 255, 255); impl at 0.47 on rgb(244, 246, 251)"
+        "note": "proto at 0.75 on rgb(255, 255, 255); impl at 0.46 on rgb(244, 246, 251)"
       }
     ],
     "protoOnly": 8,
-    "implOnly": 11,
+    "implOnly": 10,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -143,7 +143,7 @@
     "shared": 21,
     "mismatched": [],
     "protoOnly": 3,
-    "implOnly": 13,
+    "implOnly": 12,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -252,10 +252,10 @@
   {
     "id": "B-24",
     "width": 1440,
-    "shared": 20,
+    "shared": 21,
     "mismatched": [],
-    "protoOnly": 8,
-    "implOnly": 15,
+    "protoOnly": 7,
+    "implOnly": 12,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -466,7 +466,7 @@
     "shared": 45,
     "mismatched": [],
     "protoOnly": 12,
-    "implOnly": 10,
+    "implOnly": 9,
     "typo": [],
     "struct": [
       "content width 1440 -> 1184",
@@ -582,25 +582,11 @@
     "shared": 21,
     "mismatched": [],
     "protoOnly": 1,
-    "implOnly": 3,
+    "implOnly": 2,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
       "button radius [0px | 50% | 6px | 8px | pill] -> [6px]"
-    ],
-    "score": 10
-  },
-  {
-    "id": "B-02",
-    "width": 1440,
-    "shared": 11,
-    "mismatched": [],
-    "protoOnly": 2,
-    "implOnly": 7,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 640",
-      "button radius [6px | 8px] -> [6px]"
     ],
     "score": 10
   },
@@ -611,11 +597,11 @@
     "mismatched": [
       {
         "text": "What the subscription covers",
-        "note": "proto at 0.2 on rgb(255, 247, 232); impl at 0.73 on rgb(255, 255, 255)"
+        "note": "proto at 0.2 on rgb(255, 247, 232); impl at 0.67 on rgb(255, 255, 255)"
       }
     ],
     "protoOnly": 15,
-    "implOnly": 12,
+    "implOnly": 11,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -643,7 +629,7 @@
     "shared": 15,
     "mismatched": [],
     "protoOnly": 23,
-    "implOnly": 19,
+    "implOnly": 16,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176",
@@ -672,7 +658,7 @@
     "mismatched": [
       {
         "text": "Approve verification",
-        "note": "proto at 0.38 on rgb(14, 107, 69); impl at 0.91 on rgb(27, 59, 179)"
+        "note": "proto at 0.38 on rgb(14, 107, 69); impl at 0.9 on rgb(27, 59, 179)"
       }
     ],
     "protoOnly": 16,
@@ -690,7 +676,7 @@
     "shared": 29,
     "mismatched": [],
     "protoOnly": 9,
-    "implOnly": 11,
+    "implOnly": 10,
     "typo": [
       {
         "text": "₹4,200",
@@ -699,6 +685,24 @@
     ],
     "struct": [
       "content width 1440 -> 1176"
+    ],
+    "score": 7
+  },
+  {
+    "id": "A-17",
+    "width": 1440,
+    "shared": 46,
+    "mismatched": [],
+    "protoOnly": 19,
+    "implOnly": 14,
+    "typo": [
+      {
+        "text": "Delivery record",
+        "diff": "size 22->17"
+      }
+    ],
+    "struct": [
+      "content width 1440 -> 1184"
     ],
     "score": 7
   },
@@ -856,7 +860,7 @@
     "shared": 11,
     "mismatched": [],
     "protoOnly": 1,
-    "implOnly": 9,
+    "implOnly": 8,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -869,7 +873,7 @@
     "shared": 23,
     "mismatched": [],
     "protoOnly": 16,
-    "implOnly": 14,
+    "implOnly": 13,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -882,7 +886,7 @@
     "shared": 11,
     "mismatched": [],
     "protoOnly": 3,
-    "implOnly": 5,
+    "implOnly": 4,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -908,7 +912,7 @@
     "shared": 23,
     "mismatched": [],
     "protoOnly": 14,
-    "implOnly": 16,
+    "implOnly": 15,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -921,7 +925,7 @@
     "shared": 27,
     "mismatched": [],
     "protoOnly": 14,
-    "implOnly": 25,
+    "implOnly": 24,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -934,7 +938,7 @@
     "shared": 18,
     "mismatched": [],
     "protoOnly": 4,
-    "implOnly": 4,
+    "implOnly": 3,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -947,7 +951,7 @@
     "shared": 21,
     "mismatched": [],
     "protoOnly": 8,
-    "implOnly": 11,
+    "implOnly": 10,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -960,7 +964,7 @@
     "shared": 17,
     "mismatched": [],
     "protoOnly": 9,
-    "implOnly": 16,
+    "implOnly": 15,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
@@ -973,10 +977,23 @@
     "shared": 16,
     "mismatched": [],
     "protoOnly": 7,
-    "implOnly": 9,
+    "implOnly": 8,
     "typo": [],
     "struct": [
       "content width 1440 -> 1176"
+    ],
+    "score": 5
+  },
+  {
+    "id": "B-02",
+    "width": 1440,
+    "shared": 4,
+    "mismatched": [],
+    "protoOnly": 9,
+    "implOnly": 15,
+    "typo": [],
+    "struct": [
+      "content width 1440 -> 640"
     ],
     "score": 5
   },
@@ -1200,19 +1217,6 @@
     "mismatched": [],
     "protoOnly": 5,
     "implOnly": 10,
-    "typo": [],
-    "struct": [
-      "content width 1440 -> 1184"
-    ],
-    "score": 5
-  },
-  {
-    "id": "A-17",
-    "width": 1440,
-    "shared": 46,
-    "mismatched": [],
-    "protoOnly": 19,
-    "implOnly": 14,
     "typo": [],
     "struct": [
       "content width 1440 -> 1184"

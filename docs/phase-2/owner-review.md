@@ -4,7 +4,7 @@ One page for the review. What is open, what each decision needs, and the
 evidence for it. The full record behind every line here is the
 [decision sheet](decision-sheet.md); this page links rather than repeats.
 
-**Implementation:** `b9e7e53` on `claude/phase-2-frontend` (kkl-web)
+**Implementation:** `5c3a658` on `claude/phase-2-frontend` (kkl-web)
 **Approved design:** kkl-design `5bc3512`, unmodified
 **Not requested:** acceptance, deployment, or any exception marked accepted —
 acceptance is a person saying yes.
@@ -15,7 +15,7 @@ acceptance is a person saying yes.
 
 | # | What it is | Evidence | Decision needed | Owner |
 |---|---|---|---|---|
-| **E-P1** | Browser **Back leaves the listing editor without the custom dialog**. Forward restores unsaved edits with an "Unsaved work restored." notice; **nothing is ever silently saved** — a second tab reads the server value | [Video](evidence/e-p1/e-p1-back-forward-b95e81e.webm) · [labelled frame strip](evidence/e-p1/e-p1-frame-strip-b95e81e.png) · [raw frames](evidence/e-p1/raw/) — captured at `b95e81e`; behaviour identical at `b9e7e53` | Accept the behaviour, or fund the Next 16 Cache Components route and its four named costs | Client, or the designer who specified B-15 |
+| **E-P1** | Browser **Back leaves the listing editor without the custom dialog**. Forward restores unsaved edits with an "Unsaved work restored." notice; **nothing is ever silently saved** — a second tab reads the server value | [Video](evidence/e-p1/e-p1-back-forward-b95e81e.webm) · [labelled frame strip](evidence/e-p1/e-p1-frame-strip-b95e81e.png) · [raw frames](evidence/e-p1/raw/) — captured at `b95e81e`; behaviour identical at `5c3a658` (B-15 suite green) | Accept the behaviour, or fund the Next 16 Cache Components route and its four named costs | Client, or the designer who specified B-15 |
 | **E-P2a** | Focus indicator gains a 1px ink companion edge inside the unchanged saffron ring (2.11:1 → 17.63:1 on white) | [Comparison sheet](evidence/e-p2/e-p2-prototype-vs-corrected-b9e7e53.png) — **approved prototype versus accessibility-corrected implementation**, current at `b9e7e53`; [raw crops](evidence/e-p2/raw/) | Keep it, or name another remedy | Designer |
 | **E-P2b** | Control border darkened `#C6CCE0` → `#8A8E9C` (1.60:1 → 3.27:1 on white) | Same sheet | Keep it, or name another remedy | Designer |
 | **E-P3** | Review imagery draws the attribution band on **every** card; the approved P-01 draws it on the project cards and not the property cards. On P-03 and B-07 the band is approved and both sides carry it | [Attribution sheet, four screens](evidence/e-p3/e-p3-attribution-b9e7e53.png) — real baseline photographs, both sides, now including B-07's restored thumbnails and the approved "No photos yet" state. The earlier [three-screen sheet](evidence/e-p3/e-p3-attribution-b95e81e.png) is kept, labelled with its original commit `b95e81e`, for provenance | Confirm the proposed treatment (keep the band now; remove it from property cards when licensed photography lands), or ask for it dropped now | Designer |
@@ -41,13 +41,22 @@ frame — a whitespace-sensitive selector, silently swallowed. Closed out:
 - **Never swallowed again:** all four prototype-driving scripts now assert the
   frame's rendered width and fail the run (`scripts/proto-width.mjs`);
   negative-tested with a width the prototype does not offer.
-- **Rerun and investigated:** the corrected sweep surfaced a recorded class —
-  the approved screens step display type down at mobile (titles 26/30/34, flow
-  titles 24/27/30, section headings 21/24/26, and four more) while the
-  implementation holds the desktop step — plus five flat-size rows. Every row
-  is classified in [`visual-differences.md`](visual-differences.md) §6.
-  **None is corrected in this pass** — a responsive-type pass is a cycle of
-  its own, and it is yours to schedule.
+- **Rerun, classified — and now corrected:** the corrected sweep surfaced a
+  recorded class — the approved screens step display type down at mobile
+  (titles 26/30/34, flow titles 24/27/30, section headings 21/24/26, and four
+  more) while the implementation held the desktop step — plus five flat-size
+  rows. You authorised the bounded correction; **it landed at `5c3a658`**.
+  Every row was verified against the approved sources, corrected with the
+  semantic style that owns the role at the approved 620/1060 breakpoints, and
+  re-measured at 390, 768 and 1440. The tablet sweep is new this pass, and it
+  caught four console-chrome rows the extreme widths cannot pair (the Builder
+  header subscription chip at 14px, both rail-footer value steps, and the
+  Seller header balance as the approved pill button) — all fixed. The two
+  pairing suspects were real and are fixed: B-18's specimen is rebuilt to the
+  approved composition, and B-24's aside is rebuilt to the approved
+  account-status tile panel. Row by row:
+  [`visual-differences.md`](visual-differences.md) §6; representative screens
+  at all three widths: [`evidence/responsive-type/`](evidence/responsive-type/).
 
 ## 3 · Manual verification — open, listed separately
 
@@ -88,13 +97,28 @@ a bug.
 
 ## 5 · Verification at this commit
 
-All green at `b9e7e53` under the review configuration in
+All green at `5c3a658` under the review configuration in
 [`local-review.md`](local-review.md): typecheck/lint clean · unit 27/27 ·
 tokens 30/30 + 43/43 · contrast 24/24 + corrections 12/12 · visual values
 24/24 · typography 11/11 · zoom 32/32 · accessibility 22/22 · names 24/24 ·
 forced-colors 13/13 · route sweep 224/224 · no-JavaScript 51/51 ·
 enquiry/Seller/Builder/Admin 17/26/48/36 · B-15 9/9 · deployment guard 10/10
 (+2 pending a backend) · coverage 113/113.
+
+Geometry differ, re-run on the new build: full sweeps at 1440 and 390
+(`visual/geometry-1440.json`, `visual/geometry-390.json`) plus a targeted
+tablet sweep at 768 over the 38 affected screens (`visual/geometry-768.json`).
+Every corrected row closes at all three widths; what remains is the recorded
+set in [`visual-differences.md`](visual-differences.md) §6 — the P-02/P-10
+baseline-internal inconsistencies and the A-17 shell-title wording. No
+horizontal overflow on the 18 representative pages at any of the three widths.
+
+One evidence fault found and fixed this pass: `visual/index.json` as committed
+at `4f125ec` had been truncated to the two E-P3 screens by an ONLY-filtered
+capture run, which made the coverage generator report 95 uncovered rows. The
+full index is restored from `b9e7e53` with the 38 affected screens' rows
+refreshed from the new build; the generator again reports 97 pairs, 4 nested,
+12 library, 0 uncovered.
 
 A count is not coverage — five defects across these passes had a passing check
 sitting on top of them, D-20 included. The list is on the

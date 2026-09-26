@@ -16,6 +16,24 @@ geometry measured the frame it intended, and the PNG captures used a script
 that already had the working fallback. The differences the corrected run
 surfaced are classified in `../visual-differences.md` §6.
 
+## Tablet sweep, and the index fault at `4f125ec`
+
+`geometry-768.json` is a **targeted** sweep: the screens the responsive-type
+pass (`5c3a658`) touched, measured at the tablet verification width. The
+screen map carries only the extreme widths per pair, so the run extends the
+affected pairs in memory before handing off to the unmodified geometry
+script; the frame-width assertion in `scripts/proto-width.mjs` applies
+unchanged. Its remaining rows are the same recorded set as the two full
+sweeps — see `../visual-differences.md` §6.
+
+**`index.json` as committed at `4f125ec` was truncated** to the two E-P3
+screens: an ONLY-filtered capture run rewrote the index with just the rows it
+captured. Restored in this pass from the `b9e7e53` revision, with the
+affected screens' rows — and their PNG pairs — refreshed from the `5c3a658`
+build. The coverage generator (`scripts/build-coverage-matrix.mjs`) reads this
+index; the truncation, not a coverage loss, was behind its "95 uncovered"
+report.
+
 ## Two states, captured separately
 
 | Files | State |
@@ -103,7 +121,9 @@ To compare the real photographs, run the capture in an environment that allows
 
 ## What is in them, and what is not
 
-**17 screens of 113 inventory rows**, at 1440 and 390. The set was chosen by
+**97 screens of 113 inventory rows** as captured pairs, at 1440 and 390 — the
+generated map is `../coverage.md`; the remaining rows are covered as nested
+states (4) or library evidence (12). The pair set was chosen by
 the priority list in the acceptance pass: public portal, Seller
 dashboard/marketplace/purchase result/billing, Builder
 dashboard/editor/enquiries/restrictions, Admin dashboard/KYC review/wallet
