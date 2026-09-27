@@ -1,793 +1,926 @@
 [
- {
-  "id": "P-01",
-  "group": "P",
-  "name": "Homepage",
-  "route": "/",
-  "states": "Default, guest, signed-in, mobile menu open"
- },
- {
-  "id": "P-02",
-  "group": "P",
-  "name": "Search results",
-  "route": "/search",
-  "states": "Loading, results, no results, filters applied, reset, sorted, pagination, error"
- },
- {
-  "id": "P-03",
-  "group": "P",
-  "name": "Property / project detail",
-  "route": "/property/:id",
-  "states": "Gallery, specifications, amenities, location, possession, no media, enquiry CTA"
- },
- {
-  "id": "P-04",
-  "group": "P",
-  "name": "Enquiry form",
-  "route": "/property/:id/enquiry",
-  "states": "Idle, validation error, submitting, needs sign-in, submitted"
- },
- {
-  "id": "P-05",
-  "group": "P",
-  "name": "Site-visit request",
-  "route": "/property/:id/site-visit",
-  "states": "Request form, submitted (not confirmed), builder yet to respond"
- },
- {
-  "id": "P-06",
-  "group": "P",
-  "name": "Mobile OTP sign-in / register",
-  "route": "/auth",
-  "states": "Enter mobile, enter OTP, invalid OTP, expired, resend cooldown, too many attempts, success"
- },
- {
-  "id": "P-07",
-  "group": "P",
-  "name": "Enquiry confirmation",
-  "route": "/enquiry/:id/confirmed",
-  "states": "Success with details preserved across sign-in"
- },
- {
-  "id": "P-08",
-  "group": "P",
-  "name": "Requirement capture (5 steps)",
-  "route": "/find-my-match",
-  "states": "Step 1-5, validation, back, resume, abandon"
- },
- {
-  "id": "P-09",
-  "group": "P",
-  "name": "Requirement review",
-  "route": "/find-my-match/review",
-  "states": "Summary, edit, submit"
- },
- {
-  "id": "P-10",
-  "group": "P",
-  "name": "Matched properties",
-  "route": "/matches",
-  "states": "Matches ordered by locality and timing, no-match naming the clash, refine"
- },
- {
-  "id": "P-11",
-  "group": "P",
-  "name": "Shortlist",
-  "route": "/account/shortlist",
-  "states": "Empty, populated, removed item"
- },
- {
-  "id": "P-12",
-  "group": "P",
-  "name": "Buyer dashboard",
-  "route": "/account",
-  "states": "First use, active, with requirement"
- },
- {
-  "id": "P-13",
-  "group": "P",
-  "name": "My enquiries",
-  "route": "/account/enquiries",
-  "states": "Empty, list with statuses"
- },
- {
-  "id": "P-14",
-  "group": "P",
-  "name": "Enquiry detail",
-  "route": "/account/enquiries/:id",
-  "states": "Submitted, seen by builder, responded, visit requested"
- },
- {
-  "id": "P-15",
-  "group": "P",
-  "name": "Profile & settings",
-  "route": "/account/profile",
-  "states": "View, edit, password, validation"
- },
- {
-  "id": "P-16",
-  "group": "P",
-  "name": "Notifications",
-  "route": "/account/notifications",
-  "states": "Empty, unread, read"
- },
- {
-  "id": "P-17",
-  "group": "P",
-  "name": "For builders (info + register)",
-  "route": "/builders",
-  "states": "Default"
- },
- {
-  "id": "P-18",
-  "group": "P",
-  "name": "For brokers (info + register)",
-  "route": "/brokers",
-  "states": "Default"
- },
- {
-  "id": "P-19",
-  "group": "P",
-  "name": "Contact & support",
-  "route": "/support",
-  "states": "Form, submitted"
- },
- {
-  "id": "P-20",
-  "group": "P",
-  "name": "Policy page template",
-  "route": "/legal/:slug",
-  "states": "Copy pending placeholder"
- },
- {
-  "id": "P-21",
-  "group": "P",
-  "name": "System states",
-  "route": "within C-08, C-09",
-  "states": "404, session expired, access denied, error with retry"
- },
- {
-  "id": "S-01",
-  "group": "S",
-  "name": "Seller registration",
-  "route": "/seller/register",
-  "states": "Mobile OTP, details, duplicate account"
- },
- {
-  "id": "S-02",
-  "group": "S",
-  "name": "Onboarding \u2014 business details",
-  "route": "/seller/onboarding",
-  "states": "Empty, validation, saved"
- },
- {
-  "id": "S-03",
-  "group": "S",
-  "name": "KYC submission (PAN, Aadhaar)",
-  "route": "/seller/kyc",
-  "states": "Empty, uploading, file too large, wrong format, submitted"
- },
- {
-  "id": "S-04",
-  "group": "S",
-  "name": "KYC status",
-  "route": "/seller/kyc/status",
-  "states": "Not submitted, pending, approved, rejected with reason, resubmission"
- },
- {
-  "id": "S-05",
-  "group": "S",
-  "name": "Restricted / suspended account",
-  "route": "/seller/restricted",
-  "states": "Pre-approval, suspended, recovery action"
- },
- {
-  "id": "S-06",
-  "group": "S",
-  "name": "Seller dashboard",
-  "route": "/seller",
-  "states": "First use, active, low balance"
- },
- {
-  "id": "S-07",
-  "group": "S",
-  "name": "Lead marketplace",
-  "route": "/seller/leads",
-  "states": "List, filters, sort, Sale tab, no results, loading, masked fields"
- },
- {
-  "id": "S-08",
-  "group": "S",
-  "name": "Lead preview (masked)",
-  "route": "/seller/leads/:id",
-  "states": "Masked contact, qualification summary, aging badge"
- },
- {
-  "id": "S-09",
-  "group": "S",
-  "name": "Purchase review & confirm",
-  "route": "/seller/leads/:id/buy",
-  "states": "Review, confirm, processing"
- },
- {
-  "id": "S-10",
-  "group": "S",
-  "name": "Purchase failure states",
-  "route": "\u2014",
-  "states": "Insufficient balance, already sold, deduction failed, retry"
- },
- {
-  "id": "S-11",
-  "group": "S",
-  "name": "Purchase success & contact reveal",
-  "route": "/seller/leads/:id/purchased",
-  "states": "Revealed contact, download CSV, receipt"
- },
- {
-  "id": "S-12",
-  "group": "S",
-  "name": "Purchased leads",
-  "route": "/seller/purchased",
-  "states": "Empty, list, filters, export"
- },
- {
-  "id": "S-13",
-  "group": "S",
-  "name": "Purchased lead detail",
-  "route": "/seller/purchased/:id",
-  "states": "Full contact, qualification, call summary, download"
- },
- {
-  "id": "S-14",
-  "group": "S",
-  "name": "Credits & balance",
-  "route": "/seller/billing",
-  "states": "Balance, expiring soon, zero balance"
- },
- {
-  "id": "S-15",
-  "group": "S",
-  "name": "Recharge credits",
-  "route": "/seller/billing/recharge",
-  "states": "Amount entry, packs, validation"
- },
- {
-  "id": "S-16",
-  "group": "S",
-  "name": "Payment handoff & result",
-  "route": "/seller/billing/payment",
-  "states": "Redirect, pending, success, failure, retry"
- },
- {
-  "id": "S-17",
-  "group": "S",
-  "name": "Transactions & usage history",
-  "route": "/seller/billing/history",
-  "states": "Empty, list, filters, ledger detail"
- },
- {
-  "id": "S-18",
-  "group": "S",
-  "name": "Credit expiry & renewal",
-  "route": "/seller/billing/expiry",
-  "states": "Active, expiring, expired \u2014 alternatives annotated"
- },
- {
-  "id": "S-19",
-  "group": "S",
-  "name": "Invoices",
-  "route": "/seller/billing/invoices",
-  "states": "Empty, list, download"
- },
- {
-  "id": "S-20",
-  "group": "S",
-  "name": "Invoice detail",
-  "route": "/seller/billing/invoices/:id",
-  "states": "Tax detail, download PDF"
- },
- {
-  "id": "S-21",
-  "group": "S",
-  "name": "Billing information",
-  "route": "/seller/billing/details",
-  "states": "View, edit, validation"
- },
- {
-  "id": "S-22",
-  "group": "S",
-  "name": "Support tickets",
-  "route": "/seller/support",
-  "states": "Empty, open, closed"
- },
- {
-  "id": "S-23",
-  "group": "S",
-  "name": "New ticket",
-  "route": "/seller/support/new",
-  "states": "Form, attachment, submitted"
- },
- {
-  "id": "S-24",
-  "group": "S",
-  "name": "Ticket detail & replies",
-  "route": "/seller/support/:id",
-  "states": "Awaiting reply, replied, resolved, reopened"
- },
- {
-  "id": "S-25",
-  "group": "S",
-  "name": "Profile & settings",
-  "route": "/seller/profile",
-  "states": "View, edit, password, notification preferences"
- },
- {
-  "id": "B-01",
-  "group": "B",
-  "name": "Builder registration",
-  "route": "/builder/register",
-  "states": "Mobile OTP, company details"
- },
- {
-  "id": "B-02",
-  "group": "B",
-  "name": "Builder KYC & verification",
-  "route": "/builder/kyc",
-  "states": "Same as Seller plus company documents, statuses"
- },
- {
-  "id": "B-03",
-  "group": "B",
-  "name": "Subscription overview",
-  "route": "/builder/subscription",
-  "states": "Not subscribed, plan detail, active, price placeholder"
- },
- {
-  "id": "B-04",
-  "group": "B",
-  "name": "Subscription payment result",
-  "route": "/builder/subscription/payment",
-  "states": "Pending, success, failure, retry"
- },
- {
-  "id": "B-05",
-  "group": "B",
-  "name": "Renewal & expiry",
-  "route": "/builder/subscription/renewal",
-  "states": "Renewal due, grace, expired \u2014 listing outcome alternatives"
- },
- {
-  "id": "B-06",
-  "group": "B",
-  "name": "Builder dashboard",
-  "route": "/builder",
-  "states": "First use, active, restricted"
- },
- {
-  "id": "B-07",
-  "group": "B",
-  "name": "My properties",
-  "route": "/builder/properties",
-  "states": "Empty, list, filters, statuses (draft, published, unpublished)"
- },
- {
-  "id": "B-08",
-  "group": "B",
-  "name": "Create listing \u2014 basics",
-  "route": "/builder/properties/new",
-  "states": "Empty, validation, autosave"
- },
- {
-  "id": "B-09",
-  "group": "B",
-  "name": "Create listing \u2014 location",
-  "route": "/builder/properties/new/location",
-  "states": "Hierarchy selection, map pin, validation"
- },
- {
-  "id": "B-10",
-  "group": "B",
-  "name": "Create listing \u2014 pricing & configuration",
-  "route": "/builder/properties/new/pricing",
-  "states": "Per-configuration pricing, validation"
- },
- {
-  "id": "B-11",
-  "group": "B",
-  "name": "Create listing \u2014 specifications & amenities",
-  "route": "/builder/properties/new/specs",
-  "states": "Selection, custom entry"
- },
- {
-  "id": "B-12",
-  "group": "B",
-  "name": "Create listing \u2014 media",
-  "route": "/builder/properties/new/media",
-  "states": "Upload progress, failure, retry, reorder, remove, video link"
- },
- {
-  "id": "B-13",
-  "group": "B",
-  "name": "Create listing \u2014 preview & publish",
-  "route": "/builder/properties/new/preview",
-  "states": "Preview, publish, save draft, blocked by subscription"
- },
- {
-  "id": "B-14",
-  "group": "B",
-  "name": "Listing actions",
-  "route": "\u2014",
-  "states": "Unpublish, delete confirmation, republish"
- },
- {
-  "id": "B-15",
-  "group": "B",
-  "name": "Edit listing & unsaved changes",
-  "route": "/builder/properties/:id/edit",
-  "states": "Dirty state, discard, validation summary"
- },
- {
-  "id": "B-16",
-  "group": "B",
-  "name": "Enquiries on my listings",
-  "route": "/builder/enquiries",
-  "states": "Empty, new (unread), list, filters"
- },
- {
-  "id": "B-17",
-  "group": "B",
-  "name": "Enquiry detail",
-  "route": "/builder/enquiries/:id",
-  "states": "Free disclosure vs pay-to-unlock \u2014 both annotated"
- },
- {
-  "id": "B-18",
-  "group": "B",
-  "name": "New-enquiry notification",
-  "route": "\u2014",
-  "states": "Toast, in-portal badge, email/WhatsApp copy"
- },
- {
-  "id": "B-19",
-  "group": "B",
-  "name": "Access restrictions",
-  "route": "\u2014",
-  "states": "KYC not submitted, pending, rejected, no subscription, expired, account suspended \u2014 each with recovery"
- },
- {
-  "id": "B-20",
-  "group": "B",
-  "name": "Lead marketplace (Builder access)",
-  "route": "/builder/marketplace",
-  "states": "Masked leads, Sale tab, filters, purchase, already-owned block"
- },
- {
-  "id": "B-21",
-  "group": "B",
-  "name": "Purchased leads (Builder access)",
-  "route": "/builder/leads",
-  "states": "List, revealed contact, CSV download, Excel simulated"
- },
- {
-  "id": "B-22",
-  "group": "B",
-  "name": "Billing & credits (Builder access)",
-  "route": "/builder/billing",
-  "states": "Balance, recharge, ledger, subscription charges alongside credits"
- },
- {
-  "id": "B-23",
-  "group": "B",
-  "name": "Support (Builder access)",
-  "route": "/builder/support",
-  "states": "Ticket list, new ticket, conversation thread"
- },
- {
-  "id": "B-24",
-  "group": "B",
-  "name": "Profile & settings (Builder access)",
-  "route": "/builder/profile",
-  "states": "Contact details, enquiry alerts, verification status"
- },
- {
-  "id": "A-01",
-  "group": "A",
-  "name": "Admin sign-in",
-  "route": "/admin/login",
-  "states": "Form, invalid, locked out"
- },
- {
-  "id": "A-02",
-  "group": "A",
-  "name": "Admin dashboard",
-  "route": "/admin",
-  "states": "Queues, volumes, alerts"
- },
- {
-  "id": "A-03",
-  "group": "A",
-  "name": "Users",
-  "route": "/admin/users",
-  "states": "List, filters, role, status, search"
- },
- {
-  "id": "A-04",
-  "group": "A",
-  "name": "User detail",
-  "route": "/admin/users/:id",
-  "states": "Profile, role, status actions, history"
- },
- {
-  "id": "A-05",
-  "group": "A",
-  "name": "KYC queue",
-  "route": "/admin/kyc",
-  "states": "Pending, resubmitted, empty, overdue"
- },
- {
-  "id": "A-06",
-  "group": "A",
-  "name": "KYC applicant review",
-  "route": "/admin/kyc/:id",
-  "states": "Documents, zoom, checklist"
- },
- {
-  "id": "A-07",
-  "group": "A",
-  "name": "KYC decision",
-  "route": "within /admin/kyc/:id",
-  "states": "Approve (checklist-gated), reject with reason, request resubmission, outcome panel"
- },
- {
-  "id": "A-08",
-  "group": "A",
-  "name": "Property review queue",
-  "route": "/admin/properties",
-  "states": "Pending, published, reported, filters"
- },
- {
-  "id": "A-09",
-  "group": "A",
-  "name": "Property detail & moderation",
-  "route": "/admin/properties/:id",
-  "states": "Approve, unpublish with reason, history"
- },
- {
-  "id": "A-10",
-  "group": "A",
-  "name": "Lead intake overview",
-  "route": "/admin/leads/intake",
-  "states": "Sources, volumes, duplicates"
- },
- {
-  "id": "A-11",
-  "group": "A",
-  "name": "Intake results & failures",
-  "route": "/admin/leads/intake/:id",
-  "states": "Accepted, rejected rows, validation errors, re-run"
- },
- {
-  "id": "A-12",
-  "group": "A",
-  "name": "Leads",
-  "route": "/admin/leads",
-  "states": "List, lifecycle filters, aging, Sale tab"
- },
- {
-  "id": "A-13",
-  "group": "A",
-  "name": "Lead detail & history",
-  "route": "/admin/leads/:id",
-  "states": "Qualification answers, score, status history, buyer"
- },
- {
-  "id": "A-14",
-  "group": "A",
-  "name": "Lead pricing & aging rules",
-  "route": "/admin/settings/pricing",
-  "states": "Price table, 20% aging discount, Sale window"
- },
- {
-  "id": "A-15",
-  "group": "A",
-  "name": "Platform settings",
-  "route": "/admin/settings",
-  "states": "Taxonomy, calling hours, templates"
- },
- {
-  "id": "A-16",
-  "group": "A",
-  "name": "Orders & purchases",
-  "route": "/admin/orders",
-  "states": "List, filters, order detail"
- },
- {
-  "id": "A-17",
-  "group": "A",
-  "name": "Delivery & download records",
-  "route": "/admin/orders/:id/delivery",
-  "states": "Delivered, downloaded, failed delivery"
- },
- {
-  "id": "A-18",
-  "group": "A",
-  "name": "Wallet & credit oversight",
-  "route": "/admin/wallets",
-  "states": "Balances, ledger view, per-account drill-down"
- },
- {
-  "id": "A-19",
-  "group": "A",
-  "name": "Credit adjustment",
-  "route": "/admin/wallets/:id/adjust",
-  "states": "Credit or debit as a ledger transaction with mandatory reason"
- },
- {
-  "id": "A-20",
-  "group": "A",
-  "name": "Refund review",
-  "route": "/admin/refunds",
-  "states": "Requested, approved, rejected, audit trail"
- },
- {
-  "id": "A-21",
-  "group": "A",
-  "name": "Subscriptions & billing",
-  "route": "/admin/subscriptions",
-  "states": "Active, expiring, expired, invoices"
- },
- {
-  "id": "A-22",
-  "group": "A",
-  "name": "Support queue",
-  "route": "/admin/support",
-  "states": "Open, awaiting user, resolved, SLA breach"
- },
- {
-  "id": "A-23",
-  "group": "A",
-  "name": "Ticket conversation",
-  "route": "/admin/support/:id",
-  "states": "Thread, internal note, reply, resolve"
- },
- {
-  "id": "A-24",
-  "group": "A",
-  "name": "Voice qualification overview",
-  "route": "/admin/voice",
-  "states": "Volumes, outcomes, retries, quiet-hour blocks"
- },
- {
-  "id": "A-25",
-  "group": "A",
-  "name": "Call detail",
-  "route": "/admin/voice/:id",
-  "states": "Transcript, summary, captured answers, score, consent outcome"
- },
- {
-  "id": "A-26",
-  "group": "A",
-  "name": "WhatsApp funnel",
-  "route": "/admin/whatsapp",
-  "states": "Journey overview, conversation detail, template status"
- },
- {
-  "id": "A-27",
-  "group": "A",
-  "name": "Notification delivery",
-  "route": "/admin/notifications",
-  "states": "Sent, failed, retrying, send log"
- },
- {
-  "id": "A-28",
-  "group": "A",
-  "name": "Consent & suppression",
-  "route": "/admin/consent",
-  "states": "Opt-out list, source of consent, restricted actions"
- },
- {
-  "id": "A-29",
-  "group": "A",
-  "name": "Analytics & reports",
-  "route": "/admin/reports",
-  "states": "Filters, export, empty period"
- },
- {
-  "id": "A-30",
-  "group": "A",
-  "name": "Audit log",
-  "route": "/admin/audit",
-  "states": "List, filters, entry detail"
- },
- {
-  "id": "A-31",
-  "group": "A",
-  "name": "Jobs & integration status",
-  "route": "/admin/system",
-  "states": "Queue health, webhook failures, dry-run mode"
- },
- {
-  "id": "C-01",
-  "group": "C",
-  "name": "Colour tokens",
-  "route": "library",
-  "states": "12 named roles, contrast rules applied across the product"
- },
- {
-  "id": "C-02",
-  "group": "C",
-  "name": "Typography",
-  "route": "library",
-  "states": "8-step scale, three families, minimum sizes per surface"
- },
- {
-  "id": "C-03",
-  "group": "C",
-  "name": "Navigation systems",
-  "route": "library",
-  "states": "Public header, dashboard rail (blue and admin), mobile drawer"
- },
- {
-  "id": "C-04",
-  "group": "C",
-  "name": "Form controls",
-  "route": "library",
-  "states": "Inputs, invalid, disabled, select, chips, five button levels, focus"
- },
- {
-  "id": "C-05",
-  "group": "C",
-  "name": "Filters, tables, pagination",
-  "route": "library",
-  "states": "Applied-filter chips, reset, priority columns, working pagination"
- },
- {
-  "id": "C-06",
-  "group": "C",
-  "name": "Cards",
-  "route": "library",
-  "states": "Property card and lead card as distinct components, masked state, shortlist"
- },
- {
-  "id": "C-07",
-  "group": "C",
-  "name": "Dialogs, uploads, notifications",
-  "route": "library",
-  "states": "Destructive confirm, reason-gated action, upload progress/ready/failed, toast, inline success and error"
- },
- {
-  "id": "C-08",
-  "group": "C",
-  "name": "Content states",
-  "route": "library",
-  "states": "Loading, skeleton, first-use empty, no results, error with retry, success"
- },
- {
-  "id": "C-09",
-  "group": "C",
-  "name": "Access & session states",
-  "route": "library",
-  "states": "Session expired, access denied, restricted, suspended, not found"
- },
- {
-  "id": "C-10",
-  "group": "C",
-  "name": "Journey map",
-  "route": "library",
-  "states": "Seven walkthroughs with step IDs and what carries between them"
- },
- {
-  "id": "C-11",
-  "group": "C",
-  "name": "Verification report",
-  "route": "library",
-  "states": "Pass, partial and not-done checks with scope and notes"
- },
- {
-  "id": "C-12",
-  "group": "C",
-  "name": "Client decision list",
-  "route": "library",
-  "states": "16 open decisions with impact and affected screens"
- }
+  {
+    "id": "P-01",
+    "group": "P",
+    "name": "Homepage",
+    "route": "/",
+    "states": "Default, guest, signed-in, mobile menu open"
+  },
+  {
+    "id": "P-02",
+    "group": "P",
+    "name": "Search results",
+    "route": "/search",
+    "states": "Loading, results, no results, filters applied, reset, sorted, pagination, error"
+  },
+  {
+    "id": "P-03",
+    "group": "P",
+    "name": "Property / project detail",
+    "route": "/property/:id",
+    "states": "Gallery, specifications, amenities, location, possession, no media, enquiry CTA"
+  },
+  {
+    "id": "P-04",
+    "group": "P",
+    "name": "Enquiry form",
+    "route": "/property/:id/enquiry",
+    "states": "Idle, validation error, submitting, needs sign-in, submitted"
+  },
+  {
+    "id": "P-05",
+    "group": "P",
+    "name": "Site-visit request",
+    "route": "/property/:id/site-visit",
+    "states": "Request form, submitted (not confirmed), builder yet to respond"
+  },
+  {
+    "id": "P-06",
+    "group": "P",
+    "name": "Mobile OTP sign-in / register",
+    "route": "/auth",
+    "states": "Enter mobile, enter OTP, invalid OTP, expired, resend cooldown, too many attempts, success"
+  },
+  {
+    "id": "P-07",
+    "group": "P",
+    "name": "Enquiry confirmation",
+    "route": "/enquiry/:id/confirmed",
+    "states": "Success with details preserved across sign-in"
+  },
+  {
+    "id": "P-08",
+    "group": "P",
+    "name": "Requirement capture (5 steps)",
+    "route": "/find-my-match",
+    "states": "Step 1-5, validation, back, resume, abandon"
+  },
+  {
+    "id": "P-09",
+    "group": "P",
+    "name": "Requirement review",
+    "route": "/find-my-match/review",
+    "states": "Summary, edit, submit"
+  },
+  {
+    "id": "P-10",
+    "group": "P",
+    "name": "Matched properties",
+    "route": "/matches",
+    "states": "Matches ordered by locality and timing, no-match naming the clash, refine"
+  },
+  {
+    "id": "P-11",
+    "group": "P",
+    "name": "Shortlist",
+    "route": "/account/shortlist",
+    "states": "Empty, populated, removed item"
+  },
+  {
+    "id": "P-12",
+    "group": "P",
+    "name": "Buyer dashboard",
+    "route": "/account",
+    "states": "First use, active, with requirement"
+  },
+  {
+    "id": "P-13",
+    "group": "P",
+    "name": "My enquiries",
+    "route": "/account/enquiries",
+    "states": "Empty, list with statuses"
+  },
+  {
+    "id": "P-14",
+    "group": "P",
+    "name": "Enquiry detail",
+    "route": "/account/enquiries/:id",
+    "states": "Submitted, seen by builder, responded, visit requested"
+  },
+  {
+    "id": "P-15",
+    "group": "P",
+    "name": "Profile & settings",
+    "route": "/account/profile",
+    "states": "View, edit, password, validation"
+  },
+  {
+    "id": "P-16",
+    "group": "P",
+    "name": "Notifications",
+    "route": "/account/notifications",
+    "states": "Empty, unread, read"
+  },
+  {
+    "id": "P-17",
+    "group": "P",
+    "name": "For builders (info + register)",
+    "route": "/builders",
+    "states": "Default"
+  },
+  {
+    "id": "P-18",
+    "group": "P",
+    "name": "For brokers (info + register)",
+    "route": "/brokers",
+    "states": "Default"
+  },
+  {
+    "id": "P-19",
+    "group": "P",
+    "name": "Contact & support",
+    "route": "/support",
+    "states": "Form, submitted"
+  },
+  {
+    "id": "P-20",
+    "group": "P",
+    "name": "Policy page template",
+    "route": "/legal/:slug",
+    "states": "Copy pending placeholder"
+  },
+  {
+    "id": "P-21",
+    "group": "P",
+    "name": "System states",
+    "route": "within C-08, C-09",
+    "states": "404, session expired, access denied, error with retry"
+  },
+  {
+    "id": "S-01",
+    "group": "S",
+    "name": "Seller registration",
+    "route": "/seller/register",
+    "states": "Mobile OTP, details, duplicate account"
+  },
+  {
+    "id": "S-02",
+    "group": "S",
+    "name": "Onboarding \u2014 business details",
+    "route": "/seller/onboarding",
+    "states": "Empty, validation, saved"
+  },
+  {
+    "id": "S-03",
+    "group": "S",
+    "name": "KYC submission (PAN, Aadhaar)",
+    "route": "/seller/kyc",
+    "states": "Empty, uploading, file too large, wrong format, submitted"
+  },
+  {
+    "id": "S-04",
+    "group": "S",
+    "name": "KYC status",
+    "route": "/seller/kyc/status",
+    "states": "Not submitted, pending, approved, rejected with reason, resubmission"
+  },
+  {
+    "id": "S-05",
+    "group": "S",
+    "name": "Restricted / suspended account",
+    "route": "/seller/restricted",
+    "states": "Pre-approval, suspended, recovery action"
+  },
+  {
+    "id": "S-06",
+    "group": "S",
+    "name": "Seller dashboard",
+    "route": "/seller",
+    "states": "First use, active, low balance"
+  },
+  {
+    "id": "S-07",
+    "group": "S",
+    "name": "Lead marketplace",
+    "route": "/seller/leads",
+    "states": "List, filters, sort, Sale tab, no results, loading, masked fields"
+  },
+  {
+    "id": "S-08",
+    "group": "S",
+    "name": "Lead preview (masked)",
+    "route": "/seller/leads/:id",
+    "states": "Masked contact, qualification summary, aging badge"
+  },
+  {
+    "id": "S-09",
+    "group": "S",
+    "name": "Purchase review & confirm",
+    "route": "/seller/leads/:id/buy",
+    "states": "Review, confirm, processing"
+  },
+  {
+    "id": "S-10",
+    "group": "S",
+    "name": "Purchase failure states",
+    "route": "\u2014",
+    "states": "Insufficient balance, already sold, deduction failed, retry"
+  },
+  {
+    "id": "S-11",
+    "group": "S",
+    "name": "Purchase success & contact reveal",
+    "route": "/seller/leads/:id/purchased",
+    "states": "Revealed contact, download CSV, receipt"
+  },
+  {
+    "id": "S-12",
+    "group": "S",
+    "name": "Purchased leads",
+    "route": "/seller/purchased",
+    "states": "Empty, list, filters, export"
+  },
+  {
+    "id": "S-13",
+    "group": "S",
+    "name": "Purchased lead detail",
+    "route": "/seller/purchased/:id",
+    "states": "Full contact, qualification, call summary, download"
+  },
+  {
+    "id": "S-14",
+    "group": "S",
+    "name": "Credits & balance",
+    "route": "/seller/billing",
+    "states": "Balance, expiring soon, zero balance"
+  },
+  {
+    "id": "S-15",
+    "group": "S",
+    "name": "Recharge credits",
+    "route": "/seller/billing/recharge",
+    "states": "Amount entry, packs, validation"
+  },
+  {
+    "id": "S-16",
+    "group": "S",
+    "name": "Payment handoff & result",
+    "route": "/seller/billing/payment",
+    "states": "Redirect, pending, success, failure, retry"
+  },
+  {
+    "id": "S-17",
+    "group": "S",
+    "name": "Transactions & usage history",
+    "route": "/seller/billing/history",
+    "states": "Empty, list, filters, ledger detail"
+  },
+  {
+    "id": "S-18",
+    "group": "S",
+    "name": "Credit expiry & renewal",
+    "route": "/seller/billing/expiry",
+    "states": "Active, expiring, expired \u2014 alternatives annotated"
+  },
+  {
+    "id": "S-19",
+    "group": "S",
+    "name": "Invoices",
+    "route": "/seller/billing/invoices",
+    "states": "Empty, list, download"
+  },
+  {
+    "id": "S-20",
+    "group": "S",
+    "name": "Invoice detail",
+    "route": "/seller/billing/invoices/:id",
+    "states": "Tax detail, download PDF"
+  },
+  {
+    "id": "S-21",
+    "group": "S",
+    "name": "Billing information",
+    "route": "/seller/billing/details",
+    "states": "View, edit, validation"
+  },
+  {
+    "id": "S-22",
+    "group": "S",
+    "name": "Support tickets",
+    "route": "/seller/support",
+    "states": "Empty, open, closed"
+  },
+  {
+    "id": "S-23",
+    "group": "S",
+    "name": "New ticket",
+    "route": "/seller/support/new",
+    "states": "Form, attachment, submitted"
+  },
+  {
+    "id": "S-24",
+    "group": "S",
+    "name": "Ticket detail & replies",
+    "route": "/seller/support/:id",
+    "states": "Awaiting reply, replied, resolved, reopened"
+  },
+  {
+    "id": "S-25",
+    "group": "S",
+    "name": "Profile & settings",
+    "route": "/seller/profile",
+    "states": "View, edit, password, notification preferences"
+  },
+  {
+    "id": "B-01",
+    "group": "B",
+    "name": "Builder registration",
+    "route": "/builder/register",
+    "states": "Mobile OTP, company details"
+  },
+  {
+    "id": "B-02",
+    "group": "B",
+    "name": "Builder KYC & verification",
+    "route": "/builder/kyc",
+    "states": "Same as Seller plus company documents, statuses"
+  },
+  {
+    "id": "B-03",
+    "group": "B",
+    "name": "Subscription overview",
+    "route": "/builder/subscription",
+    "states": "Not subscribed, plan detail, active, price placeholder"
+  },
+  {
+    "id": "B-04",
+    "group": "B",
+    "name": "Subscription payment result",
+    "route": "/builder/subscription/payment",
+    "states": "Pending, success, failure, retry"
+  },
+  {
+    "id": "B-05",
+    "group": "B",
+    "name": "Renewal & expiry",
+    "route": "/builder/subscription/renewal",
+    "states": "Renewal due, grace, expired \u2014 listing outcome alternatives"
+  },
+  {
+    "id": "B-06",
+    "group": "B",
+    "name": "Builder dashboard",
+    "route": "/builder",
+    "states": "First use, active, restricted"
+  },
+  {
+    "id": "B-07",
+    "group": "B",
+    "name": "My properties",
+    "route": "/builder/properties",
+    "states": "Empty, list, filters, statuses (draft, published, unpublished)"
+  },
+  {
+    "id": "B-08",
+    "group": "B",
+    "name": "Create listing \u2014 basics",
+    "route": "/builder/properties/new",
+    "states": "Empty, validation, autosave"
+  },
+  {
+    "id": "B-09",
+    "group": "B",
+    "name": "Create listing \u2014 location",
+    "route": "/builder/properties/new/location",
+    "states": "Hierarchy selection, map pin, validation"
+  },
+  {
+    "id": "B-10",
+    "group": "B",
+    "name": "Create listing \u2014 pricing & configuration",
+    "route": "/builder/properties/new/pricing",
+    "states": "Per-configuration pricing, validation"
+  },
+  {
+    "id": "B-11",
+    "group": "B",
+    "name": "Create listing \u2014 specifications & amenities",
+    "route": "/builder/properties/new/specs",
+    "states": "Selection, custom entry"
+  },
+  {
+    "id": "B-12",
+    "group": "B",
+    "name": "Create listing \u2014 media",
+    "route": "/builder/properties/new/media",
+    "states": "Upload progress, failure, retry, reorder, remove, video link"
+  },
+  {
+    "id": "B-13",
+    "group": "B",
+    "name": "Create listing \u2014 preview & publish",
+    "route": "/builder/properties/new/preview",
+    "states": "Preview, publish, save draft, blocked by subscription"
+  },
+  {
+    "id": "B-14",
+    "group": "B",
+    "name": "Listing actions",
+    "route": "\u2014",
+    "states": "Unpublish, delete confirmation, republish"
+  },
+  {
+    "id": "B-15",
+    "group": "B",
+    "name": "Edit listing & unsaved changes",
+    "route": "/builder/properties/:id/edit",
+    "states": "Dirty state, discard, validation summary"
+  },
+  {
+    "id": "B-16",
+    "group": "B",
+    "name": "Enquiries on my listings",
+    "route": "/builder/enquiries",
+    "states": "Empty, new (unread), list, filters"
+  },
+  {
+    "id": "B-17",
+    "group": "B",
+    "name": "Enquiry detail",
+    "route": "/builder/enquiries/:id",
+    "states": "Free disclosure vs pay-to-unlock \u2014 both annotated"
+  },
+  {
+    "id": "B-18",
+    "group": "B",
+    "name": "New-enquiry notification",
+    "route": "\u2014",
+    "states": "Toast, in-portal badge, email/WhatsApp copy"
+  },
+  {
+    "id": "B-19",
+    "group": "B",
+    "name": "Access restrictions",
+    "route": "\u2014",
+    "states": "KYC not submitted, pending, rejected, no subscription, expired, account suspended \u2014 each with recovery"
+  },
+  {
+    "id": "B-20",
+    "group": "B",
+    "name": "Lead marketplace (Builder access)",
+    "route": "/builder/marketplace",
+    "states": "Masked leads, Sale tab, filters, purchase, already-owned block"
+  },
+  {
+    "id": "B-21",
+    "group": "B",
+    "name": "Purchased leads (Builder access)",
+    "route": "/builder/leads",
+    "states": "List, revealed contact, CSV download, Excel simulated"
+  },
+  {
+    "id": "B-22",
+    "group": "B",
+    "name": "Billing & credits (Builder access)",
+    "route": "/builder/billing",
+    "states": "Balance, recharge, ledger, subscription charges alongside credits"
+  },
+  {
+    "id": "B-23",
+    "group": "B",
+    "name": "Support (Builder access)",
+    "route": "/builder/support",
+    "states": "Ticket list, new ticket, conversation thread"
+  },
+  {
+    "id": "B-24",
+    "group": "B",
+    "name": "Profile & settings (Builder access)",
+    "route": "/builder/profile",
+    "states": "Contact details, enquiry alerts, verification status"
+  },
+  {
+    "id": "A-01",
+    "group": "A",
+    "name": "Admin sign-in",
+    "route": "/admin/login",
+    "states": "Form, invalid, locked out"
+  },
+  {
+    "id": "A-02",
+    "group": "A",
+    "name": "Admin dashboard",
+    "route": "/admin",
+    "states": "Queues, volumes, alerts"
+  },
+  {
+    "id": "A-03",
+    "group": "A",
+    "name": "Users",
+    "route": "/admin/users",
+    "states": "List, filters, role, status, search"
+  },
+  {
+    "id": "A-04",
+    "group": "A",
+    "name": "User detail",
+    "route": "/admin/users/:id",
+    "states": "Profile, role, status actions, history"
+  },
+  {
+    "id": "A-05",
+    "group": "A",
+    "name": "KYC queue",
+    "route": "/admin/kyc",
+    "states": "Pending, resubmitted, empty, overdue"
+  },
+  {
+    "id": "A-06",
+    "group": "A",
+    "name": "KYC applicant review",
+    "route": "/admin/kyc/:id",
+    "states": "Documents, zoom, checklist"
+  },
+  {
+    "id": "A-07",
+    "group": "A",
+    "name": "KYC decision",
+    "route": "within /admin/kyc/:id",
+    "states": "Approve (checklist-gated), reject with reason, request resubmission, outcome panel"
+  },
+  {
+    "id": "A-08",
+    "group": "A",
+    "name": "Property review queue",
+    "route": "/admin/properties",
+    "states": "Pending, published, reported, filters"
+  },
+  {
+    "id": "A-09",
+    "group": "A",
+    "name": "Property detail & moderation",
+    "route": "/admin/properties/:id",
+    "states": "Approve, unpublish with reason, history"
+  },
+  {
+    "id": "A-10",
+    "group": "A",
+    "name": "Lead intake overview",
+    "route": "/admin/leads/intake",
+    "states": "Sources, volumes, duplicates"
+  },
+  {
+    "id": "A-11",
+    "group": "A",
+    "name": "Intake results & failures",
+    "route": "/admin/leads/intake/:id",
+    "states": "Accepted, rejected rows, validation errors, re-run"
+  },
+  {
+    "id": "A-12",
+    "group": "A",
+    "name": "Leads",
+    "route": "/admin/leads",
+    "states": "List, lifecycle filters, aging, Sale tab"
+  },
+  {
+    "id": "A-13",
+    "group": "A",
+    "name": "Lead detail & history",
+    "route": "/admin/leads/:id",
+    "states": "Qualification answers, score, status history, buyer"
+  },
+  {
+    "id": "A-14",
+    "group": "A",
+    "name": "Lead pricing & aging rules",
+    "route": "/admin/settings/pricing",
+    "states": "Price table, 20% aging discount, Sale window"
+  },
+  {
+    "id": "A-15",
+    "group": "A",
+    "name": "Platform settings",
+    "route": "/admin/settings",
+    "states": "Taxonomy, calling hours, templates"
+  },
+  {
+    "id": "A-16",
+    "group": "A",
+    "name": "Orders & purchases",
+    "route": "/admin/orders",
+    "states": "List, filters, order detail"
+  },
+  {
+    "id": "A-17",
+    "group": "A",
+    "name": "Delivery & download records",
+    "route": "/admin/orders/:id/delivery",
+    "states": "Delivered, downloaded, failed delivery"
+  },
+  {
+    "id": "A-18",
+    "group": "A",
+    "name": "Wallet & credit oversight",
+    "route": "/admin/wallets",
+    "states": "Balances, ledger view, per-account drill-down"
+  },
+  {
+    "id": "A-19",
+    "group": "A",
+    "name": "Credit adjustment",
+    "route": "/admin/wallets/:id/adjust",
+    "states": "Credit or debit as a ledger transaction with mandatory reason"
+  },
+  {
+    "id": "A-20",
+    "group": "A",
+    "name": "Refund review",
+    "route": "/admin/refunds",
+    "states": "Requested, approved, rejected, audit trail"
+  },
+  {
+    "id": "A-21",
+    "group": "A",
+    "name": "Subscriptions & billing",
+    "route": "/admin/subscriptions",
+    "states": "Active, expiring, expired, invoices"
+  },
+  {
+    "id": "A-22",
+    "group": "A",
+    "name": "Support queue",
+    "route": "/admin/support",
+    "states": "Open, awaiting user, resolved, SLA breach"
+  },
+  {
+    "id": "A-23",
+    "group": "A",
+    "name": "Ticket conversation",
+    "route": "/admin/support/:id",
+    "states": "Thread, internal note, reply, resolve"
+  },
+  {
+    "id": "A-24",
+    "group": "A",
+    "name": "Voice qualification overview",
+    "route": "/admin/voice",
+    "states": "Volumes, outcomes, retries, quiet-hour blocks"
+  },
+  {
+    "id": "A-25",
+    "group": "A",
+    "name": "Call detail",
+    "route": "/admin/voice/:id",
+    "states": "Transcript, summary, captured answers, score, consent outcome"
+  },
+  {
+    "id": "A-26",
+    "group": "A",
+    "name": "WhatsApp funnel",
+    "route": "/admin/whatsapp",
+    "states": "Journey overview, conversation detail, template status"
+  },
+  {
+    "id": "A-27",
+    "group": "A",
+    "name": "Notification delivery",
+    "route": "/admin/notifications",
+    "states": "Sent, failed, retrying, send log"
+  },
+  {
+    "id": "A-28",
+    "group": "A",
+    "name": "Consent & suppression",
+    "route": "/admin/consent",
+    "states": "Opt-out list, source of consent, restricted actions"
+  },
+  {
+    "id": "A-29",
+    "group": "A",
+    "name": "Analytics & reports",
+    "route": "/admin/reports",
+    "states": "Filters, export, empty period"
+  },
+  {
+    "id": "A-30",
+    "group": "A",
+    "name": "Audit log",
+    "route": "/admin/audit",
+    "states": "List, filters, entry detail"
+  },
+  {
+    "id": "A-31",
+    "group": "A",
+    "name": "Jobs & integration status",
+    "route": "/admin/system",
+    "states": "Queue health, webhook failures, dry-run mode"
+  },
+  {
+    "id": "C-01",
+    "group": "C",
+    "name": "Colour tokens",
+    "route": "library",
+    "states": "12 named roles, contrast rules applied across the product"
+  },
+  {
+    "id": "C-02",
+    "group": "C",
+    "name": "Typography",
+    "route": "library",
+    "states": "8-step scale, three families, minimum sizes per surface"
+  },
+  {
+    "id": "C-03",
+    "group": "C",
+    "name": "Navigation systems",
+    "route": "library",
+    "states": "Public header, dashboard rail (blue and admin), mobile drawer"
+  },
+  {
+    "id": "C-04",
+    "group": "C",
+    "name": "Form controls",
+    "route": "library",
+    "states": "Inputs, invalid, disabled, select, chips, five button levels, focus"
+  },
+  {
+    "id": "C-05",
+    "group": "C",
+    "name": "Filters, tables, pagination",
+    "route": "library",
+    "states": "Applied-filter chips, reset, priority columns, working pagination"
+  },
+  {
+    "id": "C-06",
+    "group": "C",
+    "name": "Cards",
+    "route": "library",
+    "states": "Property card and lead card as distinct components, masked state, shortlist"
+  },
+  {
+    "id": "C-07",
+    "group": "C",
+    "name": "Dialogs, uploads, notifications",
+    "route": "library",
+    "states": "Destructive confirm, reason-gated action, upload progress/ready/failed, toast, inline success and error"
+  },
+  {
+    "id": "C-08",
+    "group": "C",
+    "name": "Content states",
+    "route": "library",
+    "states": "Loading, skeleton, first-use empty, no results, error with retry, success"
+  },
+  {
+    "id": "C-09",
+    "group": "C",
+    "name": "Access & session states",
+    "route": "library",
+    "states": "Session expired, access denied, restricted, suspended, not found"
+  },
+  {
+    "id": "C-10",
+    "group": "C",
+    "name": "Journey map",
+    "route": "library",
+    "states": "Seven walkthroughs with step IDs and what carries between them"
+  },
+  {
+    "id": "C-11",
+    "group": "C",
+    "name": "Verification report",
+    "route": "library",
+    "states": "Pass, partial and not-done checks with scope and notes"
+  },
+  {
+    "id": "C-12",
+    "group": "C",
+    "name": "Client decision list",
+    "route": "library",
+    "states": "16 open decisions with impact and affected screens"
+  },
+  {
+    "id": "CR02-01",
+    "group": "CR02",
+    "name": "Post Property entry",
+    "route": "/post-property",
+    "states": "No listings, with listings, start control, pending owner-policy panel"
+  },
+  {
+    "id": "CR02-02",
+    "group": "CR02",
+    "name": "My property listings",
+    "route": "/owner/listings",
+    "states": "Empty, draft, waiting for review, changes needed, cleared, declined, withdrawn"
+  },
+  {
+    "id": "CR02-03",
+    "group": "CR02",
+    "name": "Owner listing \u2014 About the property",
+    "route": "/owner/listings/[id]/basics",
+    "states": "Empty, partly filled, validation error, draft saved, unsaved changes, not editable"
+  },
+  {
+    "id": "CR02-04",
+    "group": "CR02",
+    "name": "Owner listing \u2014 Where it is",
+    "route": "/owner/listings/[id]/location",
+    "states": "Unset, searchable locality chosen, unrecognised locality refused"
+  },
+  {
+    "id": "CR02-05",
+    "group": "CR02",
+    "name": "Owner listing \u2014 Price and configuration",
+    "route": "/owner/listings/[id]/pricing",
+    "states": "Sale price, monthly rent, non-numeric amount refused, carpet area invalid"
+  },
+  {
+    "id": "CR02-06",
+    "group": "CR02",
+    "name": "Owner listing \u2014 Photographs",
+    "route": "/owner/listings/[id]/photos",
+    "states": "None chosen, files listed with not-stored disclosure, cover marked, removal, no-JS fallback"
+  },
+  {
+    "id": "CR02-07",
+    "group": "CR02",
+    "name": "Owner listing \u2014 How buyers reach you",
+    "route": "/owner/listings/[id]/contact",
+    "states": "Unset, preference chosen, name validation"
+  },
+  {
+    "id": "CR02-08",
+    "group": "CR02",
+    "name": "Owner listing \u2014 Preview and submit",
+    "route": "/owner/listings/[id]/preview",
+    "states": "Blockers outstanding, ready to send, sending, duplicate submission resolved"
+  },
+  {
+    "id": "CR02-09",
+    "group": "CR02",
+    "name": "Owner listing record",
+    "route": "/owner/listings/[id]",
+    "states": "Sent confirmation, draft, in review, changes needed, cleared, declined, withdrawn, messages, history, withdraw"
+  },
+  {
+    "id": "CR02-10",
+    "group": "CR02",
+    "name": "Admin \u2014 Owner submissions queue",
+    "route": "/admin/owner-listings",
+    "states": "Waiting, being reviewed, changes asked for, cleared, all, empty; no-publish notice"
+  },
+  {
+    "id": "CR02-11",
+    "group": "CR02",
+    "name": "Admin \u2014 Owner submission",
+    "route": "/admin/owner-listings/[id]",
+    "states": "Listing detail, photographs-not-reviewable notice, owner thread, internal notes, decision, history"
+  },
+  {
+    "id": "CR04-01",
+    "group": "CR04",
+    "name": "My purchases (Seller)",
+    "route": "/seller/orders",
+    "states": "Empty, one order, several orders"
+  },
+  {
+    "id": "CR04-02",
+    "group": "CR04",
+    "name": "Order detail (Seller)",
+    "route": "/seller/orders/[reference]",
+    "states": "Paid, payment block with ledger reference, invoice not issued, no refund control, 404"
+  },
+  {
+    "id": "CR04-03",
+    "group": "CR04",
+    "name": "My purchases (Builder)",
+    "route": "/builder/orders",
+    "states": "Empty, one order, several orders"
+  },
+  {
+    "id": "CR04-04",
+    "group": "CR04",
+    "name": "Order detail (Builder)",
+    "route": "/builder/orders/[reference]",
+    "states": "Paid, cross-pool reference 404"
+  },
+  {
+    "id": "CR04-05",
+    "group": "CR04",
+    "name": "Purchase result \u2014 duplicate submission",
+    "route": "/seller/leads/[id]/result",
+    "states": "First purchase, replayed submission notice, insufficient credits, already sold, not verified, suspended, deduction failed"
+  },
+  {
+    "id": "CR07-01",
+    "group": "CR07",
+    "name": "Verification (console)",
+    "route": "/seller/verification",
+    "states": "Not required, check needed, being checked, verified, needs a person, did not pass, expired; sample-service and no-provider notices"
+  },
+  {
+    "id": "CR07-02",
+    "group": "CR07",
+    "name": "Admin \u2014 Verification cases",
+    "route": "/admin/verification",
+    "states": "Needs a person, with the service, both empty; not-an-approval notice"
+  },
+  {
+    "id": "CR07-03",
+    "group": "CR07",
+    "name": "Admin \u2014 Verification case",
+    "route": "/admin/verification/[reference]",
+    "states": "Why required, sample-service notice, decision without reason refused, decision recorded, history"
+  }
 ]

@@ -1,9 +1,10 @@
 # Client Change Register — CR01 to CR07
 
-Prepared 26 September 2026 against HEAD `e6ec30b` (working tree clean, verified
-by fetch). Sources: `KKL_UI_Spec.docx` (the client's written specification) and
-`KKL_Client_Change_Confirmation.docx` (review version 1), plus the accompanying
-call instructions.
+Prepared 26 September 2026 against HEAD `e6ec30b`. **Implementation pass 27
+September 2026**, from `537a265` — see the status table below for what each
+record now is. Sources: `KKL_UI_Spec.docx` (the client's written specification)
+and `KKL_Client_Change_Confirmation.docx` (review version 1), plus the
+accompanying call instructions.
 
 > **The confirmation document is a proposal for review, not evidence that every
 > suggested field, policy or workflow has been approved.** Each record below
@@ -22,19 +23,74 @@ these changes extend but do not close.
 
 ## Implementation status at a glance
 
-Updated as the work lands. "Done" means implemented and verified in this build;
-"prepared" means the artifact exists for review and is labelled as the proposal
-it is; "blocked" names the decision that must land first.
+Updated as the work lands. "Done" means implemented and verified in this build
+by a suite that would fail if it were not; "prepared" means the artifact exists
+for review and is labelled as the proposal it is; "blocked" names the decision
+that must land first.
+
+**These statuses are mine, not the client's.** The change-confirmation document
+is unsigned — its signature line and its Approve/Revise block are both blank —
+so nothing below is client-approved. "Done" means built and verified, and says
+nothing about acceptance.
 
 | Record | Status | What that means |
 |---|---|---|
-| CR01 — Buy Leads wording | **Done** | Marketplace entries, page titles and buying actions renamed; property Buy/Rent untouched; suites updated |
-| CR02 — Distinct journeys | **Prepared** | `/post-property` renders the owner journey and the specification's guided form, disabled and labelled (D-18). Seller semantics unchanged; no role renamed; Builder rules not applied to owners |
-| CR03 — Request Leads | **Done, as sample** | Full journey: create with idempotency, reference, tracking, Admin queue, public replies vs internal notes, status history, audit. **Persistence is process memory and is not claimed as durable** — `service-contract.md` §2.12 lists the required records and endpoints |
-| CR04 — Purchase orders | **Reconciled, blocked** | The existing flow already is preview → direct order → payment → release → invoice/history. Cart, gateway and request→order conversion await decisions 3 and 4; no gateway work started |
-| CR05 — Locations | **Done** | Central records (India → West Bengal → Kolkata → 55 areas), stable ids, searchable picker, hierarchy-aware matching; applied to search, listings, lead filters and lead requests. Rental units explicit where rentals appear |
-| CR06 — Visual direction | **Blocked** | Decision 9: the authoritative logo asset and the "Type 1" referent are both unsupplied. The approved homepage stays |
-| CR07 — KYC policy | **Prepared** | `kyc-policy-matrix.md` — the role/action matrix, outcome model and queue rules for confirmation. No gate moved, no provider selected |
+| CR01 — Buy Leads wording | **Done** | Marketplace entries, page titles, buying actions and the sentences that point at them all read Buy Leads; property Buy/Rent intent and the descriptive taglines untouched. Verified by where each label links, not by word counts — `verify-labels-and-locations.mjs` 1–8 |
+| CR02 — Individual owner posting | **Done, as sample** | A working six-step journey: `/post-property` → `/owner/listings` → steps → preview → submit → the listing record, plus the Admin owner-submission queue. Submission enters a review queue; nothing publishes, nothing is charged, no verification is awarded. Drafts are process memory and the screens say so. Photographs are recorded by name and the files are **not** stored, disclosed on every screen that shows them — `verify-owner-posting-flow.mjs` 31/31 |
+| CR03 — Request Leads | **Done, genuinely persistent** | Served by kkl-backend (branch `claude/cr03-lead-requests`) when `KKL_LEAD_REQUESTS=backend`: a request is a PostgreSQL row that survives a restart, and row-level security the application role cannot bypass refuses one account the rows of another. Proven by restarting the service mid-run — `verify-lead-request-persistence.mjs` 9/9 — and by `kkl-backend/tests/rls.test.mjs` past the handlers. Without that variable the sample store answers and the screens say records last for the session only. There is no fallback between the two |
+| CR04 — Purchase orders | **Done on the confirmed path** | Decision 4 resolved to direct order settled from wallet credits. The order is now a record of its own: My purchases and order detail in both consoles, payment traced to its ledger entry, invoice state stated rather than implied, replayed submissions reported as repeats. No gateway, no refund control, no tax treatment. Cart and a gateway alternative remain a later addition — `verify-lead-order-flow.mjs` 20/20 |
+| CR05 — Locations | **Done** | Central records (India → West Bengal → Kolkata → 55 areas), stable ids, searchable picker, hierarchy-aware matching, on all six surfaces that pick a location — property search, the owner and Builder listing forms, both marketplace filter rows, the Seller lead-request form — plus the Admin views that show an area. A locality's own name now ranks above the sub-localities whose labels contain it; before this pass, typing "New Town" and pressing Enter selected Action Area I — `verify-labels-and-locations.mjs` 9–17 |
+| CR06 — Visual direction | **Blocked** | Decision 9: the authoritative logo asset and the "Type 1" referent are both unsupplied. You said you would send both; they have not arrived, so the approved homepage stays untouched and no archived direction has been guessed at |
+| CR07 — Verification policy | **Done, as labelled sample** | Decision 5/6 resolved to a selective, action-based policy: no check for browsing or enquiring, a check where money or publication is at stake, "Not required" as its own state that is never Verified, no case opened by registering, cases with references and history, the Admin queue split between what needs a person and routine processing, and a provider failure that can never become a pass. The existing Seller purchase restriction is unchanged. No provider selected, no identity document collected, no compliance claimed — `verify-verification-policy.mjs` 19/19 |
+
+### What is sample and what is genuinely integrated
+
+| | Backed by a database, survives a restart | Process memory, lost on restart |
+|---|---|---|
+| CR03 lead requests | ✓ with `KKL_LEAD_REQUESTS=backend` | ✓ without it (and the screens say which) |
+| CR02 owner listings | — | ✓ |
+| CR04 orders | — | ✓ (derived from the purchase and its ledger entry) |
+| CR07 verification cases | — | ✓ |
+
+Everything in the right-hand column is a kkl-backend dependency. Only CR03 was
+stated as a client requirement, and only CR03 has been made real.
+
+---
+
+## Decisions received in this pass, and what they changed
+
+Four answers arrived during the implementation pass. Each is recorded with what
+it settled and what it deliberately left open.
+
+| Decision | Answer received | What it settled | What it did not settle |
+|---|---|---|---|
+| 4 — cart vs direct order, wallet vs gateway | **Direct order, settled from wallet credits** | CR04's path is the one already built; the order becomes a record with payment traced to its ledger entry | No payment provider is chosen, and a cart remains a later addition. Nothing names or contacts a gateway |
+| 7 — owner publication | **Submit for review; never auto-publish** | CR02's journey: drafts, submission into a moderation queue, and a confirmation that says plainly the listing is awaiting review | Whether a cleared listing publishes at all, when, on what terms, and at what cost. "Cleared" therefore reads "Cleared — not published" everywhere |
+| 5/6 — verification policy | **Selective, action-based** | CR07's whole structure: no check for browsing or enquiring, a check where money or publication is at stake, Not required as its own state, existing purchase restriction retained | Which provider does the checking; whether verifications expire and after how long; whether requesting leads needs a check (built as "not required" and marked on screen as an assumption) |
+| 9 — logo and Type 1 homepage | **"I'll supply both"** | Nothing yet — the assets have not arrived | CR06 in its entirety. The approved homepage is untouched and no archived direction has been guessed at |
+
+### Still outstanding, in the order they block work
+
+1. **The CR06 assets** — the authoritative logo file, and which screenshot or
+   file is "Type 1". CR06 cannot start without them and nothing else waits on
+   them.
+2. **Owner publication terms** (decision 7's remainder) — whether a cleared
+   owner listing publishes, on what terms, and what an owner is charged. Until
+   this lands, `cleared` is the end of the owner journey.
+3. **Whether requesting leads requires verification** — implemented as "not
+   required" and labelled on screen as an assumption rather than a rule.
+4. **Verification provider, expiry period, retention and consent** — no
+   provider is selected and no compliance claim is made.
+5. **Refund eligibility and destination** (D-14) — why there is no refund or
+   cancel control on an order, and no `refunded` status.
+6. **Tax treatment and whether a per-order invoice is issued** (D-13) — why the
+   order's invoice block states that no separate document exists rather than
+   offering one.
+7. **Whether a Seller may withdraw a lead request, and retention for closed
+   requests** — kkl-backend's CR03 slice documents both as open.
+
+None of these is blocking the frontend work that remains; each is blocking a
+statement the screens currently decline to make.
 
 ---
 
