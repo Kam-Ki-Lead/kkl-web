@@ -336,6 +336,16 @@ const leadMarketService: LeadMarketService = {
   async getPurchased(id) {
     return sellerStore.getPurchased(id);
   },
+
+  // CR04 — order history. No account parameter: the store answers for the
+  // caller's own identity, so there is nothing here that could ask for
+  // somebody else's orders.
+  async listOrders() {
+    return sellerStore.listOrders();
+  },
+  async getOrder(reference) {
+    return sellerStore.getOrder(reference);
+  },
   async exportPurchased({ ids }) {
     return {
       filename: `kkl-purchased-leads-${new Date().toISOString().slice(0, 10)}.csv`,

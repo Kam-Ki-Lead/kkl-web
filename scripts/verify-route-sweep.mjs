@@ -37,13 +37,25 @@ const ROUTES = [
   '/account/shortlist', '/account/profile', '/account/notifications',
   '/builders', '/brokers', '/support', '/legal/terms', '/legal/privacy',
   '/legal/refunds', '/enquiry/unavailable?reason=expired',
-  // CR02 — the owner Post Property skeleton, labelled proposed
+  // CR02 — the individual owner's posting journey
   '/post-property',
+  '/owner/listings', '/owner/listings/op-seed-1',
+  '/owner/listings/op-seed-1/basics', '/owner/listings/op-seed-1/location',
+  '/owner/listings/op-seed-1/pricing', '/owner/listings/op-seed-1/photos',
+  '/owner/listings/op-seed-1/contact', '/owner/listings/op-seed-1/preview',
   // Seller
   '/seller', '/seller/register', '/seller/onboarding', '/seller/kyc',
   '/seller/kyc/status', '/seller/restricted', '/seller/leads',
   '/seller/leads?tab=sale', '/seller/leads/L-4471', '/seller/leads/L-4471/buy',
-  '/seller/purchased', '/seller/billing', '/seller/billing/recharge',
+  '/seller/purchased',
+  // CR04 — order history. `/seller/orders/[reference]` is deliberately absent:
+  // order references are minted when a lead is bought and nothing is seeded as
+  // already purchased, so there is no fixed reference to sweep. Seeding one to
+  // give this list a row would change the Seller's starting balance and the
+  // counts other suites assert. verify-lead-order-flow.mjs drives the detail
+  // screen against a reference it creates, which is the stronger check anyway.
+  '/seller/orders',
+  '/seller/billing', '/seller/billing/recharge',
   '/seller/billing/history', '/seller/billing/invoices',
   '/seller/billing/invoices/INV-2026-0821', '/seller/billing/details',
   '/seller/billing/expiry', '/seller/support', '/seller/support/new',
@@ -59,7 +71,11 @@ const ROUTES = [
   '/builder/properties/bl-greenview/preview',
   '/builder/enquiries', '/builder/enquiries/E-8801', '/builder/enquiries/notifications',
   '/builder/marketplace', '/builder/marketplace/L-4530', '/builder/marketplace/L-4530/buy',
-  '/builder/leads', '/builder/billing', '/builder/billing/recharge',
+  '/builder/leads',
+  // CR04 — the same order screens over the Builder pool. Detail omitted for the
+  // reason given above.
+  '/builder/orders',
+  '/builder/billing', '/builder/billing/recharge',
   '/builder/billing/history', '/builder/billing/invoices',
   '/builder/billing/invoices/INV-2026-0903', '/builder/support',
   '/builder/support/new', '/builder/support/T-3140', '/builder/profile',
@@ -79,6 +95,9 @@ const ROUTES = [
   '/admin/system',
   // CR03 — the lead-requests queue
   '/admin/requests', '/admin/requests/lr-seed-1',
+  // CR02 — the owner-submission queue
+  '/admin/owner-listings', '/admin/owner-listings?status=all',
+  '/admin/owner-listings/op-seed-1',
 ];
 
 const WIDTHS = [

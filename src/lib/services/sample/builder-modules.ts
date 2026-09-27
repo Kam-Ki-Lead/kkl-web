@@ -24,6 +24,7 @@ import {
 import { processState } from "./process-state";
 import { areaOptionsFor, displayPath, isWithin } from "./locations";
 import * as builderStore from "./builder-store";
+import { projectOrder } from "./lead-orders";
 
 /**
  * The Builder's marketplace, credits and support.
@@ -350,6 +351,19 @@ export const builderLeadMarket: LeadMarketService = {
 
   async getPurchased(id) {
     return m().soldLeads.get(id) ?? null;
+  },
+
+  // CR04 — the Builder's own orders, over the same projection the Seller
+  // console uses. The two lead pools are separate; an order is not.
+  async listOrders() {
+    return [...m().soldLeads.values()]
+      .sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt))
+      .map((lead) => projectOrder(lead, "builder", lead.orderId));
+  },
+
+  async getOrder(reference) {
+    const lead = [...m().soldLeads.values()].find((l) => l.orderId === reference);
+    return lead === undefined ? null : projectOrder(lead, "builder", lead.orderId);
   },
 
   async exportPurchased({ ids }) {

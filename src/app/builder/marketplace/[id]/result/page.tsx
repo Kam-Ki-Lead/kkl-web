@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BuilderShell } from "@/components/builder/builder-shell";
 import { Card } from "@/components/ui/card";
@@ -60,6 +61,18 @@ export default async function PurchaseResultPage({
             {formatCreditBalance(wallet.balanceCredits)}.
           </p>
 
+          {outcome.duplicate ? (
+            <p
+              role="status"
+              className="t-body mt-[12px] rounded-[8px] border border-[#D4DBF3] bg-tint px-[14px] py-[11px] text-body"
+            >
+              <strong className="text-ink">This is the purchase you already made.</strong> The
+              submission was a repeat — a double press, a reloaded form or a retried request — and it
+              resolved to the same order rather than buying the lead again. You have{" "}
+              <strong className="text-ink">not</strong> been charged twice.
+            </p>
+          ) : null}
+
           <Card className="mt-[18px] border-[#BFE0CE] p-[22px]">
             <h3 className="t-card-title text-success">Contact details</h3>
             <dl className="mt-[12px] grid grid-cols-2 gap-[14px] max-[560px]:grid-cols-1">
@@ -77,11 +90,20 @@ export default async function PurchaseResultPage({
             <ButtonLink href="/builder/leads" variant="secondary">
               Go to My leads
             </ButtonLink>
+            <ButtonLink href={`/builder/orders/${lead.orderId}`} variant="secondary">
+              View the order
+            </ButtonLink>
           </div>
 
           <p className="t-caption mt-[12px] text-muted">
-            The order reference is <span className="t-mono text-ink">{lead.orderId}</span>.
-            Re-downloading does not cost credits.
+            The order reference is{" "}
+            <Link
+              href={`/builder/orders/${lead.orderId}`}
+              className="t-mono font-semibold text-brand underline underline-offset-2"
+            >
+              {lead.orderId}
+            </Link>
+            . Re-downloading does not cost credits.
           </p>
         </div>
       </BuilderShell>

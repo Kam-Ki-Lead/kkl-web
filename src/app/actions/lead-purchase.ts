@@ -81,8 +81,15 @@ export async function purchaseLead(
   // string: it decides which of the designed result screens renders, and a URL
   // the Seller can edit must not be able to claim a purchase that did not
   // happen. The result screen reads it once.
+  // `duplicate` travels with the outcome so the result screen can say so. A
+  // replayed submit already resolved to the purchase that was made — that is
+  // the idempotency key working — but a screen that renders an ordinary success
+  // leaves the buyer wondering whether they were charged twice. Being told they
+  // were not is the whole point of the guarantee.
+  const duplicate = outcome.kind === "purchased" && outcome.duplicate;
+
   const jar = await cookies();
-  jar.set(OUTCOME_COOKIE, JSON.stringify({ leadId, kind: outcome.kind, scope }), {
+  jar.set(OUTCOME_COOKIE, JSON.stringify({ leadId, kind: outcome.kind, scope, duplicate }), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -97,6 +104,8 @@ export type StoredOutcome = {
   readonly leadId: string;
   readonly kind: PurchaseOutcome["kind"];
   readonly scope: MarketScope;
+  /** True when this submission resolved to a purchase already made. */
+  readonly duplicate?: boolean;
 };
 
 /**

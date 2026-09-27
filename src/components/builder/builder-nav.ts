@@ -14,6 +14,9 @@ export function builderRailItems(unreadEnquiries: number): readonly RailItem[] {
     // CR01: the marketplace entry is named for the action — buying leads.
     { href: "/builder/marketplace", label: "Buy Leads" },
     { href: "/builder/leads", label: "My leads" },
+    // CR04: the commercial record of what was bought, separate from the working
+    // list of leads to call. Same screen as the Seller console's, own pool.
+    { href: "/builder/orders", label: "My purchases" },
     { href: "/builder/billing", label: "Billing & credits" },
     { href: "/builder/support", label: "Support" },
     { href: "/builder/profile", label: "Profile" },

@@ -18,6 +18,9 @@ export function sellerRailItems(newLeadCount: number | null): readonly RailItem[
       badge: newLeadCount && newLeadCount > 0 ? `${newLeadCount} new` : null,
     },
     { href: "/seller/purchased", label: "My leads" },
+    // CR04: the commercial record of what was bought, separate from the working
+    // list of leads to call. Different question, different screen.
+    { href: "/seller/orders", label: "My purchases" },
     // CR03: Request Leads is its own journey, separate from buying an
     // available lead — the rail names it for what it is.
     { href: "/seller/requests", label: "Lead requests" },

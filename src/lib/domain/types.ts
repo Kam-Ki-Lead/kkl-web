@@ -287,6 +287,67 @@ export type PurchasedLead = {
   readonly qualification: LeadQualification;
 };
 
+/**
+ * CR04 — a lead purchase as an order.
+ *
+ * The order already existed in the data: `PurchasedLead.orderId` has carried a
+ * reference since the purchase flow was built. What it did not have was a
+ * record of its own, so there was nowhere to answer "what did I order, what did
+ * I pay, and where is the paperwork" without going through the lead.
+ *
+ * `status` has two cases and no third. A purchase either deducted and released
+ * or it did not; there is no `refunded`, because refund eligibility and
+ * destination are undecided (D-14) and a status nobody has agreed to would be
+ * read as a promise.
+ */
+export type LeadOrderStatus = "paid" | "failed";
+
+/**
+ * What paid for the order.
+ *
+ * One case today, deliberately. The confirmed CR04 decision is a direct order
+ * settled from wallet credits; a payment-gateway alternative is a later
+ * addition, so there is no `gateway` case to render a half-built journey
+ * against, and no gateway is named anywhere.
+ */
+export type LeadOrderPayment = {
+  readonly method: "wallet_credits";
+  readonly label: string;
+  /** The ledger entry the deduction wrote, so the money can be traced. */
+  readonly ledgerReference: string;
+  readonly amountCredits: number;
+};
+
+/**
+ * Whether a document exists for this order, stated rather than implied.
+ *
+ * `not_issued` is the honest answer for a wallet-credit order in this build:
+ * the money event that produced a tax document was the recharge, and whether a
+ * separate per-order invoice is issued — and how it is taxed — are open
+ * decisions (D-13). A screen that showed a "Download invoice" button leading
+ * nowhere, or an invoice with a ₹0 tax line, would both answer a question
+ * nobody has answered.
+ */
+export type LeadOrderInvoiceState =
+  | { readonly kind: "issued"; readonly invoiceId: string; readonly number: string }
+  | { readonly kind: "not_issued"; readonly reason: string };
+
+export type LeadOrder = {
+  /** The reference the buyer quotes, e.g. "ORD-10234". Also the id. */
+  readonly reference: string;
+  readonly status: LeadOrderStatus;
+  readonly placedAt: string;
+  /** The lead this order released. Null on a failed order — nothing was released. */
+  readonly leadId: string | null;
+  /** What the lead was, for a list that should not have to load each lead. */
+  readonly itemLabel: string;
+  readonly locationPath: readonly string[];
+  readonly payment: LeadOrderPayment;
+  readonly invoice: LeadOrderInvoiceState;
+  /** Which marketplace it came from; the two pools are separate. */
+  readonly scope: "seller" | "builder";
+};
+
 export type MarketplaceFilters = {
   readonly locationIds?: readonly string[];
   readonly categories?: readonly string[];

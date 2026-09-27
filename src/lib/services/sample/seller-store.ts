@@ -4,6 +4,7 @@ import type {
   InvoiceDetail,
   KycSubmission,
   KycTimelineEntry,
+  LeadOrder,
   LedgerEntry,
   MarketplaceLead,
   MarketplaceLeadDetail,
@@ -24,6 +25,7 @@ import type {
   UsageMonth,
 } from "@/lib/services/contracts";
 import { processState } from "./process-state";
+import { projectOrder } from "./lead-orders";
 import { areaOptionsFor, displayPath, isWithin } from "./locations";
 
 /**
@@ -564,6 +566,25 @@ export function listPurchased(): readonly PurchasedLead[] {
 
 export function getPurchased(id: string): PurchasedLead | null {
   return state().soldLeads.get(id) ?? null;
+}
+
+/**
+ * CR04 — the caller's own orders. The projection is shared with the Builder
+ * marketplace; see lead-orders.ts for why an order is derived rather than
+ * stored beside the purchase it describes.
+ */
+function orderFor(lead: PurchasedLead): LeadOrder {
+  const entry = state().ledger.find((e) => e.id === lead.orderId);
+  return projectOrder(lead, "seller", entry?.id ?? null);
+}
+
+export function listOrders(): readonly LeadOrder[] {
+  return listPurchased().map(orderFor);
+}
+
+export function getOrder(reference: string): LeadOrder | null {
+  const lead = listPurchased().find((l) => l.orderId === reference);
+  return lead === undefined ? null : orderFor(lead);
 }
 
 /** CSV of the caller's own purchased leads. Quoting is deliberate, not optional. */

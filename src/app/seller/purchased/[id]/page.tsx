@@ -100,7 +100,16 @@ export default async function PurchasedLeadPage({
               <Detail label="Purchased" value={formatDate(lead.purchasedAt)} />
               <Detail label="Credits paid" value={formatExactInr(lead.pricePaidCredits)} />
             </dl>
-            <ButtonLink href="/seller/purchased" variant="secondary" className="mt-[14px] w-full">
+            {/* CR04: the order is its own record — what was paid, how, and what
+                paperwork exists. This screen is the lead; that one is the order. */}
+            <ButtonLink
+              href={`/seller/orders/${lead.orderId}`}
+              variant="secondary"
+              className="mt-[14px] w-full"
+            >
+              Order and payment
+            </ButtonLink>
+            <ButtonLink href="/seller/purchased" variant="secondary" className="mt-[8px] w-full">
               All my leads
             </ButtonLink>
           </Card>

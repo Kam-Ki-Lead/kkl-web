@@ -52,6 +52,7 @@ import type {
   KycSubmission,
   KycTimelineEntry,
   LedgerEntry,
+  LeadOrder,
   LeadRequest,
   LeadRequestStatus,
   OwnerListing,
@@ -326,6 +327,17 @@ export interface LeadMarketService {
   purchase(input: { leadId: string; idempotencyKey: string }): Promise<PurchaseOutcome>;
   listPurchased(): Promise<readonly PurchasedLead[]>;
   getPurchased(id: string): Promise<PurchasedLead | null>;
+  /**
+   * CR04 — the caller's own orders, newest first. Never another account's: the
+   * service reads the identity from the session, and there is no filter
+   * parameter that could ask for somebody else's.
+   */
+  listOrders(): Promise<readonly LeadOrder[]>;
+  /**
+   * One of the caller's own orders. Null when the reference does not exist
+   * **or belongs to somebody else** — indistinguishable on purpose.
+   */
+  getOrder(reference: string): Promise<LeadOrder | null>;
   /** Export of the caller's own purchased leads, as a file body. */
   exportPurchased(input: { format: "csv"; ids?: readonly string[] }): Promise<{
     readonly filename: string;
