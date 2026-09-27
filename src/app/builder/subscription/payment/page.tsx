@@ -107,8 +107,8 @@ export default async function SubscriptionPaymentPage() {
           >
             <p>
               Your submission is{" "}
-              {outcome.kycStatus === "pending" ? "in review" : "not approved yet"}. Drafts and the
-              lead marketplace stay available while you wait.
+              {outcome.kycStatus === "pending" ? "in review" : "not approved yet"}. Drafts and Buy
+              Leads stay available while you wait.
             </p>
           </AccessPanel>
         </div>

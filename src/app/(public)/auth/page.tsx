@@ -35,8 +35,8 @@ export default async function AuthPage({
       </Card>
 
       <p className="t-caption mt-[14px] text-muted">
-        A buyer account tracks your own enquiries and shortlist. It never gives access to the
-        lead marketplace or to another account&rsquo;s data.
+        A buyer account tracks your own enquiries and shortlist. It never gives access to
+        Buy Leads or to another account&rsquo;s data.
       </p>
     </div>
   );

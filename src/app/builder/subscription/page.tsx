@@ -21,7 +21,7 @@ const PANEL: Record<
     chip: "No subscription",
     tone: "muted",
     title: "A subscription is needed to publish",
-    body: "You can prepare listings, save drafts and use the lead marketplace without one. Publishing to the public portal needs an active subscription.",
+    body: "You can prepare listings, save drafts and use Buy Leads without one. Publishing to the public portal needs an active subscription.",
   },
   active: {
     chip: "Active",
@@ -121,7 +121,7 @@ export default async function BuilderSubscriptionPage() {
               ))}
             </ul>
             <p className="t-caption mt-[10px] text-muted">
-              The lead marketplace, credits and support are separate and are available whether or
+              Buy Leads, credits and support are separate and are available whether or
               not a subscription is active.
             </p>
           </Card>

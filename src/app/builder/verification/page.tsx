@@ -17,13 +17,13 @@ const PANEL: Record<KycStatus, { chip: string; tone: ChipTone; title: string; bo
     chip: "Not submitted",
     tone: "muted",
     title: "Your company has not been verified",
-    body: "Company documents are needed before any listing can be published. Drafts and the lead marketplace stay available.",
+    body: "Company documents are needed before any listing can be published. Drafts and Buy Leads stay available.",
   },
   pending: {
     chip: "In review",
     tone: "warning",
     title: "Your documents are with an administrator",
-    body: "Nothing is needed from you while this is in review. You can keep preparing listings and use the lead marketplace.",
+    body: "Nothing is needed from you while this is in review. You can keep preparing listings and use Buy Leads.",
   },
   approved: {
     chip: "Approved",

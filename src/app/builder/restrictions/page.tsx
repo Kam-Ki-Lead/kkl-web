@@ -39,7 +39,7 @@ const RESTRICTIONS: readonly Restriction[] = [
     label: "Not verified",
     sublabel: "Before KYC submission",
     tone: "muted",
-    allowed: ["Prepare listings and save drafts", "Browse the lead marketplace"],
+    allowed: ["Prepare listings and save drafts", "Browse Buy Leads"],
     blocked: ["Publish listings", "Buy leads or subscribe"],
     recovery: "Submit PAN, Aadhaar and company documents.",
   },

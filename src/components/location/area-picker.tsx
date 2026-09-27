@@ -112,7 +112,21 @@ function Combobox({
   // The visible options: name matches, with the empty choice first — but only
   // while the query is empty; "All areas" is not an answer to "rajar".
   const q = query.trim().toLowerCase();
-  const matches = areas.filter((a) => a.label.toLowerCase().includes(q));
+  // Ranked, not merely filtered. Labels are "<area>, <parent>", so a substring
+  // match on "new town" hits the three Action Areas — whose labels end in it —
+  // as well as New Town itself. Unordered, the first of those was highlighted,
+  // so typing a locality's own name and pressing Enter selected one of its
+  // sub-localities instead. Anything the query starts sorts ahead of anything
+  // that merely contains it, and an exact label ahead of that.
+  const matches = areas
+    .filter((a) => a.label.toLowerCase().includes(q))
+    .map((a) => {
+      const label = a.label.toLowerCase();
+      const rank = label === q ? 0 : label.startsWith(q) ? 1 : 2;
+      return { area: a, rank };
+    })
+    .sort((x, y) => x.rank - y.rank || x.area.label.localeCompare(y.area.label))
+    .map((m) => m.area);
   const options: readonly AreaOption[] =
     allLabel !== undefined && q === "" ? [{ id: "", label: allLabel }, ...matches] : matches;
 
