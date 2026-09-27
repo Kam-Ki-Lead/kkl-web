@@ -10,6 +10,7 @@ import {
   type BuilderEnquiryService,
   type ListingService,
   type LeadRequestService,
+  type OwnerListingService,
   type SellerAccountService,
   type SupportService,
   type HomepageContent,
@@ -24,6 +25,7 @@ import * as adminStore from "./admin-store";
 import * as sellerStore from "./seller-store";
 import * as builderStore from "./builder-store";
 import * as leadRequestStore from "./lead-request-store";
+import * as ownerListingStore from "./owner-listing-store";
 import {
   builderCredits,
   builderLeadMarket,
@@ -525,6 +527,35 @@ const adminService: AdminService = {
     return { ok: true, auditId: "—" };
   },
 
+  // CR02 — the owner-submission queue, over the same store the owner writes to.
+  async listOwnerListings(filter) {
+    return ownerListingStore.listForStaff(filter);
+  },
+  async getOwnerListing(id) {
+    return ownerListingStore.getForStaff(id);
+  },
+  async respondToOwnerListing(input) {
+    const result = ownerListingStore.staffRespond(input);
+    if (!result.ok) return result;
+    // Same rule as ticket replies and CR03: the message on the record is the
+    // record, so there is no separate audit entry.
+    return { ok: true, auditId: "—" };
+  },
+  async decideOwnerListing(input) {
+    const result = ownerListingStore.staffDecide(input);
+    if (!result.ok) return result;
+    const auditId = adminStore.recordAudit({
+      actor: input.actor,
+      category: "listings",
+      action: "Owner listing reviewed",
+      subject: input.listingId,
+      subjectLabel: `Owner listing ${result.reference}`,
+      reason: input.reason.trim(),
+      changes: [{ field: "status", before: result.from, after: result.to }],
+    });
+    return { ok: true, auditId };
+  },
+
   async listOrders(filter) {
     return adminStore.listOrders(filter);
   },
@@ -615,6 +646,11 @@ export const sampleReviewControls = {
     // CR03: lead requests live in their own store but are visible from both
     // the Seller console and the Admin queue — same argument as above.
     leadRequestStore.resetLeadRequestsForReview();
+    // CR02: owner submissions are written from the public owner journey and read
+    // from the Admin queue — the same argument again. A reset that left them
+    // behind would make "this submission was not here before" fail on a second
+    // run of the same script.
+    ownerListingStore.resetOwnerListings();
   },
   /** The ledger invariant, so a test can assert it instead of trusting a comment. */
   reconcile: sellerStore.reconcile,
@@ -761,6 +797,45 @@ const builderEnquiryService: BuilderEnquiryService = {
   },
 };
 
+/**
+ * CR02 — the individual owner's posting journey.
+ *
+ * The owner is not an input to any of these. The store associates the single
+ * sample owner, and the screens say so; no form field names the account.
+ */
+const ownerListingService: OwnerListingService = {
+  async listMine() {
+    return ownerListingStore.listMine();
+  },
+  async getMine(id) {
+    const found = ownerListingStore.getMine(id);
+    if (found === null) {
+      // Missing and not-yours are the same answer, so ownership cannot be
+      // probed by guessing identifiers.
+      throw new ServiceError("not_found", "That listing could not be found.");
+    }
+    return found;
+  },
+  async startDraft(input) {
+    return ownerListingStore.startDraft(input);
+  },
+  async saveStep(input) {
+    return ownerListingStore.saveStep(input);
+  },
+  async blockers(listingId) {
+    return ownerListingStore.blockers(listingId);
+  },
+  async submit(input) {
+    return ownerListingStore.submit(input);
+  },
+  async withdraw(input) {
+    return ownerListingStore.withdraw(input);
+  },
+  async reply(input) {
+    return ownerListingStore.reply(input);
+  },
+};
+
 export const sampleServices: Services = {
   properties: propertyService,
   enquiries: enquiryService,
@@ -770,6 +845,7 @@ export const sampleServices: Services = {
   sellerAccount: sellerAccountService,
   leadMarket: leadMarketService,
   leadRequests: leadRequestService,
+  ownerListings: ownerListingService,
   credits: creditService,
   support: supportService,
   builder: {

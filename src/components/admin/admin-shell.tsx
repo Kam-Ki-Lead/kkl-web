@@ -24,10 +24,16 @@ export async function AdminShell({
   children: ReactNode;
 }) {
   const admin = getServices().admin;
-  const [dashboard, notifications] = await Promise.all([
+  const [dashboard, notifications, ownerListings] = await Promise.all([
     admin.dashboard(),
     admin.listNotifications("failed"),
+    // CR02: the rail badge counts what is actually waiting for a person —
+    // submitted and awaiting-resubmission — not everything in the queue.
+    admin.listOwnerListings(),
   ]);
+  const ownerWaiting = ownerListings.filter(
+    (l) => l.status === "submitted" || l.status === "in_review",
+  ).length;
 
   return (
     <ConsoleShell
@@ -37,7 +43,7 @@ export async function AdminShell({
       // tighter step than the Seller and Builder rails use.
       dense
       tone="admin"
-      items={adminRailItems(railCounts(dashboard.queues, notifications.length))}
+      items={adminRailItems(railCounts(dashboard.queues, notifications.length, ownerWaiting))}
       footer={null}
       title={title}
       subtitle={subtitle}

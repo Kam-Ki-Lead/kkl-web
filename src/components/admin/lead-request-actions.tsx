@@ -23,6 +23,17 @@ import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
  * The status form moves the request through the proposed statuses (D-17). A
  * move is appended to the request's history and written to the audit log; the
  * note, when left, is shown to the requester on their own view.
+ *
+ * WHY THE MODE TRAVELS ON THE SUBMIT BUTTON
+ * -----------------------------------------
+ * It used to travel in a hidden input driven by the toggle's client state, and
+ * that was not safe. React 19 resets a form's DOM once its action completes,
+ * and a refused submission therefore left the toggle and the component's own
+ * state able to disagree — a staff member who selected "Internal note", hit a
+ * validation error, retyped and pressed again could have sent their note to the
+ * user. Carrying the mode on the button means the value submitted is the one
+ * the button the person pressed said it would do, in the same render as its
+ * label and the sentence above the field. The three cannot disagree.
  */
 export function LeadRequestActions({
   requestId,
@@ -45,7 +56,6 @@ export function LeadRequestActions({
     <Card className="p-[20px]">
       <form action={replyAction} className="flex flex-col gap-[14px]">
         <input type="hidden" name="requestId" value={requestId} />
-        <input type="hidden" name="mode" value={internal ? "internal" : "public"} />
 
         <div role="group" aria-label="Reply mode" className="flex flex-wrap gap-[8px]">
           {[
@@ -100,7 +110,7 @@ export function LeadRequestActions({
         </Field>
 
         <div>
-          <Button type="submit" size="action" disabled={replying}>
+          <Button type="submit" name="mode" value={internal ? "internal" : "public"} size="action" disabled={replying}>
             {replying ? "Sending…" : internal ? "Add internal note" : "Send reply"}
           </Button>
         </div>

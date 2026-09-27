@@ -43,6 +43,12 @@ export function AdjustmentForm({
   live: boolean;
 }) {
   const [state, action, pending] = useActionState<AdminFormState, FormData>(adjustCredits, {});
+  // The radio group IS the submitted field — `name="direction"` — rather than a
+  // hidden input mirroring this state. React 19 resets a form's DOM once its
+  // action completes, so a refused adjustment could leave the highlighted
+  // option and the mirrored value disagreeing, and the next press would move
+  // credit in the direction nobody chose. This state now only drives the
+  // "balance after" preview, where being briefly wrong costs nothing.
   const [direction, setDirection] = useState<"credit" | "debit">("credit");
   const [amount, setAmount] = useState("");
 
@@ -54,7 +60,6 @@ export function AdjustmentForm({
     <Card className="p-[20px]">
       <form action={action} className="flex flex-col gap-[16px]">
         <input type="hidden" name="accountId" value={accountId} />
-        <input type="hidden" name="direction" value={direction} />
 
         {state.error ? (
           <p
@@ -79,7 +84,7 @@ export function AdjustmentForm({
               >
                 <input
                   type="radio"
-                  name="directionChoice"
+                  name="direction"
                   value={option.key}
                   checked={active}
                   onChange={() => setDirection(option.key)}

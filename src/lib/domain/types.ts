@@ -680,6 +680,153 @@ export type ListingDraft = {
   readonly enquiryCount: number;
 };
 
+/**
+ * CR02 — an individual owner's own property, posted in their own name.
+ *
+ * Deliberately not `ListingDraft`. That type is a Builder's project: total
+ * units, RERA registration, a possession target, a price *range* across
+ * configurations. An owner has one flat and one price, and the client's change
+ * confirmation is explicit that an individual owner is neither a Builder
+ * subscriber nor a lead-buying broker. Reusing the Builder type would have
+ * made them one in the data, whatever the screens said.
+ *
+ * The statuses are the confirmed decision: an owner saves drafts and submits;
+ * a submission enters a moderation queue; nothing publishes by itself. There
+ * is no `published` state here, because whether an owner's listing publishes —
+ * and on what terms — is still governed by the owner policy (D-10, D-18) and
+ * inventing one would settle that by implication.
+ */
+export type OwnerListingStatus =
+  | "draft"
+  /** The owner has sent it; it is waiting to be picked up. */
+  | "submitted"
+  /** Staff have it open. */
+  | "in_review"
+  /** Staff asked the owner for something; the owner can edit and resubmit. */
+  | "changes_requested"
+  /**
+   * Review is finished and nothing is wrong with it. It is NOT live: whether,
+   * when and on what terms an owner's listing publishes is not decided, so
+   * this state says "cleared review" and stops there.
+   */
+  | "cleared"
+  /** Staff declined it, with a reason the owner can read. */
+  | "declined"
+  /** The owner took it back. */
+  | "withdrawn";
+
+/** The steps of the owner's posting journey. */
+export type OwnerListingStepId =
+  | "basics"
+  | "location"
+  | "pricing"
+  | "photos"
+  | "contact"
+  | "preview";
+
+export type OwnerListingStepState = {
+  readonly id: OwnerListingStepId;
+  readonly label: string;
+  readonly complete: boolean;
+};
+
+/** Something missing or wrong, pointing at the step that owns it. */
+export type OwnerListingBlocker = {
+  readonly step: OwnerListingStepId;
+  readonly stepNumber: number;
+  readonly message: string;
+};
+
+/** How an owner wants to be contacted about their own listing. */
+export type OwnerContactPreference = "phone" | "whatsapp" | "either";
+
+/** What the owner is offering. Renting is included because the client's own
+ *  specification describes owners letting property; whether it is in the launch
+ *  scope is D-18 and the screens say so. */
+export type OwnerListingIntent = "sell" | "rent";
+
+/**
+ * A photograph an owner added.
+ *
+ * `retained` is the honest bit. In sample mode a chosen file's bytes are not
+ * kept anywhere — media storage belongs to kkl-backend — so the record says
+ * the photograph was chosen and that nothing was stored, and the screens
+ * render that rather than a broken image or a stock photo standing in for
+ * someone's flat.
+ */
+export type OwnerListingPhoto = {
+  readonly id: string;
+  readonly fileName: string;
+  readonly sizeLabel: string;
+  readonly retained: boolean;
+};
+
+/** One movement of an owner's listing through its statuses. */
+export type OwnerListingEvent = {
+  readonly at: string;
+  readonly status: OwnerListingStatus;
+  readonly actorLabel: string;
+  /** Why. Null for the owner's own save/submit steps, where the action is the reason. */
+  readonly note: string | null;
+};
+
+/**
+ * A message between the owner and staff about the listing.
+ *
+ * There is no `internal` field, and no internal-note type reachable from this
+ * one — the same containment the support console and CR03 use. Staff notes
+ * live only on the Admin projection.
+ */
+export type OwnerListingMessage = {
+  readonly id: string;
+  readonly authorLabel: string;
+  readonly body: string;
+  readonly at: string;
+};
+
+export type OwnerListing = {
+  readonly id: string;
+  /** The reference the owner quotes, e.g. "OP-1041". */
+  readonly reference: string;
+  readonly status: OwnerListingStatus;
+  readonly intent: OwnerListingIntent | null;
+  readonly title: string;
+  readonly propertyType: string | null;
+  readonly configuration: string | null;
+  readonly description: string;
+  /** Area as a location-record id (CR05). Null until chosen; never a display name. */
+  readonly localityId: string | null;
+  readonly addressLine: string;
+  /** Expected price, or monthly rent when the intent is to rent. */
+  readonly priceInr: number | null;
+  readonly carpetArea: string;
+  readonly floorLabel: string;
+  readonly furnishing: string | null;
+  readonly availableFrom: string;
+  readonly photos: readonly OwnerListingPhoto[];
+  readonly contactPreference: OwnerContactPreference | null;
+  readonly contactName: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly submittedAt: string | null;
+  readonly events: readonly OwnerListingEvent[];
+  readonly messages: readonly OwnerListingMessage[];
+};
+
+export type OwnerListingSummary = {
+  readonly id: string;
+  readonly reference: string;
+  readonly title: string;
+  readonly status: OwnerListingStatus;
+  readonly locationLabel: string;
+  readonly priceLabel: string;
+  readonly detailLine: string;
+  readonly photoCount: number;
+  readonly stepsComplete: number;
+  readonly stepsTotal: number;
+  readonly updatedAt: string;
+};
+
 export type ListingSummary = {
   readonly id: string;
   readonly title: string;

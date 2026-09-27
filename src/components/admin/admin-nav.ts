@@ -16,6 +16,7 @@ import type { QueueTile } from "@/lib/domain/admin";
 export function adminRailItems(counts: {
   kyc: number;
   listings: number;
+  ownerListings: number;
   tickets: number;
   refunds: number;
   notifications: number;
@@ -29,6 +30,11 @@ export function adminRailItems(counts: {
     { group: "ACCOUNTS", href: "/admin/subscriptions", label: "Subscriptions" },
 
     { group: "LISTINGS", href: "/admin/properties", label: "Property review", badge: badge(counts.listings) },
+    // CR02: individual owners' submissions. A separate queue from Property
+    // review because it is a different question — that screen handles live and
+    // reported listings, this one handles listings that have never been live
+    // and, under the confirmed owner decision, do not go live by being accepted.
+    { group: "LISTINGS", href: "/admin/owner-listings", label: "Owner submissions", badge: badge(counts.ownerListings) },
 
     { group: "LEADS", href: "/admin/leads/intake", label: "Lead intake" },
     { group: "LEADS", href: "/admin/leads", label: "Leads", excludePrefix: "/admin/leads/intake" },
@@ -58,12 +64,14 @@ export function adminRailItems(counts: {
 export function railCounts(
   queues: readonly QueueTile[],
   notifications: number,
+  ownerListings = 0,
 ): Parameters<typeof adminRailItems>[0] {
   const find = (label: string) =>
     queues.find((q) => q.label.toLowerCase().startsWith(label))?.value ?? 0;
   return {
     kyc: find("kyc"),
     listings: find("listings"),
+    ownerListings,
     tickets: find("support"),
     refunds: find("refund"),
     notifications,

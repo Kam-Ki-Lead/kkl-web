@@ -1,5 +1,5 @@
 import type { AccountRole, StaffRef } from "./identity";
-import type { KycStatus, LeadRequest } from "./types";
+import type { KycStatus, LeadRequest, OwnerListing } from "./types";
 
 /**
  * The Admin console's record shapes (A-01 to A-31).
@@ -282,6 +282,20 @@ export type AdminThread = AdminTicket & {
 export type AdminLeadRequest = LeadRequest & {
   /** The account that asked, as staff need to see it. */
   readonly requesterLabel: string;
+  readonly internalNotes: readonly AdminTicketMessage[];
+};
+
+/**
+ * CR02 — an owner's listing as staff see it: the owner's own view, plus who
+ * asked and the staff notes.
+ *
+ * Same containment as CR03 and the support console. `OwnerListing` has no
+ * field that could carry an internal note, so a staff note cannot reach the
+ * owner by a forgotten filter on some later screen — it can only reach them
+ * if somebody writes it into `messages`, which is the public thread.
+ */
+export type AdminOwnerListing = OwnerListing & {
+  readonly ownerLabel: string;
   readonly internalNotes: readonly AdminTicketMessage[];
 };
 

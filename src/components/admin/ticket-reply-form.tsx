@@ -18,6 +18,17 @@ import { Field, TextArea } from "@/components/ui/field";
  * The mode is a form field, which means it is untrusted input. The server reads
  * it as a boolean and nothing else — it cannot name a thread, an account or an
  * author. Where a public reply is delivered comes from the ticket's own record.
+ *
+ * WHY THE MODE TRAVELS ON THE SUBMIT BUTTON
+ * -----------------------------------------
+ * It used to travel in a hidden input driven by the toggle's client state, and
+ * that was not safe. React 19 resets a form's DOM once its action completes,
+ * and a refused submission therefore left the toggle and the component's own
+ * state able to disagree — a staff member who selected "Internal note", hit a
+ * validation error, retyped and pressed again could have sent their note to the
+ * user. Carrying the mode on the button means the value submitted is the one
+ * the button the person pressed said it would do, in the same render as its
+ * label and the sentence above the field. The three cannot disagree.
  */
 export function TicketReplyForm({
   reference,
@@ -39,7 +50,6 @@ export function TicketReplyForm({
     <Card className="p-[20px]">
       <form action={action} className="flex flex-col gap-[14px]">
         <input type="hidden" name="reference" value={reference} />
-        <input type="hidden" name="mode" value={internal ? "internal" : "public"} />
 
         <div role="group" aria-label="Reply mode" className="flex flex-wrap gap-[8px]">
           {[
@@ -97,7 +107,7 @@ export function TicketReplyForm({
         </Field>
 
         <div>
-          <Button type="submit" size="action" disabled={pending}>
+          <Button type="submit" name="mode" value={internal ? "internal" : "public"} size="action" disabled={pending}>
             {pending ? "Sending…" : internal ? "Add internal note" : "Send reply"}
           </Button>
         </div>

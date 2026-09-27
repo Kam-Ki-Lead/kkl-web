@@ -4,6 +4,7 @@ import type {
   AdminActionResult,
   AdminLead,
   AdminLeadRequest,
+  AdminOwnerListing,
   AdminLedgerRow,
   AdminOrder,
   AdminSubscription,
@@ -53,6 +54,11 @@ import type {
   LedgerEntry,
   LeadRequest,
   LeadRequestStatus,
+  OwnerListing,
+  OwnerListingBlocker,
+  OwnerListingStatus,
+  OwnerListingStepId,
+  OwnerListingSummary,
   LocationNode,
   MarketplaceLead,
   MarketplaceLeadDetail,
@@ -545,6 +551,57 @@ export interface LeadRequestService {
   getMine(id: string): Promise<LeadRequest>;
 }
 
+/**
+ * CR02 — the individual owner's posting journey.
+ *
+ * Separate from the Builder's listing service on purpose. An owner is not a
+ * subscriber and not a lead buyer: there is no subscription to check, no
+ * credit to spend, and no publish action, because nothing an owner submits
+ * goes live by itself. `submit` moves a draft into the moderation queue and
+ * does nothing else — it charges nothing and publishes nothing.
+ *
+ * The owner is never an input. The service associates the account from the
+ * server-side identity; in this build that is the single sample owner, and the
+ * screens say so.
+ */
+export interface OwnerListingService {
+  /** The owner's own listings, newest first — drafts and submitted alike. */
+  listMine(): Promise<readonly OwnerListingSummary[]>;
+  /**
+   * One of the owner's own listings. Throws `not_found` when the id does not
+   * exist **or belongs to somebody else**; the two are indistinguishable so
+   * ownership cannot be probed by guessing ids.
+   */
+  getMine(id: string): Promise<OwnerListing>;
+  /** Starts a new draft and returns it. Nothing is published and nothing is charged. */
+  startDraft(input: { idempotencyKey: string }): Promise<OwnerListing>;
+  /**
+   * Saves one step's fields. Validation failures throw a `ValidationError`
+   * naming the fields; a partly-filled draft is allowed, because an owner
+   * filling in what they know first is the normal case.
+   */
+  saveStep(input: {
+    listingId: string;
+    step: OwnerListingStepId;
+    values: Readonly<Record<string, string | readonly string[]>>;
+  }): Promise<OwnerListing>;
+  /** What still has to be filled in before the listing can be submitted. */
+  blockers(listingId: string): Promise<readonly OwnerListingBlocker[]>;
+  /**
+   * Sends the listing for review. Idempotent on `idempotencyKey`: a double
+   * submit or a retried POST returns the same listing rather than queueing it
+   * twice. Refused, with the blockers, when anything required is missing.
+   */
+  submit(input: { listingId: string; idempotencyKey: string }): Promise<
+    | { readonly ok: true; readonly listing: OwnerListing; readonly duplicate: boolean }
+    | { readonly ok: false; readonly blockers: readonly OwnerListingBlocker[] }
+  >;
+  /** Takes a submitted listing back out of the queue. */
+  withdraw(input: { listingId: string; reason: string }): Promise<OwnerListing>;
+  /** The owner's reply to staff on their own listing. */
+  reply(input: { listingId: string; body: string }): Promise<OwnerListing>;
+}
+
 export type Services = {
   readonly properties: PropertyService;
   readonly enquiries: EnquiryService;
@@ -554,6 +611,7 @@ export type Services = {
   readonly sellerAccount: SellerAccountService;
   readonly leadMarket: LeadMarketService;
   readonly leadRequests: LeadRequestService;
+  readonly ownerListings: OwnerListingService;
   readonly credits: CreditService;
   readonly support: SupportService;
   /**
@@ -691,6 +749,34 @@ export interface AdminService {
     requestId: string;
     status: LeadRequestStatus;
     note?: string;
+  }): Promise<AdminActionResult>;
+
+  /**
+   * CR02 — the owner-submission queue.
+   *
+   * Staff see the listing the owner sees, plus the owner label and the staff
+   * notes. There is no publish action here either: `clear` records that review
+   * found nothing wrong, and stops. Publication is governed by the owner
+   * policy (D-10, D-18) and is not staff's to grant while that is open.
+   *
+   * Every decision carries a reason, and each one appends to the listing's
+   * history rather than overwriting it.
+   */
+  listOwnerListings(filter?: {
+    status?: OwnerListingStatus;
+  }): Promise<readonly AdminOwnerListing[]>;
+  getOwnerListing(id: string): Promise<AdminOwnerListing | null>;
+  respondToOwnerListing(input: {
+    actor: StaffRef;
+    listingId: string;
+    body: string;
+    internal: boolean;
+  }): Promise<AdminActionResult>;
+  decideOwnerListing(input: {
+    actor: StaffRef;
+    listingId: string;
+    decision: "in_review" | "changes_requested" | "cleared" | "declined";
+    reason: string;
   }): Promise<AdminActionResult>;
 
   // A-16 to A-21
