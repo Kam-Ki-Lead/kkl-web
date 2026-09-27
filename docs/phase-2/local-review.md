@@ -382,3 +382,56 @@ portal properties. They are written to leave the seed state behind them, but if
 a run fails part-way the next suite may start from a mutated portal. Reset both
 consoles (`/seller/review-state?reset=1`, `/builder/review-state?reset=1`) or
 restart the server before reading a second run's results as clean.
+
+## CR03 — reviewing against durable lead requests
+
+By default `/seller/requests` and `/admin/requests` are served by the in-memory
+sample store, and the screens say records are kept for the session only. To
+review the same journeys against records that actually persist, run
+kkl-backend's lead-request slice underneath:
+
+```sh
+# kkl-backend, branch claude/cr03-lead-requests. See its
+# docs/cr03-lead-requests.md for the database setup.
+MIGRATE_DATABASE_URL='postgres://postgres@127.0.0.1:5433/kkl' npm run migrate
+DATABASE_URL='postgres://kkl_app@127.0.0.1:5433/kkl' \
+KKL_DEV_AUTH_SECRET='local-review-secret' PORT=4010 npm start
+```
+
+Then serve kkl-web with three extra variables. They have no `NEXT_PUBLIC_`
+prefix on purpose — they are read from the server process per request, and the
+shared secret must never reach a browser bundle:
+
+```sh
+KKL_ENV=review KKL_DATA_SOURCE=sample \
+KKL_LEAD_REQUESTS=backend \
+KKL_LEAD_REQUESTS_BASE_URL=http://127.0.0.1:4010 \
+KKL_LEAD_REQUESTS_DEV_SECRET=local-review-secret \
+npx next start -p 3811
+```
+
+The build is unchanged: this is a server-side switch, so the same bundle serves
+both. The list page's closing sentence changes to match whichever store is
+answering, and there is no fallback between them — with `KKL_LEAD_REQUESTS=backend`
+and kkl-backend down, the screens report an error rather than quietly serving
+memory.
+
+What this does and does not make real: lead-request *records* become durable and
+account-isolated, enforced by the database. Everything else on the screen —
+sign-in, credits, payments, contact reveal — is still sample, and there is still
+one sample Seller because kkl-web has no sign-in.
+
+### Verifying it
+
+```sh
+# The journey, against whichever store is configured.
+PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-lead-request-flow.mjs
+
+# Permanence and cross-account isolation. Restarts kkl-backend mid-run.
+BACKEND_DIR=/path/to/kkl-backend BACKEND_URL=http://127.0.0.1:4010 \
+KKL_DEV_AUTH_SECRET=local-review-secret \
+PLAYWRIGHT=/path/to/playwright/index.mjs \
+node scripts/verify-lead-request-persistence.mjs
+```
+
+Only a green run of the second one justifies saying records are stored.

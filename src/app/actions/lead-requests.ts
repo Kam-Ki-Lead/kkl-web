@@ -32,9 +32,14 @@ import { ValidationError } from "@/lib/services/contracts";
  *
  * Persistence
  * -----------
- * The sample service keeps records in process memory so the journey can be
- * reviewed end to end. The client requires permanent storage; that is a
- * kkl-backend dependency (service-contract.md §2.11) and is not claimed here.
+ * Which store answers these calls is configuration, not code here. With
+ * KKL_LEAD_REQUESTS=backend the service is kkl-backend: a request becomes a
+ * PostgreSQL row that survives a restart, and the database — not just this
+ * code — refuses one account the rows of another. Without it, the sample
+ * store answers from process memory and the screens say so. There is no
+ * fallback between the two: a backend that cannot be reached is an error, not
+ * a silent return to memory. See service-contract.md §2.12 and
+ * kkl-backend/docs/cr03-lead-requests.md.
  */
 
 export type LeadRequestFormState = {

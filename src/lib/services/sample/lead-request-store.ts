@@ -27,7 +27,7 @@ import { areaLabel, getLocation } from "./locations";
  * is one sample Seller and no sign-in. The confirmation document is explicit
  * that a process-memory store does not satisfy the requirement; the durable
  * records and endpoints kkl-backend must provide are documented in
- * docs/phase-2/service-contract.md §2.11, and persistence is not claimed until
+ * docs/phase-2/service-contract.md §2.12, and persistence is not claimed until
  * records survive a restart and are retrieved with appropriate account access.
  *
  * The separation that matters *is* real here, because it is structural:

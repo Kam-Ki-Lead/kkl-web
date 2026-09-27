@@ -1,6 +1,8 @@
 import { runtimeConfig } from "@/lib/config/runtime";
 import type { Services } from "./contracts";
 import { sampleReviewControls, sampleServices } from "./sample/sample-services";
+import { leadRequestStoreKind } from "./backend/config";
+import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -16,7 +18,7 @@ import { sampleReviewControls, sampleServices } from "./sample/sample-services";
  */
 export function getServices(): Services {
   if (runtimeConfig.dataSource === "sample") {
-    return sampleServices;
+    return withLeadRequestStore(sampleServices);
   }
 
   throw new Error(
@@ -24,6 +26,33 @@ export function getServices(): Services {
       "It is blocked on kkl-backend publishing its versioned OpenAPI spec. kkl-web does not " +
       "fall back to sample data.",
   );
+}
+
+/**
+ * CR03 — lead requests, and only lead requests, may come from kkl-backend while
+ * every other service is still sample.
+ *
+ * The binary above is about the platform: `api` means kkl-backend serves
+ * everything, and it does not yet serve anything else. CR03 is the one domain
+ * the client requires to be *stored*, and no arrangement of frontend code can
+ * satisfy that, so it is allowed to move on its own.
+ *
+ * This is a swap, not a fallback. When KKL_LEAD_REQUESTS=backend and the
+ * backend cannot be reached, the screens report an error; they do not quietly
+ * serve process memory and call the records stored.
+ */
+function withLeadRequestStore(services: Services): Services {
+  if (leadRequestStoreKind() !== "backend") return services;
+  return {
+    ...services,
+    leadRequests: backendLeadRequests,
+    admin: { ...services.admin, ...backendAdminLeadRequests },
+  };
+}
+
+/** Which store lead requests are currently coming from, for the screens to say so. */
+export function leadRequestStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? leadRequestStoreKind() : "backend";
 }
 
 /**

@@ -6,10 +6,14 @@
  * record on both consoles, public replies vs internal notes, status history,
  * and the audit entry. It also checks the CR01 labels in their new context.
  *
- * What it cannot check is the one thing the sample store does not do:
- * permanence. Records here live in process memory; the durable-records
- * requirement is documented in docs/phase-2/service-contract.md §2.12 and is
- * not claimed by a green run of this script.
+ * It runs against either store. With KKL_LEAD_REQUESTS unset the sample store
+ * answers from process memory; with KKL_LEAD_REQUESTS=backend kkl-backend
+ * answers from PostgreSQL. Nothing below depends on which — identifier and
+ * reference shapes are the store's business.
+ *
+ * What a green run here does NOT establish is permanence: this script never
+ * restarts anything. That is scripts/verify-lead-request-persistence.mjs, and
+ * only a green run of *that* justifies saying records are stored.
  *
  * Run:
  *   NEXT_PUBLIC_KKL_ENV=review NEXT_PUBLIC_KKL_DATA_SOURCE=sample npx next build
@@ -66,7 +70,9 @@ await form.check('input[name="configuration"][value="2"]');
 await form.check('input[name="intent"][value="buy"]');
 
 await Promise.all([
-  form.waitForURL(/\/seller\/requests\/lr-/, { timeout: 15000 }),
+  // The identifier's shape is the store's business, not this script's: the
+  // sample store mints `lr-<token>` and kkl-backend mints a uuid.
+  form.waitForURL(/\/seller\/requests\/[^/?]+\?created=/, { timeout: 15000 }),
   form.click('button:has-text("Send request")'),
 ]);
 const detailUrl = form.url();
@@ -74,7 +80,7 @@ const reference = new URL(detailUrl).searchParams.get('created');
 const detailText = await form.textContent('body');
 
 ok('4. A valid request is filed and returns a reference',
-  Boolean(reference && /^LR-\d+$/.test(reference)) && detailText.includes('Request sent'),
+  Boolean(reference && /^LR-[A-Z0-9]+$/.test(reference)) && detailText.includes('Request sent'),
   `reference ${reference} shown on the detail screen`);
 
 ok('5. The detail shows the request as submitted with its history',
@@ -91,7 +97,7 @@ const listBefore = await (async () => {
   await page.close();
   return text;
 })();
-const countBefore = (listBefore.match(/LR-\d+/g) ?? []).length;
+const countBefore = (listBefore.match(/LR-[A-Z0-9]+/g) ?? []).length;
 
 // A second visit to the form mints a NEW key — that is a new intention and
 // files a second request. The replay guard is about the SAME key. Replaying
@@ -106,7 +112,7 @@ const listAfter = await (async () => {
   await page.close();
   return text;
 })();
-const countAfter = (listAfter.match(/LR-\d+/g) ?? []).length;
+const countAfter = (listAfter.match(/LR-[A-Z0-9]+/g) ?? []).length;
 
 ok('6. Reloading the result files no second request',
   countAfter === countBefore && listAfter.includes(reference),

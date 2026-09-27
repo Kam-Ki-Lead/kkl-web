@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LeadRequestStorageNote } from "@/components/seller/lead-request-storage-note";
 import { SellerShell } from "@/components/seller/seller-shell";
 import { REQUEST_STATUS } from "@/components/console/request-status";
 import { ButtonLink } from "@/components/ui/button";
@@ -108,8 +109,7 @@ export default async function SellerRequestsPage() {
           <Link href="/seller/leads" className="font-semibold text-brand">
             Buy Leads
           </Link>
-          . In this review build, requests are kept for the session only — permanent storage is a
-          backend dependency, not yet claimed.
+          . <LeadRequestStorageNote />
         </p>
       </div>
     </SellerShell>
