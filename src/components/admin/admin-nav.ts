@@ -15,6 +15,7 @@ import type { QueueTile } from "@/lib/domain/admin";
  */
 export function adminRailItems(counts: {
   kyc: number;
+  verification: number;
   listings: number;
   ownerListings: number;
   tickets: number;
@@ -27,6 +28,16 @@ export function adminRailItems(counts: {
 
     { group: "ACCOUNTS", href: "/admin/users", label: "Users" },
     { group: "ACCOUNTS", href: "/admin/kyc", label: "KYC queue", badge: badge(counts.kyc) },
+    // CR07: verification cases under the confirmed action-based policy. Separate
+    // from the KYC queue above, which is document submissions: this one answers
+    // whether a check was required for an action at all, and its badge counts
+    // only what needs a person — routine processing is not a backlog.
+    {
+      group: "ACCOUNTS",
+      href: "/admin/verification",
+      label: "Verification cases",
+      badge: badge(counts.verification),
+    },
     { group: "ACCOUNTS", href: "/admin/subscriptions", label: "Subscriptions" },
 
     { group: "LISTINGS", href: "/admin/properties", label: "Property review", badge: badge(counts.listings) },
@@ -65,11 +76,13 @@ export function railCounts(
   queues: readonly QueueTile[],
   notifications: number,
   ownerListings = 0,
+  verification = 0,
 ): Parameters<typeof adminRailItems>[0] {
   const find = (label: string) =>
     queues.find((q) => q.label.toLowerCase().startsWith(label))?.value ?? 0;
   return {
     kyc: find("kyc"),
+    verification,
     listings: find("listings"),
     ownerListings,
     tickets: find("support"),

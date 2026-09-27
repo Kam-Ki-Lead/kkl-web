@@ -11,6 +11,7 @@ import {
   type ListingService,
   type LeadRequestService,
   type OwnerListingService,
+  type VerificationService,
   type SellerAccountService,
   type SupportService,
   type HomepageContent,
@@ -26,6 +27,7 @@ import * as sellerStore from "./seller-store";
 import * as builderStore from "./builder-store";
 import * as leadRequestStore from "./lead-request-store";
 import * as ownerListingStore from "./owner-listing-store";
+import * as verificationStore from "./verification-store";
 import {
   builderCredits,
   builderLeadMarket,
@@ -566,6 +568,30 @@ const adminService: AdminService = {
     return { ok: true, auditId };
   },
 
+  // CR07 — the split queue. Two lists, not one with a filter: a routine case
+  // still with the provider must not sit in the same pile as one waiting on a
+  // person, and must not disappear either.
+  async verificationQueues() {
+    return verificationStore.staffQueues();
+  },
+  async getVerificationCase(reference) {
+    return verificationStore.getCase(reference);
+  },
+  async decideVerificationCase(input) {
+    const result = verificationStore.decideCase(input);
+    if (!result.ok) return result;
+    const auditId = adminStore.recordAudit({
+      actor: input.actor,
+      category: "accounts",
+      action: "Verification case decided",
+      subject: input.reference,
+      subjectLabel: `Verification case ${input.reference}`,
+      reason: input.reason.trim(),
+      changes: [{ field: "outcome", before: result.from, after: result.to }],
+    });
+    return { ok: true, auditId };
+  },
+
   async listOrders(filter) {
     return adminStore.listOrders(filter);
   },
@@ -646,6 +672,9 @@ export const sampleReviewControls = {
   setAccountStatus: sellerStore.setAccountStatusForReview,
   setPaymentOutcome: sellerStore.setPaymentOutcomeForReview,
   setBalance: sellerStore.setBalanceForReview,
+  // CR07: stands in for the verification provider's answer. Not a policy knob —
+  // the policy is in verification-policy.ts and is not review-settable.
+  setVerificationProviderResult: verificationStore.setProviderResultForReview,
   reset: () => {
     sellerStore.resetForReview();
     // The Admin console reads the Seller's verification, status and wallet, and
@@ -661,6 +690,9 @@ export const sampleReviewControls = {
     // behind would make "this submission was not here before" fail on a second
     // run of the same script.
     ownerListingStore.resetOwnerListings();
+    // CR07: verification cases are written from the console and read from the
+    // Admin queue, so the same argument applies again.
+    verificationStore.resetVerification();
   },
   /** The ledger invariant, so a test can assert it instead of trusting a comment. */
   reconcile: sellerStore.reconcile,
@@ -846,6 +878,27 @@ const ownerListingService: OwnerListingService = {
   },
 };
 
+/**
+ * CR07 — verification, per action.
+ *
+ * The role is not an input either: it comes from the account the store holds.
+ * In this build that is the one sample Seller, and the screens say so.
+ */
+const verificationService: VerificationService = {
+  async requirements() {
+    return verificationStore.requirements("seller");
+  },
+  async listMine() {
+    return verificationStore.listCases();
+  },
+  async start(action) {
+    return verificationStore.startCase(action);
+  },
+  async submit(reference) {
+    return verificationStore.submitToProvider(reference);
+  },
+};
+
 export const sampleServices: Services = {
   properties: propertyService,
   enquiries: enquiryService,
@@ -856,6 +909,7 @@ export const sampleServices: Services = {
   leadMarket: leadMarketService,
   leadRequests: leadRequestService,
   ownerListings: ownerListingService,
+  verification: verificationService,
   credits: creditService,
   support: supportService,
   builder: {

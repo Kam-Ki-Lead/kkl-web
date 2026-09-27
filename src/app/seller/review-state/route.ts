@@ -77,6 +77,19 @@ export async function GET(request: NextRequest) {
     applied.push(`payment=${payment}`);
   }
 
+  // CR07: what the sample verification service answers next, so each outcome —
+  // including the one that must never become a pass — can be seen on the screens.
+  const provider = params.get("provider");
+  if (
+    provider === "verified" ||
+    provider === "failed" ||
+    provider === "unclear" ||
+    provider === "unavailable"
+  ) {
+    review.setVerificationProviderResult(provider);
+    applied.push(`provider=${provider}`);
+  }
+
   const balance = params.get("balance");
   if (balance !== null && /^\d{1,7}$/.test(balance)) {
     review.setBalance(Number(balance));
@@ -92,6 +105,7 @@ export async function GET(request: NextRequest) {
         "  ?account=active|suspended                      account state (S-05)",
         "  ?payment=success|pending|failed                next recharge outcome (S-16)",
         "  ?balance=<rupees>                              set the balance, e.g. 0 for S-10",
+        "  ?provider=verified|failed|unclear|unavailable  next sample verification result (CR07)",
         "  ?reset=1                                       restore every seed value",
         "  ?reconcile=1                                   the ledger invariant, as JSON",
         "  &to=/seller/...                                where to go afterwards",

@@ -48,6 +48,8 @@ const ROUTES = [
   '/seller/kyc/status', '/seller/restricted', '/seller/leads',
   '/seller/leads?tab=sale', '/seller/leads/L-4471', '/seller/leads/L-4471/buy',
   '/seller/purchased',
+  // CR07 — what needs checking, per action
+  '/seller/verification',
   // CR04 — order history. `/seller/orders/[reference]` is deliberately absent:
   // order references are minted when a lead is bought and nothing is seeded as
   // already purchased, so there is no fixed reference to sweep. Seeding one to
@@ -98,6 +100,8 @@ const ROUTES = [
   // CR02 — the owner-submission queue
   '/admin/owner-listings', '/admin/owner-listings?status=all',
   '/admin/owner-listings/op-seed-1',
+  // CR07 — verification cases, split into needs-a-person and routine
+  '/admin/verification', '/admin/verification/VER-4401',
 ];
 
 const WIDTHS = [

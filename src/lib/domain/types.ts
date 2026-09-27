@@ -508,6 +508,109 @@ export type KycTimelineEntry = {
   readonly at: string | null;
 };
 
+// ------------------------------------------------------------ verification --
+
+/**
+ * CR07 — what a verification check is doing, per action.
+ *
+ * Seven outcomes, and the first distinction is the one `KycStatus` cannot
+ * express: **`not_required` is not `verified`**. An account that needs no check
+ * for an action has not passed one, and showing it a verified badge would be a
+ * claim nobody made. `KycStatus` stays as it is — the state of a document
+ * submission — and this describes whether a check is needed at all.
+ */
+export type VerificationOutcome =
+  /** No check is needed for this action on this account. Never shown as verified. */
+  | "not_required"
+  /** A check is needed before the action. The case has not started. */
+  | "required"
+  /** The case is with the provider. Routine processing, not a staff queue. */
+  | "in_progress"
+  /** The check completed successfully. */
+  | "verified"
+  /** The case needs a person: an unclear result, an incomplete submission, a provider error. */
+  | "needs_review"
+  /** The check completed and did not pass. Never an approval. */
+  | "failed"
+  /** A previously verified case no longer counts, where the policy sets an expiry. */
+  | "expired";
+
+/**
+ * The actions the policy speaks about.
+ *
+ * Per action, not per person: the same account can need a check for one thing
+ * and not for another, which is the whole point of the confirmed selective
+ * policy. Browsing and enquiring need none; money and publication are where a
+ * check applies.
+ */
+export type GatedAction =
+  | "browse_properties"
+  | "enquire_property"
+  | "request_leads"
+  | "purchase_lead"
+  | "publish_owner_listing"
+  | "publish_builder_listing";
+
+/** One movement of a verification case. */
+export type VerificationEvent = {
+  readonly at: string;
+  readonly outcome: VerificationOutcome;
+  readonly actorLabel: string;
+  /** Why. Required on every staff decision; null for provider-side transitions. */
+  readonly note: string | null;
+};
+
+/**
+ * A verification case: a check that was actually required, with a reference the
+ * person can quote and a history that says how it got where it is.
+ *
+ * `provider` names who is doing the checking. In this build that is a clearly
+ * labelled sample service — no provider has been selected, and nothing here
+ * contacts one or collects a real identity document.
+ */
+export type VerificationCase = {
+  readonly reference: string;
+  readonly action: GatedAction;
+  readonly actionLabel: string;
+  readonly outcome: VerificationOutcome;
+  /** Why the check was required, in the words the person reads. */
+  readonly requiredBecause: string;
+  readonly provider: {
+    readonly label: string;
+    /** The provider's own reference, once it has one. Null before then. */
+    readonly reference: string | null;
+    /** True while this is a labelled sample service rather than a real provider. */
+    readonly isSample: boolean;
+  };
+  /**
+   * True when the case is waiting on a person rather than on the provider.
+   * Routine processing must not fill a staff queue, and a case that needs
+   * attention must not be lost inside one.
+   */
+  readonly needsStaffAttention: boolean;
+  readonly openedAt: string;
+  readonly updatedAt: string;
+  readonly events: readonly VerificationEvent[];
+};
+
+/**
+ * What an account needs for one action, right now.
+ *
+ * `outcome` is `not_required` when the policy asks for nothing — and then
+ * `caseReference` is null, because no case was opened. Registering does not
+ * open one: an ordinary user never enters a verification queue by signing up.
+ */
+export type VerificationRequirement = {
+  readonly action: GatedAction;
+  readonly actionLabel: string;
+  readonly outcome: VerificationOutcome;
+  /** The sentence shown to the person: why a check is or is not needed. */
+  readonly explanation: string;
+  readonly caseReference: string | null;
+  /** True when the action is blocked by this outcome today. */
+  readonly blocksAction: boolean;
+};
+
 // --------------------------------------------------------------------- kyc --
 
 export type KycSubmission = {

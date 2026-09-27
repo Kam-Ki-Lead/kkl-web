@@ -52,6 +52,7 @@ import type {
   KycSubmission,
   KycTimelineEntry,
   LedgerEntry,
+  GatedAction,
   LeadOrder,
   LeadRequest,
   LeadRequestStatus,
@@ -60,6 +61,8 @@ import type {
   OwnerListingStatus,
   OwnerListingStepId,
   OwnerListingSummary,
+  VerificationCase,
+  VerificationRequirement,
   LocationNode,
   MarketplaceLead,
   MarketplaceLeadDetail,
@@ -614,6 +617,36 @@ export interface OwnerListingService {
   reply(input: { listingId: string; body: string }): Promise<OwnerListing>;
 }
 
+/**
+ * CR07 — verification, as a per-action question.
+ *
+ * Separate from the KYC submission service on purpose. That one is about a
+ * document submission's state; this one answers "does this account need a check
+ * for this action at all", which is the question the confirmed selective policy
+ * turns on. `not_required` is an answer it can give, and it is never `verified`.
+ *
+ * The account is never an input. The service answers for the caller's own
+ * identity; there is no parameter that could ask about somebody else.
+ */
+export interface VerificationService {
+  /** What the caller needs, action by action, right now. */
+  requirements(): Promise<readonly VerificationRequirement[]>;
+  /** The caller's own cases. Empty for an account that has never needed one. */
+  listMine(): Promise<readonly VerificationCase[]>;
+  /**
+   * Opens a case for an action that requires one. Throws when the action
+   * requires nothing — a case that was never needed would put an account in a
+   * queue it has no business being in.
+   */
+  start(action: GatedAction): Promise<VerificationCase>;
+  /**
+   * Sends the case to the verification service and records the answer. A result
+   * that is unreadable, or a service that cannot be reached, becomes a case for
+   * review — never a pass.
+   */
+  submit(reference: string): Promise<VerificationCase | null>;
+}
+
 export type Services = {
   readonly properties: PropertyService;
   readonly enquiries: EnquiryService;
@@ -624,6 +657,7 @@ export type Services = {
   readonly leadMarket: LeadMarketService;
   readonly leadRequests: LeadRequestService;
   readonly ownerListings: OwnerListingService;
+  readonly verification: VerificationService;
   readonly credits: CreditService;
   readonly support: SupportService;
   /**
@@ -788,6 +822,31 @@ export interface AdminService {
     actor: StaffRef;
     listingId: string;
     decision: "in_review" | "changes_requested" | "cleared" | "declined";
+    reason: string;
+  }): Promise<AdminActionResult>;
+
+  /**
+   * CR07 — verification cases, split.
+   *
+   * `attention` is what a person must act on; `routine` is what the provider is
+   * still working on. Two lists rather than one with a filter, because a queue
+   * that mixes them buries the cases that need someone — and because a routine
+   * case must not look like a backlog.
+   */
+  verificationQueues(): Promise<{
+    readonly attention: readonly VerificationCase[];
+    readonly routine: readonly VerificationCase[];
+  }>;
+  getVerificationCase(reference: string): Promise<VerificationCase | null>;
+  /**
+   * A staff decision. The reason is mandatory: this is the screen where
+   * somebody's identity is accepted or refused, and a decision nobody can
+   * review later is not a decision.
+   */
+  decideVerificationCase(input: {
+    actor: StaffRef;
+    reference: string;
+    outcome: "verified" | "failed" | "needs_review" | "expired";
     reason: string;
   }): Promise<AdminActionResult>;
 
