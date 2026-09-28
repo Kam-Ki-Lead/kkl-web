@@ -575,6 +575,16 @@ export type VerificationCase = {
   readonly outcome: VerificationOutcome;
   /** Why the check was required, in the words the person reads. */
   readonly requiredBecause: string;
+  /**
+   * The provenance behind that rule — who decided it, when, and on what basis.
+   * Staff-facing only. `AdminShell` screens render it; the requester's own views
+   * never do, and no customer-facing type carries it.
+   */
+  readonly policyProvenance: {
+    readonly note: string;
+    readonly basis: string;
+    readonly decidedBy: string | null;
+  };
   readonly provider: {
     readonly label: string;
     /** The provider's own reference, once it has one. Null before then. */

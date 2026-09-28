@@ -116,6 +116,11 @@ function project(c: StoredCase): VerificationCase {
     actionLabel: ACTION_LABELS[c.action],
     outcome: c.outcome,
     requiredBecause: policyFor(c.action).explanation,
+    policyProvenance: {
+      note: policyFor(c.action).internalNote,
+      basis: policyFor(c.action).basis,
+      decidedBy: policyFor(c.action).decidedBy,
+    },
     provider: {
       label: PROVIDER_LABEL,
       reference: c.providerReference,

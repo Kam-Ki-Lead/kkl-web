@@ -49,7 +49,7 @@ confirmation document remains a proposal.
 | CR03 — Request Leads | **Implemented, durable integration** | PostgreSQL rows that survive a restart; row-level security the application role cannot bypass; server-side sessions with revocation and expiry; internal notes withheld by policy, not by a filter | **Authentication is not built.** Identities are issued by a development authenticator for review — see `cr03-authentication-boundary.md`. Also open: withdrawal, retention for closed requests |
 | CR04 — Purchase orders | **Implemented, sample services** | Selection → review → wallet checkout → result → My purchases → order detail, in both consoles. Payment traced to its ledger entry; replayed submissions reported as repeats; masking preserved | **Payments** — no provider chosen, none contacted; balances move numbers in one process. **Tax treatment and per-order invoicing** (D-13). **Refund policy** (D-14) — why there is no refund control. Cart and gateway remain a later addition |
 | CR05 — Locations | **Implemented, sample records** | One hierarchy on all six surfaces that pick a location, stable ids, ranked locality search, parent replacing child, honest empty results | **Database-backed location management** — the 55 records are a fixture, not an administered table |
-| CR06-a — Type 1 reference | **Blocked** | Nothing. The approved homepage is untouched and no archived direction has been guessed at | **Which screenshot, file or existing screen "Type 1" means.** If it is the homepage already approved, this item closes with no work |
+| CR06-a — Type 1 reference | **Closed, no work needed** | Type 1 identified 28 September 2026 as the kkl-design Round 3 prototype homepage — the design already approved and already built. Compared at 1209px: header, hero and search card match, copy word for word | Nothing. Differences found were photography (imagery dependency), listing count (sample-data volume) and the review banner — none of them design |
 | CR06-b — Logo colours | **Blocked** | Nothing | **The authoritative logo file.** Colours in use are then checked against it, divergences reported before anything changes, accessibility corrections retained |
 | CR07 — Verification policy | **Implemented, sample services** | Per-action outcomes, Not required distinct from Verified, no case opened by registering, cases with references and history, the Admin queue split, a provider failure that can never become a pass, existing purchase restriction retained | **Identity-provider integration** — no provider selected, no document collected, no compliance claimed. Expiry period, consent and retention undecided. The `request_leads` rule was decided on 28 September (A-5) and is no longer outstanding |
 
@@ -99,17 +99,24 @@ Recorded in full, with source and the exact workflow each answer authorizes, in
 | Selective, action-based verification | CR07's whole structure, and keeping the purchase restriction | A provider, document collection, a compliance claim, an expiry period |
 | "I'll supply both" (CR06 assets) | Nothing yet — neither has arrived | — |
 
-### Waiting on you — two items, both CR06
+### Waiting on you — one item
 
-1. **CR06-a · Confirm the Type 1 homepage reference.** Which screenshot, file or
-   existing screen is meant. **If it is the homepage already approved, say so
-   and this closes with no work at all** — that design is what is live here.
-2. **CR06-b · The authoritative logo file**, so the colours in use can be checked
-   against it. Any divergence is reported before anything changes, and the
-   accessibility corrections already made are retained.
+**CR06-b · The authoritative logo file**, so the colours in use can be checked
+against it. Any divergence is reported before anything changes, and the
+accessibility corrections already made are retained. Sampling colours from a
+screenshot is not a substitute — a hex value read from a lossy JPEG would be a
+guess presented as a measurement.
 
-Kept separate because CR06-a may need no work and CR06-b is a colour audit that
-can start the moment the file arrives. Neither should hold up the other.
+Splitting CR06 paid off: **CR06-a closed on 28 September with no work at all.**
+Type 1 turned out to be the homepage already approved and already built, which
+is why it was worth asking rather than producing a redesign. Evidence in
+`evidence/cr06/`.
+
+**One small question, recorded rather than acted on.** The Type 1 screenshot
+shows the homepage search card with a locality and a budget pre-selected, where
+this build shows "All of Kolkata" and "Any budget". A prototype screenshot is
+usually posed, and pre-filling a buyer's search is a product decision rather
+than a styling one. If those are intended defaults, it is a one-line change.
 
 ### Decided on 28 September
 
@@ -363,20 +370,19 @@ does not block the frontend model. Decision 7: rental listing coverage.
 
 ## CR06 — Visual direction
 
-> **Still blocked, and now split in two (28 September 2026).** Nothing has been
-> built, guessed at or changed; the approved homepage stands.
+> **CR06-a closed, CR06-b still blocked (28 September 2026).**
 >
-> **CR06-a — confirm the Type 1 homepage reference.** Which screenshot, file or
-> existing screen is meant. **If it is the homepage already approved, that
-> clarification closes this item with no work at all**; no redesign will be
-> produced on an assumption.
+> **CR06-a — Type 1 identified.** The attached reference is the kkl-design Round
+> 3 prototype homepage: the design already approved and already built. Compared
+> at 1209px, header, hero and search card match and the copy is word for word.
+> **No redesign.** Evidence and the full comparison in `evidence/cr06/`.
 >
 > **CR06-b — verify colours against the authoritative logo.** Needs the real
 > logo file. The colours in use are then checked against it and any divergence
 > reported before anything changes, with the accessibility corrections retained.
 >
-> Separate items because CR06-a may need no work and CR06-b can start as soon as
-> the file arrives.
+> Separate items, and splitting them paid off: CR06-a needed no work at all,
+> and CR06-b is unblocked the moment the file arrives.
 
 
 **Source.** Specification §3.

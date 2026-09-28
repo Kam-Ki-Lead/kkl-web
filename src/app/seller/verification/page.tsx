@@ -65,20 +65,21 @@ export default async function SellerVerificationPage() {
                         <p className="t-label text-ink">{r.actionLabel}</p>
                         <p className="t-caption mt-[2px] text-body">{r.explanation}</p>
                         <p className="t-caption mt-[4px] text-muted">{state.line}</p>
-                        {/* Where the rule came from, said on the row rather than
-                            left to a document. An unconfirmed rule is marked as
-                            an assumption; a decided one names who decided it and
-                            on what basis — and a product decision is labelled as
-                            a product decision, never as a compliance finding. */}
+                        {/* Provenance is NOT rendered here.
+                            Who decided a rule, when, and the distinction between
+                            a product decision and a compliance determination all
+                            matter to whoever audits this policy and not at all to
+                            somebody working out whether they can file a request.
+                            That record lives on the Admin case detail and in
+                            docs/phase-2/decisions-received.md. `rule.internalNote`
+                            must not appear on this screen.
+                            The one exception is a rule nobody has decided: a
+                            customer is entitled to know when a rule being applied
+                            to them is provisional. */}
                         {!rule.confirmed ? (
                           <p className="t-caption mt-[4px] font-semibold text-warning">
                             This one is an assumption, not a confirmed rule — it is on the list of
                             decisions still to be made.
-                          </p>
-                        ) : rule.basis === "product_decision" ? (
-                          <p className="t-caption mt-[4px] text-muted">
-                            Product decision — {rule.decidedBy}. This is a decision about how KKL
-                            works, not a determination about what any law requires.
                           </p>
                         ) : null}
                         {r.caseReference !== null ? (

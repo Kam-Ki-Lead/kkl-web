@@ -146,6 +146,34 @@ production on nobody's authority.
 
 ---
 
+### A-6 · Type 1 identified  *(closes CR06-a)*
+
+- **Source:** project owner, 28 September 2026, as an attached image.
+- **What the image is:** the kkl-design prototype viewer, Round 3 — its own
+  chrome reads *"ROUND 3 · Kam Ki Lead — responsive portal homepage · Prototype ·
+  fit to window, 1209px · synthetic listings, stock photography"*.
+- **Therefore:** **Type 1 is the homepage that was already approved and already
+  built.** CR06-a closes with no redesign, which is the outcome worth having.
+- **Checked, not assumed.** The build was captured at the same 1209px width and
+  compared: header, nav, hero eyebrow, title, body copy, price, action and the
+  whole search card match — the copy word for word. Both images and the
+  comparison are in `evidence/cr06/`.
+- **Differences found, none of them design:** stock photography (the known
+  imagery dependency, no licence settled); "Search 128 properties" against
+  "Search 8 properties" (sample-data volume); and the review build's SAMPLE DATA
+  strip, which a design would not carry.
+- **One thing I did not act on:** Type 1's search card shows a locality and a
+  budget pre-selected where this build shows "All of Kolkata" and "Any budget".
+  A prototype screenshot is usually posed, and pre-filling a buyer's search is a
+  product decision rather than a styling one, so it is recorded as a question
+  rather than changed.
+
+### Still open: CR06-b
+
+Colour verification needs the **authoritative logo file**. Sampling colours from
+the Type 1 screenshot is not a substitute — it is a lossy JPEG of a rendered
+page, and a hex value read from it would be a guess presented as a measurement.
+
 ## My implementation decisions, which nobody approved
 
 These are mine. Each is a judgement made to keep the build coherent, and each is
@@ -163,21 +191,14 @@ A-5, a decision.
 
 ---
 
-## Open: CR06, as two separate items
+## CR06, as two separate items
 
-Kept split, because they are different questions with different answers and one
-of them may need no work at all.
+### CR06-a · Confirm the Type 1 homepage reference — **answered 28 September 2026**
 
-### CR06-a · Confirm the Type 1 homepage reference
+Type 1 is the homepage already approved and already built. See A-6 above and
+`evidence/cr06/`. **No redesign.**
 
-**What is needed:** which screenshot, file or existing screen "Type 1" refers to.
-
-**If it means the homepage already approved, say so and this item closes with no
-work.** That design is what is live in this build, untouched, and confirming it
-is worth more than any redesign. No archived direction will be treated as Type 1
-on a guess, and nothing will be rebuilt on an assumption about what was meant.
-
-### CR06-b · Verify colours against the authoritative logo
+### CR06-b · Verify colours against the authoritative logo — **still open**
 
 **What is needed:** the authoritative logo file itself — the real one, not a
 screenshot of it or an export from a deck.
@@ -187,8 +208,3 @@ file, and any divergence is reported before anything changes. The accessibility
 corrections already made are retained; where a logo colour and a contrast
 requirement disagree, that is reported as a decision for you rather than settled
 quietly in either direction.
-
-**Why separate from CR06-a:** the logo check is a colour audit and can proceed
-the moment the file arrives, whatever "Type 1" turns out to mean. Confirming the
-homepage reference may close CR06-a with nothing to do, and it should not be
-held up by a file, nor the file's audit held up by the confirmation.

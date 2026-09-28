@@ -62,8 +62,22 @@ export type PolicyRule = {
   readonly label: string;
   /** Whether a check is required for this action at all. */
   readonly required: boolean;
-  /** The sentence the person reads, in either case. */
+  /**
+   * What the customer reads. Plain, short, and about what they can and cannot
+   * do — never about who decided it or on what basis.
+   *
+   * That separation is deliberate. Provenance matters enormously to whoever
+   * audits this policy and not at all to somebody trying to work out whether
+   * they can file a request. Mixing the two made a two-line answer into a
+   * paragraph and put an internal distinction in front of a customer who has no
+   * use for it. `internalNote` below is where that belongs.
+   */
   readonly explanation: string;
+  /**
+   * The provenance, for staff and for the record. Rendered on the Admin case
+   * detail and in the policy documentation. **Never on a customer screen.**
+   */
+  readonly internalNote: string;
   /** Where the rule came from. `assumption` is the only unconfirmed basis. */
   readonly basis: PolicyBasis;
   /** Who decided it, for the record. Null for a rule nobody has decided. */
@@ -84,6 +98,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: false,
     explanation:
       "No verification is needed to look at properties. Registering does not start a check and does not put an account in any verification queue.",
+    internalNote:
+      "From the client's written specification and restated on the call: no blanket KYC gate for browsing.",
     basis: "specification",
     decidedBy: "Client specification, and the call",
     confirmed: true,
@@ -94,6 +110,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: false,
     explanation:
       "No document check is needed to send an enquiry. Confirming a mobile number at enquiry is a separate thing from identity verification, and passing it is not a verification.",
+    internalNote:
+      "From the client's written specification. Mobile confirmation at enquiry is deliberately not treated as identity verification.",
     basis: "specification",
     decidedBy: "Client specification, and the call",
     confirmed: true,
@@ -103,7 +121,9 @@ const RULES: Record<GatedAction, PolicyRule> = {
     label: "Request leads",
     required: false,
     explanation:
-      "Submitting a lead request needs no verification. Asking the team to find leads moves no money and publishes nothing. This is a product decision about how KKL works — not a statement that no law requires a check.",
+      "You can submit a lead request without verification. Verification is required before purchasing leads.",
+    internalNote:
+      "Product decision by the project owner, 28 September 2026: submitting a lead request does not require KYC, the restriction on purchasing leads is retained, and no other action changes. This is a decision about how KKL works — it is not a determination about what any law requires, and must not be described as one.",
     basis: "product_decision",
     decidedBy: "Project owner, 28 September 2026",
     confirmed: true,
@@ -113,7 +133,9 @@ const RULES: Record<GatedAction, PolicyRule> = {
     label: "Buy a lead",
     required: true,
     explanation:
-      "Buying a lead spends credits and releases another person's contact details, so it requires verification. This is the restriction that already applied; it stays until a replacement is confirmed.",
+      "Buying a lead spends credits and releases another person's contact details, so it requires verification.",
+    internalNote:
+      "Pre-existing restriction, explicitly retained by the project owner on 27 and again on 28 September 2026. It stays until a replacement is confirmed.",
     basis: "product_decision",
     decidedBy: "Project owner, 27 September 2026 (retained 28 September 2026)",
     confirmed: true,
@@ -124,6 +146,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: true,
     explanation:
       "Publishing a listing puts a property in front of buyers in your name, so it requires verification. Nothing publishes in this build — an owner's submission goes to a review queue — so no check is asked of an owner today.",
+    internalNote:
+      "Product decision by the project owner, 27 September 2026 (submit for review, never auto-publish). The publication terms themselves are still open, so this rule describes an action that does not yet happen.",
     basis: "product_decision",
     decidedBy: "Project owner, 27 September 2026",
     confirmed: true,
@@ -133,7 +157,9 @@ const RULES: Record<GatedAction, PolicyRule> = {
     label: "Publish a project listing",
     required: true,
     explanation:
-      "The existing Builder conditions stand: verification and an active subscription before a listing is published. The owner policy does not overwrite them.",
+      "The existing Builder conditions stand: verification and an active subscription before a listing is published.",
+    internalNote:
+      "Existing Builder conditions, unchanged. The owner policy deliberately does not overwrite them.",
     basis: "specification",
     decidedBy: "Existing Builder conditions, unchanged",
     confirmed: true,

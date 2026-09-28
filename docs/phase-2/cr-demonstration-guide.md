@@ -123,12 +123,13 @@ gateway alternative are a later addition.
 2. Walk the table. Browsing and enquiring read **Not required**, and the sentence
    beside them says *"This is not a verification and no check has been passed."*
    *"Not required is not Verified — that distinction is the whole change."*
-3. Point at the **Request leads** row: **Not required**, attributed underneath as
-   a *product decision* by the project owner and dated. Say the attribution out
-   loud — *"a decision about how the product works, not a finding about what the
-   law requires"* — because that distinction is the one people collapse.
-   Contrast it with **Buy a lead** on the row below, which still requires a
-   check: the decision covered requesting and nothing else.
+3. Point at the **Request leads** row: **Not required**, reading *"You can submit
+   a lead request without verification. Verification is required before
+   purchasing leads."* Contrast it with **Buy a lead** below, which still
+   requires a check — the decision covered requesting and nothing else.
+   The customer screen says nothing about who decided that or when, on purpose.
+   If somebody asks, the record is on the Admin case detail under **Policy
+   record**, and in `decisions-received.md`.
 4. **Buy a lead** requires a check and has a **case with a reference** and a
    visible history.
 5. **Drive the provider to an outage:**

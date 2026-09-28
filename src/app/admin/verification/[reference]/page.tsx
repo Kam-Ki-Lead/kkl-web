@@ -43,6 +43,23 @@ export default async function AdminVerificationCasePage({
       <Card className="mt-[16px] p-[20px]">
         <SectionHeader title="Why a check was required" />
         <p className="t-body text-body">{found.requiredBecause}</p>
+        {/* The record behind the rule. Staff see it here; the requester's own
+            views carry no field that could show it, which is the same
+            containment the internal notes use. */}
+        <InsetPanel className="mt-[12px] bg-tint">
+          <p className="t-caption text-muted">
+            Policy record ·{" "}
+            {found.policyProvenance.basis === "product_decision"
+              ? "product decision"
+              : found.policyProvenance.basis === "specification"
+                ? "client specification"
+                : "unconfirmed assumption"}
+            {found.policyProvenance.decidedBy === null
+              ? ""
+              : ` · ${found.policyProvenance.decidedBy}`}
+          </p>
+          <p className="t-body mt-[4px] text-ink">{found.policyProvenance.note}</p>
+        </InsetPanel>
         <InsetPanel className="mt-[14px]">
           <dl className="grid grid-cols-2 gap-[14px] max-[560px]:grid-cols-1">
             <Row label="Action" value={found.actionLabel} />

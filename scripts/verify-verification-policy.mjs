@@ -71,14 +71,17 @@ ok('5. The screen says no provider has been selected',
 // absence of any compliance wording.
 ok('6. Requesting leads reads as needing no verification',
   /Request leads[\s\S]{0,500}?Not required/.test(mineText) &&
-    mineText.includes('Submitting a lead request needs no verification'),
-  'the confirmed product decision is what the row states');
+    mineText.includes(
+      'You can submit a lead request without verification. Verification is required before purchasing leads.',
+    ),
+  'the customer-facing sentence is the plain two-line one');
 
-ok('6b. It is attributed as a product decision, not a compliance finding',
-  mineText.includes('Product decision — Project owner, 28 September 2026') &&
-    mineText.includes('not a determination about what any law requires') &&
+ok('6b. The customer screen carries no provenance and no assumption caveat',
+  !mineText.includes('Product decision') &&
+    !mineText.includes('Project owner') &&
+    !mineText.includes('not a determination about what any law requires') &&
     !mineText.includes('an assumption, not a confirmed rule'),
-  'the row names who decided it and what kind of decision it is; the assumption caveat is gone');
+  'who decided the rule, when, and the compliance distinction are all absent from the customer view');
 
 // Read from the rendered text, not `textContent('body')`: the latter includes
 // the inline RSC payload, which carries a second escaped copy of every
@@ -135,6 +138,13 @@ ok('9. A case shows why the check was required, and its history',
   caseText.includes('Why a check was required') && caseText.includes('History') &&
     caseText.includes('could not read the document image'),
   'the reason, the service and the event trail all render');
+
+ok('9b. The policy record is on the Admin case, not on the customer screen',
+  caseText.includes('Policy record') &&
+    caseText.includes('product decision') &&
+    caseText.includes('Project owner, 28 September 2026') === false &&
+    caseText.includes('Pre-existing restriction, explicitly retained by the project owner'),
+  'staff see the basis, who decided it and the internal note for this case\'s own action');
 
 ok('10. The case says it came from a sample service',
   caseText.includes('This is a sample verification service'),
