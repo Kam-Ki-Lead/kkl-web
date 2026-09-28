@@ -8,9 +8,15 @@ the build, whether it rests on an instruction or on a judgement of mine.
 
 **A signed DOCX is not the only form of approval, and this register does not
 demand one.** An explicit written instruction from the project owner is
-approval, and the four answers below are exactly that: written, unambiguous,
-given in response to a question that set out the options and their consequences.
-They are recorded and acted on as instructions.
+approval, and the answers below are exactly that: written, unambiguous, given in
+response to a question that set out the options and their consequences. They are
+recorded and acted on as instructions.
+
+**What is *not* approval, stated once so it is not argued later:** an
+environment variable, a sample-mode default, a review control, a screen that has
+been rendering a rule for weeks, or a passing test. None of those decides an
+unresolved business rule. Where the code needs a decision it does not have, it
+refuses rather than offering a switch.
 
 What the unsigned confirmation document does still mean: the *rest* of that
 document — every field list, status name, policy and workflow it proposes and
@@ -24,7 +30,7 @@ state and is not recorded here as fact.
 
 ---
 
-## The four answers
+## The answers received
 
 ### A-1 · Lead purchase: cart or direct order, wallet or gateway
 
@@ -86,67 +92,103 @@ state and is not recorded here as fact.
   Type 1 reference.
 - **Authorizes:** nothing yet. The assets have not arrived.
 - **Consequence:** CR06 is untouched. The approved homepage stands, and no
-  archived direction has been guessed at.
+  archived direction has been guessed at. The ask is now split into two items —
+  see the bottom of this file.
+
+---
+
+### A-5 · Lead requests and verification  *(closes the question left open on 27 September)*
+
+- **Source:** project owner, written answer, 28 September 2026.
+- **Answer, verbatim:** *"Submitting a lead request does not require KYC. Keep
+  the existing verification restriction on purchasing leads. This instruction
+  does not remove verification requirements from other actions."*
+- **Recorded as:** a **product decision**. It is a decision about how KKL works.
+
+> **It is not a legal-compliance determination, and must never be written up as
+> one.** Nobody in this programme is in a position to determine what any law
+> requires. If a compliance adviser later says a check is legally required for
+> this action, that overrides this decision and is a different kind of input
+> entirely. The code carries this distinction structurally — `PolicyBasis` has
+> `specification`, `product_decision` and `assumption`, and deliberately has no
+> `compliance` value for anyone to reach for.
+
+- **Authorizes, exactly:** `request_leads` is `required: false`, basis
+  `product_decision`, `confirmed: true`. The row on `/seller/verification` now
+  reads *"Submitting a lead request needs no verification… This is a product
+  decision about how KKL works — not a statement that no law requires a check"*,
+  attributed to the project owner and dated.
+- **Explicitly preserves:** the verification restriction on **purchasing leads**,
+  unchanged. `purchase_lead` stays `required: true`, and an unverified account
+  still cannot buy.
+- **Explicitly does not touch:** any other action. Browsing and enquiring remain
+  *not required*; publishing an owner listing and publishing a Builder listing
+  remain *required*. A check asserts the whole table, not just the changed row.
+- **Implemented in:** `src/lib/config/verification-policy.ts`,
+  `src/app/seller/verification/page.tsx`; checks 6, 6b, 6c and 6d of
+  `verify-verification-policy.mjs`.
+
+#### What this decision retired
+
+The guard that refused production while this rule was unconfirmed had an
+environment-variable override. **That override is gone**, and the reason is now
+written into the code:
+
+> An environment variable is not a decision. Neither is a sample-mode default, a
+> review control, or the fact that a screen has been rendering a rule for weeks.
+> Whoever sets a variable on a server is not the person who gets to decide
+> whether someone must prove their identity before an action.
+
+`assertVerificationPolicyConfirmed()` remains in `src/proxy.ts` with no way past
+it. Every rule is confirmed today, so it cannot fire; it stays because the next
+rule added defaults to `assumption`, and this is what stops that one reaching
+production on nobody's authority.
 
 ---
 
 ## My implementation decisions, which nobody approved
 
 These are mine. Each is a judgement made to keep the build coherent, and each is
-reversible on one instruction.
+reversible on one instruction. The list is shorter than it was: "requesting
+leads requires no verification" moved off it on 28 September 2026 and is now
+A-5, a decision.
 
 | Decision | What I decided | Why, and what would change it |
 |---|---|---|
 | Owner listings are their own type, not `ListingDraft` | An owner is not a Builder subscriber, so `OwnerListing` has no RERA, no total units, no price range and no `published` state | Reusing the Builder type would have made an owner a subscriber in the data whatever the screens said. A `published` state would have pre-decided A-2's remainder |
 | Owner drafts, orders and verification cases stay in process memory | Only CR03 was stated as a persistence requirement | Say the word and any of them can move to kkl-backend the way CR03 did |
 | A lead order shows **no** separate invoice | The taxable event was the recharge, and per-order documents and tax treatment are undecided | A decision on D-13 turns this into an issued invoice with a real document |
-| Requesting leads requires no verification | The specification does not say; the call did not cover it | **Awaiting confirmation — see below.** This one is flagged on screen and guarded in production |
 | Which "lead marketplace" sentences were renamed | Destination labels became Buy Leads; the footer and metadata taglines describing the product did not | "A Buy Leads for verified brokers" is not English, and the instruction was explicitly not to replace every occurrence |
 | `request_leads` and `publish_owner_listing` rows exist in the policy at all | The policy table needs a row per action or the gap is invisible | Both are marked for what they are: one an assumption, one a rule for an action that does not happen yet |
 
 ---
 
-## Open: does requesting leads require verification?
+## Open: CR06, as two separate items
 
-**This was not among the four answers, and I need it confirmed.**
+Kept split, because they are different questions with different answers and one
+of them may need no work at all.
 
-- **Built as:** *not required.* Asking the team to find leads moves no money and
-  publishes nothing, so under A-3's own principle — a check where money or
-  publication is at stake — no check applies.
-- **Labelled as an assumption**, not a rule, on `/seller/verification`: the row
-  carries "This one is an assumption, not a confirmed rule — it is on the list of
-  decisions still to be made."
-- **Guarded against silent production use.** `assertVerificationPolicyAcknowledged()`
-  runs in `src/proxy.ts` ahead of every request and refuses to serve a
-  deployment with `KKL_ENV=production` while an unconfirmed rule is in force. An
-  operator who has read this can proceed deliberately by setting
-  `KKL_ACK_UNCONFIRMED_VERIFICATION=request_leads`; the common case — nobody set
-  anything — fails loudly instead of quietly applying a rule nobody agreed to.
+### CR06-a · Confirm the Type 1 homepage reference
 
-  **What that guard can and cannot do today, precisely.** It cannot fire yet.
-  The deployment guard beside it refuses production-with-sample-services first,
-  so the only configuration that reaches this one is production with `api` — and
-  that cannot be built until the kkl-backend API client exists. The check is in
-  place *ahead* of that day rather than protecting anything now, and it should
-  not be described as an active control. What is protecting the assumption today
-  is the caveat on the screen and this record.
-- **To close it:** confirm either "requesting leads needs no verification" or
-  "requesting leads requires verification", and the rule's `confirmed` flag in
-  `src/lib/config/verification-policy.ts` flips. The guard then retires by
-  itself and the on-screen caveat disappears.
+**What is needed:** which screenshot, file or existing screen "Type 1" refers to.
 
----
+**If it means the homepage already approved, say so and this item closes with no
+work.** That design is what is live in this build, untouched, and confirming it
+is worth more than any redesign. No archived direction will be treated as Type 1
+on a guess, and nothing will be rebuilt on an assumption about what was meant.
 
-## Open: CR06, and the question that may dissolve it
+### CR06-b · Verify colours against the authoritative logo
 
-Two things, and deliberately nothing else:
+**What is needed:** the authoritative logo file itself — the real one, not a
+screenshot of it or an export from a deck.
 
-1. **The authoritative logo file.** Whichever file is the real one — not a
-   screenshot of it, not an export from a deck.
-2. **The screenshot or file meant by "Type 1".** A filename, a link, or an
-   image. Nothing else is needed to start.
+**What happens then:** the colours in use are checked against the ones in that
+file, and any divergence is reported before anything changes. The accessibility
+corrections already made are retained; where a logo colour and a contrast
+requirement disagree, that is reported as a decision for you rather than settled
+quietly in either direction.
 
-**If "Type 1" means the homepage already approved**, say so and CR06 closes with
-no work at all: that design is what is live in this build, untouched. That
-clarification is worth more than any redesign, and asking for it is cheaper than
-producing one. No archived direction will be treated as Type 1 on a guess.
+**Why separate from CR06-a:** the logo check is a colour audit and can proceed
+the moment the file arrives, whatever "Type 1" turns out to mean. Confirming the
+homepage reference may close CR06-a with nothing to do, and it should not be
+held up by a file, nor the file's audit held up by the confirmation.

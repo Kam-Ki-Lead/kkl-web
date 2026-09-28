@@ -65,10 +65,20 @@ export default async function SellerVerificationPage() {
                         <p className="t-label text-ink">{r.actionLabel}</p>
                         <p className="t-caption mt-[2px] text-body">{r.explanation}</p>
                         <p className="t-caption mt-[4px] text-muted">{state.line}</p>
+                        {/* Where the rule came from, said on the row rather than
+                            left to a document. An unconfirmed rule is marked as
+                            an assumption; a decided one names who decided it and
+                            on what basis — and a product decision is labelled as
+                            a product decision, never as a compliance finding. */}
                         {!rule.confirmed ? (
                           <p className="t-caption mt-[4px] font-semibold text-warning">
                             This one is an assumption, not a confirmed rule — it is on the list of
                             decisions still to be made.
+                          </p>
+                        ) : rule.basis === "product_decision" ? (
+                          <p className="t-caption mt-[4px] text-muted">
+                            Product decision — {rule.decidedBy}. This is a decision about how KKL
+                            works, not a determination about what any law requires.
                           </p>
                         ) : null}
                         {r.caseReference !== null ? (

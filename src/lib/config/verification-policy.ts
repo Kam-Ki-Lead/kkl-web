@@ -34,6 +34,29 @@ import type { AccountRole } from "@/lib/domain/identity";
  *   screens say that is an assumption rather than a decision.
  */
 
+/**
+ * Where a rule came from.
+ *
+ * Recorded per rule rather than in a comment, because "who decided this and on
+ * what basis" is the question anybody auditing a verification policy asks
+ * first, and a comment cannot be rendered on a screen or asserted by a test.
+ *
+ * `product_decision` is deliberately not `compliance`. A decision that an action
+ * needs no identity check is a decision about how the product works. It is not
+ * a determination that no law requires one — nobody here is in a position to
+ * make that, and the wording must never imply otherwise. If a compliance
+ * adviser later says a check is legally required, that overrides any row below
+ * and is a different kind of input, which is why there is no `compliance` value
+ * to reach for casually.
+ */
+export type PolicyBasis =
+  /** Stated in the client's written specification. */
+  | "specification"
+  /** Decided by the project owner as a product decision. Not a legal determination. */
+  | "product_decision"
+  /** This implementation's assumption. The screens say so; production refuses to run it. */
+  | "assumption";
+
 export type PolicyRule = {
   readonly action: GatedAction;
   readonly label: string;
@@ -41,10 +64,15 @@ export type PolicyRule = {
   readonly required: boolean;
   /** The sentence the person reads, in either case. */
   readonly explanation: string;
+  /** Where the rule came from. `assumption` is the only unconfirmed basis. */
+  readonly basis: PolicyBasis;
+  /** Who decided it, for the record. Null for a rule nobody has decided. */
+  readonly decidedBy: string | null;
   /**
    * True where the rule follows from a confirmed decision. False where it is
    * this implementation's assumption, which the screens mark as such rather
-   * than presenting as settled.
+   * than presenting as settled. Derived from `basis`; kept as its own field so
+   * every read site does not have to know which bases count.
    */
   readonly confirmed: boolean;
 };
@@ -56,6 +84,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: false,
     explanation:
       "No verification is needed to look at properties. Registering does not start a check and does not put an account in any verification queue.",
+    basis: "specification",
+    decidedBy: "Client specification, and the call",
     confirmed: true,
   },
   enquire_property: {
@@ -64,6 +94,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: false,
     explanation:
       "No document check is needed to send an enquiry. Confirming a mobile number at enquiry is a separate thing from identity verification, and passing it is not a verification.",
+    basis: "specification",
+    decidedBy: "Client specification, and the call",
     confirmed: true,
   },
   request_leads: {
@@ -71,8 +103,10 @@ const RULES: Record<GatedAction, PolicyRule> = {
     label: "Request leads",
     required: false,
     explanation:
-      "Asking the team to find leads moves no money and publishes nothing, so no check is required. Whether requesting should require one has not actually been decided — this is an assumption, not a confirmed rule.",
-    confirmed: false,
+      "Submitting a lead request needs no verification. Asking the team to find leads moves no money and publishes nothing. This is a product decision about how KKL works — not a statement that no law requires a check.",
+    basis: "product_decision",
+    decidedBy: "Project owner, 28 September 2026",
+    confirmed: true,
   },
   purchase_lead: {
     action: "purchase_lead",
@@ -80,6 +114,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: true,
     explanation:
       "Buying a lead spends credits and releases another person's contact details, so it requires verification. This is the restriction that already applied; it stays until a replacement is confirmed.",
+    basis: "product_decision",
+    decidedBy: "Project owner, 27 September 2026 (retained 28 September 2026)",
     confirmed: true,
   },
   publish_owner_listing: {
@@ -88,6 +124,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: true,
     explanation:
       "Publishing a listing puts a property in front of buyers in your name, so it requires verification. Nothing publishes in this build — an owner's submission goes to a review queue — so no check is asked of an owner today.",
+    basis: "product_decision",
+    decidedBy: "Project owner, 27 September 2026",
     confirmed: true,
   },
   publish_builder_listing: {
@@ -96,6 +134,8 @@ const RULES: Record<GatedAction, PolicyRule> = {
     required: true,
     explanation:
       "The existing Builder conditions stand: verification and an active subscription before a listing is published. The owner policy does not overwrite them.",
+    basis: "specification",
+    decidedBy: "Existing Builder conditions, unchanged",
     confirmed: true,
   },
 };
@@ -110,52 +150,41 @@ export function unconfirmedRules(): readonly PolicyRule[] {
 }
 
 /**
- * Refuse to serve production with an unconfirmed verification rule in force.
+ * Refuse to serve production while any rule in force is unconfirmed.
  *
- * `request_leads` is built as "not required" because the specification does not
- * say and the call did not cover it. On a review build that is fine — the screen
- * marks the row as an assumption and a reviewer can see it. In production it is
- * not: a rule nobody agreed to would be deciding, silently, who has to be
- * verified before asking for leads.
+ * **There is deliberately no override.** An earlier version of this let an
+ * operator acknowledge an unconfirmed rule with an environment variable. That
+ * was wrong, and the reason is worth keeping written down: an environment
+ * variable is not a decision. Neither is a sample-mode default, a review
+ * control, or the fact that a screen has been rendering a rule for weeks.
+ * Whoever sets a variable on a server is not the person who gets to decide
+ * whether someone must prove their identity before an action — so the escape
+ * hatch is gone, and the only way past this check is to get the rule decided
+ * and record it in the table above with its basis and who decided it.
  *
- * So a production deployment must name each assumption it is knowingly running
- * with, in `KKL_ACK_UNCONFIRMED_VERIFICATION` as a comma-separated list of
- * actions. Setting it is a deliberate act by an operator who has read this; the
- * absence of it is the common case, and the common case must fail rather than
- * proceed. Once a rule is confirmed, `confirmed: true` above retires it from
- * this list and the acknowledgement stops being needed.
+ * As of 28 September 2026 every rule is confirmed and this cannot fire. It
+ * stays because the next rule added will default to `assumption`, and this is
+ * what stops that one reaching production on nobody's authority.
  *
  * Read from the process on every call, like the deployment guard beside it, so
- * this cannot be frozen into a bundle built somewhere else.
- *
- * **Reach, stated honestly.** This cannot fire today. `assertDeploymentSafe()`
- * runs first and refuses production-with-sample-services outright, so the only
- * configuration that reaches this check is production with `api` — which cannot
- * be built until the kkl-backend API client exists. The guard is here so that it
- * is already in place on the day that client lands, not because it is currently
- * protecting anything. Do not cite it as an active control.
+ * it cannot be frozen into a bundle built somewhere else.
  */
-export function assertVerificationPolicyAcknowledged(): void {
+export function assertVerificationPolicyConfirmed(): void {
   if (process.env.KKL_ENV !== "production") return;
 
-  const acknowledged = new Set(
-    (process.env.KKL_ACK_UNCONFIRMED_VERIFICATION ?? "")
-      .split(",")
-      .map((entry) => entry.trim())
-      .filter(Boolean),
-  );
-  const unacknowledged = unconfirmedRules().filter((rule) => !acknowledged.has(rule.action));
-  if (unacknowledged.length === 0) return;
+  const unconfirmed = unconfirmedRules();
+  if (unconfirmed.length === 0) return;
 
   throw new Error(
-    "Refusing to serve: the verification policy contains rules the client has not confirmed — " +
-      unacknowledged.map((rule) => `${rule.action} (${rule.required ? "required" : "not required"})`).join(", ") +
-      ". These are this implementation's assumptions, not decisions, and production must not apply " +
-      "them by default. Either get them confirmed and set `confirmed: true` in " +
-      "src/lib/config/verification-policy.ts, or acknowledge them explicitly with " +
-      "KKL_ACK_UNCONFIRMED_VERIFICATION=" +
-      unacknowledged.map((rule) => rule.action).join(",") +
-      " — see docs/phase-2/change-register.md.",
+    "Refusing to serve: the verification policy contains rules nobody has decided — " +
+      unconfirmed
+        .map((rule) => `${rule.action} (${rule.required ? "required" : "not required"})`)
+        .join(", ") +
+      ". These are this implementation's assumptions, and production must not apply them. " +
+      "There is no environment override for this on purpose: a variable set on a server is " +
+      "not a business decision. Get the rule decided, then record it in " +
+      "src/lib/config/verification-policy.ts with its basis and who decided it — see " +
+      "docs/phase-2/decisions-received.md.",
   );
 }
 

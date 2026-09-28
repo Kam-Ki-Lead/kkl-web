@@ -1,7 +1,14 @@
 # CR07 — Verification policy matrix, prepared for confirmation
 
-Phase 2 · change request CR07 · status: **proposal, awaiting client confirmation
-(decisions 5 and 6 in the change register)**
+Phase 2 · change request CR07 · status: **the policy shape is decided and
+implemented** — selective and action-based (27 September 2026), with lead
+requests confirmed as needing no check (28 September 2026). Provider selection,
+expiry, consent and retention remain undecided. See
+`decisions-received.md` for each answer and `change-register.md` for status.
+
+> Both decisions below marked as product decisions are exactly that: decisions
+> about how KKL works. Neither is a determination about what any law requires,
+> and neither should be described as one.
 
 This matrix exists because two sources disagree. The written specification
 proposes Aadhaar/PAN-based third-party verification before an individual owner
@@ -9,10 +16,13 @@ may publish. The call says KYC is compliance-based and mostly unnecessary.
 Neither statement defines which roles or actions actually require a check, so
 this document prepares the question properly instead of answering it.
 
-Nothing on this page changes shipped behaviour. The current purchase
-restriction (`not_verified` refusal on lead purchase) stays until its
-replacement is confirmed; no gate is removed, none is added, and no provider
-is selected.
+**Update, 28 September 2026.** This page began as a proposal; the structure it
+proposed has since been decided and built (`src/lib/config/verification-policy.ts`
+is the authoritative table, and the screens read it). The purchase restriction
+it protected is unchanged: an unverified account still cannot buy a lead, and
+that was explicitly retained when lead requests were confirmed as needing no
+check. No gate has been removed, none added beyond the decided policy, and no
+provider is selected.
 
 ---
 
@@ -25,7 +35,7 @@ need a check for one action and not for another.
 |---|---|---|---|
 | Home seeker | Browse and search properties | **Not required.** No blanket KYC gate solely for browsing. | — |
 | Home seeker | Enquire about a property | **Not required** as document KYC. Mobile verification at enquiry stays a separate thing from document-based KYC. | Whether any additional requirement applies |
-| Broker / agency (today's Seller) | Request leads (CR03) | Apply this policy once confirmed. | Whether requesting requires a check |
+| Broker / agency (today's Seller) | Request leads (CR03) | **Not required.** Decided 28 September 2026 as a product decision by the project owner — requesting moves no money and publishes nothing. Not a legal-compliance determination. | Closed |
 | Broker / agency (today's Seller) | Purchase a lead | **Retains the current gate** until the replacement is confirmed — the existing restriction is not removed by this proposal. | What replaces it, and for whom |
 | Individual owner | Publish a property (CR02) | **Unresolved conflict** — the document says always verify first; the call says mostly unnecessary. Three readings are prepared: always required / conditionally required / not required for this action. | Decision 5 — pick one |
 | Builder | Publish a listing / manage projects | Reviewed **separately** under the existing Builder verification and subscription conditions. Owner rules must not silently overwrite Builder rules. | Whether existing Builder conditions stand |

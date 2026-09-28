@@ -123,9 +123,12 @@ gateway alternative are a later addition.
 2. Walk the table. Browsing and enquiring read **Not required**, and the sentence
    beside them says *"This is not a verification and no check has been passed."*
    *"Not required is not Verified — that distinction is the whole change."*
-3. Point at the **Request leads** row: marked as an assumption, not a rule. Say
-   it is the one thing still to confirm, and that production refuses to serve
-   while it is unconfirmed unless an operator acknowledges it deliberately.
+3. Point at the **Request leads** row: **Not required**, attributed underneath as
+   a *product decision* by the project owner and dated. Say the attribution out
+   loud — *"a decision about how the product works, not a finding about what the
+   law requires"* — because that distinction is the one people collapse.
+   Contrast it with **Buy a lead** on the row below, which still requires a
+   check: the decision covered requesting and nothing else.
 4. **Buy a lead** requires a check and has a **case with a reference** and a
    visible history.
 5. **Drive the provider to an outage:**

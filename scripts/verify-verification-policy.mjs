@@ -66,9 +66,54 @@ ok('5. The screen says no provider has been selected',
     mineText.includes('no claim is made that any check meets a legal requirement'),
   'the sample service and the absence of a compliance claim are both stated');
 
-ok('6. An unconfirmed rule is marked as an assumption, not a decision',
-  mineText.includes('an assumption, not a confirmed rule'),
-  'requesting leads is flagged as this implementation\'s assumption');
+// The rule that was an assumption is now a decision, and the screen has to say
+// which kind. Three separate things: the outcome, the provenance, and the
+// absence of any compliance wording.
+ok('6. Requesting leads reads as needing no verification',
+  /Request leads[\s\S]{0,500}?Not required/.test(mineText) &&
+    mineText.includes('Submitting a lead request needs no verification'),
+  'the confirmed product decision is what the row states');
+
+ok('6b. It is attributed as a product decision, not a compliance finding',
+  mineText.includes('Product decision — Project owner, 28 September 2026') &&
+    mineText.includes('not a determination about what any law requires') &&
+    !mineText.includes('an assumption, not a confirmed rule'),
+  'the row names who decided it and what kind of decision it is; the assumption caveat is gone');
+
+// Read from the rendered text, not `textContent('body')`: the latter includes
+// the inline RSC payload, which carries a second escaped copy of every
+// sentence. An earlier version of this check matched that copy and failed for
+// the wrong reason.
+const visible = await mine.$eval('main', (el) => el.innerText.replace(/\s+/g, ' '));
+const legalMentions = (visible.match(/[^.]*\b(legal|complian\w+)\b[^.]*\./gi) ?? []).map((m) =>
+  m.trim(),
+);
+// Every mention must be a disclaimer — something is NOT claimed, or is somebody
+// else's to decide. A sentence saying a check IS compliant would not match these.
+const disclaimers = legalMentions.filter(
+  (m) =>
+    /no claim is made/i.test(m) ||
+    /decisions for the client and its compliance adviser/i.test(m) ||
+    /not a determination about what any law requires/i.test(m),
+);
+ok('6c. Every mention of law or compliance is a disclaimer, not a claim',
+  legalMentions.length > 0 && disclaimers.length === legalMentions.length,
+  `${legalMentions.length} mention(s), all disclaimers: ${legalMentions
+    .map((m) => m.slice(0, 60))
+    .join(' | ')}`);
+
+// The decision covers requesting leads and nothing else. Every other action
+// keeps whatever it had, so this asserts the whole table rather than one row.
+const stillRequired = ['Buy a lead'];
+const stillNotRequired = ['Browse and search properties', 'Enquire about a property'];
+ok('6d. The decision did not move any other action',
+  stillRequired.every((label) =>
+    new RegExp(`${label}[\\s\\S]{0,500}?(Check needed|Being checked|Needs a person|Verified|Did not pass|Expired)`).test(mineText),
+  ) &&
+    stillNotRequired.every((label) =>
+      new RegExp(`${label}[\\s\\S]{0,400}?Not required`).test(mineText),
+    ),
+  'buying a lead still requires a check; browsing and enquiring still do not');
 
 // ------------------------------------- a required check has a case and progress
 const seeded = await ctx.newPage();

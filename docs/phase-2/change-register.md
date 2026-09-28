@@ -49,8 +49,9 @@ confirmation document remains a proposal.
 | CR03 — Request Leads | **Implemented, durable integration** | PostgreSQL rows that survive a restart; row-level security the application role cannot bypass; server-side sessions with revocation and expiry; internal notes withheld by policy, not by a filter | **Authentication is not built.** Identities are issued by a development authenticator for review — see `cr03-authentication-boundary.md`. Also open: withdrawal, retention for closed requests |
 | CR04 — Purchase orders | **Implemented, sample services** | Selection → review → wallet checkout → result → My purchases → order detail, in both consoles. Payment traced to its ledger entry; replayed submissions reported as repeats; masking preserved | **Payments** — no provider chosen, none contacted; balances move numbers in one process. **Tax treatment and per-order invoicing** (D-13). **Refund policy** (D-14) — why there is no refund control. Cart and gateway remain a later addition |
 | CR05 — Locations | **Implemented, sample records** | One hierarchy on all six surfaces that pick a location, stable ids, ranked locality search, parent replacing child, honest empty results | **Database-backed location management** — the 55 records are a fixture, not an administered table |
-| CR06 — Visual direction | **Blocked** | Nothing. The approved homepage is untouched and no archived direction has been guessed at | **The logo file** and **which screenshot or file is "Type 1"**. Both were promised and neither has arrived |
-| CR07 — Verification policy | **Implemented, sample services** | Per-action outcomes, Not required distinct from Verified, no case opened by registering, cases with references and history, the Admin queue split, a provider failure that can never become a pass, existing purchase restriction retained | **Identity-provider integration** — no provider selected, no document collected, no compliance claimed. **The `request_leads` rule is unconfirmed** and production refuses to serve while it is. Expiry period, consent and retention undecided |
+| CR06-a — Type 1 reference | **Blocked** | Nothing. The approved homepage is untouched and no archived direction has been guessed at | **Which screenshot, file or existing screen "Type 1" means.** If it is the homepage already approved, this item closes with no work |
+| CR06-b — Logo colours | **Blocked** | Nothing | **The authoritative logo file.** Colours in use are then checked against it, divergences reported before anything changes, accessibility corrections retained |
+| CR07 — Verification policy | **Implemented, sample services** | Per-action outcomes, Not required distinct from Verified, no case opened by registering, cases with references and history, the Admin queue split, a provider failure that can never become a pass, existing purchase restriction retained | **Identity-provider integration** — no provider selected, no document collected, no compliance claimed. Expiry period, consent and retention undecided. The `request_leads` rule was decided on 28 September (A-5) and is no longer outstanding |
 
 ### Dependencies, kept separate from frontend completion
 
@@ -98,19 +99,31 @@ Recorded in full, with source and the exact workflow each answer authorizes, in
 | Selective, action-based verification | CR07's whole structure, and keeping the purchase restriction | A provider, document collection, a compliance claim, an expiry period |
 | "I'll supply both" (CR06 assets) | Nothing yet — neither has arrived | — |
 
-### Two things I am waiting on
+### Waiting on you — two items, both CR06
 
-1. **Does requesting leads require verification?** It was not among the four
-   answers. It is built as *not required*, marked on screen as an assumption
-   rather than a rule. A guard is in place for production —
-   `assertVerificationPolicyAcknowledged()` in `src/proxy.ts` refuses a
-   `KKL_ENV=production` deployment unless an operator names the assumption in
-   `KKL_ACK_UNCONFIRMED_VERIFICATION` — though it cannot fire until an `api`
-   build exists, so today the caveat on screen is what carries it. One sentence
-   either way closes the question.
-2. **CR06: the logo file, and which screenshot or file is "Type 1".** Nothing
-   else is needed. **If "Type 1" means the homepage already approved, say so and
-   CR06 closes with no work** — that design is what is live in this build.
+1. **CR06-a · Confirm the Type 1 homepage reference.** Which screenshot, file or
+   existing screen is meant. **If it is the homepage already approved, say so
+   and this closes with no work at all** — that design is what is live here.
+2. **CR06-b · The authoritative logo file**, so the colours in use can be checked
+   against it. Any divergence is reported before anything changes, and the
+   accessibility corrections already made are retained.
+
+Kept separate because CR06-a may need no work and CR06-b is a colour audit that
+can start the moment the file arrives. Neither should hold up the other.
+
+### Decided on 28 September
+
+**Submitting a lead request requires no verification.** Recorded as a **product
+decision** by the project owner — a decision about how KKL works, explicitly
+**not** a legal-compliance determination. The verification restriction on
+**purchasing** leads is unchanged, and no other action moved. Full record in
+[`decisions-received.md`](decisions-received.md) §A-5.
+
+The guard that refused production while this rule was unconfirmed **no longer
+has an environment override**. An environment variable, a sample-mode default or
+a review control is not client approval of an unresolved business rule; where
+the code needs a decision it does not have, it refuses rather than offering a
+switch.
 
 ### Still undecided, in the order they block work
 
@@ -350,12 +363,20 @@ does not block the frontend model. Decision 7: rental listing coverage.
 
 ## CR06 — Visual direction
 
-> **Still blocked (28 September 2026).** Both assets were promised and neither
-> has arrived. Nothing has been built, guessed at or changed; the approved
-> homepage stands. Two things are needed and nothing else: **the authoritative
-> logo file**, and **the screenshot or file meant by "Type 1"**. **If "Type 1"
-> means the homepage already approved, that clarification closes CR06 with no
-> work at all** — no redesign will be produced on an assumption.
+> **Still blocked, and now split in two (28 September 2026).** Nothing has been
+> built, guessed at or changed; the approved homepage stands.
+>
+> **CR06-a — confirm the Type 1 homepage reference.** Which screenshot, file or
+> existing screen is meant. **If it is the homepage already approved, that
+> clarification closes this item with no work at all**; no redesign will be
+> produced on an assumption.
+>
+> **CR06-b — verify colours against the authoritative logo.** Needs the real
+> logo file. The colours in use are then checked against it and any divergence
+> reported before anything changes, with the accessibility corrections retained.
+>
+> Separate items because CR06-a may need no work and CR06-b can start as soon as
+> the file arrives.
 
 
 **Source.** Specification §3.

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { assertDeploymentSafe } from "@/lib/config/runtime";
-import { assertVerificationPolicyAcknowledged } from "@/lib/config/verification-policy";
+import { assertVerificationPolicyConfirmed } from "@/lib/config/verification-policy";
 
 /**
  * Per-request deployment guard.
@@ -24,11 +24,11 @@ import { assertVerificationPolicyAcknowledged } from "@/lib/config/verification-
 export function proxy() {
   try {
     assertDeploymentSafe();
-    // CR07: production must not silently apply a verification rule nobody
-    // confirmed. Same shape as the guard above — it refuses rather than
-    // degrades, because the degraded case is a policy decision made by
-    // accident.
-    assertVerificationPolicyAcknowledged();
+    // CR07: production must not apply a verification rule nobody decided. Same
+    // shape as the guard above — it refuses rather than degrades, because the
+    // degraded case is a policy decision made by accident. There is no
+    // environment override: a variable set on a server is not a decision.
+    assertVerificationPolicyConfirmed();
   } catch (error) {
     const reason = error instanceof Error ? error.message : "Deployment configuration is unsafe.";
     // Plain text, 503, no caching: an operator reads this, not a visitor, and a
