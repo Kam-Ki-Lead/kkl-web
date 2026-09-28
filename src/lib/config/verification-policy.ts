@@ -104,6 +104,61 @@ export function policyFor(action: GatedAction): PolicyRule {
   return RULES[action];
 }
 
+/** Every rule currently in force that nobody has actually confirmed. */
+export function unconfirmedRules(): readonly PolicyRule[] {
+  return Object.values(RULES).filter((rule) => !rule.confirmed);
+}
+
+/**
+ * Refuse to serve production with an unconfirmed verification rule in force.
+ *
+ * `request_leads` is built as "not required" because the specification does not
+ * say and the call did not cover it. On a review build that is fine — the screen
+ * marks the row as an assumption and a reviewer can see it. In production it is
+ * not: a rule nobody agreed to would be deciding, silently, who has to be
+ * verified before asking for leads.
+ *
+ * So a production deployment must name each assumption it is knowingly running
+ * with, in `KKL_ACK_UNCONFIRMED_VERIFICATION` as a comma-separated list of
+ * actions. Setting it is a deliberate act by an operator who has read this; the
+ * absence of it is the common case, and the common case must fail rather than
+ * proceed. Once a rule is confirmed, `confirmed: true` above retires it from
+ * this list and the acknowledgement stops being needed.
+ *
+ * Read from the process on every call, like the deployment guard beside it, so
+ * this cannot be frozen into a bundle built somewhere else.
+ *
+ * **Reach, stated honestly.** This cannot fire today. `assertDeploymentSafe()`
+ * runs first and refuses production-with-sample-services outright, so the only
+ * configuration that reaches this check is production with `api` — which cannot
+ * be built until the kkl-backend API client exists. The guard is here so that it
+ * is already in place on the day that client lands, not because it is currently
+ * protecting anything. Do not cite it as an active control.
+ */
+export function assertVerificationPolicyAcknowledged(): void {
+  if (process.env.KKL_ENV !== "production") return;
+
+  const acknowledged = new Set(
+    (process.env.KKL_ACK_UNCONFIRMED_VERIFICATION ?? "")
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean),
+  );
+  const unacknowledged = unconfirmedRules().filter((rule) => !acknowledged.has(rule.action));
+  if (unacknowledged.length === 0) return;
+
+  throw new Error(
+    "Refusing to serve: the verification policy contains rules the client has not confirmed — " +
+      unacknowledged.map((rule) => `${rule.action} (${rule.required ? "required" : "not required"})`).join(", ") +
+      ". These are this implementation's assumptions, not decisions, and production must not apply " +
+      "them by default. Either get them confirmed and set `confirmed: true` in " +
+      "src/lib/config/verification-policy.ts, or acknowledge them explicitly with " +
+      "KKL_ACK_UNCONFIRMED_VERIFICATION=" +
+      unacknowledged.map((rule) => rule.action).join(",") +
+      " — see docs/phase-2/change-register.md.",
+  );
+}
+
 /** Every rule, for the screens that show the whole picture. */
 export const VERIFICATION_POLICY: readonly PolicyRule[] = Object.values(RULES);
 

@@ -10,6 +10,18 @@ import { getServices } from "@/lib/services";
 export const metadata: Metadata = { title: "My property listings", robots: { index: false } };
 
 /**
+ * Rendered per request, never prerendered.
+ *
+ * This page reads one account's own listings, which change while the server is
+ * running. Left to Next's default it was collected as a static page: it happened
+ * to stay correct because every write calls `revalidatePath`, but it depended on
+ * that, and it failed a production build outright — the data source is resolved
+ * at render time and there is no API client to resolve it to yet. Per-account
+ * data is not static data.
+ */
+export const dynamic = "force-dynamic";
+
+/**
  * CR02 — where an owner finds their own listings again.
  *
  * Drafts and sent listings in one list, newest first, because an owner thinks

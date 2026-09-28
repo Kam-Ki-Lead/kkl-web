@@ -6,10 +6,15 @@ record now is. Sources: `KKL_UI_Spec.docx` (the client's written specification)
 and `KKL_Client_Change_Confirmation.docx` (review version 1), plus the
 accompanying call instructions.
 
-> **The confirmation document is a proposal for review, not evidence that every
-> suggested field, policy or workflow has been approved.** Each record below
-> separates what the call confirmed from what the document merely proposes, and
-> names the decision that blocks whatever cannot yet be built.
+> **Four decisions have been given in writing and are acted on as instructions.**
+> They are recorded in `decisions-received.md` with their source and the exact
+> workflow each one authorizes. A signed DOCX is not required for an explicit
+> written instruction to count as approval, and none is demanded here.
+>
+> **The rest of the confirmation document remains a proposal.** Every field list,
+> status name, policy and workflow it suggests that nobody has answered is
+> unapproved, and each record below names the decision that blocks whatever
+> cannot yet be built.
 >
 > The Phase 1 baseline (kkl-design `5bc3512`) and the existing frontend remain
 > the reference for every screen these changes do not touch. Nothing here
@@ -23,25 +28,42 @@ these changes extend but do not close.
 
 ## Implementation status at a glance
 
-Updated as the work lands. "Done" means implemented and verified in this build
-by a suite that would fail if it were not; "prepared" means the artifact exists
-for review and is labelled as the proposal it is; "blocked" names the decision
-that must land first.
+Status words are used narrowly, and none of them means finished.
 
-**These statuses are mine, not the client's.** The change-confirmation document
-is unsigned — its signature line and its Approve/Revise block are both blank —
-so nothing below is client-approved. "Done" means built and verified, and says
-nothing about acceptance.
+- **Implemented, sample services** — the journey works end to end and its records
+  live in process memory. Named dependencies remain.
+- **Implemented, durable integration** — the records are in PostgreSQL and
+  survive a restart. Authentication is still unbuilt; see below.
+- **Implemented, wording only** — no behaviour changed.
+- **Blocked** — named input missing; nothing built.
 
-| Record | Status | What that means |
+**No CR is complete.** Every row below carries something outstanding, listed in
+its own column. Approval is recorded in `decisions-received.md`: four answers
+from the project owner authorize specific workflows, and the rest of the
+confirmation document remains a proposal.
+
+| Record | Status | What works | What is outstanding |
+|---|---|---|---|
+| CR01 — Buy Leads wording | **Implemented, wording only** | Marketplace entries, page titles, buying actions and the sentences pointing at them read Buy Leads; property Buy/Rent intent and the descriptive taglines untouched | Nothing. This one has no dependency |
+| CR02 — Individual owner posting | **Implemented, sample services** | Six-step journey, preview, submit-for-review, the owner's record, the Admin queue, decisions with reasons and history. Nothing publishes, nothing is charged, no verification is awarded | **Photo storage** — files are recorded by name and not kept anywhere. **Publication policy** — whether a cleared listing publishes, when, on what terms, at what cost. **Draft persistence** — process memory |
+| CR03 — Request Leads | **Implemented, durable integration** | PostgreSQL rows that survive a restart; row-level security the application role cannot bypass; server-side sessions with revocation and expiry; internal notes withheld by policy, not by a filter | **Authentication is not built.** Identities are issued by a development authenticator for review — see `cr03-authentication-boundary.md`. Also open: withdrawal, retention for closed requests |
+| CR04 — Purchase orders | **Implemented, sample services** | Selection → review → wallet checkout → result → My purchases → order detail, in both consoles. Payment traced to its ledger entry; replayed submissions reported as repeats; masking preserved | **Payments** — no provider chosen, none contacted; balances move numbers in one process. **Tax treatment and per-order invoicing** (D-13). **Refund policy** (D-14) — why there is no refund control. Cart and gateway remain a later addition |
+| CR05 — Locations | **Implemented, sample records** | One hierarchy on all six surfaces that pick a location, stable ids, ranked locality search, parent replacing child, honest empty results | **Database-backed location management** — the 55 records are a fixture, not an administered table |
+| CR06 — Visual direction | **Blocked** | Nothing. The approved homepage is untouched and no archived direction has been guessed at | **The logo file** and **which screenshot or file is "Type 1"**. Both were promised and neither has arrived |
+| CR07 — Verification policy | **Implemented, sample services** | Per-action outcomes, Not required distinct from Verified, no case opened by registering, cases with references and history, the Admin queue split, a provider failure that can never become a pass, existing purchase restriction retained | **Identity-provider integration** — no provider selected, no document collected, no compliance claimed. **The `request_leads` rule is unconfirmed** and production refuses to serve while it is. Expiry period, consent and retention undecided |
+
+### Dependencies, kept separate from frontend completion
+
+These four are not frontend work and are not waiting on frontend work. The
+journeys above are finished as frontend; each of these is a separate, named
+piece of a different kind.
+
+| Dependency | Blocks | Owner |
 |---|---|---|
-| CR01 — Buy Leads wording | **Done** | Marketplace entries, page titles, buying actions and the sentences that point at them all read Buy Leads; property Buy/Rent intent and the descriptive taglines untouched. Verified by where each label links, not by word counts — `verify-labels-and-locations.mjs` 1–8 |
-| CR02 — Individual owner posting | **Done, as sample** | A working six-step journey: `/post-property` → `/owner/listings` → steps → preview → submit → the listing record, plus the Admin owner-submission queue. Submission enters a review queue; nothing publishes, nothing is charged, no verification is awarded. Drafts are process memory and the screens say so. Photographs are recorded by name and the files are **not** stored, disclosed on every screen that shows them — `verify-owner-posting-flow.mjs` 31/31 |
-| CR03 — Request Leads | **Done, genuinely persistent** | Served by kkl-backend (branch `claude/cr03-lead-requests`) when `KKL_LEAD_REQUESTS=backend`: a request is a PostgreSQL row that survives a restart, and row-level security the application role cannot bypass refuses one account the rows of another. Proven by restarting the service mid-run — `verify-lead-request-persistence.mjs` 9/9 — and by `kkl-backend/tests/rls.test.mjs` past the handlers. Without that variable the sample store answers and the screens say records last for the session only. There is no fallback between the two |
-| CR04 — Purchase orders | **Done on the confirmed path** | Decision 4 resolved to direct order settled from wallet credits. The order is now a record of its own: My purchases and order detail in both consoles, payment traced to its ledger entry, invoice state stated rather than implied, replayed submissions reported as repeats. No gateway, no refund control, no tax treatment. Cart and a gateway alternative remain a later addition — `verify-lead-order-flow.mjs` 20/20 |
-| CR05 — Locations | **Done** | Central records (India → West Bengal → Kolkata → 55 areas), stable ids, searchable picker, hierarchy-aware matching, on all six surfaces that pick a location — property search, the owner and Builder listing forms, both marketplace filter rows, the Seller lead-request form — plus the Admin views that show an area. A locality's own name now ranks above the sub-localities whose labels contain it; before this pass, typing "New Town" and pressing Enter selected Action Area I — `verify-labels-and-locations.mjs` 9–17 |
-| CR06 — Visual direction | **Blocked** | Decision 9: the authoritative logo asset and the "Type 1" referent are both unsupplied. You said you would send both; they have not arrived, so the approved homepage stays untouched and no archived direction has been guessed at |
-| CR07 — Verification policy | **Done, as labelled sample** | Decision 5/6 resolved to a selective, action-based policy: no check for browsing or enquiring, a check where money or publication is at stake, "Not required" as its own state that is never Verified, no case opened by registering, cases with references and history, the Admin queue split between what needs a person and routine processing, and a provider failure that can never become a pass. The existing Seller purchase restriction is unchanged. No provider selected, no identity document collected, no compliance claimed — `verify-verification-policy.mjs` 19/19 |
+| **Photo storage** — object storage, virus scanning, a retention rule | CR02 showing a real photograph to an owner or a reviewer | kkl-backend |
+| **Payments** — a provider, settlement, reconciliation, tax treatment | CR04 taking real money and issuing a real invoice | kkl-backend + a client decision |
+| **Identity-provider integration** — provider selection, consent, retention, and the authenticator itself | CR07 being a compliance control rather than a structure; CR03 being authenticated | kkl-backend + the client's compliance adviser |
+| **Publication policy** — whether, when and on what terms an owner's listing goes live | CR02's journey continuing past "cleared" | Client decision |
 
 ### What is sample and what is genuinely integrated
 
@@ -55,42 +77,53 @@ nothing about acceptance.
 Everything in the right-hand column is a kkl-backend dependency. Only CR03 was
 stated as a client requirement, and only CR03 has been made real.
 
+**"Durable" is not "authenticated".** CR03's records persist and are isolated per
+account by database policy, and both were demonstrated. Establishing that a
+caller *is* the account they claim is a separate, unbuilt thing — identities are
+issued by a development authenticator for review. See
+[`cr03-authentication-boundary.md`](cr03-authentication-boundary.md) before
+describing CR03 to anyone.
+
 ---
 
-## Decisions received in this pass, and what they changed
+## Decisions received, and what is still open
 
-Four answers arrived during the implementation pass. Each is recorded with what
-it settled and what it deliberately left open.
+Recorded in full, with source and the exact workflow each answer authorizes, in
+**[`decisions-received.md`](decisions-received.md)**. In brief:
 
-| Decision | Answer received | What it settled | What it did not settle |
-|---|---|---|---|
-| 4 — cart vs direct order, wallet vs gateway | **Direct order, settled from wallet credits** | CR04's path is the one already built; the order becomes a record with payment traced to its ledger entry | No payment provider is chosen, and a cart remains a later addition. Nothing names or contacts a gateway |
-| 7 — owner publication | **Submit for review; never auto-publish** | CR02's journey: drafts, submission into a moderation queue, and a confirmation that says plainly the listing is awaiting review | Whether a cleared listing publishes at all, when, on what terms, and at what cost. "Cleared" therefore reads "Cleared — not published" everywhere |
-| 5/6 — verification policy | **Selective, action-based** | CR07's whole structure: no check for browsing or enquiring, a check where money or publication is at stake, Not required as its own state, existing purchase restriction retained | Which provider does the checking; whether verifications expire and after how long; whether requesting leads needs a check (built as "not required" and marked on screen as an assumption) |
-| 9 — logo and Type 1 homepage | **"I'll supply both"** | Nothing yet — the assets have not arrived | CR06 in its entirety. The approved homepage is untouched and no archived direction has been guessed at |
+| Answer | Authorizes | Explicitly does not authorize |
+|---|---|---|
+| Direct order + wallet | CR04's order journey and order record | A cart, any gateway, any tax treatment, any refund path |
+| Submit for review, never auto-publish | CR02's journey through to a staff decision | Publishing a cleared listing, charging an owner, awarding a verification |
+| Selective, action-based verification | CR07's whole structure, and keeping the purchase restriction | A provider, document collection, a compliance claim, an expiry period |
+| "I'll supply both" (CR06 assets) | Nothing yet — neither has arrived | — |
 
-### Still outstanding, in the order they block work
+### Two things I am waiting on
 
-1. **The CR06 assets** — the authoritative logo file, and which screenshot or
-   file is "Type 1". CR06 cannot start without them and nothing else waits on
-   them.
-2. **Owner publication terms** (decision 7's remainder) — whether a cleared
-   owner listing publishes, on what terms, and what an owner is charged. Until
-   this lands, `cleared` is the end of the owner journey.
-3. **Whether requesting leads requires verification** — implemented as "not
-   required" and labelled on screen as an assumption rather than a rule.
-4. **Verification provider, expiry period, retention and consent** — no
-   provider is selected and no compliance claim is made.
-5. **Refund eligibility and destination** (D-14) — why there is no refund or
-   cancel control on an order, and no `refunded` status.
-6. **Tax treatment and whether a per-order invoice is issued** (D-13) — why the
-   order's invoice block states that no separate document exists rather than
-   offering one.
-7. **Whether a Seller may withdraw a lead request, and retention for closed
-   requests** — kkl-backend's CR03 slice documents both as open.
+1. **Does requesting leads require verification?** It was not among the four
+   answers. It is built as *not required*, marked on screen as an assumption
+   rather than a rule. A guard is in place for production —
+   `assertVerificationPolicyAcknowledged()` in `src/proxy.ts` refuses a
+   `KKL_ENV=production` deployment unless an operator names the assumption in
+   `KKL_ACK_UNCONFIRMED_VERIFICATION` — though it cannot fire until an `api`
+   build exists, so today the caveat on screen is what carries it. One sentence
+   either way closes the question.
+2. **CR06: the logo file, and which screenshot or file is "Type 1".** Nothing
+   else is needed. **If "Type 1" means the homepage already approved, say so and
+   CR06 closes with no work** — that design is what is live in this build.
 
-None of these is blocking the frontend work that remains; each is blocking a
-statement the screens currently decline to make.
+### Still undecided, in the order they block work
+
+| | Blocks | Register |
+|---|---|---|
+| Owner publication terms and owner charges | CR02 past "cleared" | D-10, D-18 |
+| Verification provider, expiry, consent, retention | CR07 being a compliance control | — |
+| Refund eligibility and destination | Any refund control on an order | D-14 |
+| Tax treatment and per-order invoicing | An issued invoice on a lead order | D-13 |
+| Seller withdrawal and retention for closed lead requests | CR03's lifecycle | kkl-backend CR03 doc |
+
+Each of these is a statement the screens currently decline to make, not a piece
+of missing frontend.
 
 ---
 
@@ -132,6 +165,16 @@ CR02 question and does not block the label change.
 ---
 
 ## CR02 — Distinct property and lead journeys
+
+> **As implemented (28 September 2026).** Decision 7 was answered *"submit for
+> review, never auto-publish"*, and the journey is built to it: six steps, a
+> preview, a submission into the Admin owner-submission queue, and a
+> confirmation that says the listing is awaiting review. Nothing publishes,
+> nothing is charged, no verification is awarded, and staff have no publish
+> action. Photographs are recorded by name and the files are **not stored**,
+> disclosed on every screen that shows them. Drafts are process memory.
+> Remaining dependencies: photo storage, publication policy, draft persistence.
+
 
 **Source.** Call distinction plus specification §4. Confirmation document CR02
 and the audience table.
@@ -221,6 +264,15 @@ field/status names and any later conversion flow.
 
 ## CR04 — Purchase orders
 
+> **As implemented (28 September 2026).** Decision 4 was answered *"direct order
+> + wallet"*, which is the path already built; what this pass added is the
+> **order as a record** — My purchases and order detail in both consoles, the
+> payment traced to its ledger entry, the invoice position stated rather than
+> implied, and a replayed submission reported as a repeat. No cart, no gateway,
+> no tax treatment, no refund control. Remaining dependencies: payments, tax
+> treatment and per-order invoicing (D-13), refund policy (D-14).
+
+
 **Source.** Specification §1.
 
 **Requested behaviour.** Reconcile the client's sales-order flow with the
@@ -298,6 +350,14 @@ does not block the frontend model. Decision 7: rental listing coverage.
 
 ## CR06 — Visual direction
 
+> **Still blocked (28 September 2026).** Both assets were promised and neither
+> has arrived. Nothing has been built, guessed at or changed; the approved
+> homepage stands. Two things are needed and nothing else: **the authoritative
+> logo file**, and **the screenshot or file meant by "Type 1"**. **If "Type 1"
+> means the homepage already approved, that clarification closes CR06 with no
+> work at all** — no redesign will be produced on an assumption.
+
+
 **Source.** Specification §3.
 
 **Requested behaviour.** Extract exact colours from the client-confirmed logo
@@ -315,6 +375,19 @@ confirmed. No code change is made under this record.
 ---
 
 ## CR07 — KYC and verification queue
+
+> **As implemented (28 September 2026).** The conflict was resolved by the
+> answer *"selective, action-based"*: no check for browsing or enquiring, a
+> check where money or publication is at stake, **Not required as its own state
+> that is never Verified**, no case opened by registering, cases with references
+> and history, the Admin queue split between what needs a person and routine
+> processing, a provider failure that can never become a pass, and the existing
+> Seller purchase restriction retained. The checking is done by a labelled
+> **sample verification service**; no provider is selected, no identity document
+> is collected and no compliance is claimed. **The `request_leads` rule is this
+> implementation's assumption, not a decision** — it is marked as such on screen
+> and production refuses to serve while it is unconfirmed.
+
 
 **Source.** Specification §4 versus the call: the document proposes third-party
 verification before owner publication; the call says KYC is compliance-based

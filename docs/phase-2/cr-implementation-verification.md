@@ -89,10 +89,15 @@ Recorded because a wrong defect costs as much as a missed one.
 
 ## What a green run here does not establish
 
-- **Client acceptance.** The change-confirmation document is unsigned. Nothing
-  in this file is approval.
+- **Client acceptance.** Four decisions were given in writing and are recorded
+  in `decisions-received.md`; they authorize specific workflows and nothing
+  wider. A green suite is not acceptance of anything.
 - **Durability for anything but CR03.** Owner listings, orders and verification
   cases are process memory and are labelled as such on screen.
+- **Authentication.** CR03's persistence and RLS runs establish that a *given*
+  identity is confined correctly and durably. They say nothing about how that
+  identity was obtained — today a development authenticator issues one on
+  request. See `cr03-authentication-boundary.md`.
 - **Any compliance position.** No verification provider is selected, no identity
   document is collected, and no check here is claimed to satisfy a legal
   requirement.
