@@ -1,0 +1,18 @@
+flowchart TD
+    page["Server component / server action"] --> gs["getServices()"]
+    gs --> cfg{"runtimeConfig.dataSource"}
+    cfg -->|"sample"| swap["withLeadRequestStore(sampleServices)"]
+    cfg -->|"api"| thr["throw — no API client exists"]
+    swap --> lr{"KKL_LEAD_REQUESTS"}
+    lr -->|"backend"| be["backendLeadRequests<br/>backendAdminLeadRequests"]
+    lr -->|"unset"| sm["sample lead-request store"]
+    be -->|"bearer token, server-side only"| api["kkl-backend /v1"]
+    api --> pg[("PostgreSQL<br/>RLS enforced")]
+    swap --> other["12 other sample services<br/><i>process memory</i>"]
+
+    classDef live fill:#DCEEE1,stroke:#2E7D4F,color:#14321F
+    classDef sample fill:#F4F5F9,stroke:#9AA2B8,color:#2A3250
+    classDef refuse fill:#FBE6E3,stroke:#B3392C,color:#3A100B
+    class be,api,pg live
+    class sm,other sample
+    class thr refuse

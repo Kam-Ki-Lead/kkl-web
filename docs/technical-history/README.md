@@ -26,9 +26,31 @@ template anywhere in these pages.
 | 11 | [Current status and outstanding work](11-current-status-and-outstanding-work.md) | Dated snapshot, by dimension |
 | — | [traceability.csv](traceability.csv) | Prompt → requirement → screen → file → commit → evidence → status |
 
-**[KKL_Technical_Documentation.md](KKL_Technical_Documentation.md)** is the same
-material as one document. It is generated from these chapter files by
-`build-consolidated.mjs`, so the two cannot drift apart.
+## The same material as one document
+
+**[KKL_Technical_Documentation.md](KKL_Technical_Documentation.md)** carries the
+full text of every chapter, the source-coverage record above and the
+traceability matrix as a readable table — not links to them. It is generated
+from these chapter files, so the two cannot drift apart.
+
+**[KKL_Technical_Documentation.docx](KKL_Technical_Documentation.docx)** is that
+same document as Word: 75 pages, A4, with the seven architecture diagrams
+rendered as images and the traceability matrix on landscape pages. It is for
+reading and sending; the chapters remain the source.
+
+| To rebuild | Run | Needs |
+|---|---|---|
+| the consolidated Markdown | `node docs/technical-history/build-consolidated.mjs` | nothing beyond Node 22 |
+| the Word version | `node docs/technical-history/md2docx.mjs` | `npm install docx` — not an application dependency |
+| the diagram images | `mmdc -i diagrams/diagram-N.mmd -o diagrams/diagram-N.png -b white -s 2` | `@mermaid-js/mermaid-cli` |
+
+`diagrams/` holds the seven Mermaid sources extracted from the chapters and the
+PNGs rendered from them. If a PNG is missing, the Word build falls back to
+printing that diagram's Mermaid source, so it never fails for want of the
+renderer. Neither generator reads or writes anything outside this folder.
+
+Order matters: a chapter edit reaches the Word file only after
+`build-consolidated.mjs` has run.
 
 ## Repositories and commits documented
 

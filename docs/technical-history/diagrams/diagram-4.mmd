@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant S as Seller
+    participant W as kkl-web (server)
+    participant K as kkl-backend
+    participant DB as PostgreSQL
+    participant AD as Admin
+
+    S->>W: area + requirements, one submit
+    W->>K: POST /v1/lead-requests (bearer, idempotency key)
+    K->>DB: BEGIN, then SET LOCAL app.user_id and app.user_role
+    DB-->>K: row + reference (RLS: lr_insert)
+    K-->>W: LR-…
+    W-->>S: reference, visible in My Lead Requests
+    AD->>K: GET /v1/lead-requests (staff session)
+    Note over DB: lr_select — own rows OR staff
+    AD->>K: POST …/messages (public) and …/status (reason required)
+    Note over DB: lrm_select hides internal notes from the requester
+    K-->>S: status, public reply and history on the Seller's own view

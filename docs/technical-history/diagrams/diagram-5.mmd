@@ -1,0 +1,15 @@
+flowchart LR
+    A["/post-property<br/>entry"] --> B["Start a listing<br/>(POST, idempotent)"]
+    B --> C["6 steps, own URLs<br/>basics · location · pricing<br/>photos · contact · preview"]
+    C --> D{"blockers?"}
+    D -->|"yes"| C
+    D -->|"no"| E["Send for review<br/><i>never 'Publish'</i>"]
+    E --> F["Owner's listing record<br/>'Sent for review — not published,<br/>nothing charged'"]
+    F --> G["/admin/owner-listings<br/>queue · no publish action"]
+    G --> H{"staff decision<br/>reason required"}
+    H -->|"changes requested"| C
+    H -->|"cleared"| I["'Cleared — not published'"]
+    H -->|"declined"| J["declined, with reason"]
+
+    classDef blocked fill:#FFF7E8,stroke:#C98A12,color:#3A2A08
+    class I blocked

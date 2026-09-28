@@ -1,0 +1,19 @@
+flowchart TB
+    design["kkl-design @ 5bc3512<br/>Approved Phase 1 baseline<br/>10 .dc.html prototypes<br/><i>read-only reference</i>"]
+    web["kkl-web @ 36114f5<br/>Next.js 16 frontend<br/>122 page files · 266 modules<br/>NO db access, NO wallet or<br/>authoritative logic"]
+    backend["kkl-backend @ bc8ab30<br/>Node + PostgreSQL<br/>CR03 lead requests ONLY<br/>canonical program docs"]
+    voice["kkl-voice @ 349bd16<br/>protocol notes only<br/><i>no implementation</i>"]
+    demo["bdrpl-application @ 8e144e9<br/>the won-the-work demo<br/><i>reference, not architecture</i>"]
+
+    design -.->|"design source, never modified"| web
+    web -->|"versioned REST, bearer token<br/>lead requests only"| backend
+    backend -.->|"planned: events / webhooks"| voice
+    demo -.->|"workflows and ideas only"| web
+    demo -.->|"assessed in demo-assessment.md"| backend
+
+    classDef live fill:#DCEEE1,stroke:#2E7D4F,color:#14321F
+    classDef planned fill:#F4F5F9,stroke:#9AA2B8,color:#2A3250,stroke-dasharray:4 3
+    classDef ref fill:#FFF7E8,stroke:#C98A12,color:#3A2A08
+    class web,backend live
+    class voice planned
+    class design,demo ref

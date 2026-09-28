@@ -1,0 +1,12 @@
+flowchart TD
+    A["Request arrives"] --> B["src/proxy.ts"]
+    B --> C{"assertDeploymentSafe()"}
+    C -->|"NODE_ENV=production and<br/>KKL_ENV or KKL_DATA_SOURCE unset"| R1["503 · refuse to serve"]
+    C -->|"server KKL_ENV ≠ bundle NEXT_PUBLIC_KKL_ENV"| R2["503 · wrong bundle for this environment"]
+    C -->|"production + sample services"| R3["503 · simulated auth would serve real users"]
+    C -->|"ok"| D{"assertVerificationPolicyConfirmed()"}
+    D -->|"KKL_ENV=production and<br/>an unconfirmed policy rule in force"| R4["503 · a rule nobody decided"]
+    D -->|"ok"| E["Render"]
+
+    classDef refuse fill:#FBE6E3,stroke:#B3392C,color:#3A100B
+    class R1,R2,R3,R4 refuse

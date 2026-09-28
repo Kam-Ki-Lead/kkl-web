@@ -1,0 +1,19 @@
+flowchart TD
+    A["Account acts"] --> B{"policyFor(action)"}
+    B -->|"browse · enquire · request leads"| C["not_required<br/><i>never shown as Verified</i>"]
+    B -->|"buy a lead · publish"| D{"case exists?"}
+    D -->|"no"| E["required — open a case<br/><i>registering opens nothing</i>"]
+    E --> F["in_progress<br/>with the service"]
+    F --> G{"service answer"}
+    G -->|"pass"| H["verified"]
+    G -->|"fail"| I["failed — not an approval"]
+    G -->|"unreadable / unreachable"| J["needs_review<br/><i>an outage is not a pass</i>"]
+    I --> K["Admin queue: needs a person"]
+    J --> K
+    F --> L["Admin queue: with the service<br/><i>routine, not a backlog</i>"]
+    K --> M["staff decision<br/>reason required → history + audit"]
+
+    classDef neutral fill:#F4F5F9,stroke:#9AA2B8,color:#2A3250
+    classDef danger fill:#FBE6E3,stroke:#B3392C,color:#3A100B
+    class C neutral
+    class I,J danger

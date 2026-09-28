@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant B as Buyer
+    participant P as /property/[slug]/enquiry
+    participant A as server action
+    participant S as enquiry-store (sample)
+    participant BC as Builder console
+
+    B->>P: opens form
+    P->>P: mints idempotency key (hidden field)
+    B->>A: submit
+    A->>S: create(key, draft)
+    Note over S: same key → returns the first enquiry
+    S-->>A: reference
+    A-->>B: redirect to /enquiry/[id]/confirmed
+    Note over B,A: no personal information in the URL
+    S-->>BC: appears on the Builder's own enquiries
