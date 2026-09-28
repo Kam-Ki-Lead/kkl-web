@@ -153,7 +153,7 @@ template anywhere in these pages.
 
 ---
 
-# 0. About this package
+## 0. About this package
 
 ### Repositories and commits documented
 
@@ -1576,7 +1576,7 @@ sequenceDiagram
 
     S->>W: area + requirements, one submit
     W->>K: POST /v1/lead-requests (bearer, idempotency key)
-    K->>DB: BEGIN; SET LOCAL app.user_id/app.user_role
+    K->>DB: BEGIN, then SET LOCAL app.user_id and app.user_role
     DB-->>K: row + reference (RLS: lr_insert)
     K-->>W: LR-…
     W-->>S: reference, visible in My Lead Requests
@@ -2728,7 +2728,7 @@ Two sentences, if only two are read:
 
 ---
 
-# Appendix A. Traceability matrix
+## Appendix A. Traceability matrix
 
 The same rows as `traceability.csv`, rendered for reading. The CSV remains the
 machine-readable copy; both are generated from the same file, so a row that

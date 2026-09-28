@@ -104,7 +104,7 @@ sequenceDiagram
 
     S->>W: area + requirements, one submit
     W->>K: POST /v1/lead-requests (bearer, idempotency key)
-    K->>DB: BEGIN; SET LOCAL app.user_id/app.user_role
+    K->>DB: BEGIN, then SET LOCAL app.user_id and app.user_role
     DB-->>K: row + reference (RLS: lr_insert)
     K-->>W: LR-…
     W-->>S: reference, visible in My Lead Requests

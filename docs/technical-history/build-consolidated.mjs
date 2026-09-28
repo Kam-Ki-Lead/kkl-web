@@ -227,7 +227,7 @@ ${contents}
 
 ---
 
-# ${FRONT_TITLE}
+## ${FRONT_TITLE}
 
 ${FRONT_MATTER_SECTIONS.map((title) => demote(section(readme, title))).join("\n\n")}
 
@@ -235,7 +235,7 @@ ${chapters.map((c) => `---\n\n${demote(c.text).trim()}`).join("\n\n")}
 
 ---
 
-# ${APPENDIX_TITLE}
+## ${APPENDIX_TITLE}
 
 The same rows as \`traceability.csv\`, rendered for reading. The CSV remains the
 machine-readable copy; both are generated from the same file, so a row that
