@@ -1,0 +1,54 @@
+prompt_id,date,requirement_or_cr,screen_or_state_id,repository,key_files,commits,verification_evidence,evidence_class,current_status
+PRM-001,2026-09-15,"Project brief; three-repository plan",,kkl-backend,"docs/requirements.md; docs/architecture.md; docs/demo-assessment.md",a15a508,"Documentation review only",S,Delivered
+PRM-001,2026-09-15,"First prototype and screen inventory","P-*, S-*, B-*, A- (draft)",kkl-web,"sitemap, screen inventory, journeys, clickable prototype",348ebb7,"None; superseded",S,Superseded
+PRM-001,2026-09-15,"Voice protocol notes",,kkl-voice,README + protocol notes,349bd16,None,S,Delivered
+PRM-002,2026-09-15,"Phase 1 rejected; design briefing package",,kkl-web,"DESIGN_BRIEF.md; 01-06 supporting docs",b5c3f9f,"Content review vs source PDFs",S,Delivered
+PRM-003,2026-09-21,"Claude Design import (interrupted)",,kkl-design,KKL Component and State Library.dc.html,5bc3512,"n/a — interrupted",,Superseded
+PRM-004,2026-09-21,"Peer-relayed duplicate (interrupted)",,,,,"n/a — interrupted",,Superseded
+PRM-005,2026-09-21,"Phase 2: shared foundation + homepage",P-01;C-01..C-12,kkl-web,"src/app/globals.css; src/components/ui/*; src/components/layout/*",34079e9;36502c3,"verify-design-tokens 30/30+43/43 @5c3a658",G/H,Delivered
+PRM-005,2026-09-21,"Phase 2: public portal and Buyer",P-02..P-21,kkl-web,"src/app/(public)/**; src/lib/services/sample/enquiry-store.ts",b860df2;cbb4ba3,"verify-enquiry-flow 17/17 @c2ec702",C,Delivered
+PRM-006,2026-09-21,"P-15 Profile, P-16 Notifications",P-15;P-16,kkl-web,"src/app/(public)/account/**",a43973a,"route sweep; enquiry suite",C,Delivered
+PRM-006,2026-09-21,"Review imagery behind a flag",E-P3,kkl-web,"src/lib/services/sample/review-imagery.ts",0635e6f,"evidence/e-p3/*",V,Partial — licence open
+PRM-006,2026-09-21,"Enquiry idempotency; PII out of URLs",P-08..P-11,kkl-web,"src/app/actions/enquiry.ts; enquiry-store.ts",95e59c7,"tests/idempotency.test.mjs 27/27 @2dd368c",C,Delivered
+PRM-006,2026-09-21,"Account screens dynamic; run-time guard",P-13..P-16,kkl-web,"src/lib/config/runtime.ts; src/proxy.ts",9b9bdaf,"verify-sample-mode-guard 10/10 @707d77b",H,Delivered
+PRM-006,2026-09-22,"Process-held sample state",all sample,kkl-web,"src/lib/services/sample/process-state.ts",2f5627e,"cross-bundle reset observable",C,Delivered
+PRM-006,2026-09-22,"Retract an unproven cause",,kkl-web,docs/phase-2/verification.md,748915f,"documentation correction",S,Delivered
+PRM-007,2026-09-22,"Re-issue of PRM-006",,,,,,,Superseded
+PRM-008,2026-09-22,"Seller reset determinism; wallet reconcile",S-14..S-21,kkl-web,"src/lib/services/sample/seller-store.ts",9b6ffa9,"tests/ledger.test.mjs; flow suite run twice",C,Delivered
+PRM-008,2026-09-22,"Builder journey",B-01..B-24,kkl-web,"src/app/builder/**; src/components/builder/*",ae03160;1edfbf2;567a2c2,"verify-builder-flow 48/48 @c2ec702",C,Delivered
+PRM-009,2026-09-22,"B-15 unsaved changes",B-15,kkl-web,"src/components/builder/unsaved-changes.tsx",5829839,"verify-b15-navigation 9/9 @5c3a658",H,Partial — E-P1 open
+PRM-009,2026-09-22,"Admin console",A-01..A-31,kkl-web,"src/app/admin/**; src/lib/services/sample/admin-store.ts",3c1b0fd;b0f0a3a;3a8645a,"verify-admin-flow 36/36 @c2ec702",C,Delivered
+PRM-010,2026-09-23,"Acceptance pass; four-category split",,kkl-web,"docs/phase-2/acceptance.md; exceptions.md",44db69e,"category split recorded",S,Delivered
+PRM-010,2026-09-23,"B-15 Back made harmless",B-15;E-P1,kkl-web,"src/components/builder/unsaved-changes.tsx",e0f23b9,"evidence/e-p1/*.webm + frame strip",V,Awaiting decision
+PRM-010,2026-09-23,"Deployment guard bundle-vs-server fix",,kkl-web,"src/lib/config/runtime.ts",66286c6,"tests/deployment-guard.test.mjs 72 combinations",C,Delivered
+PRM-010,2026-09-23,"Rendered comparison; shared deviations",multiple,kkl-web,"scripts/capture-visual-comparison.mjs",0fdbf45;b19e6b1;578492e;7687105;dfb0165,"visual/*.json; evidence/*",G/V,Delivered
+PRM-011,2026-09-23,"Map 113 inventory rows to evidence",all 113,kkl-web,"scripts/screen-map.mjs; build-coverage-matrix.mjs",011bade;969ae3d,"docs/phase-2/coverage.md",G,Delivered
+PRM-011,2026-09-23,"Geometry differ",all,kkl-web,"scripts/verify-screen-geometry.mjs",011bade,"visual/geometry-1440.json; -390; -768",G,Delivered
+PRM-012,2026-09-23,"Typography per context",multiple,kkl-web,"src/app/globals.css",b95e81e,"verify-typography 11/11 @5c3a658",G/H,Delivered
+PRM-012,2026-09-23,"Guard suite hermetic and Windows-runnable",,kkl-web,"scripts/verify-sample-mode-guard.sh",707d77b;1591aa0,"10/10 + 2 pending @707d77b",H,Partial
+PRM-013,2026-09-23,"E-P5/E-P6 baseline corrections",B-02;B-07,kkl-web,"src/app/builder/**",b9e7e53;7afe140,"evidence/*",V,Delivered
+PRM-013,2026-09-25,"D-20 evidence impact; E-P3 refresh",E-P3;D-20,kkl-web,"scripts/proto-width.mjs",4f125ec,"evidence/e-p3/*-b9e7e53.png",V,Delivered
+PRM-013,2026-09-26,"Responsive type pass",multiple,kkl-web,"src/app/globals.css; docs/phase-2/visual-differences.md",5c3a658;e6ec30b,"visual/geometry-768.json",G,Delivered
+PRM-014,2026-09-27,"Evidence-based completion review",,kkl-web,"none — audit only","(stash@{0} created, unapplied)","route sweep 236/236; lead-request 15/15; guard 10/10 re-run",A,Delivered
+PRM-015,2026-09-26,"CR05 central location model",CR05;all pickers,kkl-web,"src/lib/services/sample/locations.ts; src/components/location/area-picker.tsx",abf454a,"verify-labels-and-locations 23/23 @c2ec702",C,Delivered
+PRM-015,2026-09-26,"CR01 Buy Leads rename",CR01,kkl-web,"src/components/seller/seller-nav.ts; builder-nav.ts",23d24b0;537a265;c2ec702,"verify-labels-and-locations checks 1-8",C,Delivered
+PRM-015,2026-09-26,"CR03 sample journey",CR03,kkl-web,"src/lib/services/sample/lead-request-store.ts; src/app/seller/requests/**",9220c32,"verify-lead-request-flow 15/15",C,Superseded by durable store
+PRM-015,2026-09-26,"CR02 prepared (inert)",CR02,kkl-web,"src/app/(public)/post-property/page.tsx",7220f42,"renders; 0 forms by design",S,Superseded
+PRM-015,2026-09-26,"CR01-CR07 register; KYC matrix",CR01-CR07,kkl-web,"docs/phase-2/change-register.md; kyc-policy-matrix.md",90770ef,"documentation",S,Delivered
+PRM-015,2026-09-27,"CR03 durable backend",CR03,kkl-backend,"migrations/001-004; src/db/pool.mjs; src/http/server.mjs",21903ba;4fb7b9d,"backend npm test 19/19 @4fb7b9d",C,Delivered
+PRM-015,2026-09-27,"CR03 kkl-web wiring",CR03,kkl-web,"src/lib/services/backend/lead-requests.ts; config.ts",1940f11,"verify-lead-request-persistence 9/9",C,Delivered
+PRM-015,2026-09-27,"CR02 owner journey",CR02-01..CR02-11,kkl-web,"src/app/(public)/owner/**; src/app/admin/owner-listings/**",f74deb2,"verify-owner-posting-flow 31/31 @f74deb2",C,Delivered
+PRM-015,2026-09-27,"Form-safety fix (mode on the button)",CR02;CR03;A-23;A-19,kkl-web,"src/components/admin/*.tsx",f74deb2,"owner 31/31; CR03 15/15; admin 36/36",C,Delivered
+PRM-015,2026-09-27,"CR04 order record",CR04-01..CR04-05,kkl-web,"src/app/seller/orders/**; src/components/console/order-views.tsx",6b7f777,"verify-lead-order-flow 20/20 @6b7f777",C,Delivered
+PRM-015,2026-09-27,"CR07 verification policy",CR07-01..CR07-03,kkl-web,"src/lib/config/verification-policy.ts; src/app/admin/verification/**",51a5627,"verify-verification-policy 19/19 @51a5627",C,Delivered
+PRM-015,2026-09-27,"CR01+CR05 completion; locality ranking fix",CR01;CR05,kkl-web,"src/components/location/area-picker.tsx",c2ec702,"verify-labels-and-locations 23/23",C,Delivered
+PRM-015,2026-09-27,"Inventory +19 CR rows; CR records",CR02;CR04;CR07,kkl-web,"docs/phase-2/inventory.json; cr-implementation-verification.md",6a00cdd,"route sweep 268/268",C,Delivered
+PRM-016,2026-09-28,"Decisions received; authentication boundary",CR03;CR06;CR07,kkl-web,"docs/phase-2/decisions-received.md; cr03-authentication-boundary.md",5ecea35,"documentation; owner 31/31 + verification 19/19 re-run",C,Delivered
+PRM-016,2026-09-28,"/owner/listings force-dynamic",CR02-02,kkl-web,"src/app/(public)/owner/listings/page.tsx",5ecea35,"production-mode build no longer fails on this page",C,Delivered
+PRM-016,2026-09-28,"Backend authentication pointer",CR03,kkl-backend,docs/cr03-lead-requests.md,bc8ab30,"documentation",S,Delivered
+PRM-017,2026-09-28,"A-5 lead-request product decision",CR07-01,kkl-web,"src/lib/config/verification-policy.ts; src/proxy.ts",ba252d9,"verify-verification-policy 22/22 @ba252d9",C,Delivered
+PRM-017,2026-09-28,"Environment override removed",CR07,kkl-web,"src/lib/config/verification-policy.ts",ba252d9,"guard cannot fire — stated, not claimed",S,Delivered
+PRM-018,2026-09-28,"Customer copy simplified; provenance to Admin",CR07-01;CR07-03,kkl-web,"src/app/seller/verification/page.tsx; src/app/admin/verification/[reference]/page.tsx",2dd368c,"verify-verification-policy 23/23 @2dd368c",C,Delivered
+PRM-018,2026-09-28,"CR06-a Type 1 identified",CR06-a;P-01,kkl-web,"docs/phase-2/evidence/cr06/",2dd368c,"1209px comparison; both images retained",V,Complete
+PRM-019,2026-09-28,"CR06 status; register and owner review",CR06-a;CR06-b,kkl-web,"docs/phase-2/change-register.md; owner-review.md",36114f5,"documentation only",S,Delivered
+PRM-020,2026-09-28,"Technical history package",all,kkl-web,docs/technical-history/**,"(this commit)","no suite re-run by design",S,Delivered
