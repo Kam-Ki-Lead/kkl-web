@@ -1,4 +1,4 @@
-# CR06-a — Type 1 identified
+# CR06-a — complete · CR06-b — in progress
 
 **Answer received:** project owner, 28 September 2026, as an attached image.
 
@@ -7,7 +7,7 @@ Kam Ki Lead — responsive portal homepage · Prototype · fit to window, 1209px
 synthetic listings, stock photography"* — the kkl-design prototype viewer.
 
 **So "Type 1" is the homepage that was already approved and already built.**
-CR06-a closes with no redesign. `implemented-homepage-1209.png` is this build
+**CR06-a is complete: no redesign required.** `implemented-homepage-1209.png` is this build
 captured at the same 1209px width for comparison.
 
 ## What matches
@@ -36,20 +36,26 @@ not — the browser capture shows them.
 | Search button count | "Search 128 properties" | "Search 8 properties" | Sample-data volume. The prototype carries 128 synthetic listings, this build carries 8 |
 | Review banner | absent | "SAMPLE DATA — synthetic content…" strip above the header | A review-build artifact, correctly absent from a design |
 
-## One thing to confirm, not assume
+## CR06-b — in progress, awaiting the file
+
+**Colour verification has not started.** It needs the **authoritative logo
+file**, which is awaited from the client.
+
+Until it arrives: the **current palette is retained unchanged**, and the
+**accessibility corrections are retained** (E-P2a's focus-ring companion edge,
+E-P2b's darkened control border). Sampling colours from this screenshot is not a
+substitute and will not be done — it is a lossy JPEG of a rendered page, and a
+hex value read from it would be a guess presented as a measurement.
+
+## One thing to confirm, not assume — tracked separately from CR06-b
 
 Type 1's search card shows **Location = "New Town, Kolkata"** and **Budget =
 "Up to ₹1.5Cr"**. This build shows **"All of Kolkata"** and **"Any budget"**.
 
-I have **not** changed anything on the strength of that. A screenshot of a
+**"All of Kolkata" and "Any budget" are preserved and stay that way unless you
+instruct otherwise.** I have not changed anything on the strength of that. A screenshot of a
 prototype is usually posed — somebody set those values to make the shot show a
 result count — and pre-filling a buyer's search with a locality and a budget
 they did not choose would be a real product decision, not a styling one. If
 those are intended defaults rather than a posed state, say so and they become a
 one-line change.
-
-## CR06-b is still open
-
-Colour verification needs the **authoritative logo file**. Sampling colours from
-this screenshot is not a substitute: it is a lossy JPEG of a rendered page, and
-a hex value read from it would be a guess presented as a measurement.

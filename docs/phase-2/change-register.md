@@ -28,19 +28,23 @@ these changes extend but do not close.
 
 ## Implementation status at a glance
 
-Status words are used narrowly, and none of them means finished.
+Status words are used narrowly. Most of them do not mean finished.
 
+- **Complete** — nothing outstanding on this record. Used once so far, for
+  CR06-a, where the answer was that the work was already done.
+- **In progress** — started or unblocked in principle, but waiting on a named
+  input before it can proceed. Says what has *not* been done yet.
 - **Implemented, sample services** — the journey works end to end and its records
   live in process memory. Named dependencies remain.
 - **Implemented, durable integration** — the records are in PostgreSQL and
   survive a restart. Authentication is still unbuilt; see below.
 - **Implemented, wording only** — no behaviour changed.
-- **Blocked** — named input missing; nothing built.
 
-**No CR is complete.** Every row below carries something outstanding, listed in
-its own column. Approval is recorded in `decisions-received.md`: four answers
-from the project owner authorize specific workflows, and the rest of the
-confirmation document remains a proposal.
+**Only CR06-a is complete.** Every other row carries something outstanding,
+listed in its own column, and none of them should be read as finished.
+Approval is recorded in `decisions-received.md`: six answers from the project
+owner authorize specific workflows, and the rest of the confirmation document
+remains a proposal.
 
 | Record | Status | What works | What is outstanding |
 |---|---|---|---|
@@ -49,8 +53,8 @@ confirmation document remains a proposal.
 | CR03 — Request Leads | **Implemented, durable integration** | PostgreSQL rows that survive a restart; row-level security the application role cannot bypass; server-side sessions with revocation and expiry; internal notes withheld by policy, not by a filter | **Authentication is not built.** Identities are issued by a development authenticator for review — see `cr03-authentication-boundary.md`. Also open: withdrawal, retention for closed requests |
 | CR04 — Purchase orders | **Implemented, sample services** | Selection → review → wallet checkout → result → My purchases → order detail, in both consoles. Payment traced to its ledger entry; replayed submissions reported as repeats; masking preserved | **Payments** — no provider chosen, none contacted; balances move numbers in one process. **Tax treatment and per-order invoicing** (D-13). **Refund policy** (D-14) — why there is no refund control. Cart and gateway remain a later addition |
 | CR05 — Locations | **Implemented, sample records** | One hierarchy on all six surfaces that pick a location, stable ids, ranked locality search, parent replacing child, honest empty results | **Database-backed location management** — the 55 records are a fixture, not an administered table |
-| CR06-a — Type 1 reference | **Closed, no work needed** | Type 1 identified 28 September 2026 as the kkl-design Round 3 prototype homepage — the design already approved and already built. Compared at 1209px: header, hero and search card match, copy word for word | Nothing. Differences found were photography (imagery dependency), listing count (sample-data volume) and the review banner — none of them design |
-| CR06-b — Logo colours | **Blocked** | Nothing | **The authoritative logo file.** Colours in use are then checked against it, divergences reported before anything changes, accessibility corrections retained |
+| CR06-a — Type 1 reference | **Complete** | Type 1 identified 28 September 2026 as the existing approved homepage — the kkl-design Round 3 prototype, already built. Compared at 1209px: header, hero and search card match, copy word for word. **No redesign required** | Nothing. Differences found were photography (imagery dependency), listing count (sample-data volume) and the review banner — none of them design |
+| CR06-b — Logo colours | **In progress** | Nothing yet — **colour verification has not started**, and cannot until the file arrives. The current palette and the accessibility corrections are retained unchanged in the meantime | **The authoritative logo file, awaited from the client.** Colours in use are then checked against it and divergences reported before anything changes. No colour is inferred from a screenshot and no palette value moves until the file is in hand |
 | CR07 — Verification policy | **Implemented, sample services** | Per-action outcomes, Not required distinct from Verified, no case opened by registering, cases with references and history, the Admin queue split, a provider failure that can never become a pass, existing purchase restriction retained | **Identity-provider integration** — no provider selected, no document collected, no compliance claimed. Expiry period, consent and retention undecided. The `request_leads` rule was decided on 28 September (A-5) and is no longer outstanding |
 
 ### Dependencies, kept separate from frontend completion
@@ -90,33 +94,50 @@ describing CR03 to anyone.
 ## Decisions received, and what is still open
 
 Recorded in full, with source and the exact workflow each answer authorizes, in
-**[`decisions-received.md`](decisions-received.md)**. In brief:
+**[`decisions-received.md`](decisions-received.md)**. Six answers so far. In
+brief:
 
 | Answer | Authorizes | Explicitly does not authorize |
 |---|---|---|
 | Direct order + wallet | CR04's order journey and order record | A cart, any gateway, any tax treatment, any refund path |
 | Submit for review, never auto-publish | CR02's journey through to a staff decision | Publishing a cleared listing, charging an owner, awarding a verification |
 | Selective, action-based verification | CR07's whole structure, and keeping the purchase restriction | A provider, document collection, a compliance claim, an expiry period |
-| "I'll supply both" (CR06 assets) | Nothing yet — neither has arrived | — |
+| "I'll supply both" (CR06 assets) | Superseded by the two answers below | — |
+| Lead requests need no verification (28 Sep) | CR07's `request_leads` rule, as a product decision; purchase restriction retained | Any other action; any compliance determination |
+| Type 1 is the attached image (28 Sep) | CR06-a complete — it is the existing approved homepage | CR06-b, which still needs the logo file |
 
 ### Waiting on you — one item
 
-**CR06-b · The authoritative logo file**, so the colours in use can be checked
-against it. Any divergence is reported before anything changes, and the
-accessibility corrections already made are retained. Sampling colours from a
-screenshot is not a substitute — a hex value read from a lossy JPEG would be a
-guess presented as a measurement.
+**CR06-b · The authoritative logo file.** This item is **in progress and
+awaiting that file**; **colour verification has not started** and will not until
+the file is in hand.
 
-Splitting CR06 paid off: **CR06-a closed on 28 September with no work at all.**
-Type 1 turned out to be the homepage already approved and already built, which
-is why it was worth asking rather than producing a redesign. Evidence in
-`evidence/cr06/`.
+Until then, and stated so nobody has to infer it:
 
-**One small question, recorded rather than acted on.** The Type 1 screenshot
-shows the homepage search card with a locality and a budget pre-selected, where
-this build shows "All of Kolkata" and "Any budget". A prototype screenshot is
-usually posed, and pre-filling a buyer's search is a product decision rather
-than a styling one. If those are intended defaults, it is a one-line change.
+- **The current palette is retained unchanged.** No token, no hex value, nothing.
+- **The accessibility corrections are retained** — E-P2a's focus-ring companion
+  edge and E-P2b's darkened control border both stay exactly as they are.
+- **No colour is inferred from a screenshot.** Sampling the Type 1 JPEG would
+  produce a hex value read off a lossy render of a rendered page: a guess
+  presented as a measurement, and worse than waiting.
+
+When the file arrives: the colours in use are compared against it, divergences
+are reported **before** anything changes, and where a logo colour and a contrast
+requirement disagree that is put to you as a decision rather than settled
+quietly in either direction.
+
+**CR06-a is complete.** Type 1 is the existing approved homepage, already built;
+no redesign is required. Evidence in `evidence/cr06/`. Splitting CR06 in two is
+what let this half close on its own while the other half waits on a file.
+
+### A separate question, not part of CR06-b
+
+The Type 1 screenshot shows the homepage search card with a locality and a
+budget pre-selected. **This build preserves "All of Kolkata" and "Any budget",
+and will keep them unless you instruct otherwise.** A prototype screenshot is
+usually posed for the shot, and pre-filling a buyer's search with a locality and
+a price they did not choose is a product decision rather than a styling one.
+Tracked on its own so it neither blocks CR06-b nor rides along with it.
 
 ### Decided on 28 September
 
@@ -370,19 +391,21 @@ does not block the frontend model. Decision 7: rental listing coverage.
 
 ## CR06 — Visual direction
 
-> **CR06-a closed, CR06-b still blocked (28 September 2026).**
+> **CR06-a complete; CR06-b in progress, awaiting the file (28 September 2026).**
 >
-> **CR06-a — Type 1 identified.** The attached reference is the kkl-design Round
-> 3 prototype homepage: the design already approved and already built. Compared
-> at 1209px, header, hero and search card match and the copy is word for word.
-> **No redesign.** Evidence and the full comparison in `evidence/cr06/`.
+> **CR06-a — complete.** Type 1 is the existing approved homepage: the kkl-design
+> Round 3 prototype, already built. Compared at 1209px — header, hero and search
+> card match, copy word for word. **No redesign required.** Evidence and the full
+> comparison in `evidence/cr06/`.
 >
-> **CR06-b — verify colours against the authoritative logo.** Needs the real
-> logo file. The colours in use are then checked against it and any divergence
-> reported before anything changes, with the accessibility corrections retained.
+> **CR06-b — in progress, awaiting the authoritative logo file from the client.
+> Colour verification has not started.** The current palette and the
+> accessibility corrections (E-P2a, E-P2b) are retained unchanged until the file
+> arrives. No colour is inferred from a screenshot: a hex read off a lossy JPEG
+> is a guess presented as a measurement.
 >
-> Separate items, and splitting them paid off: CR06-a needed no work at all,
-> and CR06-b is unblocked the moment the file arrives.
+> Splitting CR06 in two is what let the first half complete on its own while the
+> second waits on a file.
 
 
 **Source.** Specification §3.

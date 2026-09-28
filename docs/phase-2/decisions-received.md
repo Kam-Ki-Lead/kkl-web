@@ -193,18 +193,28 @@ A-5, a decision.
 
 ## CR06, as two separate items
 
-### CR06-a · Confirm the Type 1 homepage reference — **answered 28 September 2026**
+### CR06-a · Type 1 reference — **complete, 28 September 2026**
 
-Type 1 is the homepage already approved and already built. See A-6 above and
-`evidence/cr06/`. **No redesign.**
+Type 1 is the **existing approved homepage**, already built. **No redesign
+required.** See A-6 above and `evidence/cr06/`.
 
-### CR06-b · Verify colours against the authoritative logo — **still open**
+### CR06-b · Logo colours — **in progress, awaiting the file**
 
-**What is needed:** the authoritative logo file itself — the real one, not a
+**Awaiting the authoritative logo file from the client. Colour verification has
+not started** and cannot begin until the file is in hand — the real file, not a
 screenshot of it or an export from a deck.
 
-**What happens then:** the colours in use are checked against the ones in that
-file, and any divergence is reported before anything changes. The accessibility
-corrections already made are retained; where a logo colour and a contrast
-requirement disagree, that is reported as a decision for you rather than settled
-quietly in either direction.
+**What is retained while it waits:**
+
+- the **current palette**, unchanged — no token, no hex value;
+- the **accessibility corrections** — E-P2a's focus-ring companion edge and
+  E-P2b's darkened control border. A logo file is a reason to check colours, not
+  a reason to undo an accessibility fix.
+
+**No colour is inferred from a screenshot.** A hex read off a lossy JPEG of a
+rendered page is a guess presented as a measurement.
+
+**What happens when it arrives:** the colours in use are compared against the
+file, and any divergence is reported **before** anything changes. Where a logo
+colour and a contrast requirement disagree, that is put to you as a decision
+rather than settled quietly in either direction.

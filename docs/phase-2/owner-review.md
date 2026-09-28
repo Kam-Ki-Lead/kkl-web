@@ -4,7 +4,10 @@ One page for the review. What is open, what each decision needs, and the
 evidence for it. The full record behind every line here is the
 [decision sheet](decision-sheet.md); this page links rather than repeats.
 
-**Implementation:** `5c3a658` on `claude/phase-2-frontend` (kkl-web)
+**Implementation:** `5c3a658` on `claude/phase-2-frontend` (kkl-web) for the
+Phase 2 exceptions below. The client-change work (CR01–CR07) landed after it —
+see [`change-register.md`](change-register.md) for per-record status and
+[`decisions-received.md`](decisions-received.md) for what has been decided.
 **Approved design:** kkl-design `5bc3512`, unmodified
 **Not requested:** acceptance, deployment, or any exception marked accepted —
 acceptance is a person saying yes.
@@ -95,7 +98,48 @@ Plus **sixteen open client decisions**, six blocking launch, in
 of them — an inert control on A-14, A-20 or A-21 is the decision showing, not
 a bug.
 
-## 5 · Verification at this commit
+## 4b · CR06 — visual direction
+
+Split into two items on 28 September so that neither holds up the other. One is
+finished; the other is waiting on a file.
+
+| Item | Status | Where it stands |
+|---|---|---|
+| **CR06-a — Type 1 reference** | **Complete** | Type 1 is the **existing approved homepage** — the kkl-design Round 3 prototype, already built. **No redesign required.** Compared at 1209px: header, hero and search card match, copy word for word. Both images and the comparison are in [`evidence/cr06/`](evidence/cr06/) |
+| **CR06-b — logo colours** | **In progress** | **Awaiting the authoritative logo file from the client. Colour verification has not started** and cannot begin until the file is in hand |
+
+### What is deliberately not happening while CR06-b waits
+
+- **The current palette is retained unchanged** — no token and no hex value
+  moves until the file arrives.
+- **The accessibility corrections are retained**: E-P2a's focus-ring companion
+  edge and E-P2b's darkened control border stay exactly as they are. A logo
+  file, when it comes, is a reason to check colours — not a reason to undo an
+  accessibility fix.
+- **No colour is inferred from a screenshot.** Sampling the Type 1 JPEG would
+  give a hex read off a lossy render of a rendered page: a guess presented as a
+  measurement. Waiting is better.
+
+When the file arrives, colours in use are compared against it and any divergence
+is **reported before anything changes**. Where a logo colour and a contrast
+requirement disagree, that goes to you as a decision rather than being settled
+quietly in either direction — the same handling E-P2a and E-P2b get.
+
+### One question tracked separately from CR06-b
+
+The Type 1 screenshot shows the homepage search card with a locality and a
+budget pre-selected. **The build preserves "All of Kolkata" and "Any budget",
+and keeps them unless you say otherwise.** A prototype screenshot is usually
+posed for the shot, and pre-filling a buyer's search with a locality and a price
+they did not choose is a product decision, not a styling one. Kept on its own so
+it neither blocks CR06-b nor rides along with it.
+
+## 5 · Verification at the Phase 2 exception commit
+
+Figures below are from `5c3a658`, the commit these exceptions were captured at.
+Verification for the later client-change work is recorded separately in
+[`cr-implementation-verification.md`](cr-implementation-verification.md); this
+section has not been re-run and does not claim to cover it.
 
 All green at `5c3a658` under the review configuration in
 [`local-review.md`](local-review.md): typecheck/lint clean · unit 27/27 ·
