@@ -110,3 +110,21 @@ export function locationBackendConfig(): LocationBackendConfig {
     launchCityId: read("KKL_LOCATIONS_LAUNCH_CITY") ?? "in-wb-kol",
   };
 }
+
+// ---------------------------------------------------------------------------
+// Slices B and C — profiles and listings.
+//
+// Two more narrow switches, on the same principle: a domain moves to
+// kkl-backend when kkl-backend serves it, and the platform-wide `api` flag
+// stays off until every service exists. Each is explicit, each is documented
+// in kkl-backend/docs/phase-3/integration.md, and none of them falls back to
+// sample data when the real service is unreachable.
+// ---------------------------------------------------------------------------
+
+export function profileStoreKind(): "sample" | "backend" {
+  return read("KKL_PROFILES") === "backend" ? "backend" : "sample";
+}
+
+export function listingStoreKind(): "sample" | "backend" {
+  return read("KKL_LISTINGS") === "backend" ? "backend" : "sample";
+}

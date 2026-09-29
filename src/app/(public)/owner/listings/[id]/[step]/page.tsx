@@ -13,6 +13,18 @@ import { ServiceError } from "@/lib/services/contracts";
 import { OWNER_STEPS, stepStates } from "@/lib/services/sample/owner-listing-store";
 import type { OwnerListingStepId } from "@/lib/domain/types";
 
+/**
+ * Per-account data is not static data.
+ *
+ * With KKL_LISTINGS=backend this page reads a person's own records over the
+ * network at request time. Collected as a static page it prerendered once at
+ * build — which Next refuses outright for a no-store fetch, and which would be
+ * wrong even if it did not. The sibling list page carries the same line for
+ * the same reason.
+ */
+export const dynamic = "force-dynamic";
+
+
 export const metadata: Metadata = { title: "Post your property", robots: { index: false } };
 
 const STEP_IDS = OWNER_STEPS.map((s) => s.id);

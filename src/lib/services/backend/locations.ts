@@ -2,6 +2,7 @@ import type { LocationNode } from "@/lib/domain/types";
 import { ServiceError } from "@/lib/services/contracts";
 import type { LocationService } from "@/lib/services/contracts";
 import { locationBackendConfig } from "./config";
+import { isFrameworkSignal } from "./session";
 
 /**
  * Slice B — location records served by kkl-backend.
@@ -48,6 +49,7 @@ async function get<T>(path: string): Promise<T> {
       cache: "no-store",
     });
   } catch (cause) {
+    if (isFrameworkSignal(cause)) throw cause;
     console.error("[kkl-web] location service unreachable", cause);
     throw new ServiceError(
       "unavailable",

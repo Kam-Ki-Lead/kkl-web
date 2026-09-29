@@ -1,9 +1,16 @@
 import { runtimeConfig } from "@/lib/config/runtime";
 import type { Services } from "./contracts";
 import { sampleReviewControls, sampleServices } from "./sample/sample-services";
-import { leadRequestStoreKind, locationStoreKind } from "./backend/config";
+import {
+  leadRequestStoreKind,
+  listingStoreKind,
+  locationStoreKind,
+  profileStoreKind,
+} from "./backend/config";
 import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
 import { backendLocations } from "./backend/locations";
+import { backendProfile } from "./backend/profile";
+import { backendAdminOwnerListings, backendOwnerListings } from "./backend/owner-listings";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -19,7 +26,7 @@ import { backendLocations } from "./backend/locations";
  */
 export function getServices(): Services {
   if (runtimeConfig.dataSource === "sample") {
-    return withLocationStore(withLeadRequestStore(sampleServices));
+    return withListingStore(withProfileStore(withLocationStore(withLeadRequestStore(sampleServices))));
   }
 
   throw new Error(
@@ -64,6 +71,42 @@ function withLeadRequestStore(services: Services): Services {
 function withLocationStore(services: Services): Services {
   if (locationStoreKind() !== "backend") return services;
   return { ...services, locations: backendLocations };
+}
+
+/**
+ * P-15's profile, served by kkl-backend when KKL_PROFILES=backend.
+ *
+ * The record moves; the identity in front of it does not. kkl-web still
+ * identifies itself to kkl-backend through the development issuer, so this
+ * makes the profile durable and account-scoped without making anybody
+ * authenticated.
+ */
+function withProfileStore(services: Services): Services {
+  if (profileStoreKind() !== "backend") return services;
+  return { ...services, profile: backendProfile };
+}
+
+/**
+ * CR02's owner journey and the Admin review of it, served by kkl-backend when
+ * KKL_LISTINGS=backend. Both sides move together: an owner submitting into a
+ * durable queue while staff read a sample one would be worse than either.
+ */
+function withListingStore(services: Services): Services {
+  if (listingStoreKind() !== "backend") return services;
+  return {
+    ...services,
+    ownerListings: backendOwnerListings,
+    admin: { ...services.admin, ...backendAdminOwnerListings },
+  };
+}
+
+/** Which store each backend-served domain is using, for the screens to say so. */
+export function profileStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? profileStoreKind() : "backend";
+}
+
+export function listingStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? listingStoreKind() : "backend";
 }
 
 /** Which store location records are coming from, for the screens to say so. */

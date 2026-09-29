@@ -9,6 +9,18 @@ import { Chip } from "@/components/ui/chip";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
 
+/**
+ * Per-account data is not static data.
+ *
+ * With KKL_LISTINGS=backend this page reads a person's own records over the
+ * network at request time. Collected as a static page it prerendered once at
+ * build — which Next refuses outright for a no-store fetch, and which would be
+ * wrong even if it did not. The sibling list page carries the same line for
+ * the same reason.
+ */
+export const dynamic = "force-dynamic";
+
+
 export const metadata: Metadata = { title: "Post your property" };
 
 /**
