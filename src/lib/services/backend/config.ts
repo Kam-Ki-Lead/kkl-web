@@ -65,3 +65,48 @@ export function leadRequestBackendConfig(): LeadRequestBackendConfig {
     staffRef: read("KKL_LEAD_REQUESTS_STAFF_REF") ?? "kkl-web:sample-staff",
   };
 }
+
+// ---------------------------------------------------------------------------
+// Slice B — where location records come from.
+//
+// A second narrow switch, for the same reason the first one exists: kkl-backend
+// now serves locations, and nothing else that kkl-web needs. Moving the whole
+// application to `api` would take the public portal, the marketplace and the
+// wallet with it, and those services do not exist yet.
+//
+// There is no fallback here either. If the switch says backend and the backend
+// cannot be reached, location pickers fail loudly. A picker that quietly serves
+// a stale in-memory list while staff believe they are maintaining the real one
+// is the same class of lie as a simulated purchase.
+// ---------------------------------------------------------------------------
+
+export type LocationStoreKind = "sample" | "backend";
+
+export type LocationBackendConfig = {
+  readonly baseUrl: string;
+  /**
+   * The city the portal launches in. Configuration, not a constant: the tree
+   * has a country and a state above it and other cities beside it, and none of
+   * that is compiled in.
+   */
+  readonly launchCityId: string;
+};
+
+export function locationStoreKind(): LocationStoreKind {
+  return read("KKL_LOCATIONS") === "backend" ? "backend" : "sample";
+}
+
+export function locationBackendConfig(): LocationBackendConfig {
+  const baseUrl = read("KKL_LOCATIONS_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL");
+  if (baseUrl === undefined) {
+    throw new Error(
+      "KKL_LOCATIONS=backend requires KKL_LOCATIONS_BASE_URL (or KKL_LEAD_REQUESTS_BASE_URL) " +
+        "pointing at kkl-backend. kkl-web does not fall back to the sample location records " +
+        "when the backend is unconfigured — staff would be maintaining records nobody reads.",
+    );
+  }
+  return {
+    baseUrl: baseUrl.replace(/\/+$/, ""),
+    launchCityId: read("KKL_LOCATIONS_LAUNCH_CITY") ?? "in-wb-kol",
+  };
+}

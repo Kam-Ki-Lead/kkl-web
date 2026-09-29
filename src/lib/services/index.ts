@@ -1,8 +1,9 @@
 import { runtimeConfig } from "@/lib/config/runtime";
 import type { Services } from "./contracts";
 import { sampleReviewControls, sampleServices } from "./sample/sample-services";
-import { leadRequestStoreKind } from "./backend/config";
+import { leadRequestStoreKind, locationStoreKind } from "./backend/config";
 import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
+import { backendLocations } from "./backend/locations";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -18,7 +19,7 @@ import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-re
  */
 export function getServices(): Services {
   if (runtimeConfig.dataSource === "sample") {
-    return withLeadRequestStore(sampleServices);
+    return withLocationStore(withLeadRequestStore(sampleServices));
   }
 
   throw new Error(
@@ -48,6 +49,26 @@ function withLeadRequestStore(services: Services): Services {
     leadRequests: backendLeadRequests,
     admin: { ...services.admin, ...backendAdminLeadRequests },
   };
+}
+
+/**
+ * Slice B — location records may come from kkl-backend while everything else
+ * is still sample, for the same reason lead requests may: kkl-backend serves
+ * them, and moving the whole application to `api` would take the marketplace
+ * and the wallet with it.
+ *
+ * A swap, not a fallback. With KKL_LOCATIONS=backend and the backend
+ * unreachable, pickers fail; they do not quietly serve the sample records
+ * while staff maintain the real ones.
+ */
+function withLocationStore(services: Services): Services {
+  if (locationStoreKind() !== "backend") return services;
+  return { ...services, locations: backendLocations };
+}
+
+/** Which store location records are coming from, for the screens to say so. */
+export function locationStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? locationStoreKind() : "backend";
 }
 
 /** Which store lead requests are currently coming from, for the screens to say so. */
