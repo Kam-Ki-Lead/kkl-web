@@ -8,6 +8,13 @@ import { StateMessage } from "@/components/ui/states";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import type { ContactAccessMode } from "@/lib/domain/types";
+
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Enquiries" };
 
@@ -19,6 +26,25 @@ const TABS = [
 ] as const;
 
 /** B-16 — enquiries on the Builder's own listings. */
+/** One sentence per candidate rule, so the screen never has to guess. */
+const MODE_COPY: Record<ContactAccessMode, { title: string; detail: string }> = {
+  included_free: {
+    title: "alternative A — included",
+    detail:
+      "Contact details on enquiries for your own listings are visible without unlocking.",
+  },
+  included_with_subscription: {
+    title: "alternative A2 — included with a subscription",
+    detail:
+      "Contact details on enquiries for your own listings come with an active subscription.",
+  },
+  paid_unlock: {
+    title: "alternative B — paid unlock",
+    detail:
+      "Contact details on enquiries for your own listings are unlocked with credits, one enquiry at a time.",
+  },
+};
+
 export default async function BuilderEnquiriesPage({
   searchParams,
 }: {
@@ -29,13 +55,14 @@ export default async function BuilderEnquiriesPage({
   const tab = one(params.tab) ?? "all";
 
   const services = getServices().builder;
-  const [enquiries, mode] = await Promise.all([
+  const [enquiries, access] = await Promise.all([
     services.enquiries.list({
       unreadOnly: tab === "unread" || undefined,
       kind: tab === "enquiry" ? "enquiry" : tab === "site_visit" ? "site_visit" : undefined,
     }),
     services.enquiries.contactAccessMode(),
   ]);
+  const mode = access.selectedMode;
 
   return (
     <BuilderShell title="Enquiries" subtitle="Buyers who contacted you about your listings">
@@ -99,19 +126,32 @@ export default async function BuilderEnquiriesPage({
                     </p>
                   </div>
 
+                  {/* THREE CASES, AND THE THIRD IS NOT A MASK
+                      A released number; a withheld one under a rule somebody
+                      chose, which is what a mask means; and no rule at all,
+                      which is every deployment today. The third gets a
+                      sentence — a mask there would imply a real value is
+                      being held back under an agreement that does not
+                      exist. */}
                   <div className="flex-none text-right">
                     {enquiry.contactPhone ? (
                       <>
                         <p className="t-mono text-[15px] text-ink">{enquiry.contactPhone}</p>
                         <p className="t-caption text-success">Contact available</p>
                       </>
-                    ) : (
+                    ) : enquiry.contactMask ? (
                       <>
                         <MaskedValue>{enquiry.contactMask}</MaskedValue>
                         <p className="t-caption text-muted">
-                          Locked · ₹{enquiry.unlockPriceCredits?.toLocaleString("en-IN")} to unlock
+                          {enquiry.unlockPriceCredits === null
+                            ? enquiry.contactAccess.label
+                            : `Locked · ₹${enquiry.unlockPriceCredits.toLocaleString("en-IN")} to unlock`}
                         </p>
                       </>
+                    ) : (
+                      <p className="t-caption max-w-[220px] text-muted">
+                        {enquiry.contactAccess.label}
+                      </p>
                     )}
                   </div>
                 </Card>
@@ -120,16 +160,25 @@ export default async function BuilderEnquiriesPage({
           </ul>
         )}
 
-        {/* D-05. The screen says which alternative is showing, every time. */}
+        {/* D-05 / Q-2a. The screen says what is in force, every time — and
+            when nothing is, it says that rather than picking one to show. */}
         <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-ink">
-            Showing alternative {mode === "included" ? "A" : "B"}
+            {mode === null ? access.label : `Showing ${MODE_COPY[mode].title}`}
           </h2>
           <p className="t-body mt-[6px] text-body">
-            {mode === "included"
-              ? "Contact details on enquiries for your own listings are visible without unlocking."
-              : "Contact details on enquiries for your own listings are unlocked with credits, one enquiry at a time."}{" "}
-            This is a design proposal, not a stated rule.
+            {mode === null ? (
+              <>
+                Three rules are on the table and none has been confirmed: contact details
+                included at no extra charge, included through a subscription, or unlocked
+                by spending credits. Until one is chosen, no contact detail is released
+                and none is shown here.
+              </>
+            ) : (
+              <>
+                {MODE_COPY[mode].detail} This is a design proposal, not a stated rule.
+              </>
+            )}
           </p>
           <p className="t-caption mt-[8px] text-muted">{DECISIONS["D-05"].question} — D-05</p>
         </Card>

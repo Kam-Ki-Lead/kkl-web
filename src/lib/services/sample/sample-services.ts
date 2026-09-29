@@ -380,6 +380,16 @@ const leadRequestService: LeadRequestService = {
 };
 
 const creditService: CreditService = {
+  async availability() {
+    // Sample mode simulates the money, so every action is available —
+    // and every screen using it is labelled sample. The real service
+    // reports the four blockers separately.
+    const open = { available: true, reason: null, code: null };
+    return {
+      purchase: open, recharge: open, refund: open, invoice: open,
+      creditExpiry: { configured: false, reason: null, code: null },
+    };
+  },
   async wallet() {
     return sellerStore.wallet();
   },
@@ -797,7 +807,19 @@ const builderEnquiryService: BuilderEnquiryService = {
     return builderStore.listEnquiries(buyerEnquiriesForBuilder(), { unreadOnly: true }).length;
   },
   async contactAccessMode() {
-    return builderStore.contactAccessMode();
+    // Sample mode always has an alternative selected, because selecting one
+    // is what a reviewer came here to look at. The real service reports
+    // `awaiting_decision`, which sample data cannot honestly claim to be.
+    const mode = builderStore.contactAccessMode();
+    return {
+      state: "available" as const,
+      selectedMode: mode,
+      label: `Showing the ${mode.replace(/_/g, " ")} alternative`,
+      detail: "Sample data: a reviewer selected this alternative. No rule has been confirmed.",
+      question: "Q-2a",
+      candidateModes: ["included_free", "included_with_subscription", "paid_unlock"] as const,
+      unlockPriceCredits: null,
+    };
   },
 
   /**
@@ -809,7 +831,7 @@ const builderEnquiryService: BuilderEnquiryService = {
    * charged for something already included would be the worst of both.
    */
   async unlockContact(input) {
-    if (builderStore.contactAccessMode() !== "unlock") return { kind: "not_applicable" };
+    if (builderStore.contactAccessMode() !== "paid_unlock") return { kind: "not_applicable" };
 
     const seed =
       builderStore.findSeedEnquiry(input.id) ??

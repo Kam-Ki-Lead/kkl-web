@@ -11,6 +11,12 @@ import { DECISIONS } from "@/lib/config/business-rules";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Enquiry" };
 
 /** B-17 — enquiry detail and contact access. */
@@ -21,7 +27,7 @@ export default async function BuilderEnquiryPage({
 }) {
   const { id } = await params;
   const services = getServices().builder;
-  const [enquiry, mode, wallet] = await Promise.all([
+  const [enquiry, access, wallet] = await Promise.all([
     services.enquiries.get(id),
     services.enquiries.contactAccessMode(),
     services.credits.wallet(),
@@ -84,27 +90,36 @@ export default async function BuilderEnquiryPage({
                   </div>
                 </dl>
                 <p className="t-caption mt-[12px] text-muted">
-                  Shown under alternative {mode === "included" ? "A" : "B"}, which is a design
-                  proposal for enquiries on your own listings — not a confirmed rule.
+                  {access.detail}
                 </p>
               </>
             ) : (
               <>
-                <p className="mt-[10px]">
-                  <MaskedValue>{enquiry.contactMask}</MaskedValue>
-                </p>
+                {/* Three cases. A mask means a real value is being withheld
+                    under a rule somebody agreed to; while Q-2a is open there
+                    is no such rule, so there is a sentence here instead, and
+                    no unlock action — offering one would select the third
+                    alternative by implication. */}
+                {enquiry.contactMask ? (
+                  <p className="mt-[10px]">
+                    <MaskedValue>{enquiry.contactMask}</MaskedValue>
+                  </p>
+                ) : null}
+                <p className="t-body mt-[10px] text-body">{enquiry.contactAccess.label}</p>
                 <p className="t-caption mt-[8px] text-muted">
-                  The full number is not sent to this page while it is locked — there is nothing
-                  here to reveal without unlocking.
+                  {enquiry.contactAccess.detail}
                 </p>
-                <div className="mt-[14px]">
-                  <UnlockContactForm
-                    enquiryId={enquiry.id}
-                    idempotencyKey={token}
-                    priceCredits={enquiry.unlockPriceCredits ?? 0}
-                    balanceCredits={wallet.balanceCredits}
-                  />
-                </div>
+                {enquiry.contactAccess.selectedMode === "paid_unlock"
+                  && enquiry.contactAccess.unlockPriceCredits !== null ? (
+                  <div className="mt-[14px]">
+                    <UnlockContactForm
+                      enquiryId={enquiry.id}
+                      idempotencyKey={token}
+                      priceCredits={enquiry.contactAccess.unlockPriceCredits}
+                      balanceCredits={wallet.balanceCredits}
+                    />
+                  </div>
+                ) : null}
               </>
             )}
           </Card>

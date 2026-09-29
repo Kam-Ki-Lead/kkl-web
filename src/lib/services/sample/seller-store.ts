@@ -1,4 +1,6 @@
 import type {
+  LeadIntentBand,
+  LeadQualification,
   BillingDetails,
   Invoice,
   InvoiceDetail,
@@ -262,7 +264,19 @@ export function kycTimeline(): readonly KycTimelineEntry[] {
 
 // ---------------------------------------------------------------- lead market --
 
-type SeedLead = MarketplaceLeadDetail & {
+type SeedLead = Omit<MarketplaceLeadDetail,
+  'priceCredits' | 'contactMask' | 'qualification' | 'contactState' | 'blockers'
+  | 'purchasable' | 'intentBand' | 'intentScore'> & {
+  /**
+   * Sample fixtures carry concrete values where the real service may have
+   * none. That is what a fixture is for, and sample mode says so on every
+   * screen; the backend adapters are where the nullable cases live.
+   */
+  readonly priceCredits: number;
+  readonly contactMask: string;
+  readonly qualification: LeadQualification;
+  readonly intentBand: LeadIntentBand;
+  readonly intentScore: number;
   readonly contact: PurchasedLead["contact"];
   /** The lead's area as a location-record id (CR05); the path derives from it. */
   readonly locationId: string;
@@ -426,6 +440,13 @@ function toMasked(seed: SeedLead): MarketplaceLead {
     priceCredits: seed.priceCredits,
     originalPriceCredits: seed.originalPriceCredits,
     contactMask: seed.contactMask,
+    contactState: {
+      state: 'masked_preview',
+      label: 'Contact hidden until purchase',
+    },
+    // A fixture is always buyable; the real blockers are the backend's.
+    blockers: [],
+    purchasable: true,
   };
 }
 

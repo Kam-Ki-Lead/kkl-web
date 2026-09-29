@@ -4,6 +4,12 @@ import { OrderList } from "@/components/console/order-views";
 import { BUILDER_ORDER_PATHS } from "@/components/console/order-paths";
 import { getServices } from "@/lib/services";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "My purchases" };
 
 /**

@@ -7,6 +7,16 @@ import { Chip } from "@/components/ui/chip";
 import { formatAreaPath, formatDate, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
 import { runtimeConfig } from "@/lib/config/runtime";
+import {
+  NOT_SCORED_LABEL,
+  NO_QUALIFICATION_DETAIL,
+} from "@/lib/domain/commerce-display";
+
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Purchased lead" };
 
@@ -53,19 +63,24 @@ export default async function PurchasedLeadPage({
               <Fact label="Budget band" value={lead.budgetBand} />
               <Fact label="Location" value={formatAreaPath(lead.locationPath)} />
               <Fact label="Configuration" value={lead.configuration} />
-              <Fact label="Timeline" value={q.timeline} />
-              <Fact label="Purpose" value={q.purpose} />
-              <Fact label="Financing" value={q.financing} />
+              <Fact label="Timeline" value={q?.timeline ?? NOT_SCORED_LABEL} />
+              <Fact label="Purpose" value={q?.purpose ?? NOT_SCORED_LABEL} />
+              <Fact label="Financing" value={q?.financing ?? NOT_SCORED_LABEL} />
             </dl>
-            <p className="t-body mt-[14px] text-body">{q.summary}</p>
+            <p className="t-body mt-[14px] text-body">{q ? q.summary : NO_QUALIFICATION_DETAIL}</p>
             <div className="mt-[12px] flex flex-wrap gap-[8px]">
-              <Chip tone="neutral">Intent score {q.intentScore}/100</Chip>
-              {q.consentCaptured ? (
+              <Chip tone="neutral">
+                {q ? `Intent score ${q.intentScore}/100` : NOT_SCORED_LABEL}
+              </Chip>
+              {/* An absent call is an absent consent record, never a neutral
+                  one: this lead was bought, and whether its enquirer agreed to
+                  be contacted is exactly the thing not to soften. */}
+              {q?.consentCaptured ? (
                 <Chip tone="success">Consent captured</Chip>
               ) : (
                 <Chip tone="warning">No consent captured</Chip>
               )}
-              <Chip tone="muted">{q.channel}</Chip>
+              <Chip tone="muted">{q?.channel ?? "No call recorded"}</Chip>
             </div>
           </Card>
         </div>

@@ -228,11 +228,20 @@ export type MarketplaceLead = {
   readonly locationPath: readonly string[];
   readonly configuration: string;
   readonly budgetBand: string;
-  readonly intentBand: LeadIntentBand;
-  readonly intentScore: number;
+  /**
+   * Null when nothing has scored this lead. Qualification scoring belongs to
+   * the voice phase; kkl-backend has no score today, and a default of 0 or
+   * "warm" would be a claim about a person nobody has spoken to.
+   */
+  readonly intentBand: LeadIntentBand | null;
+  readonly intentScore: number | null;
   readonly status: Extract<LeadLifecycleStatus, "listed" | "on_sale">;
   readonly ageDays: number;
-  readonly priceCredits: number;
+  /**
+   * Null when no lead price is configured (Q-1a). A zero would read as free,
+   * and a made-up number would read as agreed.
+   */
+  readonly priceCredits: number | null;
   /** Present only when the aging discount applies; the server computes it. */
   readonly originalPriceCredits: number | null;
   /**
@@ -243,8 +252,26 @@ export type MarketplaceLead = {
    * reverse. How much a mask may reveal is a disclosure policy that belongs to
    * kkl-backend, not to this layer — kkl-web renders whatever string it is
    * given and cannot widen it.
+   *
+   * **Null when the server composes no mask.** kkl-backend does not: the
+   * contact lives in a table it has not read, so it has nothing to mask and
+   * will not invent digits to stand in for it. Screens render `contactState`
+   * instead, which is a sentence. Sample mode keeps its masks — they are
+   * fixtures, and labelled as such.
    */
-  readonly contactMask: string;
+  readonly contactMask: string | null;
+  /**
+   * What is true about this lead's contact right now, as a state rather than
+   * a placeholder. Always present, so a screen never has to decide what a
+   * null mask means.
+   */
+  readonly contactState: {
+    readonly state: "masked_preview" | "released_on_purchase";
+    readonly label: string;
+  };
+  /** Why this lead cannot be bought, if it cannot. Empty when it can. */
+  readonly blockers: readonly { readonly code: string; readonly reason: string }[];
+  readonly purchasable: boolean;
   /** Requirement summary line — configuration and budget, as one phrase. */
   readonly requirement: string;
 };
@@ -262,7 +289,13 @@ export type LeadQualification = {
 };
 
 export type MarketplaceLeadDetail = MarketplaceLead & {
-  readonly qualification: LeadQualification;
+  /**
+   * Null when no qualification call has happened. kkl-backend records leads
+   * that nobody has called — voice is Phase 4 — and a qualification block
+   * filled with plausible sentences would be the most convincing lie on the
+   * screen.
+   */
+  readonly qualification: LeadQualification | null;
 };
 
 /** A lead the viewer has purchased. Contact details exist only on this type. */
@@ -273,8 +306,9 @@ export type PurchasedLead = {
   readonly locationPath: readonly string[];
   readonly configuration: string;
   readonly budgetBand: string;
-  readonly intentBand: LeadIntentBand;
-  readonly intentScore: number;
+  /** Null for the same reason it is null on a marketplace lead: no call. */
+  readonly intentBand: LeadIntentBand | null;
+  readonly intentScore: number | null;
   readonly pricePaidCredits: number;
   readonly requirement: string;
   readonly contact: {
@@ -284,7 +318,8 @@ export type PurchasedLead = {
     /** Free text the buyer gave during qualification, or null. */
     readonly bestTimeToCall: string | null;
   };
-  readonly qualification: LeadQualification;
+  /** Null when no qualification call has happened. */
+  readonly qualification: LeadQualification | null;
 };
 
 /**
@@ -381,6 +416,42 @@ export type LedgerEntry = {
  * append-only ledger; this client never computes, adjusts or caches an
  * authoritative balance.
  */
+/**
+ * Whether one money-shaped action can be taken right now, and why not.
+ *
+ * `reason` is a sentence for a person, composed by whoever knows — which is
+ * the service, not the screen. A screen that had to compose these would be
+ * guessing at conditions it cannot see, and would go stale the day one of
+ * them is answered.
+ */
+export type CommerceAction = {
+  readonly available: boolean;
+  readonly reason: string | null;
+  /** The machine-readable condition, for a screen that wants to branch. */
+  readonly code: string | null;
+};
+
+/**
+ * The four actions, separately.
+ *
+ * They are separate because their blockers are separate: a lead price, a set
+ * of payment credentials, a refund policy and a tax treatment are four
+ * decisions by four different people. Collapsing them into one "commerce
+ * unavailable" would report four open questions as one.
+ */
+export type CommerceAvailability = {
+  readonly purchase: CommerceAction;
+  readonly recharge: CommerceAction;
+  readonly refund: CommerceAction;
+  readonly invoice: CommerceAction;
+  /** Not an action: whether an expiry rule exists at all. */
+  readonly creditExpiry: {
+    readonly configured: boolean;
+    readonly reason: string | null;
+    readonly code: string | null;
+  };
+};
+
 export type WalletSummary = {
   readonly balanceCredits: number;
   readonly expiringSoonCredits: number | null;
@@ -1030,7 +1101,39 @@ export type ListingSummary = {
  * carries contact details; the development proposal lists paid unlocking.
  * Neither is confirmed, so both are built and the screens say which is showing.
  */
-export type ContactAccessMode = "included" | "unlock";
+/**
+ * The three candidate answers to Q-2a, named so a screen can render whichever
+ * one is eventually chosen.
+ *
+ * Naming all three selects none of them. `included` and `unlock` were the two
+ * the sample fixtures knew about; the third — entitlement through a
+ * subscription — was in the question all along and had no name here, which
+ * made it the option the code could not express.
+ */
+export type ContactAccessMode =
+  | "included_free"
+  | "included_with_subscription"
+  | "paid_unlock";
+
+/**
+ * What a recipient may currently see of an enquirer's contact, and why.
+ *
+ * `awaiting_decision` is the state of every deployment today and is not a
+ * temporary rendering convenience: no rule has been chosen, so there is
+ * nothing to disclose, nothing to charge for, and nothing to mask. A screen
+ * shows `label`; it does not infer a rule from the absence of one.
+ */
+export type ContactAccessState = {
+  readonly state: "awaiting_decision" | "available" | "locked";
+  readonly selectedMode: ContactAccessMode | null;
+  readonly label: string;
+  readonly detail: string;
+  /** The open question, when there is one. Null once it is answered. */
+  readonly question: string | null;
+  readonly candidateModes: readonly ContactAccessMode[];
+  /** Only ever a number under `paid_unlock`, and only once that is chosen. */
+  readonly unlockPriceCredits: number | null;
+};
 
 /**
  * A Builder's view of an enquiry on their own listing.
@@ -1046,9 +1149,19 @@ export type BuilderEnquiry = {
   readonly listingId: string;
   readonly listingTitle: string;
   readonly kind: "enquiry" | "site_visit";
-  readonly buyerName: string;
-  /** The mask, always present. The unmasked number is a separate field. */
-  readonly contactMask: string;
+  /**
+   * Null when the server sends no name. kkl-backend sends none: a name is a
+   * contact detail, and Q-2a has not said who may have one.
+   */
+  readonly buyerName: string | null;
+  /**
+   * The mask, when the server composes one. Null when it does not — and
+   * kkl-backend does not, because it has read no contact to mask. Screens
+   * render `contactAccess.label`.
+   */
+  readonly contactMask: string | null;
+  /** Always present. What may be seen, and why not. */
+  readonly contactAccess: ContactAccessState;
   /**
    * Present only when this enquiry's contact is currently accessible — under
    * alternative A always, under alternative B once unlocked. Absent otherwise,

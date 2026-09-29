@@ -39,7 +39,8 @@ import type {
   BuilderEnquiry,
   BuilderSubscription,
   BuyerProfile,
-  ContactAccessMode,
+  CommerceAvailability,
+  ContactAccessState,
   Invoice,
   ListingDraft,
   ListingSectionId,
@@ -370,6 +371,15 @@ export type UsageMonth = { readonly label: string; readonly spentInr: number };
  */
 export interface CreditService {
   wallet(): Promise<WalletSummary>;
+  /**
+   * What each money action may do right now, and why not — as data, before
+   * anybody presses anything.
+   *
+   * A screen that discovers "recharge is unavailable" by attempting a
+   * recharge has already told the person the wrong thing, and a screen that
+   * hard-codes the reason goes stale the day the reason changes.
+   */
+  availability(): Promise<CommerceAvailability>;
   usageByMonth(): Promise<readonly UsageMonth[]>;
   ledger(filter?: { readonly type?: "recharge" | "purchase" }): Promise<readonly LedgerEntry[]>;
   recharge(input: { amountInr: number; idempotencyKey: string }): Promise<RechargeOutcome>;
@@ -477,8 +487,15 @@ export interface BuilderEnquiryService {
   get(id: string): Promise<BuilderEnquiry | null>;
   markRead(id: string): Promise<void>;
   unreadCount(): Promise<number>;
-  /** The contact-access alternative currently in force (D-05). */
-  contactAccessMode(): Promise<ContactAccessMode>;
+  /**
+   * The contact-access rule currently in force (D-05 / Q-2a), as a state.
+   *
+   * It returns a state rather than a mode because "no rule has been chosen"
+   * is a real answer and not a missing one. `selectedMode` is null in that
+   * case, and a screen renders `label` instead of picking an alternative to
+   * display.
+   */
+  contactAccessMode(): Promise<ContactAccessState>;
   /** Alternative B only. Spends credits to reveal one enquiry's contact. */
   unlockContact(input: { id: string; idempotencyKey: string }): Promise<
     | { readonly kind: "unlocked"; readonly enquiry: BuilderEnquiry; readonly duplicate: boolean }

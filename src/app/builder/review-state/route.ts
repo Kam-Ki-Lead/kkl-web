@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSampleReviewControls } from "@/lib/services";
+import type { ContactAccessMode } from "@/lib/domain/types";
 
 /**
  * Review-only switches for the Builder states a reviewer cannot otherwise reach.
@@ -66,9 +67,17 @@ export async function GET(request: NextRequest) {
     applied.push(`subscriptionOutcome=${outcome}`);
   }
 
+  // The review switch keeps its short words; the contract now names all three
+  // candidate rules, so the mapping is explicit rather than a coincidence of
+  // spelling.
   const contact = params.get("contact");
-  if (contact === "included" || contact === "unlock") {
-    builder.setContactAccess(contact);
+  const CONTACT_ALTERNATIVES: Record<string, ContactAccessMode> = {
+    included: "included_free",
+    subscription: "included_with_subscription",
+    unlock: "paid_unlock",
+  };
+  if (contact && CONTACT_ALTERNATIVES[contact]) {
+    builder.setContactAccess(CONTACT_ALTERNATIVES[contact]);
     applied.push(`contact=${contact}`);
   }
 

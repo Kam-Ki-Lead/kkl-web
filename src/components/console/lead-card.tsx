@@ -4,6 +4,11 @@ import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { MaskedValue } from "@/components/ui/chip";
 import { formatAreaPath, formatExactInr } from "@/lib/format";
+import {
+  NOT_SCORED_LABEL,
+  UNPRICED_LABEL,
+  primaryBlocker,
+} from "@/lib/domain/commerce-display";
 
 /**
  * C-06's lead card — the marketplace listing for an unpurchased lead (S-07).
@@ -39,7 +44,9 @@ export function LeadCard({
           {onSale ? (
             <p className="t-caption font-bold text-warning">Sale · aged {lead.ageDays} days</p>
           ) : null}
-          <p className="t-card-title text-ink">{formatExactInr(lead.priceCredits)}</p>
+          <p className="t-card-title text-ink">
+            {lead.priceCredits === null ? UNPRICED_LABEL : formatExactInr(lead.priceCredits)}
+          </p>
           {lead.originalPriceCredits !== null ? (
             <p className="t-caption text-muted line-through">
               {formatExactInr(lead.originalPriceCredits)}
@@ -51,21 +58,49 @@ export function LeadCard({
       <dl className="mt-[14px] grid grid-cols-4 gap-[8px] max-[720px]:grid-cols-2">
         <Fact label="Budget" value={lead.budgetBand} />
         <Fact label="Configuration" value={lead.configuration} />
-        <Fact label="Intent score" value={`${lead.intentScore}/100`} />
+        <Fact
+          label="Intent score"
+          value={lead.intentScore === null ? NOT_SCORED_LABEL : `${lead.intentScore}/100`}
+        />
         <Fact label="Age" value={lead.ageDays === 1 ? "1 day" : `${lead.ageDays} days`} />
       </dl>
 
+      {/* A mask when the server composed one, and its own sentence when it
+          did not. kkl-backend composes none: it has read no contact, so it
+          has nothing to mask and does not invent digits to stand in. */}
       <p className="mt-[12px] rounded-[8px] bg-tint px-[13px] py-[10px] text-[14px] text-muted">
-        Contact hidden until purchase · <MaskedValue>{lead.contactMask}</MaskedValue>
+        {lead.contactMask ? (
+          <>
+            Contact hidden until purchase · <MaskedValue>{lead.contactMask}</MaskedValue>
+          </>
+        ) : (
+          lead.contactState.label
+        )}
       </p>
 
       <div className="mt-[14px] grid grid-cols-2 gap-[10px] max-[480px]:grid-cols-1">
         <ButtonLink href={`${basePath}/${lead.id}`} variant="secondary">
           View lead
         </ButtonLink>
-        <ButtonLink href={`${basePath}/${lead.id}/buy`}>
-          Buy for {formatExactInr(lead.priceCredits)}
-        </ButtonLink>
+        {/* Disabled with its reason rather than leading to a screen that
+            refuses. The server decides `purchasable`; this renders it. */}
+        {lead.purchasable ? (
+          <ButtonLink href={`${basePath}/${lead.id}/buy`}>
+            {lead.priceCredits === null ? "Buy this lead" : `Buy for ${formatExactInr(lead.priceCredits)}`}
+          </ButtonLink>
+        ) : (
+          <span
+            aria-disabled="true"
+            title={primaryBlocker(lead)?.reason ?? undefined}
+            className="flex cursor-not-allowed items-center justify-center rounded-[10px] bg-chip-muted-bg px-[18px] py-[12px] text-[15px] font-semibold text-muted"
+          >
+            {primaryBlocker(lead)?.code === "insufficient_credits"
+              ? "Not enough credits"
+              : primaryBlocker(lead)?.code === "lead_price_not_configured"
+                ? UNPRICED_LABEL
+                : "Unavailable"}
+          </span>
+        )}
       </div>
     </Card>
   );
@@ -96,11 +131,12 @@ export function LeadRow({
       <span className="min-w-0">
         <span className="block text-[15px] font-bold text-ink">{lead.requirement}</span>
         <span className="block text-[14px] text-muted">
-          {formatAreaPath(lead.locationPath)} · score {lead.intentScore}
+          {formatAreaPath(lead.locationPath)}
+          {lead.intentScore === null ? "" : ` · score ${lead.intentScore}`}
         </span>
       </span>
       <span className="flex-none font-[family-name:var(--font-heading)] text-[16px] font-extrabold text-brand">
-        {formatExactInr(lead.priceCredits)}
+        {lead.priceCredits === null ? UNPRICED_LABEL : formatExactInr(lead.priceCredits)}
       </span>
     </Link>
   );

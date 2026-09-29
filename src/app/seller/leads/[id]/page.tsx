@@ -8,6 +8,18 @@ import { PendingRule } from "@/components/ui/states";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatAreaPath, formatCreditBalance, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import {
+  NOT_SCORED_LABEL,
+  NO_QUALIFICATION_DETAIL,
+  UNPRICED_LABEL,
+  primaryBlocker,
+} from "@/lib/domain/commerce-display";
+
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Lead" };
 
@@ -59,7 +71,12 @@ export default async function MaskedLeadPage({
   }
 
   const q = lead.qualification;
-  const affordable = wallet.balanceCredits >= lead.priceCredits;
+  // A price that does not exist is not a price of zero, and an affordability
+  // comparison against nothing is a question with no answer. Both cases are
+  // rendered rather than computed away.
+  const affordable = lead.priceCredits !== null
+    && wallet.balanceCredits >= lead.priceCredits;
+  const blocker = primaryBlocker(lead);
 
   return (
     <SellerShell title={`Lead ${lead.id}`} subtitle="Masked until purchase">
@@ -76,24 +93,26 @@ export default async function MaskedLeadPage({
               <Fact label="Budget band" value={lead.budgetBand} />
               <Fact label="Location" value={formatAreaPath(lead.locationPath)} />
               <Fact label="Configuration" value={lead.configuration} />
-              <Fact label="Timeline" value={q.timeline} />
-              <Fact label="Purpose" value={q.purpose} />
-              <Fact label="Financing" value={q.financing} />
+              <Fact label="Timeline" value={q?.timeline ?? NOT_SCORED_LABEL} />
+              <Fact label="Purpose" value={q?.purpose ?? NOT_SCORED_LABEL} />
+              <Fact label="Financing" value={q?.financing ?? NOT_SCORED_LABEL} />
             </dl>
           </Card>
 
           <Card className="p-[22px]">
             <h2 className="t-card-title text-ink">Qualification call summary</h2>
-            <p className="t-body mt-[8px] text-body">{q.summary}</p>
+            <p className="t-body mt-[8px] text-body">{q ? q.summary : NO_QUALIFICATION_DETAIL}</p>
             <div className="mt-[14px] flex flex-wrap gap-[8px]">
               {/* The approved S-08 tags are rectangular 14px chips, not the
                   13px pill: 700 for score and consent, 600 slate for the
                   channel. */}
               <span className="rounded-[6px] bg-chip-neutral-bg px-[12px] py-[8px] text-[14px] font-bold text-chip-neutral-fg">
-                Intent score {q.intentScore}/100
+                {q ? `Intent score ${q.intentScore}/100` : NOT_SCORED_LABEL}
               </span>
-              {/* D-14: consent is only ever shown as captured when it was. */}
-              {q.consentCaptured ? (
+              {/* D-14: consent is only ever shown as captured when it was —
+                  and an absent qualification call is an absent consent
+                  record, never a neutral one. */}
+              {q?.consentCaptured ? (
                 <span className="rounded-[6px] bg-chip-success-bg px-[12px] py-[8px] text-[14px] font-bold text-chip-success-fg">
                   Consent captured
                 </span>
@@ -103,31 +122,38 @@ export default async function MaskedLeadPage({
                 </span>
               )}
               <span className="rounded-[6px] bg-chip-muted-bg px-[12px] py-[8px] text-[14px] font-semibold text-slate">
-                {q.channel}
+                {q?.channel ?? "No call recorded"}
               </span>
             </div>
           </Card>
 
           <Card className="bg-tint p-[22px]">
             <h2 className="t-card-title text-slate">Contact details</h2>
-            <dl className="mt-[12px] grid grid-cols-2 gap-[14px] max-[560px]:grid-cols-1">
-              <div>
-                <dt className="t-caption text-muted">Name</dt>
-                <dd className="mt-[1px]">
-                  <MaskedValue className="text-[16px]">
-                    {lead.contactMask.split(" · ")[0]}
-                  </MaskedValue>
-                </dd>
-              </div>
-              <div>
-                <dt className="t-caption text-muted">Mobile</dt>
-                <dd className="mt-[1px]">
-                  <MaskedValue className="text-[16px]">
-                    {lead.contactMask.split(" · ")[1] ?? "•••"}
-                  </MaskedValue>
-                </dd>
-              </div>
-            </dl>
+            {/* A mask only when the server composed one. kkl-backend composes
+                none — it has read no contact to mask — so the same slot holds
+                the sentence from `contactState` rather than invented digits. */}
+            {lead.contactMask ? (
+              <dl className="mt-[12px] grid grid-cols-2 gap-[14px] max-[560px]:grid-cols-1">
+                <div>
+                  <dt className="t-caption text-muted">Name</dt>
+                  <dd className="mt-[1px]">
+                    <MaskedValue className="text-[16px]">
+                      {lead.contactMask.split(" · ")[0]}
+                    </MaskedValue>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="t-caption text-muted">Mobile</dt>
+                  <dd className="mt-[1px]">
+                    <MaskedValue className="text-[16px]">
+                      {lead.contactMask.split(" · ")[1] ?? "•••"}
+                    </MaskedValue>
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="t-body mt-[12px] text-body">{lead.contactState.label}</p>
+            )}
             <p className="t-caption mt-[12px] text-muted">
               Masked until purchase. One lead is released to one purchaser only, and only after
               the credit deduction succeeds. The hidden values are not sent to this page — there
@@ -142,7 +168,7 @@ export default async function MaskedLeadPage({
             {/* The approved S-08 aside sets the price at 30px/800 flat — not
                 the stepping flow title. */}
             <p className="mt-[2px] font-[family-name:var(--font-heading)] text-[30px] font-extrabold leading-[1.15] tracking-[-0.03em] text-ink">
-              {formatExactInr(lead.priceCredits)}
+              {lead.priceCredits === null ? UNPRICED_LABEL : formatExactInr(lead.priceCredits)}
             </p>
             {lead.originalPriceCredits !== null ? (
               <p className="t-caption mt-[1px] text-muted">
@@ -153,9 +179,45 @@ export default async function MaskedLeadPage({
               Your balance {formatCreditBalance(wallet.balanceCredits)}
             </p>
 
-            <ButtonLink href={`/seller/leads/${lead.id}/buy`} className="mt-[16px] w-full">
-              Buy this lead
-            </ButtonLink>
+            {/* The action is disabled when the server says it cannot be done,
+
+                and the reason is beside it. A person should not have to press a
+
+                button to be told it was never going to work. */}
+
+            {lead.purchasable ? (
+
+              <ButtonLink href={`/seller/leads/${lead.id}/buy`} className="mt-[16px] w-full">
+
+                Buy this lead
+
+              </ButtonLink>
+
+            ) : (
+
+              <div className="mt-[16px]">
+
+                <span
+
+                  aria-disabled="true"
+
+                  className="block cursor-not-allowed rounded-[10px] bg-chip-muted-bg px-[18px] py-[12px] text-center text-[15px] font-semibold text-muted"
+
+                >
+
+                  Buy this lead
+
+                </span>
+
+                {blocker ? (
+
+                  <p className="t-caption mt-[8px] text-warning">{blocker.reason}</p>
+
+                ) : null}
+
+              </div>
+
+            )}
             <ButtonLink
               href="/seller/leads"
               variant="secondary"

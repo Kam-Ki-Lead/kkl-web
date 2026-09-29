@@ -2,10 +2,12 @@ import { runtimeConfig } from "@/lib/config/runtime";
 import type { Services } from "./contracts";
 import { sampleReviewControls, sampleServices } from "./sample/sample-services";
 import {
+  builderEnquiryStoreKind,
   enquiryStoreKind,
   leadRequestStoreKind,
   listingStoreKind,
   locationStoreKind,
+  marketplaceStoreKind,
   profileStoreKind,
 } from "./backend/config";
 import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
@@ -13,6 +15,8 @@ import { backendLocations } from "./backend/locations";
 import { backendProfile } from "./backend/profile";
 import { backendEnquiries } from "./backend/enquiries";
 import { backendAdminOwnerListings, backendOwnerListings } from "./backend/owner-listings";
+import { backendCredits, backendLeadMarket } from "./backend/commerce";
+import { backendBuilderEnquiries } from "./backend/builder-enquiries";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -28,8 +32,12 @@ import { backendAdminOwnerListings, backendOwnerListings } from "./backend/owner
  */
 export function getServices(): Services {
   if (runtimeConfig.dataSource === "sample") {
-    return withEnquiryStore(
-      withListingStore(withProfileStore(withLocationStore(withLeadRequestStore(sampleServices)))),
+    return withBuilderEnquiryStore(
+      withMarketplaceStore(
+        withEnquiryStore(
+          withListingStore(withProfileStore(withLocationStore(withLeadRequestStore(sampleServices)))),
+        ),
+      ),
     );
   }
 
@@ -115,6 +123,56 @@ function withListingStore(services: Services): Services {
 function withEnquiryStore(services: Services): Services {
   if (enquiryStoreKind() !== "backend") return services;
   return { ...services, enquiries: backendEnquiries };
+}
+
+/**
+ * The marketplace, wallet and orders, served by kkl-backend when
+ * KKL_MARKETPLACE=backend.
+ *
+ * Seller and Builder get separate instances over separate accounts, because
+ * that is what they are: two accounts with two wallets and two order lists,
+ * and a shared one would be a data leak wearing a convenience’s clothes.
+ *
+ * Every commercial action refuses today, by name and with its reason. That is
+ * the service being honest, not the integration being incomplete.
+ */
+function withMarketplaceStore(services: Services): Services {
+  if (marketplaceStoreKind() !== "backend") return services;
+  return {
+    ...services,
+    leadMarket: backendLeadMarket("seller"),
+    credits: backendCredits("seller"),
+    builder: {
+      ...services.builder,
+      leadMarket: backendLeadMarket("builder"),
+      credits: backendCredits("builder"),
+    },
+  };
+}
+
+/**
+ * The recipient’s enquiry inbox, served by kkl-backend when
+ * KKL_BUILDER_ENQUIRIES=backend.
+ *
+ * It renders the requirement and an explicit undecided contact state. No
+ * mask, no unlock, no name — Q-2a has three candidate rules and none is
+ * selected, and each of those three would be a different screen.
+ */
+function withBuilderEnquiryStore(services: Services): Services {
+  if (builderEnquiryStoreKind() !== "backend") return services;
+  return {
+    ...services,
+    builder: { ...services.builder, enquiries: backendBuilderEnquiries },
+  };
+}
+
+/** Which store each backend-served domain is using, for the screens to say so. */
+export function marketplaceStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? marketplaceStoreKind() : "backend";
+}
+
+export function builderEnquiryStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? builderEnquiryStoreKind() : "backend";
 }
 
 export function enquiryStore(): "sample" | "backend" {

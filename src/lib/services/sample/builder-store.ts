@@ -855,7 +855,7 @@ export function setContactAccessForReview(mode: ContactAccessMode): void {
 function projectEnquiry(seed: SeedEnquiry): BuilderEnquiry {
   const listing = find(seed.listingId);
   const mode = state().contactAccess;
-  const accessible = mode === "included" || state().unlocked.has(seed.id);
+  const accessible = mode === "included_free" || state().unlocked.has(seed.id);
 
   return {
     id: seed.id,
@@ -872,7 +872,24 @@ function projectEnquiry(seed: SeedEnquiry): BuilderEnquiry {
     source: seed.source,
     receivedAt: seed.receivedAt,
     read: seed.read,
-    unlockPriceCredits: mode === "unlock" && !accessible ? SEED_UNLOCK_PRICE : null,
+    unlockPriceCredits: mode === "paid_unlock" && !accessible ? SEED_UNLOCK_PRICE : null,
+    // Sample mode exercises whichever alternative the reviewer selected, so
+    // its state is `available` or `locked` — never `awaiting_decision`, which
+    // is what the real service reports while Q-2a is open.
+    contactAccess: {
+      state: accessible ? "available" : "locked",
+      selectedMode: mode,
+      label: accessible
+        ? "Contact details are available"
+        : mode === "paid_unlock"
+          ? "Unlock to see contact details"
+          : "Contact details are not available on this plan",
+      detail: "Sample data: the reviewer selected this alternative to see how it renders. "
+        + "No rule has been confirmed.",
+      question: "Q-2a",
+      candidateModes: ["included_free", "included_with_subscription", "paid_unlock"],
+      unlockPriceCredits: mode === "paid_unlock" && !accessible ? SEED_UNLOCK_PRICE : null,
+    },
   };
 }
 

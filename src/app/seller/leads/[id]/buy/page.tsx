@@ -8,6 +8,13 @@ import { AccessPanel } from "@/components/ui/states";
 import { newPurchaseToken } from "@/app/actions/lead-purchase";
 import { formatAreaPath, formatCreditBalance, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { UNPRICED_DETAIL, UNPRICED_LABEL } from "@/lib/domain/commerce-display";
+
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Confirm purchase" };
 
@@ -43,15 +50,20 @@ export default async function PurchaseReviewPage({
     notFound();
   }
 
-  const shortfall = lead.priceCredits - wallet.balanceCredits;
+  // An unpriced lead has no shortfall to compute and no purchase to confirm:
+  // it is blocked before any of the account questions are asked, because
+  // there is no amount. Zero would read as free.
+  const shortfall = lead.priceCredits === null ? 0 : lead.priceCredits - wallet.balanceCredits;
   const blocked =
-    account.accountStatus === "suspended"
-      ? ("suspended" as const)
-      : account.kycStatus !== "approved"
-        ? ("unverified" as const)
-        : shortfall > 0
-          ? ("funds" as const)
-          : null;
+    lead.priceCredits === null
+      ? ("unpriced" as const)
+      : account.accountStatus === "suspended"
+        ? ("suspended" as const)
+        : account.kycStatus !== "approved"
+          ? ("unverified" as const)
+          : shortfall > 0
+            ? ("funds" as const)
+            : null;
 
   const token = await newPurchaseToken();
 
@@ -67,11 +79,18 @@ export default async function PurchaseReviewPage({
         <Card className="mt-[18px] overflow-hidden">
           <Row label="Lead" value={`${lead.id} · ${lead.requirement}`} />
           <Row label="Area" value={formatAreaPath(lead.locationPath)} />
-          <Row label="Price" value={formatExactInr(lead.priceCredits)} />
+          <Row
+            label="Price"
+            value={lead.priceCredits === null ? UNPRICED_LABEL : formatExactInr(lead.priceCredits)}
+          />
           <Row label="Current balance" value={formatCreditBalance(wallet.balanceCredits)} />
           <Row
             label="Balance after purchase"
-            value={formatCreditBalance(Math.max(0, wallet.balanceCredits - lead.priceCredits))}
+            value={
+              lead.priceCredits === null
+                ? formatCreditBalance(wallet.balanceCredits)
+                : formatCreditBalance(Math.max(0, wallet.balanceCredits - lead.priceCredits))
+            }
             strong
           />
         </Card>
@@ -98,11 +117,27 @@ export default async function PurchaseReviewPage({
             footnote="Nothing has been deducted and the lead is still listed for others."
           >
             <p>
-              This lead costs {formatExactInr(lead.priceCredits)} and your balance is{" "}
+              This lead costs {lead.priceCredits === null ? UNPRICED_LABEL : formatExactInr(lead.priceCredits)} and your balance is{" "}
               {formatCreditBalance(wallet.balanceCredits)} — {formatExactInr(shortfall)} short.
               Recharging first is the only route; the purchase is not attempted and no partial
               deduction is made.
             </p>
+          </AccessPanel>
+        ) : null}
+
+        {blocked === "unpriced" ? (
+          <AccessPanel
+            tone="restricted"
+            chipLabel="Not priced"
+            title="This lead cannot be bought yet"
+            actions={
+              <ButtonLink href="/seller/leads" variant="secondary">
+                Back to the marketplace
+              </ButtonLink>
+            }
+            footnote="Nothing has been deducted and the lead is still listed."
+          >
+            <p>{UNPRICED_DETAIL}</p>
           </AccessPanel>
         ) : null}
 

@@ -8,6 +8,12 @@ import { StateMessage } from "@/components/ui/states";
 import { formatAreaPath, formatDate, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "My leads" };
 
 /** B-21 — purchased leads under Builder access. */

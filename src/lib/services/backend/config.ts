@@ -132,3 +132,27 @@ export function listingStoreKind(): "sample" | "backend" {
 export function enquiryStoreKind(): "sample" | "backend" {
   return read("KKL_ENQUIRIES") === "backend" ? "backend" : "sample";
 }
+
+// ---------------------------------------------------------------------------
+// Slices E and F — the marketplace, the wallet and orders; and the recipient's
+// enquiry inbox.
+//
+// Two more narrow switches, for the same reason as the five before them. What
+// is different about these is what moving them buys: the commercial actions
+// behind them refuse, because no lead price is configured (Q-1a) and no
+// payment credentials exist (Q-5).
+//
+// That is the point of connecting them anyway. A screen wired to kkl-backend
+// says "not priced yet" because the service said so; the same screen on
+// fixtures shows a plausible ₹1,200 that somebody will eventually quote back
+// as a decision. Sample mode stays available and stays labelled, for review;
+// backend mode is the one that tells the truth about what is settled.
+// ---------------------------------------------------------------------------
+
+export function marketplaceStoreKind(): "sample" | "backend" {
+  return read("KKL_MARKETPLACE") === "backend" ? "backend" : "sample";
+}
+
+export function builderEnquiryStoreKind(): "sample" | "backend" {
+  return read("KKL_BUILDER_ENQUIRIES") === "backend" ? "backend" : "sample";
+}

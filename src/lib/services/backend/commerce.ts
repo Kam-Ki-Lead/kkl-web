@@ -1,0 +1,420 @@
+import type {
+  CreditService,
+  LeadMarketService,
+  PurchaseOutcome,
+  RechargeOutcome,
+} from "@/lib/services/contracts";
+import { ServiceError } from "@/lib/services/contracts";
+import type {
+  CommerceAvailability,
+  Invoice,
+  InvoiceDetail,
+  LeadOrder,
+  LedgerEntry,
+  MarketplaceLead,
+  MarketplaceLeadDetail,
+  PurchasedLead,
+  WalletSummary,
+} from "@/lib/domain/types";
+import type { UsageMonth } from "@/lib/services/contracts";
+import { callAs, type BackendRole } from "./session";
+
+/**
+ * The marketplace, the wallet and orders, served by kkl-backend.
+ *
+ * WHAT IS REAL HERE
+ * The records. A wallet balance is the sum of an append-only ledger in
+ * PostgreSQL. An order is a row that one account can read. A lead's contact
+ * details are released by a database policy to the account that bought that
+ * lead, and to nobody else.
+ *
+ * WHAT REFUSES, AND WHY IT IS STILL CONNECTED
+ * Buying refuses: no lead price is configured (Q-1a). Recharging refuses: no
+ * payment provider credentials exist (Q-5). Refunds and invoices refuse for
+ * their own reasons (Q-1d, Q-1e). Connecting the screens to a service whose
+ * commercial actions refuse is not a half-measure — it is the difference
+ * between a screen that says "not priced yet" because the service said so,
+ * and a screen showing a plausible ₹1,200 that came from a fixture. The
+ * second is the one that gets believed.
+ *
+ * WHAT IS NOT HERE
+ * Qualification data. kkl-backend records leads that nobody has called —
+ * voice is a later phase — so `qualification` is null and the screens say
+ * so, rather than rendering a summary of a conversation that never happened.
+ */
+
+type BackendBlocker = { code: string; reason: string };
+
+type BackendLead = {
+  id: string;
+  reference: string;
+  status: string;
+  locationName: string | null;
+  propertyType: string | null;
+  budgetBand: string | null;
+  configurations: string[];
+  timing: string | null;
+  summary: string | null;
+  consentStatus: string;
+  priceCredits: number | null;
+  available: boolean;
+  eligible: boolean;
+  contact: { state: "released_on_purchase"; label: string };
+  purchasable: boolean;
+  blockers: BackendBlocker[];
+};
+
+type BackendWallet = {
+  accountId: string;
+  balanceCredits: number;
+  pricing: {
+    leadPriceCredits: number | null;
+    configured: boolean;
+    reason: string | null;
+    rules: Record<string, { configured: boolean; code: string; question: string; reason: string | null }>;
+  };
+  entries: {
+    id: string;
+    entryType: "recharge" | "purchase" | "refund" | "adjustment" | "expiry";
+    amountCredits: number;
+    orderId: string | null;
+    reason: string | null;
+    at: string;
+  }[];
+};
+
+type BackendOrder = {
+  id: string;
+  reference: string;
+  leadId: string;
+  amountCredits: number;
+  status: "pending" | "completed" | "failed" | "cancelled";
+  failureReason: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  duplicate?: boolean;
+  balanceCredits?: number;
+  leadReference?: string;
+  lead?: {
+    reference: string;
+    summary: string | null;
+    propertyType: string | null;
+    budgetBand: string | null;
+    locationName: string | null;
+  };
+  contact?: { fullName: string; phone: string; email: string | null } | null;
+};
+
+function raise(status: number, body: { error?: string; code?: string }): never {
+  throw new ServiceError("unavailable", body.error ?? `The service returned ${status}.`);
+}
+
+/** The requirement line the approved cards render, from what the lead has. */
+const requirementOf = (lead: BackendLead) =>
+  [lead.configurations.join(", "), lead.budgetBand].filter(Boolean).join(" · ")
+  || lead.summary
+  || lead.reference;
+
+const pathOf = (lead: BackendLead) => (lead.locationName ? [lead.locationName] : []);
+
+function toMarketplaceLead(lead: BackendLead): MarketplaceLead {
+  return {
+    id: lead.id,
+    locationPath: pathOf(lead),
+    configuration: lead.configurations.join(", ") || "Not stated",
+    budgetBand: lead.budgetBand ?? "Not stated",
+    // Nothing has scored these leads, and a default band would be a claim
+    // about somebody nobody has spoken to.
+    intentBand: null,
+    intentScore: null,
+    status: lead.status === "on_sale" ? "on_sale" : "listed",
+    // The aging rule is unconfirmed (Q-1b), so no age-derived discount is
+    // computed here; the age itself is a fact and stays 0 until the backend
+    // sends one.
+    ageDays: 0,
+    priceCredits: lead.priceCredits,
+    originalPriceCredits: null,
+    // kkl-backend composes no mask: it has read no contact to mask.
+    contactMask: null,
+    contactState: lead.contact,
+    blockers: lead.blockers,
+    purchasable: lead.purchasable,
+    requirement: requirementOf(lead),
+  };
+}
+
+const toDetail = (lead: BackendLead): MarketplaceLeadDetail => ({
+  ...toMarketplaceLead(lead),
+  qualification: null,
+});
+
+function toLeadOrder(order: BackendOrder): LeadOrder {
+  return {
+    reference: order.id,
+    // kkl-backend has four states; the approved order screens draw two.
+    // `pending` is drawn as failed-so-far rather than paid: nothing has been
+    // released while an order is pending, and "paid" would say otherwise.
+    status: order.status === "completed" ? "paid" : "failed",
+    placedAt: order.createdAt,
+    leadId: order.status === "completed" ? order.leadId : null,
+    itemLabel: order.lead?.summary ?? order.lead?.reference ?? order.leadReference ?? "Lead",
+    locationPath: order.lead?.locationName ? [order.lead.locationName] : [],
+    payment: {
+      method: "wallet_credits",
+      label: "Wallet credits",
+      ledgerReference: order.reference,
+      amountCredits: order.amountCredits,
+    },
+    invoice: {
+      kind: "not_issued",
+      reason:
+        "No tax treatment or invoice numbering is configured, so no invoice has been issued "
+        + "for this order.",
+    },
+    scope: "seller",
+  };
+}
+
+function toPurchasedLead(order: BackendOrder): PurchasedLead | null {
+  if (order.status !== "completed" || !order.contact) return null;
+  return {
+    id: order.leadId,
+    orderId: order.id,
+    purchasedAt: order.completedAt ?? order.createdAt,
+    locationPath: order.lead?.locationName ? [order.lead.locationName] : [],
+    configuration: order.lead?.propertyType ?? "Not stated",
+    budgetBand: order.lead?.budgetBand ?? "Not stated",
+    intentBand: null,
+    intentScore: null,
+    pricePaidCredits: order.amountCredits,
+    requirement: order.lead?.summary ?? order.lead?.reference ?? "Lead",
+    contact: {
+      name: order.contact.fullName,
+      phone: order.contact.phone,
+      email: order.contact.email,
+      // Free text from a qualification call that has not happened.
+      bestTimeToCall: null,
+    },
+    qualification: null,
+  };
+}
+
+/**
+ * The two marketplaces are two accounts, not one pool with a flag.
+ *
+ * A Seller and a Builder hold separate wallets, separate orders and separate
+ * purchased leads, because they are separate accounts in kkl-backend. The
+ * role decides which session the adapter speaks as, and the database decides
+ * what that session may read.
+ */
+export function backendLeadMarket(role: BackendRole): LeadMarketService {
+  return {
+    async list() {
+      const { status, body } = await callAs<{ leads: BackendLead[] }>(
+        role, "/v1/leads?eligible=true");
+      if (status !== 200) raise(status, body);
+      const leads = body.leads.map(toMarketplaceLead);
+      return {
+        leads,
+        total: leads.length,
+        // The backend withholds unconsented leads from the eligible view and
+        // says so per row; it does not yet return a count of what it left
+        // out, and inventing one would be worse than the honest null.
+        withheld: null,
+        filterOptions: {
+          areas: [...new Set(body.leads.map((l) => l.locationName).filter(
+            (n): n is string => n !== null))].map((name) => ({ id: name, name, label: name })),
+          budgetBands: [...new Set(body.leads.map((l) => l.budgetBand).filter(
+            (b): b is string => b !== null))],
+          configurations: [...new Set(body.leads.flatMap((l) => l.configurations))],
+        },
+      };
+    },
+
+    async get(id) {
+      // kkl-backend has no single-lead route: a lead is a row in the list its
+      // policy already scopes. Filtering here reads no more than the list did.
+      const { status, body } = await callAs<{ leads: BackendLead[] }>(
+        role, "/v1/leads?eligible=false");
+      if (status !== 200) raise(status, body);
+      const found = body.leads.find((l) => l.id === id);
+      return found ? toDetail(found) : null;
+    },
+
+    async purchase(input): Promise<PurchaseOutcome> {
+      const { status, body } = await callAs<BackendOrder & { error?: string; code?: string }>(
+        role, "/v1/orders", {
+          method: "POST",
+          body: { leadId: input.leadId, idempotencyKey: input.idempotencyKey },
+        });
+
+      if (status === 201 || status === 200) {
+        const order = await callAs<BackendOrder>(role, `/v1/orders/${body.id}`);
+        const purchased = toPurchasedLead(order.body);
+        if (!purchased) {
+          return {
+            kind: "deduction_failed",
+            message: "The order completed but its contact details could not be read back.",
+          };
+        }
+        return { kind: "purchased", lead: purchased, duplicate: body.duplicate === true };
+      }
+
+      // Each refusal maps to the outcome the approved screens already draw.
+      // `deduction_failed` carries the backend's own sentence, because the
+      // reason a purchase is unavailable — no price, no consent — is the
+      // useful part and a generic failure message throws it away.
+      const code = (body as { code?: string }).code;
+      if (code === "insufficient_credits") {
+        const wallet = await callAs<BackendWallet>(role, "/v1/wallet");
+        return {
+          kind: "insufficient_credits",
+          priceCredits: 0,
+          balanceCredits: wallet.body.balanceCredits,
+        };
+      }
+      if (code === "lead_already_sold" || code === "lead_not_for_sale") return { kind: "already_sold" };
+      if (code === "account_suspended") return { kind: "account_suspended" };
+      return {
+        kind: "deduction_failed",
+        message: (body as { error?: string }).error ?? "That purchase could not be completed.",
+      };
+    },
+
+    async listPurchased() {
+      const { status, body } = await callAs<{ orders: BackendOrder[] }>(role, "/v1/orders");
+      if (status !== 200) raise(status, body);
+      const completed = body.orders.filter((o) => o.status === "completed");
+      const details = await Promise.all(
+        completed.map((o) => callAs<BackendOrder>(role, `/v1/orders/${o.id}`)));
+      return details
+        .map((d) => toPurchasedLead(d.body))
+        .filter((l): l is PurchasedLead => l !== null);
+    },
+
+    async getPurchased(id) {
+      const { status, body } = await callAs<{ orders: BackendOrder[] }>(role, "/v1/orders");
+      if (status !== 200) raise(status, body);
+      const match = body.orders.find((o) => o.leadId === id && o.status === "completed");
+      if (!match) return null;
+      const detail = await callAs<BackendOrder>(role, `/v1/orders/${match.id}`);
+      return toPurchasedLead(detail.body);
+    },
+
+    async listOrders() {
+      const { status, body } = await callAs<{ orders: BackendOrder[] }>(role, "/v1/orders");
+      if (status !== 200) raise(status, body);
+      return body.orders.map((o) => toLeadOrder({ ...o, scope: undefined } as BackendOrder))
+        .map((o) => ({ ...o, scope: role === "builder" ? ("builder" as const) : ("seller" as const) }));
+    },
+
+    async getOrder(reference) {
+      const { status, body } = await callAs<BackendOrder>(role, `/v1/orders/${reference}`);
+      if (status === 404) return null;
+      if (status !== 200) raise(status, body);
+      return {
+        ...toLeadOrder(body),
+        scope: role === "builder" ? "builder" : "seller",
+      };
+    },
+
+    async exportPurchased() {
+      // The export is a file of contact details. It is not built against the
+      // backend yet, and a half-built one that silently omitted rows would be
+      // worse than none.
+      throw new ServiceError(
+        "unavailable",
+        "Exporting purchased leads is not available while the marketplace is served by "
+        + "kkl-backend. The records are on the orders screen.",
+      );
+    },
+  };
+}
+
+export function backendCredits(role: BackendRole): CreditService {
+  return {
+    async availability(): Promise<CommerceAvailability> {
+      const { status, body } = await callAs<CommerceAvailability>(
+        role, "/v1/commerce/availability");
+      if (status !== 200) raise(status, body as { error?: string });
+      return body;
+    },
+
+    async wallet(): Promise<WalletSummary> {
+      const { status, body } = await callAs<BackendWallet>(role, "/v1/wallet");
+      if (status !== 200) raise(status, body);
+      return {
+        balanceCredits: body.balanceCredits,
+        // Null, not zero, for both. No expiry rule is configured (Q-1c), so
+        // nobody can say how many credits are near expiry or past it — and a
+        // zero would assert that none are.
+        expiringSoonCredits: null,
+        expiredCredits: null,
+      };
+    },
+
+    async usageByMonth(): Promise<readonly UsageMonth[]> {
+      const { status, body } = await callAs<BackendWallet>(role, "/v1/wallet");
+      if (status !== 200) raise(status, body);
+      const months = new Map<string, number>();
+      for (const entry of body.entries) {
+        if (entry.entryType !== "purchase") continue;
+        const label = new Date(entry.at).toLocaleDateString("en-IN", {
+          month: "short", year: "numeric",
+        });
+        months.set(label, (months.get(label) ?? 0) - entry.amountCredits);
+      }
+      return [...months].map(([label, spentInr]) => ({ label, spentInr }));
+    },
+
+    async ledger(filter): Promise<readonly LedgerEntry[]> {
+      const { status, body } = await callAs<BackendWallet>(role, "/v1/wallet");
+      if (status !== 200) raise(status, body);
+      // The running balance is computed from the end, because the backend
+      // returns newest first and the balance it reports is the current one.
+      let running = body.balanceCredits;
+      const entries: LedgerEntry[] = [];
+      for (const entry of body.entries) {
+        const balanceAfterCredits = running;
+        running -= entry.amountCredits;
+        if (filter?.type && entry.entryType !== filter.type) continue;
+        entries.push({
+          id: entry.id,
+          type: entry.entryType === "purchase" ? "lead_purchase"
+            : entry.entryType === "expiry" ? "credit_expired"
+              : entry.entryType,
+          occurredAt: entry.at,
+          description: entry.reason ?? entry.entryType,
+          deltaCredits: entry.amountCredits,
+          balanceAfterCredits,
+          // No expiry rule is configured (Q-1c), so no entry carries a date.
+          expiresAt: null,
+        });
+      }
+      return entries;
+    },
+
+    async recharge(): Promise<RechargeOutcome> {
+      const { body } = await callAs<{ error?: string }>(role, "/v1/wallet/recharge", {
+        method: "POST", body: {},
+      });
+      // Always this branch today. The message is the backend's, because it
+      // names the provider and the dependency, and a generic "failed" would
+      // send somebody looking for a bug instead of a credential.
+      return {
+        kind: "failed",
+        message: body.error ?? "Recharge is unavailable.",
+      };
+    },
+
+    async invoices(): Promise<readonly Invoice[]> {
+      // No invoice has been issued, because no tax treatment is configured
+      // (Q-1e). An empty list is the truth; the screens say why.
+      return [];
+    },
+
+    async invoice(): Promise<InvoiceDetail | null> {
+      return null;
+    },
+  };
+}

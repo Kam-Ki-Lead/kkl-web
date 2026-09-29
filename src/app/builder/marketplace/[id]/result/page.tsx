@@ -11,6 +11,12 @@ import { DECISIONS } from "@/lib/config/business-rules";
 import { formatCreditBalance, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Purchase result" };
 
 /**
@@ -136,7 +142,7 @@ export default async function PurchaseResultPage({
             <p>
               The deduction was not attempted, because your balance of{" "}
               {formatCreditBalance(wallet.balanceCredits)} does not cover
-              {lead ? ` the ${formatExactInr(lead.priceCredits)} price` : " this lead"}. Credits
+              {lead?.priceCredits != null ? ` the ${formatExactInr(lead.priceCredits)} price` : " this lead"}. Credits
               are never partially deducted.
             </p>
           </AccessPanel>
