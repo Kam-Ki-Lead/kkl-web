@@ -128,3 +128,7 @@ export function profileStoreKind(): "sample" | "backend" {
 export function listingStoreKind(): "sample" | "backend" {
   return read("KKL_LISTINGS") === "backend" ? "backend" : "sample";
 }
+
+export function enquiryStoreKind(): "sample" | "backend" {
+  return read("KKL_ENQUIRIES") === "backend" ? "backend" : "sample";
+}

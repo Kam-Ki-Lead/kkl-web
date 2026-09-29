@@ -2,6 +2,7 @@ import { runtimeConfig } from "@/lib/config/runtime";
 import type { Services } from "./contracts";
 import { sampleReviewControls, sampleServices } from "./sample/sample-services";
 import {
+  enquiryStoreKind,
   leadRequestStoreKind,
   listingStoreKind,
   locationStoreKind,
@@ -10,6 +11,7 @@ import {
 import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
 import { backendLocations } from "./backend/locations";
 import { backendProfile } from "./backend/profile";
+import { backendEnquiries } from "./backend/enquiries";
 import { backendAdminOwnerListings, backendOwnerListings } from "./backend/owner-listings";
 
 /**
@@ -26,7 +28,9 @@ import { backendAdminOwnerListings, backendOwnerListings } from "./backend/owner
  */
 export function getServices(): Services {
   if (runtimeConfig.dataSource === "sample") {
-    return withListingStore(withProfileStore(withLocationStore(withLeadRequestStore(sampleServices))));
+    return withEnquiryStore(
+      withListingStore(withProfileStore(withLocationStore(withLeadRequestStore(sampleServices)))),
+    );
   }
 
   throw new Error(
@@ -98,6 +102,23 @@ function withListingStore(services: Services): Services {
     ownerListings: backendOwnerListings,
     admin: { ...services.admin, ...backendAdminOwnerListings },
   };
+}
+
+/**
+ * Buyer enquiries, served by kkl-backend when KKL_ENQUIRIES=backend.
+ *
+ * The record is durable and account-scoped. What it points at is still a
+ * portal property, because nothing publishes, so kkl-backend marks the
+ * enquiry unrouted rather than inventing a recipient — and no notification is
+ * sent, because no channel exists.
+ */
+function withEnquiryStore(services: Services): Services {
+  if (enquiryStoreKind() !== "backend") return services;
+  return { ...services, enquiries: backendEnquiries };
+}
+
+export function enquiryStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? enquiryStoreKind() : "backend";
 }
 
 /** Which store each backend-served domain is using, for the screens to say so. */
