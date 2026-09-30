@@ -9,6 +9,12 @@ import { getServices } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Wallets & credits", robots: { index: false } };
 
+/**
+ * Read per request: with KKL_ADMIN_OPERATIONS=backend this page calls
+ * kkl-backend as the staff account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 function one(v: string | string[] | undefined): string {
   return (Array.isArray(v) ? v[0] : v) ?? "";
 }

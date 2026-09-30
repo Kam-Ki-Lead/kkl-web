@@ -10,6 +10,12 @@ import { getServices } from "@/lib/services";
 export const metadata: Metadata = { title: "Credit adjustment", robots: { index: false } };
 
 /**
+ * Read per request: with KKL_ADMIN_OPERATIONS=backend this page calls
+ * kkl-backend as the staff account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
+/**
  * A-19 — a credit adjustment, recorded as an auditable transaction.
  *
  * Two gates, both in the store rather than this form: a whole number of at

@@ -12,6 +12,7 @@ import {
   profileStoreKind,
   supportStoreKind,
   verificationStoreKind,
+  adminOperationsStoreKind,
 } from "./backend/config";
 import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
 import { backendLocations } from "./backend/locations";
@@ -25,6 +26,7 @@ import { backendAdminAudit, backendAdminSupport } from "./backend/admin-support"
 import { backendNotifications } from "./backend/notifications";
 import { backendVerification } from "./backend/verification";
 import { backendAdminVerification } from "./backend/admin-verification";
+import { backendAdminOperations } from "./backend/admin-operations";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -58,6 +60,7 @@ const BACKEND_DOMAINS = [
   withSupportStore,
   withNotificationStore,
   withVerificationStore,
+  withAdminOperationsStore,
 ] as const;
 
 export function getServices(): Services {
@@ -234,6 +237,24 @@ function withVerificationStore(services: Services): Services {
     verification: backendVerification("seller"),
     admin: { ...services.admin, ...backendAdminVerification },
   };
+}
+
+/**
+ * Wallet oversight, credit adjustments and the suppression list, served by
+ * kkl-backend when KKL_ADMIN_OPERATIONS=backend.
+ *
+ * These are the staff consoles for capabilities that existed and that nothing
+ * called. Lead intake (A-10, A-11) is not here on purpose: see
+ * `adminOperationsStoreKind` for why connecting it would mean inventing
+ * numbers the backend does not record.
+ */
+function withAdminOperationsStore(services: Services): Services {
+  if (adminOperationsStoreKind() !== "backend") return services;
+  return { ...services, admin: { ...services.admin, ...backendAdminOperations } };
+}
+
+export function adminOperationsStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? adminOperationsStoreKind() : "backend";
 }
 
 export function verificationStore(): "sample" | "backend" {

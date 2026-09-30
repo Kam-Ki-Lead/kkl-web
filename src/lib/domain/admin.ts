@@ -186,11 +186,21 @@ export type DeliveryEvent = {
   readonly when: string;
 };
 
+/**
+ * A wallet, as the oversight screen sees it.
+ *
+ * `frozen` is not a wallet state anywhere in the system. An account is
+ * suspended or it is not, and a suspended account cannot act at all — so the
+ * field is reported from `accountStatus` and the two are kept beside each
+ * other rather than one standing in for the other. There is no separate
+ * "freeze this wallet" operation, and nothing here should imply one.
+ */
 export type AdminWallet = {
   readonly accountId: string;
   readonly name: string;
   readonly role: AccountRole;
   readonly balanceInr: number;
+  readonly accountStatus: "active" | "suspended";
   readonly frozen: boolean;
   readonly note: string;
 };
@@ -345,8 +355,19 @@ export type WhatsAppConversation = {
 
 // ------------------------------------------------------ consent, notices, ops --
 
+/**
+ * One entry on the suppression list.
+ *
+ * `maskedNumber` is null whenever the service does not hold an address — which
+ * is every backend deployment, because the table stores a SHA-256 and nothing
+ * else. A mask implies a value is being withheld; null plus
+ * `addressAvailable: false` says there is nothing to withhold, which is a
+ * different and truer statement. The screen renders the second case as a
+ * sentence rather than as dots.
+ */
 export type SuppressionEntry = {
-  readonly maskedNumber: string;
+  readonly maskedNumber: string | null;
+  readonly addressAvailable: boolean;
   readonly source: string;
   readonly basis: string;
   readonly when: string;

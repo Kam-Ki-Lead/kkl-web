@@ -7,6 +7,12 @@ import { getServices } from "@/lib/services";
 export const metadata: Metadata = { title: "Consent & suppression", robots: { index: false } };
 
 /**
+ * Read per request: with KKL_ADMIN_OPERATIONS=backend this page calls
+ * kkl-backend as the staff account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
+/**
  * A-28 — who may be contacted, and on what basis.
  *
  * **Read-only for staff, by design rather than by omission.** A suppression is
@@ -43,13 +49,23 @@ export default async function AdminConsentPage() {
             Suppression list
           </h2>
           <ul>
-            {suppression.map((entry) => (
+            {suppression.map((entry, index) => (
               <li
-                key={entry.maskedNumber}
+                key={entry.maskedNumber ?? `${entry.when}-${index}`}
                 className="border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
-                  <span className="t-mono text-[14px] text-ink">{entry.maskedNumber}</span>
+                  {/* No mask where there is nothing to mask. The stored value
+                      is a digest, so dots here would imply a number is being
+                      withheld from the screen rather than absent from the
+                      system — which is a different, and untrue, claim. */}
+                  {entry.addressAvailable && entry.maskedNumber !== null ? (
+                    <span className="t-mono text-[14px] text-ink">{entry.maskedNumber}</span>
+                  ) : (
+                    <span className="text-[15px] text-muted">
+                      The address is not stored — only a digest of it
+                    </span>
+                  )}
                   {/* The approved list sets dates and basis lines at 15px. */}
                   <span className="text-[15px] text-muted">{entry.when}</span>
                 </div>

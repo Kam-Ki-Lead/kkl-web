@@ -911,6 +911,7 @@ export function listWallets(): readonly AdminWallet[] {
       name: "Sanjay Paul",
       role: "seller",
       balanceInr: sellerStore.wallet().balanceCredits,
+      accountStatus: accountStatusOf(SELLER_ACCOUNT_ID) === "suspended" ? "suspended" : "active",
       frozen: accountStatusOf(SELLER_ACCOUNT_ID) === "suspended",
       note: "Live — this is the Seller console's own derived balance",
     },
@@ -919,6 +920,7 @@ export function listWallets(): readonly AdminWallet[] {
       name: "Suman Bhattacharya",
       role: "builder",
       balanceInr: builderStore.balance(),
+      accountStatus: accountStatusOf(BUILDER_ACCOUNT_ID) === "suspended" ? "suspended" : "active",
       frozen: accountStatusOf(BUILDER_ACCOUNT_ID) === "suspended",
       note: "Live — this is the Builder console's own derived balance",
     },
@@ -927,6 +929,7 @@ export function listWallets(): readonly AdminWallet[] {
       name: "Deb Roy",
       role: "seller",
       balanceInr: 1_420,
+      accountStatus: "suspended",
       frozen: true,
       note: "Static sample — this account has no console in this build",
     },
@@ -1989,10 +1992,10 @@ export function whatsappConversations(): readonly WhatsAppConversation[] {
 
 export function suppressionList(): readonly SuppressionEntry[] {
   return [
-    { maskedNumber: "+91 87772 ••••6", source: "Refused on a qualification call", basis: "Explicit refusal recorded at 00:48, call C-7728", when: "11 Sep 2026" },
-    { maskedNumber: "+91 99031 ••••8", source: "Replied STOP on WhatsApp", basis: "Channel opt-out honoured across all channels", when: "8 Sep 2026" },
-    { maskedNumber: "+91 90271 ••••2", source: "Requested removal via support", basis: "Ticket AT-538, identity confirmed by OTP", when: "2 Sep 2026" },
-    { maskedNumber: "+91 98311 ••••9", source: "National registry match at intake", basis: "Filtered before any contact attempt", when: "29 Aug 2026" },
+    { maskedNumber: "+91 87772 ••••6", addressAvailable: true, source: "Refused on a qualification call", basis: "Explicit refusal recorded at 00:48, call C-7728", when: "11 Sep 2026" },
+    { maskedNumber: "+91 99031 ••••8", addressAvailable: true, source: "Replied STOP on WhatsApp", basis: "Channel opt-out honoured across all channels", when: "8 Sep 2026" },
+    { maskedNumber: "+91 90271 ••••2", addressAvailable: true, source: "Requested removal via support", basis: "Ticket AT-538, identity confirmed by OTP", when: "2 Sep 2026" },
+    { maskedNumber: "+91 98311 ••••9", addressAvailable: true, source: "National registry match at intake", basis: "Filtered before any contact attempt", when: "29 Aug 2026" },
   ];
 }
 

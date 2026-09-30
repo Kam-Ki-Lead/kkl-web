@@ -194,3 +194,25 @@ export function notificationStoreKind(): "sample" | "backend" {
 export function verificationStoreKind(): "sample" | "backend" {
   return read("KKL_VERIFICATION") === "backend" ? "backend" : "sample";
 }
+
+// ---------------------------------------------------------------------------
+// KKL_ADMIN_OPERATIONS — the staff consoles for capabilities that already
+// existed and that no screen called.
+//
+// Wallet oversight (A-18), a credit adjustment (A-19) and the suppression
+// list (A-28) were all implemented, policy-enforced and tested in
+// kkl-backend, and all three were invisible: no route passed an account to
+// the wallet read, and nothing at all read the suppression list. A capability
+// nobody can reach is not a delivered capability, whatever the tests say.
+//
+// Lead intake (A-10, A-11) is deliberately *not* in this switch. The backend
+// records intake rejections per batch but records nothing about what a batch
+// accepted, and the approved screen shows accepted, rejected and duplicate
+// counts per run. Connecting it would mean inventing two of those three
+// numbers, so it stays on sample data and is reported as a gap rather than
+// filled with a plausible figure.
+// ---------------------------------------------------------------------------
+
+export function adminOperationsStoreKind(): "sample" | "backend" {
+  return read("KKL_ADMIN_OPERATIONS") === "backend" ? "backend" : "sample";
+}
