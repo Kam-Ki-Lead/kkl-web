@@ -7,7 +7,7 @@ import {
 } from "@/components/verification/verification-forms";
 import { Card, InsetPanel, SectionHeader } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import { getServices } from "@/lib/services";
+import { getServices, verificationStore } from "@/lib/services";
 import { policyFor } from "@/lib/config/verification-policy";
 import { formatDateTime } from "@/lib/format";
 
@@ -46,11 +46,13 @@ export default async function SellerVerificationPage() {
       <div className="flex flex-col gap-[16px]">
         <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
           <p className="t-body text-body">
-            <strong className="text-ink">No verification provider has been selected.</strong> The
-            checks below are run by a clearly labelled sample service so each outcome can be
-            reviewed. No identity document is collected, nothing is sent anywhere, and no claim is
-            made that any check meets a legal requirement — what is required, what may be collected
-            and how long it is kept are decisions for the client and its compliance adviser.
+            <strong className="text-ink">No verification provider has been selected.</strong>{" "}
+            {verificationStore() === "backend"
+              ? "A case can be stored for this account. Sending it does not pass the check, because no provider is configured and staff cannot award a pass."
+              : "The checks below are run by a clearly labelled sample service so each outcome can be reviewed."}{" "}
+            No identity document is collected, nothing is sent anywhere, and no claim is made that
+            any check meets a legal requirement — what is required, what may be collected and how
+            long it is kept are decisions for the client and its compliance adviser.
           </p>
         </Card>
 
@@ -152,7 +154,10 @@ export default async function SellerVerificationPage() {
                       </ol>
 
                       {c.outcome === "required" || c.outcome === "needs_review" ? (
-                        <SubmitVerificationForm reference={c.reference} />
+                        <SubmitVerificationForm
+                          reference={c.reference}
+                          persisted={verificationStore() === "backend"}
+                        />
                       ) : null}
                     </InsetPanel>
                   </li>

@@ -6,7 +6,7 @@ of that run. It does not revise the Phase 2 sample-service handoff in
 
 | Document | What it answers |
 |---|---|
-| **[integration-verification.md](integration-verification.md)** | What was exercised at frontend `611bca9` against backend `abf89fc`, which switches were on, which domains stayed on sample data, and which rows the run left in `kkl_review` |
+| **[integration-verification.md](integration-verification.md)** | The `611bca9` run against backend `abf89fc`, and a later section for the remaining domain switches on the same process |
 
 ## Older records stay on their own revisions
 

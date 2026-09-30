@@ -106,7 +106,10 @@ type BackendOrder = {
 };
 
 function raise(status: number, body: { error?: string; code?: string }): never {
-  throw new ServiceError("unavailable", body.error ?? `The service returned ${status}.`);
+  const message = body.error ?? `The service returned ${status}.`;
+  if (status === 401) throw new ServiceError("unauthenticated", message);
+  if (status === 403) throw new ServiceError("forbidden", message);
+  throw new ServiceError("unavailable", message);
 }
 
 /** The requirement line the approved cards render, from what the lead has. */

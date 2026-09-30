@@ -78,7 +78,10 @@ const toBuilderEnquiry = (e: BackendEnquiry): BuilderEnquiry => ({
 });
 
 function raise(status: number, body: { error?: string }): never {
-  throw new ServiceError("unavailable", body.error ?? `The enquiry service returned ${status}.`);
+  const message = body.error ?? `The enquiry service returned ${status}.`;
+  if (status === 401) throw new ServiceError("unauthenticated", message);
+  if (status === 403) throw new ServiceError("forbidden", message);
+  throw new ServiceError("unavailable", message);
 }
 
 export const backendBuilderEnquiries: BuilderEnquiryService = {

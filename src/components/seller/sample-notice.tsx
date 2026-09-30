@@ -1,4 +1,5 @@
 import { runtimeConfig } from "@/lib/config/runtime";
+import { authStoreKind, marketplaceStoreKind, supportStoreKind } from "@/lib/services/backend/config";
 import { Card } from "@/components/ui/card";
 
 /**
@@ -20,19 +21,23 @@ export function SellerSampleNotice({ children }: { children?: React.ReactNode })
       <h2 className="t-card-title text-warning">Nothing on these screens is a real account</h2>
       <ul className="t-body mt-[8px] flex list-disc flex-col gap-[4px] pl-[20px] text-body">
         <li>
-          There is no sign-in. One sample Seller is shared by everyone using this build, so a
-          purchase made in one browser is visible in another.
+          {authStoreKind() === "backend"
+            ? "Sign-in is this browser’s session. It does not open another account’s Seller screens."
+            : "There is no sign-in. One sample Seller is shared by everyone using this build, so a purchase made in one browser is visible in another."}
         </li>
         <li>
           Verification is not verification. KYC status is a value that can be switched for review;
           no document is checked and no administrator has approved anything.
         </li>
         <li>
-          No money moves. The balance is a number held in the server&rsquo;s memory. No payment is
-          taken, no gateway is contacted, and no invoice is issued to anyone.
+          {marketplaceStoreKind() === "backend"
+            ? "The balance is this account’s wallet. Buying a lead and adding credits still refuse, because no price and no payment provider are configured."
+            : "No money moves. The balance is a number held in the server’s memory. No payment is taken, no gateway is contacted, and no invoice is issued to anyone."}
         </li>
         <li>
-          Purchases, ledger entries and tickets are lost when the server restarts.
+          {marketplaceStoreKind() === "backend" || supportStoreKind() === "backend"
+            ? "Records the service accepts stay after a restart. A purchase the service refuses is not stored as a completed order."
+            : "Purchases, ledger entries and tickets are lost when the server restarts."}
         </li>
       </ul>
       <p className="t-caption mt-[10px] text-muted">

@@ -193,6 +193,74 @@ Enquiries, both unrouted, subject `p-ivy-court`, status `new`:
 - The domain switches listed under "Left on sample data" were not part of this run.
 - Caller OTP limit is 10 codes per 15 minutes. The close-out enquiry-ownership check used one further local code for FE1630 buyerB.
 
+## Domain switches, 30 September 2026
+
+This section is a later run. It does not change the `611bca9` results above,
+and it does not attribute those results to the handoff accounts.
+
+The same backend process was still listening on `http://127.0.0.1:4010`.
+Health stayed 200. The checkout was still `abf89fce39f6f38a689fccc352391bcae9bef0d7`
+(implementation `d4116b3b072c6050326cf1591acc69359c7b8502`, OpenAPI
+`1.0.0-phase3.l`). The frontend was a production build of the tree that adds
+this section, served with `next start` on port 3811. `POST /v1/dev/sessions`
+was not used. Local code delivery is not production OTP.
+
+Settings, in addition to the `611bca9` set (`KKL_AUTH`, `KKL_STAFF_ORDERS`,
+`KKL_INTAKE`, `KKL_ENQUIRIES`):
+
+`KKL_LOCATIONS=backend`, `KKL_LOCATIONS_BASE_URL=http://127.0.0.1:4010`,
+`KKL_PROFILES=backend`, `KKL_LEAD_REQUESTS=backend`,
+`KKL_LEAD_REQUESTS_BASE_URL=http://127.0.0.1:4010`, `KKL_LISTINGS=backend`,
+`KKL_BUILDER_ENQUIRIES=backend`, `KKL_SUPPORT=backend`,
+`KKL_NOTIFICATIONS=backend`, `KKL_VERIFICATION=backend`,
+`KKL_ADMIN_OPERATIONS=backend`, `KKL_MARKETPLACE=backend`.
+
+`KKL_DATA_SOURCE` stayed `sample`. The site-wide sample banner stays because
+portal listings are still the sample catalogue. No development secret was set
+on the frontend.
+
+### Accounts actually exercised
+
+These are the handoff fixtures. The FE1630 accounts were not used for this run.
+
+| Display name | Role | Account id |
+|---|---|---|
+| Review Buyer | buyer | `e173a27a-0e40-4662-91ea-7a70c87e8f1c` |
+| Review Seller | seller | `b13b9e12-eb0c-405d-9508-9c0454d02b2c` |
+| Review Staff | staff | `90c42fb8-498e-41c1-8044-2c09d8bd4981` |
+
+### Browser
+
+| Check | Result |
+|---|---|
+| Public location search for “rajar” | PASS. The picker returned Rajarhat, Kolkata. |
+| Review Buyer profile email | PASS. `review.buyer.phase3@example.com` was still present after reload. The in-memory profile card was absent. |
+| Review Buyer opening `/seller/requests/new` | PASS as a refusal. The page said “The lead marketplace is for Seller and Builder accounts.” and named Review Buyer. It did not render the sample seller or the form. |
+| Review Seller lead request | PASS. `LR-MUOEZMQQ2YV` (`47ab81d7-df3c-4b6c-b466-2e0e0136e3f5`), notes “Phase 3 Review Seller request for Rajarhat.” Still present after reload. Staff list labelled it `Account b13b9e12-eb0c-405d-9508-9c0454d02b2c`, not the sample seller. |
+| Review Seller wallet and marketplace | PASS as reads and a refusal. Balance ₹0. Buy Leads showed 0 leads and “Lead prices are not yet set by the client.” Recharge said no payment provider credentials are configured (Q-5) and that nothing was charged. |
+| Review Seller support ticket | PASS. `TK-02F76F84`, subject “Phase 3 seller support check”, still present after reload and in the staff queue under Review Seller. Attachments remain unavailable. No external message was sent. |
+| Review Seller notifications | PASS. Empty list, with the sentence that records are stored and no WhatsApp, email or push was sent. |
+| Verification case `VER-EC4FAE39` | PASS as a stored case and a refusal to pass it. Submission recorded “Verification cannot be carried out: no provider is selected” (Q-4). The case was still there after the server was rebuilt. |
+| Property draft `PL-5362CF550A` | PASS as a draft. `dce729f6-eeda-405c-a455-f0b628a3d907`, title “Phase 3 Rajarhat apartment”, type Apartment, still present after reload. Send for review stayed disabled. The preview named missing locality, price, intent, configuration, contact name, contact method, and a photograph. Photographs need storage (Q-8). The draft was not published. |
+| Review Seller opening `/builder` | PASS as a refusal, after the fix. The page said the session is a seller account and did not show the sample builder’s listings or an active subscription. Before the fix, the same URL rendered the sample builder dashboard (2 published, 1 draft, subscription Active). |
+| Sign out of every session | PASS. The button was clicked on Review Seller’s browser session. A second session for the same account, opened through `POST /v1/auth/code` and `POST /v1/auth/sessions`, then received 401 `unauthorized` on refresh. |
+| Staff wallets | PASS as a read. Review Buyer and Review Seller were listed at ₹0 with no ledger entries. An adjustment was not submitted. |
+| Staff lead-request and support queues | PASS as reads of the rows above. |
+
+### Restrictions, not completions
+
+- Purchase, recharge, refund, invoice, and a verification pass still refuse. Enabling the switches did not configure a price, a payment provider, or a verification provider.
+- Builder enquiries were not exercised. None of the three handoff accounts is a builder. A seller session is refused by the Builder console and is not promoted.
+- Listing submission for review was not completed. The draft is missing required fields, and a photograph cannot be stored while storage is unconfigured (Q-8).
+- Admin rail badges for KYC, property review, refunds, support and notifications still come from the sample dashboard. The support queue itself showed one backend ticket while the rail badge still said 6.
+- Seller business profile, KYC and billing-address screens are still the sample seller record. The shell name and the wallet are the signed-in account.
+- Portal property cards remain the sample catalogue because `KKL_DATA_SOURCE=sample`.
+- Two browser profiles were not open at the same time. This browser shares one cookie jar. Account separation in this run is the buyer refusal, the seller refusal on the Builder console, and the second-session revoke above.
+
+### Fixture request
+
+A builder account, if the Builder enquiry inbox is to be exercised in a later run. Do not create one through `/v1/dev/sessions` from this frontend.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name

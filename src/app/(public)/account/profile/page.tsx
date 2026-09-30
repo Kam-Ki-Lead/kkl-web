@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getServices } from "@/lib/services";
 import { runtimeConfig } from "@/lib/config/runtime";
+import { profileStoreKind } from "@/lib/services/backend/config";
 import { ProfileForm } from "@/components/account/profile-form";
 import { Card } from "@/components/ui/card";
 
@@ -9,6 +10,7 @@ export const metadata: Metadata = { title: "Profile & settings" };
 /** P-15 — profile & settings. */
 export default async function ProfilePage() {
   const services = getServices();
+  const profileIsSample = profileStoreKind() !== "backend";
   const [profile, areas] = await Promise.all([
     services.profile.get(),
     services.locations.areaOptions({ cityId: "in-wb-kol" }),
@@ -25,11 +27,11 @@ export default async function ProfilePage() {
         <ProfileForm
           profile={profile}
           areas={areas}
-          isSample={runtimeConfig.isSampleMode}
+          isSample={profileIsSample}
         />
       </Card>
 
-      {runtimeConfig.isSampleMode ? (
+      {profileIsSample && runtimeConfig.isSampleMode ? (
         <Card className="mt-[14px] border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-label text-warning">This is not a real account</h2>
           <p className="t-caption mt-[6px] text-body">

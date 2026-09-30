@@ -1,4 +1,5 @@
 import { runtimeConfig } from "@/lib/config/runtime";
+import { authStoreKind } from "@/lib/services/backend/config";
 import { Card } from "@/components/ui/card";
 
 /**
@@ -16,8 +17,9 @@ export function BuilderSampleNotice() {
       <h2 className="t-card-title text-warning">Nothing on these screens is a real account</h2>
       <ul className="t-body mt-[8px] flex list-disc flex-col gap-[4px] pl-[20px] text-body">
         <li>
-          There is no sign-in. One sample Builder is shared by everyone using this build, and its
-          records are separate from the sample Seller&rsquo;s.
+          {authStoreKind() === "backend"
+            ? "Sign-in is this browser’s session. It does not open another account’s Builder screens."
+            : "There is no sign-in. One sample Builder is shared by everyone using this build, and its records are separate from the sample Seller’s."}
         </li>
         <li>
           No company was verified. KYC status is a value that can be switched for review; no

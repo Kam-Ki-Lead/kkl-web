@@ -303,7 +303,12 @@ function toInternalNotes(messages: BackendMessage[]): AdminTicketMessage[] {
 function toAdminLeadRequest(record: BackendLeadRequest): AdminLeadRequest {
   return {
     ...toLeadRequest(record),
-    requesterLabel: SAMPLE_LABELS.seller,
+    // The published lead-request record has an account id and no display name.
+    // The sample seller name is only honest while the development issuer is
+    // the one filing the request.
+    requesterLabel: bearerMode() === "browser-session"
+      ? `Account ${record.accountId}`
+      : SAMPLE_LABELS.seller,
     internalNotes: toInternalNotes(record.messages ?? []),
   };
 }

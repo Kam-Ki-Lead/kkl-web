@@ -1,8 +1,13 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import { AvatarBadge, ConsoleShell } from "@/components/layout/console-shell";
 import { builderRailFooter, builderRailItems } from "./builder-nav";
 import { Chip, type ChipTone } from "@/components/ui/chip";
+import { ServiceError } from "@/lib/services/contracts";
+import { redirectForAuth } from "@/lib/auth/recover";
+import { readSignedInProfile } from "@/lib/auth/backend";
 import { getServices } from "@/lib/services";
+import { bearerMode } from "@/lib/services/backend/session";
 import type { BuilderSubscriptionState } from "@/lib/domain/types";
 
 const SUBSCRIPTION: Record<
@@ -32,12 +37,61 @@ export async function BuilderShell({
   children: ReactNode;
 }) {
   const services = getServices().builder;
-  const [account, unread] = await Promise.all([
-    services.account.get(),
-    services.enquiries.unreadCount(),
-  ]);
+  let signedInName: string | null = null;
+  let signedInRole: string | null = null;
+  if (bearerMode() === "browser-session") {
+    try {
+      const profile = await readSignedInProfile();
+      signedInName = profile.displayName;
+      signedInRole = profile.role;
+    } catch (error) {
+      redirectForAuth(error, (await headers()).get("x-kkl-path") ?? "/builder");
+      if (!(error instanceof ServiceError && error.kind === "unavailable")) throw error;
+      signedInName = "Session";
+    }
+    if (signedInRole !== null && signedInRole !== "builder") {
+      return (
+        <section className="mx-auto flex max-w-[640px] flex-col gap-[12px] px-[24px] py-[48px]">
+          <h1 className="t-page-title">{title}</h1>
+          <p role="alert" className="t-body text-body">
+            This session is a {signedInRole} account. The Builder console is for a builder
+            account, and this screen does not open the sample builder.
+          </p>
+          {signedInName ? (
+            <p className="t-caption text-muted">Signed in as {signedInName}.</p>
+          ) : null}
+        </section>
+      );
+    }
+  }
+
+  let account;
+  let unread;
+  try {
+    [account, unread] = await Promise.all([
+      services.account.get(),
+      services.enquiries.unreadCount(),
+    ]);
+  } catch (error) {
+    redirectForAuth(error, (await headers()).get("x-kkl-path") ?? "/builder");
+    if (error instanceof ServiceError && (error.kind === "forbidden" || error.kind === "unavailable")) {
+      return (
+        <section className="mx-auto flex max-w-[640px] flex-col gap-[12px] px-[24px] py-[48px]">
+          <h1 className="t-page-title">{title}</h1>
+          <p role="alert" className="t-body text-body">
+            {error.message}
+          </p>
+          {signedInName ? (
+            <p className="t-caption text-muted">Signed in as {signedInName}.</p>
+          ) : null}
+        </section>
+      );
+    }
+    throw error;
+  }
 
   const status = SUBSCRIPTION[account.subscription.state];
+  const asideName = signedInName ?? account.contactName;
 
   return (
     <ConsoleShell
@@ -54,7 +108,7 @@ export async function BuilderShell({
           <Chip tone={status.tone} size="lg" className="max-[479px]:hidden">
             {status.label}
           </Chip>
-          <AvatarBadge name={account.contactName} />
+          <AvatarBadge name={asideName} />
         </>
       }
     >

@@ -52,7 +52,13 @@ export function StartVerificationForm({
  * has been selected, and a control that implied one would be the start of a
  * compliance claim nobody has made.
  */
-export function SubmitVerificationForm({ reference }: { reference: string }) {
+export function SubmitVerificationForm({
+  reference,
+  persisted = false,
+}: {
+  reference: string;
+  persisted?: boolean;
+}) {
   const [state, submit, pending] = useActionState<VerificationFormState, FormData>(
     submitVerification,
     {},
@@ -72,12 +78,17 @@ export function SubmitVerificationForm({ reference }: { reference: string }) {
       ) : null}
       <div>
         <Button type="submit" size="action" disabled={pending}>
-          {pending ? "Sending…" : "Send to the sample verification service"}
+          {pending
+            ? "Sending…"
+            : persisted
+              ? "Record that this check cannot be carried out"
+              : "Send to the sample verification service"}
         </Button>
       </div>
       <p className="t-caption text-muted">
-        No identity document is collected and nothing leaves this build. The service is a labelled
-        stand-in so each outcome can be reviewed; no provider has been chosen.
+        {persisted
+          ? "No identity document is collected. The case stays on this account. No provider is configured, so this does not pass the check."
+          : "No identity document is collected and nothing leaves this build. The service is a labelled stand-in so each outcome can be reviewed; no provider has been chosen."}
       </p>
     </form>
   );

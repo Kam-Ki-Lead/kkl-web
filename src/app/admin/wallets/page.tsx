@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { formatExactInr, formatSignedInr } from "@/lib/format";
-import { getServices } from "@/lib/services";
+import { adminOperationsStore, getServices } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Wallets & credits", robots: { index: false } };
 
@@ -98,8 +98,9 @@ export default async function AdminWalletsPage({
 
           {ledger.length === 0 ? (
             <p className="t-body px-[18px] py-[20px] text-body">
-              No entries. This account has no console in this build, so its ledger is not
-              modelled — an adjustment made here is recorded in the audit log and nowhere else.
+              {adminOperationsStore() === "backend"
+                ? "No entries. The balance is zero because nothing has moved on this account."
+                : "No entries. This account has no console in this build, so its ledger is not modelled — an adjustment made here is recorded in the audit log and nowhere else."}
             </p>
           ) : (
             <ul>
@@ -129,9 +130,9 @@ export default async function AdminWalletsPage({
         </Card>
 
         <p className="t-caption text-muted">
-          The balance is the last entry&rsquo;s running total, not a stored figure — the same
-          derivation the account&rsquo;s own billing screen uses, so the two cannot drift. No money
-          exists behind any of it.
+          {adminOperationsStore() === "backend"
+            ? "The balance is this account’s wallet. No payment has been taken, and no lead price is configured."
+            : "The balance is the last entry’s running total, not a stored figure — the same derivation the account’s own billing screen uses, so the two cannot drift. No money exists behind any of it."}
         </p>
       </div>
     </AdminShell>

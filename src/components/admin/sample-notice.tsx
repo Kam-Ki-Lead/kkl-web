@@ -1,4 +1,5 @@
 import { runtimeConfig } from "@/lib/config/runtime";
+import { authStoreKind } from "@/lib/services/backend/config";
 import { Card } from "@/components/ui/card";
 
 /**
@@ -19,9 +20,19 @@ export function AdminSampleNotice() {
       <h2 className="t-card-title text-warning">This is not a staff console yet</h2>
       <ul className="t-body mt-[8px] flex list-disc flex-col gap-[4px] pl-[20px] text-body">
         <li>
-          <strong className="text-ink">Nobody is signed in.</strong> A-01 collects an address and a
-          password and authenticates no one. Every action is recorded against one fixed staff
-          identity, and anything that reaches this URL gets the whole console.
+          {authStoreKind() === "backend" ? (
+            <>
+              <strong className="text-ink">The signed-in session is the only identity.</strong> A
+              customer session is refused by the service on staff operations. The screen does not
+              substitute a development staff account.
+            </>
+          ) : (
+            <>
+              <strong className="text-ink">Nobody is signed in.</strong> A-01 collects an address and a
+              password and authenticates no one. Every action is recorded against one fixed staff
+              identity, and anything that reaches this URL gets the whole console.
+            </>
+          )}
         </li>
         <li>
           <strong className="text-ink">There are no staff roles.</strong> Who may approve a

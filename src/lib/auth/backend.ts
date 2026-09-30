@@ -54,6 +54,8 @@ export type SignedInProfile = {
   readonly displayName: string;
   readonly phone: string | null;
   readonly status: "active" | "suspended";
+  /** From `GET /v1/me`. Null when the payload omits it. */
+  readonly role: "buyer" | "seller" | "builder" | "owner" | "staff" | null;
 };
 
 type CodeResponse = {
@@ -326,20 +328,25 @@ export async function callAsSignedIn<T>(
   return { status: response.status, body: parsed };
 }
 
-/** Who the token belongs to, from `GET /v1/me`. The role is not returned. */
+const ACCOUNT_ROLES = ["buyer", "seller", "builder", "owner", "staff"] as const;
+
+/** Who the token belongs to, from `GET /v1/me`, including the account's role. */
 export async function readSignedInProfile(): Promise<SignedInProfile> {
   const { status, body } = await callAsSignedIn<{
     displayName?: unknown;
     phone?: unknown;
     status?: unknown;
+    role?: unknown;
   }>("/v1/me");
   if (status !== 200) {
     throw new ServiceError("unavailable", "The signed-in account could not be read.");
   }
+  const role = ACCOUNT_ROLES.find((candidate) => candidate === body.role) ?? null;
   return {
     displayName: typeof body.displayName === "string" ? body.displayName : "Signed in",
     phone: typeof body.phone === "string" ? body.phone : null,
     status: body.status === "suspended" ? "suspended" : "active",
+    role,
   };
 }
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getServices } from "@/lib/services";
 import { runtimeConfig } from "@/lib/config/runtime";
+import { notificationStoreKind } from "@/lib/services/backend/config";
 import { formatDate } from "@/lib/format";
 import {
   markAllNotificationsRead,
@@ -126,7 +127,12 @@ export default async function NotificationsPage() {
         </ul>
       )}
 
-      {runtimeConfig.isSampleMode ? (
+      {notificationStoreKind() === "backend" ? (
+        <p className="t-caption mt-[16px] text-muted">
+          These records are stored for the signed-in account. No WhatsApp, email or push message
+          was sent.
+        </p>
+      ) : runtimeConfig.isSampleMode ? (
         <p className="t-caption mt-[16px] text-muted">
           Sample notifications. Nothing was delivered by WhatsApp, email or push, and read state
           is held in the server&rsquo;s memory for this review session only.
