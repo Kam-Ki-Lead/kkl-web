@@ -201,8 +201,8 @@ and it does not attribute those results to the handoff accounts.
 The same backend process was still listening on `http://127.0.0.1:4010`.
 Health stayed 200. The checkout was still `abf89fce39f6f38a689fccc352391bcae9bef0d7`
 (implementation `d4116b3b072c6050326cf1591acc69359c7b8502`, OpenAPI
-`1.0.0-phase3.l`). The frontend was a production build of the tree that adds
-this section, served with `next start` on port 3811. `POST /v1/dev/sessions`
+`1.0.0-phase3.l`). The frontend application is `cfa60bd`. The production build served on
+port 3811 was that tree. `next start` was used. `POST /v1/dev/sessions`
 was not used. Local code delivery is not production OTP.
 
 Settings, in addition to the `611bca9` set (`KKL_AUTH`, `KKL_STAFF_ORDERS`,
