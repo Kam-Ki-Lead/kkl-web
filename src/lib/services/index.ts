@@ -11,6 +11,7 @@ import {
   notificationStoreKind,
   profileStoreKind,
   supportStoreKind,
+  verificationStoreKind,
 } from "./backend/config";
 import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
 import { backendLocations } from "./backend/locations";
@@ -22,6 +23,8 @@ import { backendBuilderEnquiries } from "./backend/builder-enquiries";
 import { backendSupport } from "./backend/support";
 import { backendAdminAudit, backendAdminSupport } from "./backend/admin-support";
 import { backendNotifications } from "./backend/notifications";
+import { backendVerification } from "./backend/verification";
+import { backendAdminVerification } from "./backend/admin-verification";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -54,6 +57,7 @@ const BACKEND_DOMAINS = [
   withBuilderEnquiryStore,
   withSupportStore,
   withNotificationStore,
+  withVerificationStore,
 ] as const;
 
 export function getServices(): Services {
@@ -213,6 +217,27 @@ function withSupportStore(services: Services): Services {
 function withNotificationStore(services: Services): Services {
   if (notificationStoreKind() !== "backend") return services;
   return { ...services, notifications: backendNotifications("buyer") };
+}
+
+/**
+ * Verification cases, served by kkl-backend when KKL_VERIFICATION=backend.
+ *
+ * Both sides together: the customer’s cases and the staff queues. The
+ * screens gain a real case with a real history; what they do not gain is a
+ * way to pass one, because no provider is selected (Q-4) and no staff hand
+ * may award it (undecided).
+ */
+function withVerificationStore(services: Services): Services {
+  if (verificationStoreKind() !== "backend") return services;
+  return {
+    ...services,
+    verification: backendVerification("seller"),
+    admin: { ...services.admin, ...backendAdminVerification },
+  };
+}
+
+export function verificationStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? verificationStoreKind() : "backend";
 }
 
 export function supportStore(): "sample" | "backend" {

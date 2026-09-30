@@ -33,6 +33,15 @@ type BackendLocation = {
 
 type PathEntry = { id: string; name: string; kind: LocationNode["level"] };
 
+/** What the service returns in one page; its own cap is the same number. */
+const PAGE = 100;
+/**
+ * The point at which sending every area to the browser stops being sensible.
+ * A city past it needs a picker that searches rather than one that filters,
+ * and the log line above says so rather than letting records disappear.
+ */
+const MAX_AREA_OPTIONS = 2000;
+
 const node = (row: BackendLocation): LocationNode => ({
   id: row.id,
   name: row.name,
@@ -96,13 +105,53 @@ export const backendLocations: LocationService = {
    * never the store of record, and with a few hundred localities it should not
    * be the filter either.
    */
+  /**
+   * A QUERY GETS THE BEST PAGE; NO QUERY GETS ALL OF THEM
+   * With a query this is a search and one page of ranked matches is the
+   * answer. Without one it is "every area in the city", which is what each
+   * screen preloads and what the no-JavaScript select is built from — and
+   * that has to be complete. It asked for 100 and Kolkata has more localities
+   * than that, so forty of them were in no picker and in no select, with
+   * nothing on screen to say a record had been left out. The service now
+   * reports the total beside the page, so this pages to the end instead of
+   * mistaking a page for the set.
+   */
   async areaOptions({ cityId, query }) {
-    const params = new URLSearchParams({ under: cityId, limit: "100" });
-    if (query && query.trim()) params.set("q", query.trim());
-    const { locations } = await get<{ locations: BackendLocation[] }>(
-      `/v1/locations/search?${params.toString()}`,
-    );
-    return locations.map((row) => ({ id: row.id, label: row.label ?? row.name }));
+    const q = query?.trim() ?? "";
+    const page = async (offset: number) => {
+      const params = new URLSearchParams({
+        under: cityId,
+        limit: String(PAGE),
+        offset: String(offset),
+      });
+      if (q) params.set("q", q);
+      return get<{ locations: BackendLocation[]; total: number }>(
+        `/v1/locations/search?${params.toString()}`,
+      );
+    };
+
+    const first = await page(0);
+    const rows = [...first.locations];
+    if (!q) {
+      // Bounded: a city with more areas than this is a data problem to be
+      // seen, not a loop to be run. The count says what was left out.
+      for (
+        let at = rows.length;
+        at < first.total && rows.length < MAX_AREA_OPTIONS && first.locations.length;
+        at += PAGE
+      ) {
+        const next = await page(at);
+        if (!next.locations.length) break;
+        rows.push(...next.locations);
+      }
+      if (rows.length < first.total) {
+        console.warn(
+          `[kkl-web] ${first.total} areas under ${cityId}, showing ${rows.length}. `
+            + `The picker cannot offer the rest and the no-JavaScript select does not carry them.`,
+        );
+      }
+    }
+    return rows.map((row) => ({ id: row.id, label: row.label ?? row.name }));
   },
 
   /** City-first, matching the approved baseline's paths: country and state are not shown. */

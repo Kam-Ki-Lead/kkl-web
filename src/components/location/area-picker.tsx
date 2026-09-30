@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useHydrated } from "@/lib/use-hydrated";
 import { Select } from "@/components/ui/field";
+import { searchAreas } from "@/app/actions/locations";
 
 export type AreaOption = {
   /** The location-record id — the value that is stored and submitted (CR05). */
@@ -22,6 +23,16 @@ export type AreaOption = {
  * Without JavaScript the combobox cannot work, so the server render is a plain
  * select over the same records — the form still submits the id. The select is
  * stood down once hydration completes, the same contract the filter rows use.
+ *
+ * `areas` IS A PAGE, NOT THE WHOLE SET
+ * The screens preload the first hundred areas under the city. Kolkata has
+ * more localities than that, so filtering the preloaded page in the browser
+ * cannot find every record — and when it missed one it said "No area matches
+ * — check the spelling", which is a wrong answer rather than a slow one.
+ * Typing therefore also asks the service, whose ranking spans every active
+ * record; the two sets are merged by id. The preload still decides what the
+ * list shows before the first keystroke and what the no-JavaScript select
+ * offers, and that select remains limited to the page it was given.
  */
 export function AreaPicker({
   id,
@@ -109,6 +120,15 @@ function Combobox({
   // (a controlled parent may update via a URL change, which is not immediate).
   const chosenLabel = useRef<string | null>(null);
 
+  // Areas the service returned, carried with the query they answer. A set is
+  // used only while it still matches what is typed, so an answer to an older
+  // query is ignored rather than cleared — there is no moment where a stale
+  // set stands in for the current one.
+  const [found, setFound] = useState<{ q: string; rows: readonly AreaOption[] }>({
+    q: "",
+    rows: [],
+  });
+
   // The visible options: name matches, with the empty choice first — but only
   // while the query is empty; "All areas" is not an answer to "rajar".
   const q = query.trim().toLowerCase();
@@ -118,7 +138,15 @@ function Combobox({
   // so typing a locality's own name and pressing Enter selected one of its
   // sub-localities instead. Anything the query starts sorts ahead of anything
   // that merely contains it, and an exact label ahead of that.
-  const matches = areas
+  // The preloaded page and whatever the service found, by id. The preloaded
+  // entry wins a collision: it is the same record, and taking one side
+  // consistently keeps the list from reordering under the cursor when a
+  // lookup lands.
+  const fresh = found.q === query.trim() ? found.rows : [];
+  const pool: readonly AreaOption[] = fresh.length
+    ? [...areas, ...fresh.filter((f) => !areas.some((a) => a.id === f.id))]
+    : areas;
+  const matches = pool
     .filter((a) => a.label.toLowerCase().includes(q))
     .map((a) => {
       const label = a.label.toLowerCase();
@@ -129,6 +157,29 @@ function Combobox({
     .map((m) => m.area);
   const options: readonly AreaOption[] =
     allLabel !== undefined && q === "" ? [{ id: "", label: allLabel }, ...matches] : matches;
+
+  // Ask the service for what is being typed. Debounced, because this runs on
+  // a keystroke; abandoned on the next one, because an answer to a query the
+  // person has moved past is not an answer. A failure records nothing and the
+  // list stays on the preloaded page rather than falling to empty.
+  useEffect(() => {
+    const typed = query.trim();
+    if (!open || typed.length < 2) return;
+    let live = true;
+    const timer = setTimeout(() => {
+      searchAreas(typed)
+        .then((rows) => {
+          if (live) setFound({ q: typed, rows });
+        })
+        .catch(() => {
+          // The preloaded page is still on screen. Nothing is invented here.
+        });
+    }, 150);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
+  }, [query, open]);
 
   // Keep the text in step when the selection changes from outside. A label
   // just chosen stays on screen until the selection state catches up with it.

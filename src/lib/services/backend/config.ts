@@ -177,3 +177,20 @@ export function supportStoreKind(): "sample" | "backend" {
 export function notificationStoreKind(): "sample" | "backend" {
   return read("KKL_NOTIFICATIONS") === "backend" ? "backend" : "sample";
 }
+
+// ---------------------------------------------------------------------------
+// Slice G — verification cases.
+//
+// One switch, moving both sides at once: the customer's own case screens and
+// the staff queues. Half of it would be worse than neither, because a person
+// waiting on a durable case that staff read in a sample queue is waiting on
+// nobody.
+//
+// What this does not need is a provider. The case, its history, the policy it
+// was judged under and the staff workflow are all real without one; what a
+// provider would add is the ability for a case to *pass*, which is Q-4.
+// ---------------------------------------------------------------------------
+
+export function verificationStoreKind(): "sample" | "backend" {
+  return read("KKL_VERIFICATION") === "backend" ? "backend" : "sample";
+}

@@ -9,6 +9,12 @@ import { Chip } from "@/components/ui/chip";
 import { getServices } from "@/lib/services";
 import { formatDateTime } from "@/lib/format";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Verification case", robots: { index: false } };
 
 /**

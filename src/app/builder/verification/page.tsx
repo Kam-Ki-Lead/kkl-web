@@ -10,6 +10,12 @@ import { getServices } from "@/lib/services";
 import { runtimeConfig } from "@/lib/config/runtime";
 import type { KycStatus } from "@/lib/domain/types";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Company verification" };
 
 const PANEL: Record<KycStatus, { chip: string; tone: ChipTone; title: string; body: string }> = {

@@ -16,6 +16,14 @@
  * production database reads — so this can never become the answer to Q-1a by
  * accident, and a check below asserts it stayed absent.
  *
+ * The same run needs a verified account, because buying a lead requires a
+ * verification and no provider exists to grant one (Q-4). That too is an
+ * isolated fixture — a case row plus a provider event, labelled
+ * "test-fixture-provider", written for this run's own account. It is not
+ * removed afterwards and cannot be: nothing in the application holds DELETE
+ * on a verification record. Checks 6 and 7 run either side of it, so the
+ * gated state is proved as well as the journey past it.
+ *
  * Run (kkl-web on 3811 with KKL_MARKETPLACE=backend, kkl-backend up):
  *   BACKEND_DIR=... BACKEND_URL=... DATABASE_URL=... KKL_DEV_AUTH_SECRET=... \
  *   PLAYWRIGHT=/path/to/playwright/index.mjs node scripts/verify-commerce-integration.mjs
@@ -71,15 +79,23 @@ const db = new pg.Client({ connectionString: DB });
 await db.connect();
 const asStaff = async (sql, params = []) => {
   await db.query('BEGIN');
-  await db.query("SELECT set_config('app.user_id', $1, true)", [staff.accountId]);
-  await db.query("SELECT set_config('app.user_role', 'staff', true)");
-  const out = await db.query(sql, params);
-  await db.query('COMMIT');
-  return out;
+  try {
+    await db.query("SELECT set_config('app.user_id', $1, true)", [staff.accountId]);
+    await db.query("SELECT set_config('app.user_role', 'staff', true)");
+    const out = await db.query(sql, params);
+    await db.query('COMMIT');
+    return out;
+  } catch (error) {
+    // Without this, one failed statement leaves the connection in an aborted
+    // transaction and every check after it fails for the wrong reason.
+    await db.query('ROLLBACK').catch(() => {});
+    throw error;
+  }
 };
 
 const marker = randomUUID().slice(0, 8).toUpperCase();
 let leadId = null;
+let fixtureReference = null;
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext();
@@ -127,10 +143,15 @@ try {
   await wallet.goto(`${BASE}/seller/billing`, { waitUntil: 'networkidle' });
   const walletText = (await wallet.textContent('body')) ?? '';
   const walletApi = await api(seller.token, '/v1/wallet');
+  // The screen groups digits — 2,050, not 2050 — so a bare String() match
+  // passed only while the fixture balance stayed under a thousand. Both
+  // spellings are accepted; the number is what is being checked.
+  const balance = walletApi.body?.balanceCredits;
+  const grouped = typeof balance === 'number' ? balance.toLocaleString('en-IN') : null;
   ok('4. The wallet balance on the screen is the sum of the backend ledger',
     walletApi.status === 200
-      && walletText.includes(String(walletApi.body.balanceCredits)),
-    `kkl-backend reports ${walletApi.body?.balanceCredits} credits, and the screen shows it`);
+      && (walletText.includes(String(balance)) || walletText.includes(grouped)),
+    `kkl-backend reports ${balance} credits, and the screen shows it`);
 
   const recharge = await ctx.newPage();
   await recharge.goto(`${BASE}/seller/billing/recharge`, { waitUntil: 'networkidle' });
@@ -164,14 +185,49 @@ try {
     }),
   });
 
+  // -------------------------- the verification gate, before it is satisfied
+  // Buying a lead requires a verification (the confirmed CR07 rule), no
+  // provider is selected (Q-4), and whether staff may pass an account by hand
+  // is undecided. So the real state of this screen for a real account is
+  // "priced, and still not buyable" — and it has to say which of the two
+  // conditions is in the way rather than offering a button that fails.
+  const gated = await ctx.newPage();
+  await gated.goto(`${BASE}/seller/leads/${leadId}`, { waitUntil: 'networkidle' });
+  const gatedText = (await gated.textContent('body')) ?? '';
+  ok('6. An unverified account is told the verification condition, not shown a button',
+    (await gated.$('a[href$="/buy"]')) === null
+      && /verification|verified/i.test(gatedText),
+    (await gated.$('a[href$="/buy"]')) === null
+      ? 'the action is absent and the screen names the condition'
+      : 'the screen still offers a purchase the backend would refuse');
+
+  // Verified by an isolated fixture: a case row and a provider event written
+  // for this run's own account. No provider exists and none was called; this
+  // is the same fixture the backend tests use, and it is the only way an
+  // account can be verified at all today.
+  const policyVersion = await asStaff('SELECT max(version) AS v FROM verification_policy_versions');
+  fixtureReference = `VER-FIX${marker.slice(0, 6)}`;
+  const fixtureCase = await asStaff(
+    `INSERT INTO verification_cases
+       (reference, account_id, action, policy_version, outcome, provider,
+        provider_reference, decided_at)
+     VALUES ($1,$2,'purchase_lead',$3,'verified','test-fixture-provider',$4, now())
+     RETURNING id`,
+    [fixtureReference, seller.accountId, policyVersion.rows[0].v ?? 1, `fixture:${marker}`]);
+  await asStaff(
+    `INSERT INTO verification_events (case_id, outcome, actor_kind, actor_label, note, visibility)
+     VALUES ($1,'verified','provider','test-fixture-provider',
+             'Written by an isolated review fixture. No provider exists (Q-4).','shared')`,
+    [fixtureCase.rows[0].id]);
+
   const detail = await ctx.newPage();
   await detail.goto(`${BASE}/seller/leads/${leadId}`, { waitUntil: 'networkidle' });
   const detailText = (await detail.textContent('body')) ?? '';
-  ok('6. A priced lead shows its price and offers the purchase',
+  ok('7. Verified, the same lead shows its price and offers the purchase',
     detailText.includes('150') && (await detail.$('a[href$="/buy"]')) !== null,
     'the fixture price reaches the screen and the action is enabled');
 
-  ok('7. No contact detail is on the page before the purchase',
+  ok('8. No contact detail is on the page before the purchase',
     !detailText.includes(`+9198${marker.slice(0, 6)}22`)
       && !/\d{2}•+\d{2}/.test(detailText),
     'no number, and no fabricated mask standing in for one');
@@ -184,7 +240,7 @@ try {
 
   const orderRow = await asStaff(
     "SELECT * FROM orders WHERE lead_id = $1 AND status = 'completed'", [leadId]);
-  ok('8. The purchase made a completed order in the database',
+  ok('9. The purchase made a completed order in the database',
     orderRow.rowCount === 1,
     orderRow.rowCount === 1
       ? `${orderRow.rows[0].reference} for ${orderRow.rows[0].amount_credits} credits`
@@ -194,7 +250,7 @@ try {
     `SELECT sum(amount_credits)::int AS total FROM wallet_ledger
       WHERE account_id = $1 AND entry_type = 'purchase'`, [seller.accountId]);
   const after = await api(seller.token, '/v1/wallet');
-  ok('9. Exactly one debit was posted, and the balance matches the ledger',
+  ok('10. Exactly one debit was posted, and the balance matches the ledger',
     orderRow.rowCount === 1
       && Number(ledger.rows[0].total) <= -150
       && after.body.balanceCredits
@@ -204,14 +260,14 @@ try {
   const purchased = await ctx.newPage();
   await purchased.goto(`${BASE}/seller/purchased`, { waitUntil: 'networkidle' });
   const purchasedText = (await purchased.textContent('body')) ?? '';
-  ok('10. The contact is released to the buyer, on the buyer’s own screen',
+  ok('11. The contact is released to the buyer, on the buyer’s own screen',
     purchasedText.includes(marker) || purchasedText.includes(`+9198${marker.slice(0, 6)}22`),
     'the purchased-leads screen is served by kkl-backend');
 
   const stranger = await sessionFor('builder', `verify-stranger-${marker}`, 'Someone Else');
   const peek = await api(stranger.token, `/v1/orders/${orderRow.rows[0]?.id ?? randomUUID()}`);
   const strangerOrders = await api(stranger.token, '/v1/orders');
-  ok('11. Another account can read neither the order nor the contact',
+  ok('12. Another account can read neither the order nor the contact',
     peek.status === 404
       && !JSON.stringify(strangerOrders.body).includes(`+9198${marker.slice(0, 6)}22`),
     `read ${peek.status}; their own list holds ${strangerOrders.body?.orders?.length ?? 0} orders`);
@@ -219,7 +275,7 @@ try {
   // ------------------------------------------ 3. the fixture stayed a fixture
   const globalPrice = await asStaff(
     "SELECT key FROM platform_settings WHERE key = 'lead_price_credits'");
-  ok('12. No commercial rule was written into the platform configuration',
+  ok('13. No commercial rule was written into the platform configuration',
     globalPrice.rowCount === 0,
     'the price lived on this run’s own lead row and nowhere else — Q-1a stays open');
 
@@ -227,14 +283,14 @@ try {
   const inbox = await ctx.newPage();
   await inbox.goto(`${BASE}/builder/enquiries`, { waitUntil: 'networkidle' });
   const inboxText = (await inbox.textContent('body')) ?? '';
-  ok('13. The recipient inbox says contact access is awaiting confirmation',
+  ok('14. The recipient inbox says contact access is awaiting confirmation',
     /awaiting confirmation/i.test(inboxText),
     `at ${new URL(inbox.url()).pathname}: `
       + (/awaiting confirmation/i.test(inboxText)
         ? 'the wording names the undecided state rather than choosing an alternative'
         : `the phrase is absent from ${inboxText.length} characters`));
 
-  ok('14. It offers no unlock and shows no fabricated mask',
+  ok('15. It offers no unlock and shows no fabricated mask',
     !/to unlock/i.test(inboxText) && !/•{3,}/.test(inboxText),
     'no unlock price and no masked digits, because no rule selects either');
 } finally {
@@ -242,6 +298,27 @@ try {
   // The fixtures are this run's own rows. They go.
   if (leadId) {
     await asStaff('DELETE FROM lead_contacts WHERE lead_id = $1', [leadId]).catch(() => {});
+  }
+  // The verification case is NOT deleted, and cannot be: `kkl_app` holds no
+  // DELETE on verification_cases or verification_events, because a
+  // verification history a process can erase is not a history. It is instead
+  // withdrawn the way a real one would be — a staff decision of `expired`,
+  // with a reason, appended to the case. That matters beyond tidiness: these
+  // scripts share one sample account, and a fixture that left it verified
+  // made the next run's real journey start from a state nobody set up.
+  if (fixtureReference) {
+    const closed = await api(staff.token, `/v1/verification/cases/${fixtureReference}/decision`, {
+      method: 'POST',
+      body: JSON.stringify({
+        outcome: 'expired',
+        reason: `Review fixture ${marker} withdrawn. It was written by a script, not by a `
+          + 'provider, and is not evidence about this account.',
+        visibility: 'internal',
+      }),
+    });
+    if (closed.status !== 200) {
+      console.error(`could not withdraw the verification fixture: ${closed.status}`);
+    }
   }
   await db.end();
 }
