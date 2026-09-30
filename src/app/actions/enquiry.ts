@@ -4,7 +4,8 @@ import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getServices } from "@/lib/services";
+import { getServices, ServiceError } from "@/lib/services";
+import { authStoreKind, enquiryStoreKind } from "@/lib/services/backend/config";
 
 /**
  * The enquiry flow: form → OTP verification → confirmation.
@@ -150,6 +151,14 @@ export async function completeEnquiry(): Promise<
   if (!result.ok) return result;
 
   const { draft } = result;
+  // A real sign-in must not file into the shared sample list. The draft stays
+  // until a connected enquiry service accepts it.
+  if (authStoreKind() === "backend" && enquiryStoreKind() !== "backend") {
+    throw new ServiceError(
+      "unavailable",
+      "Sign-in is connected and enquiries are not, so this enquiry was not saved to the sample list. Your draft is still here.",
+    );
+  }
   await getServices().enquiries.submitEnquiry({
     idempotencyKey: draft.submissionToken,
     propertyId: draft.propertyId,

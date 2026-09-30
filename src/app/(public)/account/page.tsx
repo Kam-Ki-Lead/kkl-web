@@ -1,14 +1,46 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getServices } from "@/lib/services";
+import type { BuyerEnquiry } from "@/lib/domain/types";
+import { getServices, ServiceError } from "@/lib/services";
+import { authStoreKind, enquiryStoreKind } from "@/lib/services/backend/config";
+import { readSignedInProfile, type SignedInProfile } from "@/lib/auth/backend";
+import { redirectForAuth } from "@/lib/auth/recover";
+import { signOut } from "@/app/actions/auth";
 import { Card } from "@/components/ui/card";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "My account" };
 
 /** P-12 — buyer dashboard. */
 export default async function BuyerDashboardPage() {
-  const enquiries = await getServices().enquiries.listMine();
+  const signedIn = authStoreKind() === "backend";
+  let profile: SignedInProfile | null = null;
+  let notice: string | null = null;
+
+  if (signedIn) {
+    try {
+      profile = await readSignedInProfile();
+    } catch (error) {
+      redirectForAuth(error, "/account");
+      if (error instanceof ServiceError) notice = error.message;
+      else throw error;
+    }
+  }
+
+  let enquiries: readonly BuyerEnquiry[] = [];
+  if (!notice && signedIn && enquiryStoreKind() !== "backend") {
+    notice = "Enquiries are not connected for this sign-in, so this list was not filled from sample data.";
+  } else if (!notice) {
+    try {
+      enquiries = await getServices().enquiries.listMine();
+    } catch (error) {
+      redirectForAuth(error, "/account");
+      if (error instanceof ServiceError) notice = error.message;
+      else throw error;
+    }
+  }
+
   const awaiting = enquiries.filter((e) => e.status === "open").length;
 
   return (
@@ -17,7 +49,19 @@ export default async function BuyerDashboardPage() {
       <p className="t-body mt-[6px] text-body">
         Your enquiries, your shortlist and the requirement we match against.
       </p>
+      {profile ? (
+        <p className="t-caption mt-[8px] text-muted">
+          Signed in as {profile.displayName}
+          {profile.phone ? ` · ${profile.phone}` : ""}.
+        </p>
+      ) : null}
 
+      {notice ? (
+        <div className="mt-[20px]">
+          <StateMessage title="Enquiries are not available">{notice}</StateMessage>
+        </div>
+      ) : (
+      <>
       <div className="mt-[20px] grid grid-cols-3 gap-[14px] max-[900px]:grid-cols-1">
         <Card className="p-[18px]">
           <p className="t-figure text-ink">{enquiries.length}</p>
@@ -71,6 +115,17 @@ export default async function BuyerDashboardPage() {
           </ul>
         )}
       </Card>
+      </>
+      )}
+
+      {profile ? (
+        <form action={signOut} className="mt-[16px] flex flex-wrap gap-[10px]">
+          <Button type="submit" variant="secondary" size="sm">Sign out</Button>
+          <Button type="submit" name="everywhere" value="1" variant="quietDanger" size="sm">
+            Sign out of every session
+          </Button>
+        </form>
+      ) : null}
     </div>
   );
 }

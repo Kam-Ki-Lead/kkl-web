@@ -5,6 +5,9 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { getServices } from "@/lib/services";
+import { intakeStoreKind } from "@/lib/services/backend/config";
+import { INTAKE_GAPS } from "@/lib/services/backend/staff-contract-gaps";
+import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Intake run", robots: { index: false } };
 
@@ -22,6 +25,15 @@ export default async function AdminIntakeRunPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  if (intakeStoreKind() === "backend") {
+    return (
+      <AdminShell title={`Intake run ${id}`} subtitle="Accepted rows, rejections and validation errors">
+        <StateMessage title="This intake run is not loaded from the service">
+          {INTAKE_GAPS.join(" ")} Sample rejections are not shown in their place.
+        </StateMessage>
+      </AdminShell>
+    );
+  }
   const result = await getServices().admin.getIntakeRun(id);
   if (!result) notFound();
   const { run, rejections } = result;

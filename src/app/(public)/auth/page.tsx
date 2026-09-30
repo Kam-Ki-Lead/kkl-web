@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { runtimeConfig } from "@/lib/config/runtime";
+import { authStoreKind } from "@/lib/services/backend/config";
 import { pendingVerificationMobile } from "@/app/actions/enquiry";
 import { OtpForm } from "@/components/auth/otp-form";
 import { Card } from "@/components/ui/card";
@@ -31,7 +32,11 @@ export default async function AuthPage({
       </p>
 
       <Card className="mt-[18px] p-[22px]">
-        <OtpForm presetMobile={mobile} next={next} isSample={runtimeConfig.isSampleMode} />
+        <OtpForm
+          presetMobile={mobile}
+          next={next}
+          simulated={authStoreKind() !== "backend" && runtimeConfig.isSampleMode}
+        />
       </Card>
 
       <p className="t-caption mt-[14px] text-muted">

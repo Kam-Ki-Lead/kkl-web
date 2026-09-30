@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getServices } from "@/lib/services";
 import type { BuyerEnquiry } from "@/lib/domain/types";
+import { getServices, ServiceError } from "@/lib/services";
+import { authStoreKind, enquiryStoreKind } from "@/lib/services/backend/config";
+import { redirectForAuth } from "@/lib/auth/recover";
 import { formatDate } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
@@ -28,7 +30,19 @@ export function enquiryStatusChip(status: BuyerEnquiry["status"]): {
 
 /** P-13 — my enquiries. */
 export default async function MyEnquiriesPage() {
-  const enquiries = await getServices().enquiries.listMine();
+  let enquiries: readonly BuyerEnquiry[] = [];
+  let notice: string | null = null;
+  if (authStoreKind() === "backend" && enquiryStoreKind() !== "backend") {
+    notice = "Enquiries are not connected for this sign-in, so this list was not filled from sample data.";
+  } else {
+    try {
+      enquiries = await getServices().enquiries.listMine();
+    } catch (error) {
+      redirectForAuth(error, "/account/enquiries");
+      if (error instanceof ServiceError) notice = error.message;
+      else throw error;
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[900px] px-[32px] pb-[50px] pt-[28px] max-[1060px]:px-[18px]">
@@ -37,7 +51,11 @@ export default async function MyEnquiriesPage() {
         Every enquiry and site-visit request you have sent, and the builder&rsquo;s replies.
       </p>
 
-      {enquiries.length === 0 ? (
+      {notice ? (
+        <div className="mt-[20px]">
+          <StateMessage title="Enquiries are not available">{notice}</StateMessage>
+        </div>
+      ) : enquiries.length === 0 ? (
         <div className="mt-[20px]">
           <StateMessage
             title="You have not sent any enquiries yet"

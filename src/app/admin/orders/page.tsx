@@ -4,6 +4,9 @@ import { AdminTable, Mono, Primary } from "@/components/admin/admin-table";
 import { Chip } from "@/components/ui/chip";
 import { formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { staffOrdersStoreKind } from "@/lib/services/backend/config";
+import { STAFF_ORDER_GAPS } from "@/lib/services/backend/staff-contract-gaps";
+import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Orders", robots: { index: false } };
 
@@ -30,6 +33,16 @@ export default async function AdminOrdersPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (staffOrdersStoreKind() === "backend") {
+    return (
+      <AdminShell title="Orders" subtitle="Lead purchases and their delivery">
+        <StateMessage title="Orders are not loaded from the service">
+          {STAFF_ORDER_GAPS.join(" ")} Sample orders are not shown in their place.
+        </StateMessage>
+      </AdminShell>
+    );
+  }
+
   const params = await searchParams;
   const filter = one(params.filter) || "all";
   const query = one(params.q).trim().toLowerCase();

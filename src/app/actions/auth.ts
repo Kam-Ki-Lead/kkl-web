@@ -2,7 +2,23 @@
 
 import { redirect } from "next/navigation";
 import { runtimeConfig } from "@/lib/config/runtime";
+import { ServiceError } from "@/lib/services/contracts";
+import { authStoreKind } from "@/lib/services/backend/config";
 import { confirmEnquiryDestination } from "@/app/actions/enquiry";
+import {
+  codeRequestBody,
+  localIndianMobile,
+  safeNext,
+} from "@/lib/auth/contract";
+import {
+  clearChallenge,
+  exchangeCode,
+  readChallenge,
+  requestAuthCode,
+  revokeSession,
+  withIssuedAccess,
+  writeSession,
+} from "@/lib/auth/backend";
 
 /**
  * P-06 verification, as a server action.
@@ -18,21 +34,19 @@ import { confirmEnquiryDestination } from "@/app/actions/enquiry";
  * not: the closure only exists once JavaScript has run, so the form does
  * nothing at all before hydration.
  *
- * **This does not authenticate anyone.** In sample mode no message is sent and
- * no session is created; the step exists so the journey can be reviewed end to
- * end. Real verification belongs to kkl-backend, and nothing here writes an
- * identity claim that anything downstream trusts.
+ * With `KKL_AUTH` unset this still authenticates nobody: any six digits
+ * continue, and `000000` is the invalid state. With `KKL_AUTH=backend` the
+ * code is the published authenticator's, a failure is shown, and the sample
+ * step does not stand in. The role on the request is never read from the form.
  */
 
 export type OtpState = {
   readonly step: "mobile" | "code";
   readonly mobile: string;
   readonly error?: string;
+  /** `local` means the development channel accepted the code and nothing was sent. */
+  readonly delivery?: "local" | "other";
 };
-
-function safeNext(raw: string): string {
-  return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/account/enquiries";
-}
 
 /** The pending-enquiry handoff, recognised so the submission happens here. */
 const ENQUIRY_CONFIRM = "/enquiry/confirm";
@@ -48,18 +62,37 @@ export async function otpStep(previous: OtpState, formData: FormData): Promise<O
 }
 
 export async function requestCode(_previous: OtpState, formData: FormData): Promise<OtpState> {
-  const mobile = String(formData.get("mobile") ?? "").replace(/\D/g, "");
-  if (!/^[6-9]\d{9}$/.test(mobile)) {
-    return { step: "mobile", mobile, error: "Enter a 10-digit Indian mobile number." };
+  const mobile = localIndianMobile(String(formData.get("mobile") ?? ""));
+  if (!mobile) {
+    return { step: "mobile", mobile: String(formData.get("mobile") ?? "").replace(/\D/g, ""), error: "Enter a 10-digit Indian mobile number." };
   }
-  return { step: "code", mobile };
+
+  if (authStoreKind() !== "backend") {
+    if (!runtimeConfig.isSampleMode) {
+      return {
+        step: "mobile",
+        mobile,
+        error: "Verification is not available yet. Please try again later.",
+      };
+    }
+    return { step: "code", mobile };
+  }
+
+  // `role` and `intent` are not read. A new number becomes the backend's
+  // default account type; an existing account keeps the role on its row.
+  const result = await requestAuthCode(codeRequestBody(mobile).phone);
+  if (!result.ok) {
+    return { step: "mobile", mobile, error: result.problem.message };
+  }
+  return { step: "code", mobile, delivery: result.challenge.delivery };
 }
 
 export async function verifyCode(previous: OtpState, formData: FormData): Promise<OtpState> {
   const intent = String(formData.get("intent") ?? "");
-  const mobile = String(formData.get("mobile") ?? "").replace(/\D/g, "");
+  const mobile = localIndianMobile(String(formData.get("mobile") ?? "")) ?? previous.mobile;
 
   if (intent === "change-number") {
+    if (authStoreKind() === "backend") await clearChallenge();
     return { step: "mobile", mobile };
   }
 
@@ -67,32 +100,66 @@ export async function verifyCode(previous: OtpState, formData: FormData): Promis
   const next = safeNext(String(formData.get("next") ?? ""));
 
   if (!/^\d{6}$/.test(code)) {
-    return { step: "code", mobile: mobile || previous.mobile, error: "Enter the six-digit code." };
+    return { step: "code", mobile, error: "Enter the six-digit code.", delivery: previous.delivery };
   }
 
-  // The approved prototype's stated sample behaviour: any six digits pass,
-  // 000000 shows the invalid state. Nothing is verified against anything.
-  if (runtimeConfig.isSampleMode && code === "000000") {
+  if (authStoreKind() !== "backend") {
+    if (!runtimeConfig.isSampleMode) {
+      return {
+        step: "code",
+        mobile,
+        error: "Verification is not available yet. Please try again later.",
+      };
+    }
+    // The approved prototype's stated sample behaviour: any six digits pass,
+    // 000000 shows the invalid state. Nothing is verified against anything.
+    if (code === "000000") {
+      return {
+        step: "code",
+        mobile,
+        error: "That code is not correct. Check the digits and try again.",
+      };
+    }
+    redirect(next === ENQUIRY_CONFIRM ? await confirmEnquiryDestination() : next);
+  }
+
+  const result = await exchangeCode(code);
+  if (!result.ok) {
+    const challenge = await readChallenge();
+    const expiredLocally = result.problem.message === "That code has expired. Request a new one.";
     return {
-      step: "code",
-      mobile: mobile || previous.mobile,
-      error: "That code is not correct. Check the digits and try again.",
+      step: expiredLocally ? "mobile" : "code",
+      mobile,
+      error: result.problem.message,
+      delivery: challenge?.delivery ?? previous.delivery,
     };
   }
 
-  if (!runtimeConfig.isSampleMode) {
-    // There is no real verification path yet, and guessing one would be worse
-    // than refusing: it would present an unverified number as verified.
-    return {
-      step: "code",
-      mobile: mobile || previous.mobile,
-      error: "Verification is not available yet. Please try again later.",
-    };
+  await writeSession(result.session);
+
+  let destination: string;
+  try {
+    destination = next === ENQUIRY_CONFIRM
+      ? await withIssuedAccess(result.session.accessToken, () => confirmEnquiryDestination())
+      : next;
+  } catch (error) {
+    if (error instanceof ServiceError) {
+      return { step: "code", mobile, error: error.message, delivery: previous.delivery };
+    }
+    throw error;
   }
 
-  // A Server Action must not redirect to a Route Handler — the client router
-  // asks the target for an RSC payload, gets a plain redirect instead, and
-  // abandons the navigation, leaving the enquiry unrecorded. So the enquiry is
-  // completed here and the redirect goes to the screen that shows the outcome.
-  redirect(next === ENQUIRY_CONFIRM ? await confirmEnquiryDestination() : next);
+  redirect(destination);
+}
+
+/** Ends this session, or every session, then returns to sign-in. */
+export async function signOut(formData: FormData): Promise<void> {
+  if (authStoreKind() === "backend") {
+    try {
+      await revokeSession(formData.get("everywhere") === "1");
+    } catch (error) {
+      if (!(error instanceof ServiceError)) throw error;
+    }
+  }
+  redirect("/auth");
 }

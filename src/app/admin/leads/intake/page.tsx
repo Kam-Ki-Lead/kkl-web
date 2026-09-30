@@ -4,11 +4,24 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { getServices } from "@/lib/services";
+import { intakeStoreKind } from "@/lib/services/backend/config";
+import { INTAKE_GAPS } from "@/lib/services/backend/staff-contract-gaps";
+import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Lead intake", robots: { index: false } };
 
 /** A-10 — sources, volumes and duplicates. */
 export default async function AdminIntakePage() {
+  if (intakeStoreKind() === "backend") {
+    return (
+      <AdminShell title="Lead intake" subtitle="Sources, volumes and duplicates">
+        <StateMessage title="Intake runs are not loaded from the service">
+          {INTAKE_GAPS.join(" ")} Sample runs are not shown in their place.
+        </StateMessage>
+      </AdminShell>
+    );
+  }
+
   const { sources, runs } = await getServices().admin.intake();
 
   return (

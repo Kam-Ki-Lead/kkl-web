@@ -2,7 +2,9 @@ import type { BuyerEnquiry, EnquiryStatus } from "@/lib/domain/types";
 import type { EnquiryService } from "@/lib/services/contracts";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import { SAMPLE_PROPERTIES } from "@/lib/services/sample/fixtures";
+import { authStoreKind } from "./config";
 import { callAs } from "./session";
+import { callAsSignedIn } from "@/lib/auth/backend";
 
 /**
  * Buyer enquiries and site-visit requests, served by kkl-backend.
@@ -74,6 +76,26 @@ const toBuyerEnquiry = (e: BackendEnquiry): BuyerEnquiry => {
   };
 };
 
+/**
+ * With browser sign-in on, the enquiry is the signed-in account's. The
+ * development issuer's sample buyer is not a stand-in: two people would
+ * otherwise share one account. `as=buyer` selects the filed-by-me view from
+ * the contract; it is not a role, and it is not taken from the form.
+ */
+async function buyerCall<T>(
+  path: string,
+  init?: { method?: string; body?: unknown },
+): Promise<{ status: number; body: T & { error?: string; field?: string } }> {
+  if (authStoreKind() === "backend") {
+    const result = await callAsSignedIn<T>(path, init);
+    return {
+      status: result.status,
+      body: result.body as T & { error?: string; field?: string },
+    };
+  }
+  return callAs<T>("buyer", path, init);
+}
+
 function raise(status: number, body: { error?: string; field?: string }): never {
   if (status === 422) {
     const field = { subjectRef: "propertyId", preferredSlot: "preferredDate" }[body.field ?? ""]
@@ -86,7 +108,7 @@ function raise(status: number, body: { error?: string; field?: string }): never 
 
 export const backendEnquiries: EnquiryService = {
   async submitEnquiry(input) {
-    const { status, body } = await callAs<BackendEnquiry>("buyer", "/v1/enquiries", {
+    const { status, body } = await buyerCall<BackendEnquiry>("/v1/enquiries", {
       method: "POST",
       body: {
         kind: input.kind === "site_visit" ? "visit_request" : "enquiry",
@@ -108,14 +130,14 @@ export const backendEnquiries: EnquiryService = {
   },
 
   async listMine() {
-    const { status, body } = await callAs<{ enquiries: BackendEnquiry[] }>(
-      "buyer", "/v1/enquiries?as=buyer");
+    const { status, body } = await buyerCall<{ enquiries: BackendEnquiry[] }>(
+      "/v1/enquiries?as=buyer");
     if (status !== 200) raise(status, body);
     return body.enquiries.map(toBuyerEnquiry);
   },
 
   async getMine(id) {
-    const { status, body } = await callAs<BackendEnquiry>("buyer", `/v1/enquiries/${id}`);
+    const { status, body } = await buyerCall<BackendEnquiry>(`/v1/enquiries/${id}`);
     if (status !== 200) raise(status, body);
     return toBuyerEnquiry(body);
   },
@@ -129,7 +151,7 @@ export const backendEnquiries: EnquiryService = {
    */
   async getByReceipt(receipt) {
     if (!/^[0-9a-f-]{36}$/i.test(receipt)) return null;
-    const { status, body } = await callAs<BackendEnquiry>("buyer", `/v1/enquiries/${receipt}`);
+    const { status, body } = await buyerCall<BackendEnquiry>(`/v1/enquiries/${receipt}`);
     if (status === 404) return null;
     if (status !== 200) raise(status, body);
     return toBuyerEnquiry(body);

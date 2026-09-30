@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServices } from "@/lib/services";
+import { redirectForAuth } from "@/lib/auth/recover";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -23,7 +24,13 @@ export default async function EnquiryConfirmedPage({
   //
   // It is still not trusted as permission: the screen confirms only an enquiry
   // the service actually holds, and real authorization is kkl-backend's.
-  const enquiry = await getServices().enquiries.getByReceipt(receipt);
+  let enquiry;
+  try {
+    enquiry = await getServices().enquiries.getByReceipt(receipt);
+  } catch (error) {
+    redirectForAuth(error, `/enquiry/${receipt}/confirmed`);
+    throw error;
+  }
   if (!enquiry) notFound();
 
   return (

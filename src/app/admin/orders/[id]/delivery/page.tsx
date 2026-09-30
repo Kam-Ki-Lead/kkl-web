@@ -6,6 +6,9 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { getServices } from "@/lib/services";
+import { staffOrdersStoreKind } from "@/lib/services/backend/config";
+import { STAFF_ORDER_GAPS } from "@/lib/services/backend/staff-contract-gaps";
+import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Delivery record", robots: { index: false } };
 
@@ -24,6 +27,15 @@ export default async function AdminDeliveryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  if (staffOrdersStoreKind() === "backend") {
+    return (
+      <AdminShell title={`Order ${id}`} subtitle="What was delivered and downloaded">
+        <StateMessage title="This order is not loaded from the service">
+          {STAFF_ORDER_GAPS.join(" ")} Sample orders are not shown in their place.
+        </StateMessage>
+      </AdminShell>
+    );
+  }
   const order = await getServices().admin.getOrder(id);
   if (!order) notFound();
 

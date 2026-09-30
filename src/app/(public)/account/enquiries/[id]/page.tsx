@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getServices, ServiceError } from "@/lib/services";
+import { redirectForAuth } from "@/lib/auth/recover";
 import { formatDate } from "@/lib/format";
 import { Card, InsetPanel } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
@@ -22,6 +23,7 @@ export default async function EnquiryDetailPage({
   try {
     enquiry = await getServices().enquiries.getMine(id);
   } catch (error) {
+    redirectForAuth(error, `/account/enquiries/${id}`);
     if (error instanceof ServiceError && error.kind === "not_found") notFound();
     throw error;
   }

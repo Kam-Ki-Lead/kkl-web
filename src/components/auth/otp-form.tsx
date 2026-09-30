@@ -15,20 +15,24 @@ import { StateMessage } from "@/components/ui/states";
  * client closure that picks between two of them only exists after hydration, so
  * the form would do nothing until then.
  *
- * Nothing here authenticates. See src/app/actions/auth.ts.
+ * With `simulated`, any six digits continue and nothing is sent. Otherwise the
+ * server action calls kkl-backend, and this form never sees a token.
  */
 export function OtpForm({
   presetMobile,
   next,
-  isSample,
+  simulated,
 }: {
   presetMobile: string;
   next: string;
-  isSample: boolean;
+  simulated: boolean;
 }) {
-  const initial: OtpState = presetMobile
+  // Sample mode can skip straight to the code, because nothing is checked.
+  // A real code has to be requested first, or the number would be asked to
+  // enter a code that was never issued. The draft still prefills the number.
+  const initial: OtpState = simulated && presetMobile
     ? { step: "code", mobile: presetMobile }
-    : { step: "mobile", mobile: "" };
+    : { step: "mobile", mobile: presetMobile };
 
   const [state, action, pending] = useActionState<OtpState, FormData>(
     otpStep,
@@ -37,10 +41,16 @@ export function OtpForm({
 
   return (
     <div className="flex flex-col gap-[16px]">
-      {isSample ? (
+      {simulated ? (
         <p className="rounded-[8px] bg-chip-warning-bg px-[14px] py-[10px] text-[14px] text-warning">
           No message is sent in sample mode. Enter any six digits to continue;{" "}
           <span className="t-mono">000000</span> shows the invalid state.
+        </p>
+      ) : null}
+      {!simulated && state.delivery === "local" ? (
+        <p className="rounded-[8px] bg-chip-warning-bg px-[14px] py-[10px] text-[14px] text-warning">
+          No message was sent. This deployment accepted the code on the local
+          development channel. That is not production sign-in.
         </p>
       ) : null}
 

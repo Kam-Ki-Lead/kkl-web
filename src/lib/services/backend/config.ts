@@ -205,14 +205,62 @@ export function verificationStoreKind(): "sample" | "backend" {
 // the wallet read, and nothing at all read the suppression list. A capability
 // nobody can reach is not a delivered capability, whatever the tests say.
 //
-// Lead intake (A-10, A-11) is deliberately *not* in this switch. The backend
-// records intake rejections per batch but records nothing about what a batch
-// accepted, and the approved screen shows accepted, rejected and duplicate
-// counts per run. Connecting it would mean inventing two of those three
-// numbers, so it stays on sample data and is reported as a gap rather than
-// filled with a plausible figure.
+// Lead intake (A-10, A-11) is deliberately *not* in this switch. The published
+// intake response names batch counts as arrays and does not name the fields
+// the approved run screen renders. See KKL_INTAKE below. Connecting it here
+// would mean inventing those fields, so this switch leaves intake on sample
+// data until KKL_INTAKE is set — and that setting shows the gap rather than
+// the sample runs.
 // ---------------------------------------------------------------------------
 
 export function adminOperationsStoreKind(): "sample" | "backend" {
   return read("KKL_ADMIN_OPERATIONS") === "backend" ? "backend" : "sample";
+}
+
+// ---------------------------------------------------------------------------
+// KKL_AUTH — the browser's own session, against POST /v1/auth/*.
+//
+// Unset, the sign-in screen stays the sample step: any six digits continue
+// and 000000 is the invalid state. Nothing is sent. Set to `backend`, the
+// screen calls the published authenticator and a failure stays a failure —
+// the sample step does not take over.
+//
+// The base URL is the same one the other switches use. The development
+// secret is not required here: reading a locally delivered code is the
+// verification script's job (`GET /v1/dev/challenges/{id}/code`), and that
+// secret must not be needed for a person to submit the code they were given.
+// ---------------------------------------------------------------------------
+
+export function authStoreKind(): "sample" | "backend" {
+  return read("KKL_AUTH") === "backend" ? "backend" : "sample";
+}
+
+export function authBackendBaseUrl(): string {
+  const baseUrl = read("KKL_BACKEND_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL");
+  if (baseUrl === undefined) {
+    throw new Error(
+      "KKL_AUTH=backend requires KKL_BACKEND_BASE_URL (or KKL_LEAD_REQUESTS_BASE_URL). " +
+        "kkl-web does not accept a code locally when sign-in is switched to kkl-backend.",
+    );
+  }
+  return baseUrl.replace(/\/+$/, "");
+}
+
+// ---------------------------------------------------------------------------
+// KKL_STAFF_ORDERS and KKL_INTAKE — prepared, and not filled in.
+//
+// Cancellation (`POST /v1/orders/{orderId}/cancellation`) and intake
+// (`POST /v1/leads/intake`, `GET /v1/leads/intake/rejections`) are published.
+// The approved screens also need a staff-wide order list and a list of past
+// intake runs, with purchaser, amount and per-row rejection fields the
+// contract does not name. See `staff-contract-gaps.ts`. Turning either switch
+// on shows that gap. It does not serve the sample tables.
+// ---------------------------------------------------------------------------
+
+export function staffOrdersStoreKind(): "sample" | "backend" {
+  return read("KKL_STAFF_ORDERS") === "backend" ? "backend" : "sample";
+}
+
+export function intakeStoreKind(): "sample" | "backend" {
+  return read("KKL_INTAKE") === "backend" ? "backend" : "sample";
 }
