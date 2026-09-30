@@ -319,8 +319,7 @@ The same backend process was still listening on `http://127.0.0.1:4010`
 (pid 24008). The checkout was still
 `abf89fce39f6f38a689fccc352391bcae9bef0d7` (implementation
 `d4116b3b072c6050326cf1591acc69359c7b8502`, OpenAPI `1.0.0-phase3.l`).
-The frontend application for this section is the commit that contains the
-inbox changes. `next build` then `next start` on port 3811. The switches are
+The frontend application for this section is `53ee3c3`. `next build` then `next start` on port 3811. The switches are
 the same set as the domain-switch section. `POST /v1/dev/sessions` was not
 used. No development secret was set on the frontend.
 
