@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { IdentityBanner } from "@/components/admin/identity-banner";
+import { PageNav } from "@/components/admin/page-nav";
 import { AdminTable, Mono, Primary } from "@/components/admin/admin-table";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { formatExactInr } from "@/lib/format";
@@ -8,12 +9,13 @@ import { getServices } from "@/lib/services";
 import { staffOrdersStoreKind } from "@/lib/services/backend/config";
 import { listStaffOrders } from "@/lib/services/backend/staff-orders";
 import {
-  ORDER_LIST_LIMIT,
   ORDER_SCREEN_OMISSIONS,
   formatCredits,
   isOrderStatus,
+  isPastEnd,
   orderStatusLabel,
-  pageCapNote,
+  pageOffset,
+  pageRangeLabel,
 } from "@/lib/services/backend/staff-views";
 import { StateMessage } from "@/components/ui/states";
 
@@ -63,7 +65,8 @@ export default async function AdminOrdersPage({
     const filter = one(params.filter) || "all";
     const status = isOrderStatus(filter) ? filter : null;
     const query = one(params.q).trim().toLowerCase();
-    const loaded = await listStaffOrders(status);
+    const offset = pageOffset(one(params.offset));
+    const loaded = await listStaffOrders(status, offset);
     if (!loaded.ok) {
       return (
         <AdminShell title="Orders" subtitle="Lead purchases and their delivery">
@@ -74,25 +77,43 @@ export default async function AdminOrdersPage({
         </AdminShell>
       );
     }
-    const rows = loaded.value.filter((order) => {
+    const page = loaded.value;
+    const past = isPastEnd(page);
+    const rows = page.orders.filter((order) => {
       if (!query) return true;
       return `${order.reference ?? ""} ${order.leadReference ?? ""} ${order.buyerDisplayName ?? ""} ${order.id}`
         .toLowerCase()
         .includes(query);
     });
-    const cap = pageCapNote(loaded.value.length, ORDER_LIST_LIMIT);
+    const emptyTitle = past
+      ? "This page is past the end"
+      : page.total === 0
+        ? "No orders"
+        : "No orders match";
+    const emptyBody = past
+      ? `${page.total} orders match this filter. This offset has none of them.`
+      : page.total === 0
+        ? "Nothing is stored for this filter."
+        : "Nothing on this page matches the search. The service does not publish a search parameter, so the search looks through this page.";
     return (
       <AdminShell title="Orders" subtitle="Lead purchases and their delivery">
+        <div className="flex flex-col gap-[12px]">
         <IdentityBanner />
+        <PageNav
+          pathname="/admin/orders"
+          page={page}
+          noun="orders"
+          extra={{ filter: status ?? undefined, q: one(params.q) || undefined }}
+        />
         <AdminTable
           basePath="/admin/orders"
           filters={SERVICE_FILTERS}
           activeFilter={status ?? "all"}
           query={one(params.q)}
-          countLabel={`${rows.length} of ${loaded.value.length} orders`}
-          emptyTitle="No orders match"
-          emptyBody="Nothing matches this filter and search."
-          footnote={[cap, ...ORDER_SCREEN_OMISSIONS].filter(Boolean).join(" ")}
+          countLabel={pageRangeLabel(page, "orders")}
+          emptyTitle={emptyTitle}
+          emptyBody={emptyBody}
+          footnote={ORDER_SCREEN_OMISSIONS.join(" ")}
           columns={[
             { header: "ORDER", width: "0.9fr" },
             { header: "LEAD", width: "0.9fr" },
@@ -116,6 +137,7 @@ export default async function AdminOrdersPage({
             ],
           }))}
         />
+        </div>
       </AdminShell>
     );
   }

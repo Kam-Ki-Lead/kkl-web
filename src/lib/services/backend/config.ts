@@ -260,9 +260,10 @@ export function authBackendBaseUrl(): string {
 // ---------------------------------------------------------------------------
 // KKL_STAFF_ORDERS and KKL_INTAKE — the staff queue and the intake batches.
 //
-// Orders: `GET /v1/orders?scope=all`, `GET /v1/orders/{orderId}`, and
-// `POST /v1/orders/{orderId}/cancellation`. Intake: the batch list and the
-// batch detail. Counts and cancellation fields are rendered as published.
+// Orders: `GET /v1/orders?scope=all` with `offset` and `limit`, the order
+// detail, and `POST /v1/orders/{orderId}/cancellation`. Intake: the batch
+// list, paged the same way, and the batch detail. Counts and cancellation
+// fields are rendered as published.
 // An organisation, an INR amount, a delivery timeline and a masked phone
 // number are not invented when the payload omits them. See
 // `staff-views.ts`. Turning either switch on does not serve the sample tables.

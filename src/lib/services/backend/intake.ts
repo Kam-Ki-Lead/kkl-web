@@ -1,20 +1,20 @@
 import { ServiceError } from "@/lib/services/contracts";
 import { isFrameworkSignal, callAs, bearerMode } from "./session";
 import {
-  INTAKE_BATCH_LIMIT,
+  INTAKE_PAGE_SIZE,
   readIntakeBatch,
-  readIntakeBatchList,
+  readIntakeBatchPage,
   staffRefusal,
   type IntakeBatch,
-  type IntakeCounts,
+  type IntakeBatchPage,
 } from "./staff-views";
 
 /**
  * A-10 and A-11 from `GET /v1/leads/intake/batches` and
  * `GET /v1/leads/intake/batches/{batchRef}`.
  *
- * Counts are the persisted count fields. Item rows are the typed outcomes
- * the implementation stores. A phone number is not rendered.
+ * Counts are the persisted count fields. Item rows use the published item
+ * schemas. A phone number is not rendered.
  */
 
 export type IntakeLoad<T> =
@@ -36,14 +36,22 @@ function fail(error: unknown): IntakeLoad<never> {
   return { ok: false, message: "Intake could not be loaded." };
 }
 
-export async function listIntakeBatches(): Promise<IntakeLoad<readonly IntakeCounts[]>> {
+export async function listIntakeBatches(offset: number): Promise<IntakeLoad<IntakeBatchPage>> {
   try {
+    const query = new URLSearchParams({
+      limit: String(INTAKE_PAGE_SIZE),
+      offset: String(offset),
+    });
     const { status, body } = await callAs<{ batches?: unknown; error?: string }>(
       "staff",
-      `/v1/leads/intake/batches?limit=${INTAKE_BATCH_LIMIT}`,
+      `/v1/leads/intake/batches?${query.toString()}`,
     );
     if (status !== 200) return refused(status, body.error, "Intake batches could not be loaded.");
-    return { ok: true, value: readIntakeBatchList(body) };
+    const page = readIntakeBatchPage(body);
+    if (!page) {
+      return { ok: false, message: "The batch list did not include total, offset and limit." };
+    }
+    return { ok: true, value: page };
   } catch (error) {
     return fail(error);
   }

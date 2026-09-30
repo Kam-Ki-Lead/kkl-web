@@ -50,7 +50,7 @@ function factsFor(order: StaffOrder): ReadonlyArray<{ label: string; value: stri
   add("Credits", order.amountCredits === null ? null : formatCredits(order.amountCredits));
   add("Buyer", order.buyerDisplayName);
   add("Account", order.accountId);
-  add("Lead", order.leadReference ?? order.lead?.reference ?? null);
+  add("Lead", order.lead?.reference ?? order.leadReference);
   add("Requirement", order.lead?.summary ?? null);
   add("Property type", order.lead?.propertyType ?? null);
   add("Budget", order.lead?.budgetBand ?? null);
@@ -109,11 +109,11 @@ export default async function AdminDeliveryPage({
               <div className="min-w-0">
                 <p className="t-mono text-[12px] text-muted">{order.reference ?? order.id}</p>
                 <h2 className="t-heading mt-[2px] text-ink">
-                  {order.leadReference ?? order.lead?.reference ?? "Lead reference is not on this read"}
+                  {order.lead?.reference ?? order.reference ?? order.id}
                 </h2>
-                <p className="t-body text-body">
-                  {order.buyerDisplayName ?? "Buyer name is not on this read"}
-                </p>
+                {order.buyerDisplayName ? (
+                  <p className="t-body text-body">{order.buyerDisplayName}</p>
+                ) : null}
               </div>
               <Chip tone={toneFor(order.status)}>{orderStatusLabel(order.status)}</Chip>
             </div>

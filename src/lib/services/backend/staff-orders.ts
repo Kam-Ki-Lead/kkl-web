@@ -1,13 +1,14 @@
 import { ServiceError } from "@/lib/services/contracts";
 import { isFrameworkSignal, callAs, bearerMode } from "./session";
 import {
-  ORDER_LIST_LIMIT,
+  ORDER_PAGE_SIZE,
   cancellationFailure,
   readStaffOrder,
-  readStaffOrders,
+  readStaffOrderPage,
   staffRefusal,
   type OrderStatus,
   type StaffOrder,
+  type StaffOrderPage,
 } from "./staff-views";
 
 /**
@@ -40,8 +41,13 @@ function fail(error: unknown): StaffLoad<never> {
 
 export async function listStaffOrders(
   status: OrderStatus | null,
-): Promise<StaffLoad<readonly StaffOrder[]>> {
-  const query = new URLSearchParams({ scope: "all", limit: String(ORDER_LIST_LIMIT) });
+  offset: number,
+): Promise<StaffLoad<StaffOrderPage>> {
+  const query = new URLSearchParams({
+    scope: "all",
+    limit: String(ORDER_PAGE_SIZE),
+    offset: String(offset),
+  });
   if (status) query.set("status", status);
   try {
     const { status: http, body } = await callAs<{ orders?: unknown; error?: string }>(
@@ -51,7 +57,11 @@ export async function listStaffOrders(
     if (http !== 200) {
       return refused(http, body.error, "Orders could not be loaded.");
     }
-    return { ok: true, value: readStaffOrders(body) };
+    const page = readStaffOrderPage(body);
+    if (!page) {
+      return { ok: false, message: "The order list did not include total, offset and limit." };
+    }
+    return { ok: true, value: page };
   } catch (error) {
     return fail(error);
   }

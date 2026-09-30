@@ -1,17 +1,21 @@
 /**
- * Pure readings of the phase 3.j order and intake payloads.
+ * Pure readings of the phase 3.k order and intake payloads.
  *
- * Contract: kkl-backend `docs/api/v1.yaml` `1.0.0-phase3.j`
- * (commit 6f4bd9163a74f99cdef2341167edcf05651b0c19).
- * Item objects on an intake batch are published as objects. The keys read
- * here are the ones the implementation writes (b3bafd9 `shapeResult`):
- * index, id, reference, consentStatus, existingReference, reasonCode,
- * reason, and problems of code, field and reason. A phone number is not
- * among them, and one present on a payload is dropped.
+ * Contract: kkl-backend `docs/api/v1.yaml` `1.0.0-phase3.k`
+ * (commit c64967f79373534c2746c636d4111af8c25a4adf).
+ * These functions do not call a server. The auth stand-in is a different
+ * test, and it is not this one.
+ *
+ * List responses are `OrderPage` and `IntakeBatchPage`: `orders` or
+ * `batches`, plus `total`, `offset` and `limit`. Intake items are
+ * `IntakeAccepted`, `IntakeDuplicate`, `IntakeRejected` and `IntakeSkipped`.
+ * A phone number is not on those schemas, and one present on a payload is
+ * dropped.
  */
 
-export const ORDER_LIST_LIMIT = 500;
-export const INTAKE_BATCH_LIMIT = 200;
+/** Published default page sizes. The maxima (500 and 200) are not a full list. */
+export const ORDER_PAGE_SIZE = 100;
+export const INTAKE_PAGE_SIZE = 50;
 
 export const ORDER_STATUSES = ["pending", "completed", "failed", "cancelled"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -21,19 +25,44 @@ export const ORDER_SCREEN_OMISSIONS = [
   "An order has no organisation.",
   "amountCredits is a credit count. It is not converted into an INR amount.",
   "An order has no delivery-event list.",
-  "buyerDisplayName is present on the list. The detail read supplies lead.reference, contact when the policy returns it, and the cancellation fields.",
+  "buyerDisplayName and leadReference are present on a list. A single-order read supplies lead and, when policy allows, contact. It does not guarantee buyerDisplayName.",
 ] as const;
 
 /** Approved-screen facts the intake payload does not carry. */
 export const INTAKE_SCREEN_OMISSIONS = [
-  "A rejected item carries a row index and problem codes, fields and reasons. It carries no phone number, so none is shown.",
-  "GET /v1/leads/intake/batches takes limit, default 50 and maximum 200. It publishes no offset and no cursor.",
-  "GET /v1/orders takes limit, default 100 and maximum 500. It publishes no offset and no cursor.",
+  "A rejected item carries a row index and problems of code, field and reason. It carries no phone number, so none is shown.",
 ] as const;
 
-export function pageCapNote(returned: number, limit: number): string | null {
-  if (returned < limit) return null;
-  return `The service returned ${limit} rows, which is its maximum page. It publishes no offset, so this screen cannot tell whether older rows exist.`;
+export type PageWindow = {
+  readonly total: number;
+  readonly offset: number;
+  readonly limit: number;
+  readonly returned: number;
+};
+
+/** A non-negative integer from the query string. Anything else is the first page. */
+export function pageOffset(raw: string): number {
+  if (!/^\d+$/.test(raw)) return 0;
+  const value = Number(raw);
+  return Number.isSafeInteger(value) ? value : 0;
+}
+
+/** Next exists only when this page does not reach the unpaged total. */
+export function hasNextPage(page: Pick<PageWindow, "offset" | "returned" | "total">): boolean {
+  return page.offset + page.returned < page.total;
+}
+
+/** An offset past the end: an empty page and the same total, not an error. */
+export function isPastEnd(page: PageWindow): boolean {
+  return page.returned === 0 && page.total > 0 && page.offset >= page.total;
+}
+
+export function pageRangeLabel(page: PageWindow, noun: string): string {
+  if (page.total === 0) return `0 ${noun}`;
+  if (page.returned === 0) return `None of ${page.total} ${noun} are on this page`;
+  const start = page.offset + 1;
+  const end = page.offset + page.returned;
+  return `${start}–${end} of ${page.total} ${noun}`;
 }
 
 export type StaffOrder = {
@@ -66,42 +95,50 @@ export type StaffOrder = {
 
 export type IntakeCounts = {
   readonly batchRef: string;
-  readonly source: string | null;
-  readonly createdAt: string | null;
-  readonly submitted: number | null;
-  readonly acceptedCount: number | null;
-  readonly rejectedCount: number | null;
-  readonly duplicateCount: number | null;
-  readonly skippedCount: number | null;
+  readonly source: string;
+  readonly createdAt: string;
+  readonly submitted: number;
+  readonly acceptedCount: number;
+  readonly rejectedCount: number;
+  readonly duplicateCount: number;
+  readonly skippedCount: number;
 };
 
 export type IntakeProblem = {
-  readonly code: string | null;
+  readonly code: string;
   readonly field: string | null;
-  readonly reason: string | null;
+  readonly reason: string;
 };
 
 export type IntakeAccepted = {
-  readonly index: number | null;
-  readonly id: string | null;
-  readonly reference: string | null;
-  readonly consentStatus: string | null;
+  readonly index: number;
+  readonly id: string;
+  readonly reference: string;
+  readonly consentStatus: string;
 };
 
 export type IntakeDuplicate = {
-  readonly index: number | null;
+  readonly index: number;
   readonly existingReference: string | null;
 };
 
 export type IntakeRejected = {
-  readonly index: number | null;
+  readonly index: number;
   readonly problems: readonly IntakeProblem[];
 };
 
 export type IntakeSkipped = {
-  readonly index: number | null;
+  readonly index: number;
   readonly reasonCode: string | null;
   readonly reason: string | null;
+};
+
+export type StaffOrderPage = PageWindow & {
+  readonly orders: readonly StaffOrder[];
+};
+
+export type IntakeBatchPage = PageWindow & {
+  readonly batches: readonly IntakeCounts[];
 };
 
 export type IntakeBatch = IntakeCounts & {
@@ -120,8 +157,16 @@ function integer(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) ? value : null;
 }
 
-function indexOf(value: unknown): number | null {
-  return integer(value);
+function nonNegative(value: unknown): number | null {
+  const parsed = integer(value);
+  return parsed !== null && parsed >= 0 ? parsed : null;
+}
+
+const INTAKE_SOURCES = ["manual", "web_form", "import", "partner", "voice"] as const;
+const CONSENT = ["unknown", "granted", "refused", "withdrawn"] as const;
+
+function oneOf(value: unknown, allowed: readonly string[]): string | null {
+  return typeof value === "string" && allowed.includes(value) ? value : null;
 }
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -169,25 +214,50 @@ export function readStaffOrder(value: unknown): StaffOrder | null {
   };
 }
 
-export function readStaffOrders(value: unknown): readonly StaffOrder[] {
-  const body = record(value);
-  const orders = body && Array.isArray(body.orders) ? body.orders : [];
-  return orders.flatMap((order) => {
-    const read = readStaffOrder(order);
-    return read ? [read] : [];
-  });
+function readList(value: unknown): readonly unknown[] {
+  return Array.isArray(value) ? value : [];
 }
 
-function counts(row: Record<string, unknown>, batchRef: string): IntakeCounts {
+export function readStaffOrderPage(value: unknown): StaffOrderPage | null {
+  const body = record(value);
+  if (!body || !Array.isArray(body.orders)) return null;
+  const total = nonNegative(body.total);
+  const offset = nonNegative(body.offset);
+  const limit = nonNegative(body.limit);
+  if (total === null || offset === null || limit === null) return null;
+  return {
+    orders: body.orders.flatMap((order) => {
+      const read = readStaffOrder(order);
+      return read ? [read] : [];
+    }),
+    total,
+    offset,
+    limit,
+    returned: body.orders.length,
+  };
+}
+
+function counts(row: Record<string, unknown>, batchRef: string): IntakeCounts | null {
+  const source = oneOf(row.source, INTAKE_SOURCES);
+  const createdAt = text(row.createdAt);
+  const submitted = nonNegative(row.submitted);
+  const acceptedCount = nonNegative(row.acceptedCount);
+  const rejectedCount = nonNegative(row.rejectedCount);
+  const duplicateCount = nonNegative(row.duplicateCount);
+  const skippedCount = nonNegative(row.skippedCount);
+  if (
+    source === null || createdAt === null || submitted === null || acceptedCount === null
+    || rejectedCount === null || duplicateCount === null || skippedCount === null
+  ) return null;
   return {
     batchRef,
-    source: text(row.source),
-    createdAt: text(row.createdAt),
-    submitted: integer(row.submitted),
-    acceptedCount: integer(row.acceptedCount),
-    rejectedCount: integer(row.rejectedCount),
-    duplicateCount: integer(row.duplicateCount),
-    skippedCount: integer(row.skippedCount),
+    source,
+    createdAt,
+    submitted,
+    acceptedCount,
+    rejectedCount,
+    duplicateCount,
+    skippedCount,
   };
 }
 
@@ -198,78 +268,83 @@ export function readIntakeBatchSummary(value: unknown): IntakeCounts | null {
   return counts(row, batchRef);
 }
 
-export function readIntakeBatchList(value: unknown): readonly IntakeCounts[] {
+export function readIntakeBatchPage(value: unknown): IntakeBatchPage | null {
   const body = record(value);
-  const batches = body && Array.isArray(body.batches) ? body.batches : [];
-  return batches.flatMap((batch) => {
-    const read = readIntakeBatchSummary(batch);
-    return read ? [read] : [];
-  });
+  if (!body || !Array.isArray(body.batches)) return null;
+  const total = nonNegative(body.total);
+  const offset = nonNegative(body.offset);
+  const limit = nonNegative(body.limit);
+  if (total === null || offset === null || limit === null) return null;
+  return {
+    batches: body.batches.flatMap((batch) => {
+      const read = readIntakeBatchSummary(batch);
+      return read ? [read] : [];
+    }),
+    total,
+    offset,
+    limit,
+    returned: body.batches.length,
+  };
 }
 
-function problemsOf(value: unknown): readonly IntakeProblem[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item) => {
+function problemsOf(value: unknown): readonly IntakeProblem[] | null {
+  if (!Array.isArray(value)) return null;
+  const problems: IntakeProblem[] = [];
+  for (const item of value) {
     const row = record(item);
-    if (!row) return [];
-    return [{
-      code: text(row.code),
-      field: text(row.field),
-      reason: text(row.reason),
-    }];
-  });
+    const code = row ? text(row.code) : null;
+    const reason = row ? text(row.reason) : null;
+    if (!row || code === null || reason === null) return null;
+    problems.push({ code, field: text(row.field), reason });
+  }
+  return problems;
 }
 
 export function readAcceptedItem(value: unknown): IntakeAccepted | null {
   const row = record(value);
-  if (!row) return null;
-  return {
-    index: indexOf(row.index),
-    id: text(row.id),
-    reference: text(row.reference),
-    consentStatus: text(row.consentStatus),
-  };
+  const index = row ? nonNegative(row.index) : null;
+  const id = row ? text(row.id) : null;
+  const reference = row ? text(row.reference) : null;
+  const consentStatus = row ? oneOf(row.consentStatus, CONSENT) : null;
+  if (index === null || id === null || reference === null || consentStatus === null) return null;
+  return { index, id, reference, consentStatus };
 }
 
 export function readDuplicateItem(value: unknown): IntakeDuplicate | null {
   const row = record(value);
-  if (!row) return null;
-  return {
-    index: indexOf(row.index),
-    existingReference: text(row.existingReference),
-  };
+  const index = row ? nonNegative(row.index) : null;
+  if (!row || index === null) return null;
+  return { index, existingReference: text(row.existingReference) };
 }
 
 export function readRejectedItem(value: unknown): IntakeRejected | null {
   const row = record(value);
-  if (!row) return null;
-  return {
-    index: indexOf(row.index),
-    problems: problemsOf(row.problems),
-  };
+  const index = row ? nonNegative(row.index) : null;
+  const problems = row ? problemsOf(row.problems) : null;
+  if (index === null || problems === null) return null;
+  return { index, problems };
 }
 
 export function readSkippedItem(value: unknown): IntakeSkipped | null {
   const row = record(value);
-  if (!row) return null;
-  return {
-    index: indexOf(row.index),
-    reasonCode: text(row.reasonCode),
-    reason: text(row.reason),
-  };
+  const index = row ? nonNegative(row.index) : null;
+  if (!row || index === null) return null;
+  return { index, reasonCode: text(row.reasonCode), reason: text(row.reason) };
 }
 
 export function readIntakeBatch(value: unknown): IntakeBatch | null {
   const row = record(value);
   const batchRef = row ? text(row.batchRef) : null;
   if (!row || !batchRef) return null;
+  const header = counts(row, batchRef);
+  if (!header) return null;
   const list = <T>(raw: unknown, read: (item: unknown) => T | null): readonly T[] =>
-    Array.isArray(raw) ? raw.flatMap((item) => {
+    readList(raw).flatMap((item) => {
       const parsed = read(item);
       return parsed ? [parsed] : [];
-    }) : [];
+    });
   return {
-    ...counts(row, batchRef),
+    ...header,
     note: text(row.note),
     accepted: list(row.accepted, readAcceptedItem),
     duplicates: list(row.duplicates, readDuplicateItem),

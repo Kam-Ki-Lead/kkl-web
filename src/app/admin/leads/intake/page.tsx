@@ -2,23 +2,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { IdentityBanner } from "@/components/admin/identity-banner";
+import { PageNav } from "@/components/admin/page-nav";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { getServices } from "@/lib/services";
 import { intakeStoreKind } from "@/lib/services/backend/config";
 import { listIntakeBatches } from "@/lib/services/backend/intake";
 import {
-  INTAKE_BATCH_LIMIT,
   INTAKE_SCREEN_OMISSIONS,
-  pageCapNote,
+  isPastEnd,
+  pageOffset,
   type IntakeCounts,
 } from "@/lib/services/backend/staff-views";
 import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Lead intake", robots: { index: false } };
 
-function count(value: number | null): string {
-  return value === null ? "—" : String(value);
+function one(v: string | string[] | undefined): string {
+  return (Array.isArray(v) ? v[0] : v) ?? "";
 }
 
 function sourceTotals(batches: readonly IntakeCounts[]): ReadonlyArray<{
@@ -26,12 +27,11 @@ function sourceTotals(batches: readonly IntakeCounts[]): ReadonlyArray<{
   value: string;
   note: string;
 }> {
-  const groups = new Map<string, { submitted: number; missing: boolean }>();
+  const groups = new Map<string, { submitted: number }>();
   for (const batch of batches) {
-    const label = batch.source ?? "Unknown source";
-    const current = groups.get(label) ?? { submitted: 0, missing: false };
-    if (batch.submitted === null) current.missing = true;
-    else current.submitted += batch.submitted;
+    const label = batch.source;
+    const current = groups.get(label) ?? { submitted: 0 };
+    current.submitted += batch.submitted;
     groups.set(label, current);
   }
   if (groups.size === 0) {
@@ -40,14 +40,20 @@ function sourceTotals(batches: readonly IntakeCounts[]): ReadonlyArray<{
   return [...groups.entries()].map(([label, group]) => ({
     label,
     value: String(group.submitted),
-    note: group.missing ? "A submitted count was absent" : "Submitted on this page",
+    note: "Submitted on this page",
   }));
 }
 
 /** A-10 — sources, volumes and duplicates. */
-export default async function AdminIntakePage() {
+export default async function AdminIntakePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   if (intakeStoreKind() === "backend") {
-    const loaded = await listIntakeBatches();
+    const params = await searchParams;
+    const offset = pageOffset(one(params.offset));
+    const loaded = await listIntakeBatches(offset);
     if (!loaded.ok) {
       return (
         <AdminShell title="Lead intake" subtitle="Sources, volumes and duplicates">
@@ -58,13 +64,23 @@ export default async function AdminIntakePage() {
         </AdminShell>
       );
     }
-    const batches = loaded.value;
-    const cap = pageCapNote(batches.length, INTAKE_BATCH_LIMIT);
+    const page = loaded.value;
+    const batches = page.batches;
+    const past = isPastEnd(page);
     const sources = sourceTotals(batches);
     return (
       <AdminShell title="Lead intake" subtitle="Sources, volumes and duplicates">
         <div className="flex max-w-[900px] flex-col gap-[16px]">
           <IdentityBanner />
+          <PageNav pathname="/admin/leads/intake" page={page} noun="batches" />
+          {past ? (
+            <StateMessage title="This page is past the end">
+              {page.total} batches are stored. This offset has none of them.
+            </StateMessage>
+          ) : page.total === 0 ? (
+            <StateMessage title="No intake batches">No batches are stored.</StateMessage>
+          ) : (
+          <>
           <div className="grid grid-cols-4 gap-[14px] max-[1060px]:grid-cols-2">
             {sources.map((source) => (
               <Card key={source.label} className="p-[18px]">
@@ -80,9 +96,7 @@ export default async function AdminIntakePage() {
             <h2 className="t-card-title border-b border-line px-[18px] py-[15px] text-ink">
               Recent runs
             </h2>
-            {batches.length === 0 ? (
-              <p className="t-body px-[18px] py-[16px] text-body">No intake batches are stored.</p>
-            ) : batches.map((run) => (
+            {batches.map((run) => (
               <Link
                 key={run.batchRef}
                 href={`/admin/leads/intake/${encodeURIComponent(run.batchRef)}`}
@@ -91,21 +105,21 @@ export default async function AdminIntakePage() {
                 <span className="min-w-0">
                   <span className="t-mono block text-[13px] text-ink">{run.batchRef}</span>
                   <span className="t-caption block text-muted">
-                    {run.source ?? "Source not recorded"} · {run.createdAt ?? "Time not recorded"}
+                    {run.source} · {run.createdAt}
                   </span>
                 </span>
                 <span className="flex flex-wrap gap-[16px] text-[15px]">
-                  <span className="text-success">{count(run.acceptedCount)} accepted</span>
-                  <span className="text-warning">{count(run.rejectedCount)} rejected</span>
-                  <span className="text-muted">{count(run.duplicateCount)} duplicates</span>
-                  <span className="text-muted">{count(run.skippedCount)} skipped</span>
+                  <span className="text-success">{run.acceptedCount} accepted</span>
+                  <span className="text-warning">{run.rejectedCount} rejected</span>
+                  <span className="text-muted">{run.duplicateCount} duplicates</span>
+                  <span className="text-muted">{run.skippedCount} skipped</span>
                 </span>
               </Link>
             ))}
           </Card>
-          <p className="t-caption text-muted">
-            {[cap, ...INTAKE_SCREEN_OMISSIONS].filter(Boolean).join(" ")}
-          </p>
+          </>
+          )}
+          <p className="t-caption text-muted">{INTAKE_SCREEN_OMISSIONS.join(" ")}</p>
         </div>
       </AdminShell>
     );
