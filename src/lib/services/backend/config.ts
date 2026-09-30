@@ -156,3 +156,24 @@ export function marketplaceStoreKind(): "sample" | "backend" {
 export function builderEnquiryStoreKind(): "sample" | "backend" {
   return read("KKL_BUILDER_ENQUIRIES") === "backend" ? "backend" : "sample";
 }
+
+// ---------------------------------------------------------------------------
+// Slice G — support tickets and in-app notifications.
+//
+// Two more narrow switches. What is different about these: they need no open
+// decision and no missing credential to be useful. A ticket is a durable
+// conversation, and a notification record is a durable record; neither waits
+// on a price or a provider.
+//
+// Delivery does wait on a provider (Q-7), and it is a separate thing from
+// both of them — the queue is visible through the same service and reports
+// honestly that nothing has been sent.
+// ---------------------------------------------------------------------------
+
+export function supportStoreKind(): "sample" | "backend" {
+  return read("KKL_SUPPORT") === "backend" ? "backend" : "sample";
+}
+
+export function notificationStoreKind(): "sample" | "backend" {
+  return read("KKL_NOTIFICATIONS") === "backend" ? "backend" : "sample";
+}

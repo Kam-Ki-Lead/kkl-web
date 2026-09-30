@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { BuilderShell } from "@/components/builder/builder-shell";
 import { NewTicketForm } from "@/components/console/new-ticket-form";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "New ticket" };
 
 /**

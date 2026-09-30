@@ -13,6 +13,12 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/states";
 import type { NotificationCategory } from "@/lib/domain/types";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Notifications" };
 
 const CATEGORY: Record<NotificationCategory, { label: string; tone: ChipTone }> = {

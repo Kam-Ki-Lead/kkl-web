@@ -8,6 +8,12 @@ import { Chip, type ChipTone } from "@/components/ui/chip";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Ticket", robots: { index: false } };
 
 const STATE: Record<string, { label: string; tone: ChipTone }> = {

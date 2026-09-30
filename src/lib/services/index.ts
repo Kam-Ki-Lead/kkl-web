@@ -8,7 +8,9 @@ import {
   listingStoreKind,
   locationStoreKind,
   marketplaceStoreKind,
+  notificationStoreKind,
   profileStoreKind,
+  supportStoreKind,
 } from "./backend/config";
 import { backendAdminLeadRequests, backendLeadRequests } from "./backend/lead-requests";
 import { backendLocations } from "./backend/locations";
@@ -17,6 +19,9 @@ import { backendEnquiries } from "./backend/enquiries";
 import { backendAdminOwnerListings, backendOwnerListings } from "./backend/owner-listings";
 import { backendCredits, backendLeadMarket } from "./backend/commerce";
 import { backendBuilderEnquiries } from "./backend/builder-enquiries";
+import { backendSupport } from "./backend/support";
+import { backendAdminAudit, backendAdminSupport } from "./backend/admin-support";
+import { backendNotifications } from "./backend/notifications";
 
 /**
  * Resolves the service implementation once, from runtime configuration.
@@ -30,15 +35,30 @@ import { backendBuilderEnquiries } from "./backend/builder-enquiries";
  * versioned OpenAPI spec (see kkl-backend/docs/architecture.md §7). Until it does,
  * selecting `api` throws here rather than silently degrading.
  */
+/**
+ * The domains that may be served by kkl-backend, each behind its own switch.
+ *
+ * A list rather than nested calls. It was nine levels of parentheses by the
+ * time slice G arrived, which is a shape that guarantees the next person
+ * closes a bracket in the wrong place — as this one did. Order is
+ * irrelevant: each decorator replaces the domains it owns and touches
+ * nothing else.
+ */
+const BACKEND_DOMAINS = [
+  withLeadRequestStore,
+  withLocationStore,
+  withProfileStore,
+  withListingStore,
+  withEnquiryStore,
+  withMarketplaceStore,
+  withBuilderEnquiryStore,
+  withSupportStore,
+  withNotificationStore,
+] as const;
+
 export function getServices(): Services {
   if (runtimeConfig.dataSource === "sample") {
-    return withBuilderEnquiryStore(
-      withMarketplaceStore(
-        withEnquiryStore(
-          withListingStore(withProfileStore(withLocationStore(withLeadRequestStore(sampleServices)))),
-        ),
-      ),
-    );
+    return BACKEND_DOMAINS.reduce<Services>((services, apply) => apply(services), sampleServices);
   }
 
   throw new Error(
@@ -164,6 +184,43 @@ function withBuilderEnquiryStore(services: Services): Services {
     ...services,
     builder: { ...services.builder, enquiries: backendBuilderEnquiries },
   };
+}
+
+/**
+ * Support tickets, served by kkl-backend when KKL_SUPPORT=backend.
+ *
+ * Both sides move together — the requester’s screens and the staff queue.
+ * A user raising a durable ticket that staff read in a sample queue would be
+ * worse than either half alone, because the person would be waiting on a
+ * reply nobody can see they are waiting for.
+ */
+function withSupportStore(services: Services): Services {
+  if (supportStoreKind() !== "backend") return services;
+  return {
+    ...services,
+    support: backendSupport("seller"),
+    builder: { ...services.builder, support: backendSupport("builder") },
+    admin: { ...services.admin, ...backendAdminSupport, ...backendAdminAudit },
+  };
+}
+
+/**
+ * In-app notifications, served by kkl-backend when KKL_NOTIFICATIONS=backend.
+ *
+ * The record is real. Whether a message reached anybody is a different claim,
+ * and this service exposes no field that could be mistaken for it.
+ */
+function withNotificationStore(services: Services): Services {
+  if (notificationStoreKind() !== "backend") return services;
+  return { ...services, notifications: backendNotifications("buyer") };
+}
+
+export function supportStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? supportStoreKind() : "backend";
+}
+
+export function notificationStore(): "sample" | "backend" {
+  return runtimeConfig.dataSource === "sample" ? notificationStoreKind() : "backend";
 }
 
 /** Which store each backend-served domain is using, for the screens to say so. */

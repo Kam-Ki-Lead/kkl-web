@@ -7,6 +7,12 @@ import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
 import type { AdminTicketFilter } from "@/lib/domain/admin";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Support queue", robots: { index: false } };
 
 const FILTERS = [

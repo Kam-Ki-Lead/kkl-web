@@ -5,6 +5,12 @@ import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { DECISIONS } from "@/lib/config/business-rules";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Notification states" };
 
 /**

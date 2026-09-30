@@ -10,6 +10,12 @@ import { formatDate } from "@/lib/format";
 import { getServices } from "@/lib/services";
 import type { SupportTicket } from "@/lib/domain/types";
 
+/**
+ * Read per-account at request time: with a backend store selected this page
+ * calls kkl-backend as the signed-in account, which cannot be prerendered.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Support" };
 
 const STATUS: Record<SupportTicket["status"], { label: string; tone: ChipTone }> = {
