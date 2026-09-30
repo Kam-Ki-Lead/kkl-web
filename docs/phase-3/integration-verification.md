@@ -270,7 +270,7 @@ The same backend process was still listening on `http://127.0.0.1:4010`
 (pid 24008, started 18:23:54). Health stayed 200. The checkout was still
 `abf89fce39f6f38a689fccc352391bcae9bef0d7` (implementation
 `d4116b3b072c6050326cf1591acc69359c7b8502`, OpenAPI `1.0.0-phase3.l`).
-The frontend application for this section is the commit that contains it.
+The frontend application for this section is `75944cf`.
 `next build` then `next start` on port 3811. `POST /v1/dev/sessions` was not
 used. One further local code was issued for Review Buyer, through the sign-in
 form, so a second browser profile could sign in. That code was not a
