@@ -12,6 +12,7 @@ import { areaLabel, getLocation } from "@/lib/services/sample/locations";
 import { processState } from "@/lib/services/sample/process-state";
 import { recordAudit } from "@/lib/services/sample/admin-store";
 import { leadRequestBackendConfig, type LeadRequestBackendConfig } from "./config";
+import { bearerMode, callAs } from "./session";
 
 /**
  * CR03 — lead requests served by kkl-backend.
@@ -29,13 +30,11 @@ import { leadRequestBackendConfig, type LeadRequestBackendConfig } from "./confi
  *
  * What is still a stand-in, and is labelled as one on screen
  * ----------------------------------------------------------
- * Who is asking. kkl-backend's production authenticator is mobile OTP
- * (architecture §4), which this program's no-live-services boundary forbids,
- * and kkl-web has no sign-in. So there is one sample Seller and one sample
- * staff member, and this module obtains their sessions from kkl-backend's
- * development authenticator. The isolation between accounts is real and
- * tested; the *proof of identity* in front of it is not, and no screen says
- * otherwise.
+ * Who is asking, while `KKL_AUTH` is unset. This module then obtains a
+ * sample Seller and a sample staff member from the development issuer.
+ * That is legacy review mode. With `KKL_AUTH=backend` the same calls use
+ * the browser session, and a rejected session is not replaced with one of
+ * those sample accounts.
  *
  * Labels are composed here, from the CR05 location records, because
  * kkl-backend stores areas as stable identifiers and never as display names.
@@ -144,11 +143,40 @@ type CallOptions = {
  * replayed blindly, and every write here carries an idempotency key or is
  * naturally additive.
  */
+function interpretLeadRequest<T>(
+  status: number,
+  payload: (Record<string, unknown> & { error?: string; field?: string }) | null,
+  allowNotFound: boolean,
+): T | null {
+  if (status === 204) return null;
+  if (status === 404 && allowNotFound) return null;
+  if (status >= 200 && status < 300) return payload as T;
+  if (status === 422) {
+    const field = typeof payload?.field === "string" ? payload.field : "form";
+    throw new ValidationError({ [fieldName(field)]: payload?.error ?? "This value was not accepted." });
+  }
+  if (status === 403) throw new ServiceError("forbidden", payload?.error ?? "Not permitted.");
+  if (status === 404) throw new ServiceError("not_found", "That request could not be found.");
+  if (status === 401) {
+    throw new ServiceError("unauthenticated", "The lead-request service did not accept this session.");
+  }
+  throw new ServiceError("unavailable", `The lead-request service returned HTTP ${status}.`);
+}
+
 async function call<T>(
   role: Role,
   path: string,
   { method = "GET", body, allowNotFound = false }: CallOptions = {},
 ): Promise<T | null> {
+  if (bearerMode() === "browser-session") {
+    const { status, body: payload } = await callAs<T & { error?: string; field?: string }>(
+      role,
+      path,
+      { method, body },
+    );
+    return interpretLeadRequest<T>(status, payload, allowNotFound);
+  }
+
   const config = leadRequestBackendConfig();
 
   const attempt = async (token: string) =>

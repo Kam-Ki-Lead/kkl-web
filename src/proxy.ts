@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { assertDeploymentSafe } from "@/lib/config/runtime";
 import { assertVerificationPolicyConfirmed } from "@/lib/config/verification-policy";
 
@@ -21,7 +21,7 @@ import { assertVerificationPolicyConfirmed } from "@/lib/config/verification-pol
  * authentication, authorization or business rules — those belong to
  * kkl-backend, which is the only thing that can enforce them.
  */
-export function proxy() {
+export function proxy(request: NextRequest) {
   try {
     assertDeploymentSafe();
     // CR07: production must not apply a verification rule nobody decided. Same
@@ -39,7 +39,9 @@ export function proxy() {
     });
   }
 
-  return NextResponse.next();
+  const forwarded = new Headers(request.headers);
+  forwarded.set("x-kkl-path", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  return NextResponse.next({ request: { headers: forwarded } });
 }
 
 export const config = {

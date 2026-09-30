@@ -205,12 +205,9 @@ export function verificationStoreKind(): "sample" | "backend" {
 // the wallet read, and nothing at all read the suppression list. A capability
 // nobody can reach is not a delivered capability, whatever the tests say.
 //
-// Lead intake (A-10, A-11) is deliberately *not* in this switch. The published
-// intake response names batch counts as arrays and does not name the fields
-// the approved run screen renders. See KKL_INTAKE below. Connecting it here
-// would mean inventing those fields, so this switch leaves intake on sample
-// data until KKL_INTAKE is set — and that setting shows the gap rather than
-// the sample runs.
+// Lead intake (A-10, A-11) is deliberately *not* in this switch. It has its
+// own switch, KKL_INTAKE, because the batch list is a different path from
+// wallet oversight.
 // ---------------------------------------------------------------------------
 
 export function adminOperationsStoreKind(): "sample" | "backend" {
@@ -235,6 +232,20 @@ export function authStoreKind(): "sample" | "backend" {
   return read("KKL_AUTH") === "backend" ? "backend" : "sample";
 }
 
+/** Which bearer a backend adapter will send. Read at request time. */
+export function bearerMode(): "browser-session" | "development-issuer" {
+  return authStoreKind() === "backend" ? "browser-session" : "development-issuer";
+}
+
+/**
+ * Shown on a backend-connected staff screen while sign-in is still the
+ * development issuer. Absent once `KKL_AUTH=backend`.
+ */
+export function legacyReviewIdentityLabel(): string | null {
+  if (bearerMode() === "browser-session") return null;
+  return "Legacy review mode. This screen is using the development staff identity.";
+}
+
 export function authBackendBaseUrl(): string {
   const baseUrl = read("KKL_BACKEND_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL");
   if (baseUrl === undefined) {
@@ -247,14 +258,17 @@ export function authBackendBaseUrl(): string {
 }
 
 // ---------------------------------------------------------------------------
-// KKL_STAFF_ORDERS and KKL_INTAKE — prepared, and not filled in.
+// KKL_STAFF_ORDERS and KKL_INTAKE — the staff queue and the intake batches.
 //
-// Cancellation (`POST /v1/orders/{orderId}/cancellation`) and intake
-// (`POST /v1/leads/intake`, `GET /v1/leads/intake/rejections`) are published.
-// The approved screens also need a staff-wide order list and a list of past
-// intake runs, with purchaser, amount and per-row rejection fields the
-// contract does not name. See `staff-contract-gaps.ts`. Turning either switch
-// on shows that gap. It does not serve the sample tables.
+// Orders: `GET /v1/orders?scope=all`, `GET /v1/orders/{orderId}`, and
+// `POST /v1/orders/{orderId}/cancellation`. Intake: the batch list and the
+// batch detail. Counts and cancellation fields are rendered as published.
+// An organisation, an INR amount, a delivery timeline and a masked phone
+// number are not invented when the payload omits them. See
+// `staff-views.ts`. Turning either switch on does not serve the sample tables.
+//
+// With `KKL_AUTH=backend` both call the signed-in session. A customer session
+// stays a customer session.
 // ---------------------------------------------------------------------------
 
 export function staffOrdersStoreKind(): "sample" | "backend" {

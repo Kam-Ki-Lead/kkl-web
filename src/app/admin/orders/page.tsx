@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { IdentityBanner } from "@/components/admin/identity-banner";
 import { AdminTable, Mono, Primary } from "@/components/admin/admin-table";
-import { Chip } from "@/components/ui/chip";
+import { Chip, type ChipTone } from "@/components/ui/chip";
 import { formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
 import { staffOrdersStoreKind } from "@/lib/services/backend/config";
-import { STAFF_ORDER_GAPS } from "@/lib/services/backend/staff-contract-gaps";
+import { listStaffOrders } from "@/lib/services/backend/staff-orders";
+import {
+  ORDER_LIST_LIMIT,
+  ORDER_SCREEN_OMISSIONS,
+  formatCredits,
+  isOrderStatus,
+  orderStatusLabel,
+  pageCapNote,
+} from "@/lib/services/backend/staff-views";
 import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Orders", robots: { index: false } };
@@ -15,6 +24,22 @@ const FILTERS = [
   { label: "Delivered", value: "delivered" },
   { label: "Failed", value: "failed" },
 ];
+
+const SERVICE_FILTERS = [
+  { label: "All", value: "all" },
+  { label: "Pending", value: "pending" },
+  { label: "Completed", value: "completed" },
+  { label: "Failed", value: "failed" },
+  { label: "Cancelled", value: "cancelled" },
+];
+
+function statusTone(status: string | null): ChipTone {
+  if (status === "completed") return "success";
+  if (status === "failed") return "danger";
+  if (status === "pending") return "warning";
+  if (status === "cancelled") return "muted";
+  return "neutral";
+}
 
 function one(v: string | string[] | undefined): string {
   return (Array.isArray(v) ? v[0] : v) ?? "";
@@ -34,11 +59,63 @@ export default async function AdminOrdersPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   if (staffOrdersStoreKind() === "backend") {
+    const params = await searchParams;
+    const filter = one(params.filter) || "all";
+    const status = isOrderStatus(filter) ? filter : null;
+    const query = one(params.q).trim().toLowerCase();
+    const loaded = await listStaffOrders(status);
+    if (!loaded.ok) {
+      return (
+        <AdminShell title="Orders" subtitle="Lead purchases and their delivery">
+          <IdentityBanner />
+          <StateMessage tone="error" title="Orders could not be loaded">
+            {loaded.message} Sample orders are not shown in their place.
+          </StateMessage>
+        </AdminShell>
+      );
+    }
+    const rows = loaded.value.filter((order) => {
+      if (!query) return true;
+      return `${order.reference ?? ""} ${order.leadReference ?? ""} ${order.buyerDisplayName ?? ""} ${order.id}`
+        .toLowerCase()
+        .includes(query);
+    });
+    const cap = pageCapNote(loaded.value.length, ORDER_LIST_LIMIT);
     return (
       <AdminShell title="Orders" subtitle="Lead purchases and their delivery">
-        <StateMessage title="Orders are not loaded from the service">
-          {STAFF_ORDER_GAPS.join(" ")} Sample orders are not shown in their place.
-        </StateMessage>
+        <IdentityBanner />
+        <AdminTable
+          basePath="/admin/orders"
+          filters={SERVICE_FILTERS}
+          activeFilter={status ?? "all"}
+          query={one(params.q)}
+          countLabel={`${rows.length} of ${loaded.value.length} orders`}
+          emptyTitle="No orders match"
+          emptyBody="Nothing matches this filter and search."
+          footnote={[cap, ...ORDER_SCREEN_OMISSIONS].filter(Boolean).join(" ")}
+          columns={[
+            { header: "ORDER", width: "0.9fr" },
+            { header: "LEAD", width: "0.9fr" },
+            { header: "BUYER", width: "1.4fr" },
+            { header: "CREDITS", width: "0.8fr" },
+            { header: "STATUS", width: "0.9fr" },
+          ]}
+          rows={rows.map((order) => ({
+            key: order.id,
+            href: `/admin/orders/${order.id}/delivery`,
+            cells: [
+              <Mono key="id">{order.reference ?? order.id}</Mono>,
+              <Mono key="lead">{order.leadReference ?? "—"}</Mono>,
+              <Primary key="who">{order.buyerDisplayName ?? "—"}</Primary>,
+              <span key="amt" className="font-semibold text-ink">
+                {order.amountCredits === null ? "—" : formatCredits(order.amountCredits)}
+              </span>,
+              <Chip key="state" tone={statusTone(order.status)}>
+                {orderStatusLabel(order.status)}
+              </Chip>,
+            ],
+          }))}
+        />
       </AdminShell>
     );
   }

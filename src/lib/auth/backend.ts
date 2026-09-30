@@ -20,9 +20,11 @@ import {
 /**
  * Browser sessions against kkl-backend's published authenticator.
  *
- * This is not the development identity issuer. A code is requested, checked,
- * and exchanged for an access token plus a refresh token. The refresh token
- * is written only as an httpOnly cookie. Callers receive a profile with no
+ * This is not the development identity issuer. Commit 4b6fa79 implemented
+ * this adapter and tested it against a local stand-in. A running kkl-backend
+ * has not been exercised from here. A code is requested, checked, and
+ * exchanged for an access token plus a refresh token. The refresh token is
+ * written only as an httpOnly cookie. Callers receive a profile with no
  * role: a role the browser supplied is not a role this process will repeat.
  *
  * When the service is unreachable the caller gets `unavailable`. Nothing in

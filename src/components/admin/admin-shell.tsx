@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import { AvatarBadge, ConsoleShell } from "@/components/layout/console-shell";
+import { redirectForAuth } from "@/lib/auth/recover";
+import { readSignedInProfile } from "@/lib/auth/backend";
 import { SAMPLE_STAFF } from "@/lib/domain/identity";
 import { getServices } from "@/lib/services";
+import { bearerMode } from "@/lib/services/backend/session";
 import { adminRailItems, railCounts } from "./admin-nav";
 
 /**
@@ -10,9 +14,10 @@ import { adminRailItems, railCounts } from "./admin-nav";
  * It reads the dashboard's own queue counts so the rail badges and A-02 cannot
  * disagree — both come from one call.
  *
- * The header names the staff identity this build records actions against. It is
- * a constant, not a session, and A-01 says so; the label here is so a reviewer
- * looking at any screen can see whose name an action would carry.
+ * The header names who an action is attributed to. With `KKL_AUTH` unset that
+ * is the labelled sample staff identity. With `KKL_AUTH=backend` it is the
+ * signed-in account, and a missing session returns to sign-in. The header
+ * does not turn a customer account into staff.
  */
 export async function AdminShell({
   title,
@@ -38,6 +43,19 @@ export async function AdminShell({
     (l) => l.status === "submitted" || l.status === "in_review",
   ).length;
 
+  let asideName = SAMPLE_STAFF.name;
+  let asideTeam = SAMPLE_STAFF.team;
+  if (bearerMode() === "browser-session") {
+    try {
+      const profile = await readSignedInProfile();
+      asideName = profile.displayName;
+      asideTeam = profile.status === "suspended" ? "Suspended" : "Signed-in session";
+    } catch (error) {
+      redirectForAuth(error, (await headers()).get("x-kkl-path") ?? "/admin");
+      throw error;
+    }
+  }
+
   return (
     <ConsoleShell
       navLabel="Admin console"
@@ -55,9 +73,9 @@ export async function AdminShell({
       aside={
         <>
           <span className="t-caption text-muted max-[860px]:hidden">
-            {SAMPLE_STAFF.name} · {SAMPLE_STAFF.team}
+            {asideName} · {asideTeam}
           </span>
-          <AvatarBadge name={SAMPLE_STAFF.name} />
+          <AvatarBadge name={asideName} />
         </>
       }
     >

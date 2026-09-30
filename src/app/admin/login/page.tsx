@@ -4,6 +4,7 @@ import { Wordmark } from "@/components/brand/wordmark";
 import { Card } from "@/components/ui/card";
 import { Field, TextInput } from "@/components/ui/field";
 import { ButtonLink } from "@/components/ui/button";
+import { authStoreKind } from "@/lib/services/backend/config";
 
 export const metadata: Metadata = {
   title: "Staff sign-in",
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
  * control.
  */
 export default function AdminLoginPage() {
+  const signedIn = authStoreKind() === "backend";
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-deep px-4 py-[40px]">
       <Card className="w-full max-w-[420px] p-[28px]">
@@ -68,10 +70,9 @@ export default function AdminLoginPage() {
         <div className="mt-[18px] rounded-[10px] border border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
           <h2 className="t-card-title text-warning">These fields do nothing</h2>
           <p className="t-body mt-[6px] text-body">
-            No password is checked, no session is created and no second factor is asked for.
-            Staff authentication belongs to kkl-backend and does not exist yet, so the fields are
-            disabled rather than pretending — and the console is reachable without them, by
-            anybody who has this URL.
+            {signedIn
+              ? "No password is checked and this form creates no session. Staff access is an account that was already provisioned as staff. Sign in with that account. A customer sign-in stays a customer."
+              : "No password is checked, no session is created and no second factor is asked for. Staff authentication belongs to kkl-backend and does not exist yet, so the fields are disabled rather than pretending — and the console is reachable without them, by anybody who has this URL."}
           </p>
           <p className="t-caption mt-[8px] text-muted">
             Whether staff sign-in requires MFA, and of what kind, is <strong>D-16</strong> and is
@@ -79,9 +80,15 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        <ButtonLink href="/admin" className="mt-[16px] w-full">
-          Continue to the console (no sign-in)
-        </ButtonLink>
+        {signedIn ? (
+          <ButtonLink href="/auth?next=/admin" className="mt-[16px] w-full">
+            Sign in
+          </ButtonLink>
+        ) : (
+          <ButtonLink href="/admin" className="mt-[16px] w-full">
+            Continue to the console (no sign-in)
+          </ButtonLink>
+        )}
 
         <p className="t-caption mt-[14px] text-muted">
           <Link href="/" className="text-brand underline underline-offset-2">

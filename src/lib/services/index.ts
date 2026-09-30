@@ -244,9 +244,7 @@ function withVerificationStore(services: Services): Services {
  * kkl-backend when KKL_ADMIN_OPERATIONS=backend.
  *
  * These are the staff consoles for capabilities that existed and that nothing
- * called. Lead intake (A-10, A-11) is not here on purpose: see
- * `adminOperationsStoreKind` for why connecting it would mean inventing
- * numbers the backend does not record.
+ * called. Lead intake (A-10, A-11) is a separate switch, KKL_INTAKE.
  */
 function withAdminOperationsStore(services: Services): Services {
   if (adminOperationsStoreKind() !== "backend") return services;

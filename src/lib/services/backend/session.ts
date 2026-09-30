@@ -1,19 +1,22 @@
+import { headers } from "next/headers";
 import { ServiceError } from "@/lib/services/contracts";
 import { processState } from "@/lib/services/sample/process-state";
+import { bearerMode } from "./config";
 
 /**
- * One way to reach kkl-backend as one of the sample identities.
+ * How a server adapter identifies itself to kkl-backend.
  *
- * Slice A built real authentication — mobile number, one-time code, hashed
- * sessions with rotation — and nobody can use it, because no provider delivers
- * a code (open-dependencies.md Q-7) and kkl-web has no sign-in screen. So
- * every adapter here obtains a session from kkl-backend's **development
- * identity issuer**, which invents an account for a name.
+ * Two modes, and they do not mix.
  *
- * That is worth restating wherever it is used: the isolation between these
- * accounts is real and enforced by the database, and the proof of identity in
- * front of it is not. Durable storage and row-level policies do not add up to
- * production authentication.
+ * `KKL_AUTH=backend` uses the browser session: the httpOnly access cookie
+ * from `POST /v1/auth/sessions`. A missing or rejected session goes back
+ * through sign-in. This mode never calls `POST /v1/dev/sessions`, including
+ * after expiry or a 401.
+ *
+ * With `KKL_AUTH` unset, adapters keep the development identity issuer.
+ * That is legacy review mode. It is labelled on the staff screens that use
+ * it. The sample accounts are real rows; the proof of identity in front of
+ * them is not production sign-in.
  *
  * Everything here runs on the server. The shared secret and the backend's
  * address never reach a browser.
@@ -133,16 +136,62 @@ export type BackendProblem = {
   blockers?: ReadonlyArray<{ field: string; message: string }>;
 };
 
+export { bearerMode, legacyReviewIdentityLabel } from "./config";
+
+async function returnPath(): Promise<string> {
+  try {
+    const path = (await headers()).get("x-kkl-path");
+    return path && path.startsWith("/") && !path.startsWith("//") ? path : "/account";
+  } catch (cause) {
+    if (isFrameworkSignal(cause)) throw cause;
+    return "/account";
+  }
+}
+
 /**
- * One request as one identity, with a single retry when a cached session has
- * expired or been revoked. Nothing else is retried: a failed write must not be
- * replayed blindly, and the writes here carry idempotency keys or are
- * naturally additive.
+ * The signed-in browser session. A 401 refreshes that session or returns to
+ * sign-in. It does not issue a development identity of any role.
  */
-export async function callAs<T>(
+async function callWithBrowserSession<T>(
+  path: string,
+  init: { method?: string; body?: unknown },
+): Promise<BackendResponse<T & BackendProblem>> {
+  const { callAsSignedIn, SessionStaleError } = await import("@/lib/auth/backend");
+  const { redirectForAuth } = await import("@/lib/auth/recover");
+  try {
+    const result = await callAsSignedIn<T>(path, init);
+    const error = result.body.error;
+    return {
+      status: result.status,
+      body: {
+        ...result.body,
+        error: typeof error === "string" ? error : undefined,
+      } as T & BackendProblem,
+    };
+  } catch (error) {
+    if (
+      error instanceof SessionStaleError
+      || (error instanceof ServiceError && error.kind === "unauthenticated")
+    ) {
+      redirectForAuth(error, await returnPath());
+      throw error;
+    }
+    if (error instanceof ServiceError && error.kind === "forbidden") {
+      return { status: 403, body: { error: error.message } as T & BackendProblem };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Legacy review mode only: one request as a named sample identity, with a
+ * single retry when that cached development session has expired. Nothing else
+ * is retried. This function is not called when `KKL_AUTH=backend`.
+ */
+async function callWithDevelopmentIssuer<T>(
   role: BackendRole,
   path: string,
-  { method = "GET", body }: { method?: string; body?: unknown } = {},
+  { method = "GET", body }: { method?: string; body?: unknown },
 ): Promise<BackendResponse<T & BackendProblem>> {
   const access = backendAccess();
   const attempt = async (token: string) =>
@@ -180,4 +229,18 @@ export async function callAs<T>(
   const text = await response.text();
   const parsed = text ? (JSON.parse(text) as T & BackendProblem) : ({} as T & BackendProblem);
   return { status: response.status, body: parsed };
+}
+
+/**
+ * One request. With `KKL_AUTH=backend` the role argument is ignored: the
+ * browser session's own account is the caller, and a customer session is
+ * not replaced with a staff one.
+ */
+export async function callAs<T>(
+  role: BackendRole,
+  path: string,
+  init: { method?: string; body?: unknown } = {},
+): Promise<BackendResponse<T & BackendProblem>> {
+  if (bearerMode() === "browser-session") return callWithBrowserSession(path, init);
+  return callWithDevelopmentIssuer(role, path, init);
 }

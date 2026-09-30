@@ -13,7 +13,6 @@ import {
   sessionRequestBody,
 } from "../src/lib/auth/contract.ts";
 import { ACCESS_COOKIE, REFRESH_COOKIE, sessionCookieOptions } from "../src/lib/auth/cookies.ts";
-import { INTAKE_GAPS, STAFF_ORDER_GAPS } from "../src/lib/services/backend/staff-contract-gaps.ts";
 
 test("a code request carries the number and never a role", () => {
   const body = codeRequestBody("9830012345");
@@ -77,9 +76,3 @@ test("session cookies are httpOnly and the two tokens are different cookies", ()
   assert.notEqual(ACCESS_COOKIE, REFRESH_COOKIE);
 });
 
-test("staff order and intake screens stay blocked on unpublished fields", () => {
-  assert.ok(STAFF_ORDER_GAPS.some((gap) => gap.includes("No staff-wide list")));
-  assert.ok(STAFF_ORDER_GAPS.some((gap) => gap.includes("amountCredits")));
-  assert.ok(INTAKE_GAPS.some((gap) => gap.includes("no published fields")));
-  assert.ok(INTAKE_GAPS.some((gap) => gap.includes("No published path lists past runs")));
-});
