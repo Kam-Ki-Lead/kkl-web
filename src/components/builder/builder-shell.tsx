@@ -68,10 +68,17 @@ export async function BuilderShell({
   let account;
   let unread;
   try {
-    [account, unread] = await Promise.all([
-      services.account.get(),
-      services.enquiries.unreadCount(),
-    ]);
+    // A signed-in builder has no subscription resource on the published
+    // contract. The sample account's "Active" plan belongs to somebody else
+    // and must not be shown as this session's.
+    if (signedInRole === "builder") {
+      unread = await services.enquiries.unreadCount();
+    } else {
+      [account, unread] = await Promise.all([
+        services.account.get(),
+        services.enquiries.unreadCount(),
+      ]);
+    }
   } catch (error) {
     redirectForAuth(error, (await headers()).get("x-kkl-path") ?? "/builder");
     if (error instanceof ServiceError && (error.kind === "forbidden" || error.kind === "unavailable")) {
@@ -90,15 +97,16 @@ export async function BuilderShell({
     throw error;
   }
 
-  const status = SUBSCRIPTION[account.subscription.state];
-  const asideName = signedInName ?? account.contactName;
+  const subscriptionState = account?.subscription.state ?? "none";
+  const status = SUBSCRIPTION[subscriptionState];
+  const asideName = signedInName ?? account?.contactName ?? "Builder";
 
   return (
     <ConsoleShell
       navLabel="Builder console"
       navEyebrow="Builder"
       items={builderRailItems(unread)}
-      footer={builderRailFooter(status.label, account.subscription.state === "none" ? "Subscribe" : "Manage")}
+      footer={builderRailFooter(status.label, subscriptionState === "none" ? "Subscribe" : "Manage")}
       title={title}
       subtitle={subtitle}
       aside={

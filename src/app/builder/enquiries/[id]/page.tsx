@@ -10,6 +10,8 @@ import { newUnlockToken } from "@/app/actions/builder-enquiries";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { ServiceError } from "@/lib/services/contracts";
+import { redirectForAuth } from "@/lib/auth/recover";
 
 /**
  * Read per-account at request time: with a backend store selected this page
@@ -27,11 +29,27 @@ export default async function BuilderEnquiryPage({
 }) {
   const { id } = await params;
   const services = getServices().builder;
-  const [enquiry, access, wallet] = await Promise.all([
-    services.enquiries.get(id),
-    services.enquiries.contactAccessMode(),
-    services.credits.wallet(),
-  ]);
+  let enquiry;
+  let access;
+  let wallet;
+  try {
+    [enquiry, access, wallet] = await Promise.all([
+      services.enquiries.get(id),
+      services.enquiries.contactAccessMode(),
+      services.credits.wallet(),
+    ]);
+  } catch (error) {
+    redirectForAuth(error, `/builder/enquiries/${id}`);
+    if (error instanceof ServiceError && (error.kind === "forbidden" || error.kind === "unavailable")) {
+      return (
+        <section className="mx-auto flex max-w-[640px] flex-col gap-[12px] px-[24px] py-[48px]">
+          <h1 className="t-page-title">Enquiry</h1>
+          <p role="alert" className="t-body text-body">{error.message}</p>
+        </section>
+      );
+    }
+    throw error;
+  }
   if (!enquiry) notFound();
 
   const token = await newUnlockToken();
@@ -50,7 +68,9 @@ export default async function BuilderEnquiryPage({
             </div>
             {/* The approved enquiry header sets the buyer's name in 17px/600
                 Public Sans — a label, not a page display title. */}
-            <h2 className="mt-[3px] text-[17px] font-semibold text-ink">{enquiry.buyerName}</h2>
+            <h2 className="mt-[3px] text-[17px] font-semibold text-ink">
+              {enquiry.buyerName ?? "No name is released"}
+            </h2>
             <p className="t-body mt-[2px] text-muted">
               {enquiry.listingTitle} · {formatDateTime(enquiry.receivedAt)}
             </p>

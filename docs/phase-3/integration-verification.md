@@ -310,6 +310,94 @@ result was not repeated.
 - Portal property cards remain the sample catalogue.
 - Local code delivery is not production OTP. A queued notification is not a delivered message.
 
+## Builder enquiry inbox, 1 October 2026
+
+This section is a later run. It does not change the runs above, and it does
+not repeat the support, refund, or notification checks.
+
+The same backend process was still listening on `http://127.0.0.1:4010`
+(pid 24008). The checkout was still
+`abf89fce39f6f38a689fccc352391bcae9bef0d7` (implementation
+`d4116b3b072c6050326cf1591acc69359c7b8502`, OpenAPI `1.0.0-phase3.l`).
+The frontend application for this section is the commit that contains the
+inbox changes. `next build` then `next start` on port 3811. The switches are
+the same set as the domain-switch section. `POST /v1/dev/sessions` was not
+used. No development secret was set on the frontend.
+
+`GET /v1/enquiries` has no offset or limit. Pagination was not added.
+
+### Accounts actually exercised
+
+| Display name | Role | Account id | How |
+|---|---|---|---|
+| Review Builder | builder | `99aa72e3-4602-4f7a-a01e-936dfc535993` | Published sign-in form, local code. Number ends 0104. |
+| Review Seller | seller | `b13b9e12-eb0c-405d-9508-9c0454d02b2c` | Separate Chrome profile, published sign-in form, local code. |
+
+One local code was used for each. Neither code was a production message.
+The builder has no listings and no enquiry is addressed to that account.
+The two existing enquiries remain unrouted (`recipient_account_id` null).
+They are not this builder’s inbox.
+
+### Browser
+
+| Check | Result |
+|---|---|
+| No session opening `/builder/enquiries` | PASS as a refusal. The browser landed on `/auth?next=/builder/enquiries`. It did not show the sample enquiries (Rina Sen, Arun Das, Manish Kapoor, Sharmila Bose) or an active subscription. |
+| Review Builder inbox | PASS as an empty inbox. “No enquiries yet.” The contact card said access is awaiting confirmation and named the three undecided rules. No name, number, or mask was shown. The shell said “No subscription”, not the sample plan. |
+| Unread filter | PASS as an empty filter. “Nothing matches this filter.” Still no sample names. This is not a populated inbox. |
+| Enquiry detail for `1d8549f8-4fbb-49cc-a039-e49b79f4bbf8` | PASS as a refusal. That row is unrouted and belongs to another buyer. The builder received 404. The message was not shown. |
+| Dashboard and properties | PASS as not using the sample builder. Published and draft tiles are “—”, “Not this account's property list.” Properties says the sample builder’s projects are not shown. Enquiry count is 0. |
+| Reload after a frontend restart | PASS. The same empty inbox and the 0 enquiry count were still there. Nothing had been written. |
+| Review Seller in a second browser, while Review Builder’s dashboard was open | PASS as a refusal. The seller page said the session is a seller account and does not open the sample builder, and named Review Seller. It did not show “No enquiries yet” or the sample names. |
+| Backend unreachable | PASS as a failure. With `KKL_BACKEND_BASE_URL` pointed at a closed port, `/builder/enquiries` said the service is not responding and that the records are not served from this process. The sample names were not shown. The API process on 4010 was left running. The frontend was then pointed back at 4010. |
+
+### Restrictions, not completions
+
+- A populated inbox was not in the fixture. The empty list is the stored state. It is not evidence that a row would render.
+- Contact access stays `awaiting_decision` (Q-2a). The recipient projection includes no contact and no message (Q-2b). No mask was composed.
+- No subscription resource is published. The shell does not show the sample “Active” plan.
+- Builder property projects are still not this account’s list. The sample projects are withheld rather than presented as Review Builder’s.
+
+### What still blocks listing submission
+
+The stored owner draft `PL-5362CF550A` already has a title and a property type.
+`POST /v1/listings/{listingId}/submission` still requires, for an owner listing:
+
+- `locationId`
+- `priceInr`
+- `transaction`
+- `configuration`
+- `contactName`
+- `contactPreference`
+- at least one `listing_media` row with `kind = image`
+
+Those fields are missing on the draft. A builder listing does not require the
+owner-only fields or the photograph row; it still requires title, property
+type, location, and price.
+
+Object storage (Q-8) means the file bytes are not kept. `POST /v1/listings/{listingId}/media`
+still inserts a media row without a storage key, and the photograph rule counts
+that row. Storage being unconfigured does not by itself make submission
+impossible. The owner photograph step records file names in the browser and
+does not call that media endpoint, so the draft also has no image row.
+
+Submission does not publish. `to: published` stays refused
+(`publication_not_decided`).
+
+### What remains for the sample KYC and property-review queues
+
+These are not the same gap as storage.
+
+- `/admin/kyc` still lists sample applications. The published verification
+  resources are cases and queues, already used by `/admin/verification`. No
+  published route accepts or lists KYC document applications. Replacing that
+  queue needs that contract. It does not need listing-media storage.
+- `/admin/properties` still lists sample moderated portal listings (reported,
+  published, unpublished). The published staff queue is
+  `GET /v1/listings/queue`, already used by owner submissions. No published
+  route moderates a live portal listing or a buyer report. Replacing that
+  queue needs that contract. It does not need listing-media storage.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name

@@ -7,6 +7,7 @@ import { PropertyImage } from "@/components/property/property-image";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
+import { bearerMode } from "@/lib/services/backend/session";
 import type { ListingStatus } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "My properties" };
@@ -40,6 +41,17 @@ export default async function BuilderPropertiesPage({
   const tabKey = one(params.tab) ?? "all";
   const tab = TABS.find((t) => t.key === tabKey) ?? TABS[0];
   const justPublished = one(params.published);
+
+  if (bearerMode() === "browser-session") {
+    return (
+      <BuilderShell title="My properties" subtitle="Everything you have listed">
+        <StateMessage title="This account has no property list here">
+          The sample builder&rsquo;s projects are not shown. A listing stored for this account
+          is not on this screen.
+        </StateMessage>
+      </BuilderShell>
+    );
+  }
 
   const services = getServices().builder;
   const [listings, account] = await Promise.all([

@@ -8,15 +8,17 @@ import { ButtonLink } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { bearerMode } from "@/lib/services/backend/session";
 
 export const metadata: Metadata = { title: "Builder dashboard" };
 
 /** B-06 — Builder dashboard. */
 export default async function BuilderDashboardPage() {
   const services = getServices().builder;
+  const signedIn = bearerMode() === "browser-session";
   const [published, drafts, enquiries] = await Promise.all([
-    services.listings.list({ status: "published" }),
-    services.listings.list({ status: "draft" }),
+    signedIn ? Promise.resolve([]) : services.listings.list({ status: "published" }),
+    signedIn ? Promise.resolve([]) : services.listings.list({ status: "draft" }),
     services.enquiries.list(),
   ]);
 
@@ -29,14 +31,14 @@ export default async function BuilderDashboardPage() {
         <StatTiles
           tiles={[
             {
-              value: String(published.length),
+              value: signedIn ? "—" : String(published.length),
               label: "Published",
-              note: "Live on the portal",
+              note: signedIn ? "Not this account's property list" : "Live on the portal",
             },
             {
-              value: String(drafts.length),
+              value: signedIn ? "—" : String(drafts.length),
               label: drafts.length === 1 ? "Draft" : "Drafts",
-              note: "Not yet submitted",
+              note: signedIn ? "Not this account's property list" : "Not yet submitted",
             },
             {
               value: String(enquiries.length),
@@ -78,7 +80,7 @@ export default async function BuilderDashboardPage() {
                     >
                       <span className="min-w-0">
                         <span className="block text-[15px] font-bold text-ink">
-                          {enquiry.buyerName} · {enquiry.listingTitle}
+                          {enquiry.buyerName ?? enquiry.listingTitle}
                         </span>
                         <span className="t-caption block text-muted">
                           {enquiry.kind === "site_visit" ? "Site-visit request" : "Enquiry"} ·{" "}

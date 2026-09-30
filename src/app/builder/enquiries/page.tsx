@@ -8,6 +8,8 @@ import { StateMessage } from "@/components/ui/states";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { ServiceError } from "@/lib/services/contracts";
+import { redirectForAuth } from "@/lib/auth/recover";
 import type { ContactAccessMode } from "@/lib/domain/types";
 
 /**
@@ -55,13 +57,28 @@ export default async function BuilderEnquiriesPage({
   const tab = one(params.tab) ?? "all";
 
   const services = getServices().builder;
-  const [enquiries, access] = await Promise.all([
-    services.enquiries.list({
-      unreadOnly: tab === "unread" || undefined,
-      kind: tab === "enquiry" ? "enquiry" : tab === "site_visit" ? "site_visit" : undefined,
-    }),
-    services.enquiries.contactAccessMode(),
-  ]);
+  let enquiries;
+  let access;
+  try {
+    [enquiries, access] = await Promise.all([
+      services.enquiries.list({
+        unreadOnly: tab === "unread" || undefined,
+        kind: tab === "enquiry" ? "enquiry" : tab === "site_visit" ? "site_visit" : undefined,
+      }),
+      services.enquiries.contactAccessMode(),
+    ]);
+  } catch (error) {
+    redirectForAuth(error, "/builder/enquiries");
+    if (error instanceof ServiceError && (error.kind === "forbidden" || error.kind === "unavailable")) {
+      return (
+        <section className="mx-auto flex max-w-[640px] flex-col gap-[12px] px-[24px] py-[48px]">
+          <h1 className="t-page-title">Enquiries</h1>
+          <p role="alert" className="t-body text-body">{error.message}</p>
+        </section>
+      );
+    }
+    throw error;
+  }
   const mode = access.selectedMode;
 
   return (
@@ -112,7 +129,7 @@ export default async function BuilderEnquiriesPage({
                           href={`/builder/enquiries/${enquiry.id}`}
                           className="underline-offset-2 hover:underline"
                         >
-                          {enquiry.buyerName}
+                          {enquiry.buyerName ?? enquiry.listingTitle}
                         </Link>
                       </h2>
                       {enquiry.read ? null : <Chip tone="warning">New</Chip>}
