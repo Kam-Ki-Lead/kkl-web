@@ -110,3 +110,13 @@ still absent. A limitation that stops reproducing fails the run.
 No live services. No public deployment. No payments, authentication, calls or
 messaging. The sample-mode guard refuses to serve a production deployment
 running sample services and was not weakened to make anything pass.
+
+## Phase 3
+
+The statements above are the Phase 2 sample-service handoff. The later
+real-backend run is a separate record and does not revise them.
+
+| Document | What it answers |
+|---|---|
+| [../phase-3/README.md](../phase-3/README.md) | Where that record sits, and which older checklist entries it leaves alone |
+| [../phase-3/integration-verification.md](../phase-3/integration-verification.md) | Frontend `611bca9` against backend `abf89fc`: settings, results, fixtures |
