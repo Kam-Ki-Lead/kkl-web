@@ -159,7 +159,7 @@ export async function completeEnquiry(): Promise<
       "Sign-in is connected and enquiries are not, so this enquiry was not saved to the sample list. Your draft is still here.",
     );
   }
-  await getServices().enquiries.submitEnquiry({
+  const filed = await getServices().enquiries.submitEnquiry({
     idempotencyKey: draft.submissionToken,
     propertyId: draft.propertyId,
     kind: draft.kind,
@@ -171,11 +171,15 @@ export async function completeEnquiry(): Promise<
 
   const jar = await cookies();
   jar.delete(DRAFT_COOKIE);
-
-  // The confirmation screen is addressed by the submission token, not by the
-  // enquiry reference: references are sequential and would be enumerable in a
-  // URL. The reference is shown on the screen, where it belongs.
-  return { ok: true, receipt: draft.submissionToken };
+  // GET /v1/enquiries/{enquiryId} is the published read. The submission token
+  // is only the idempotency key, so a backend confirmation is addressed by the
+  // enquiry id the write returned. That id is a uuid. The sample store still
+  // addresses its confirmation by the token. A short human reference is shown
+  // on the screen when the record carries one; it is not the address.
+  return {
+    ok: true,
+    receipt: enquiryStoreKind() === "backend" ? filed.enquiryId : draft.submissionToken,
+  };
 }
 
 /**

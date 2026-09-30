@@ -110,7 +110,11 @@ export default async function AdminOrdersPage({
           filters={SERVICE_FILTERS}
           activeFilter={status ?? "all"}
           query={one(params.q)}
-          countLabel={pageRangeLabel(page, "orders")}
+          countLabel={
+            query
+              ? `${pageRangeLabel(page, "orders")}. Search looks through the orders on this page.`
+              : pageRangeLabel(page, "orders")
+          }
           emptyTitle={emptyTitle}
           emptyBody={emptyBody}
           footnote={ORDER_SCREEN_OMISSIONS.join(" ")}

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { AvatarBadge, ConsoleShell } from "@/components/layout/console-shell";
+import { ServiceError } from "@/lib/services/contracts";
 import { redirectForAuth } from "@/lib/auth/recover";
 import { readSignedInProfile } from "@/lib/auth/backend";
 import { SAMPLE_STAFF } from "@/lib/domain/identity";
@@ -52,7 +53,12 @@ export async function AdminShell({
       asideTeam = profile.status === "suspended" ? "Suspended" : "Signed-in session";
     } catch (error) {
       redirectForAuth(error, (await headers()).get("x-kkl-path") ?? "/admin");
-      throw error;
+      if (error instanceof ServiceError && error.kind === "unavailable") {
+        asideName = "Session";
+        asideTeam = "Account could not be read";
+      } else {
+        throw error;
+      }
     }
   }
 
