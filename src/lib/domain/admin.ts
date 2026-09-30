@@ -375,7 +375,14 @@ export type SuppressionEntry = {
 
 export type ConsentBasis = { readonly source: string; readonly basis: string };
 
-export type NotificationState = "sent" | "failed" | "retrying";
+export type NotificationState =
+  | "sent"
+  | "failed"
+  | "retrying"
+  | "queued"
+  | "sending"
+  | "suppressed"
+  | "unconfigured";
 
 export type NotificationRecord = {
   readonly id: string;

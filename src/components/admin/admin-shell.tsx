@@ -6,6 +6,7 @@ import { redirectForAuth } from "@/lib/auth/recover";
 import { readSignedInProfile } from "@/lib/auth/backend";
 import { SAMPLE_STAFF } from "@/lib/domain/identity";
 import { getServices } from "@/lib/services";
+import { liveAdminQueues } from "@/lib/services/live-admin-queues";
 import { bearerMode } from "@/lib/services/backend/session";
 import { adminRailItems, railCounts } from "./admin-nav";
 
@@ -29,9 +30,40 @@ export async function AdminShell({
   subtitle: string;
   children: ReactNode;
 }) {
+  let signedInName: string | null = null;
+  let signedInRole: string | null = null;
+  if (bearerMode() === "browser-session") {
+    try {
+      const profile = await readSignedInProfile();
+      signedInName = profile.displayName;
+      signedInRole = profile.role;
+    } catch (error) {
+      redirectForAuth(error, (await headers()).get("x-kkl-path") ?? "/admin");
+      if (!(error instanceof ServiceError && error.kind === "unavailable")) throw error;
+      signedInName = "Session";
+    }
+    if (signedInRole !== "staff") {
+      return (
+        <section className="mx-auto flex max-w-[640px] flex-col gap-[12px] px-[24px] py-[48px]">
+          <h1 className="t-page-title">{title}</h1>
+          <p role="alert" className="t-body text-body">
+            {signedInName === "Session"
+              ? "The account could not be read. This screen does not open the sample queues."
+              : signedInRole
+                ? `This session is a ${signedInRole} account. The operations console is for a staff account, and this screen does not open the sample queues.`
+                : "This session has no staff role. The operations console does not open the sample queues."}
+          </p>
+          {signedInName ? (
+            <p className="t-caption text-muted">Signed in as {signedInName}.</p>
+          ) : null}
+        </section>
+      );
+    }
+  }
+
   const admin = getServices().admin;
-  const [dashboard, notifications, ownerListings, verification] = await Promise.all([
-    admin.dashboard(),
+  const [live, notifications, ownerListings, verification] = await Promise.all([
+    liveAdminQueues(),
     admin.listNotifications("failed"),
     // CR02: the rail badge counts what is actually waiting for a person —
     // submitted and awaiting-resubmission — not everything in the queue.
@@ -44,22 +76,10 @@ export async function AdminShell({
     (l) => l.status === "submitted" || l.status === "in_review",
   ).length;
 
-  let asideName = SAMPLE_STAFF.name;
-  let asideTeam = SAMPLE_STAFF.team;
-  if (bearerMode() === "browser-session") {
-    try {
-      const profile = await readSignedInProfile();
-      asideName = profile.displayName;
-      asideTeam = profile.status === "suspended" ? "Suspended" : "Signed-in session";
-    } catch (error) {
-      redirectForAuth(error, (await headers()).get("x-kkl-path") ?? "/admin");
-      if (error instanceof ServiceError && error.kind === "unavailable") {
-        asideName = "Session";
-        asideTeam = "Account could not be read";
-      } else {
-        throw error;
-      }
-    }
+  let asideName = signedInName ?? SAMPLE_STAFF.name;
+  let asideTeam = signedInName ? "Signed-in session" : SAMPLE_STAFF.team;
+  if (bearerMode() === "browser-session" && signedInName === "Session") {
+    asideTeam = "Account could not be read";
   }
 
   return (
@@ -71,7 +91,7 @@ export async function AdminShell({
       dense
       tone="admin"
       items={adminRailItems(
-        railCounts(dashboard.queues, notifications.length, ownerWaiting, verification.attention.length),
+        railCounts(live.queues, notifications.length, ownerWaiting, verification.attention.length),
       )}
       footer={null}
       title={title}

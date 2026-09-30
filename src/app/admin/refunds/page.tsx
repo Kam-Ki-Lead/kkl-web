@@ -8,7 +8,7 @@ import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { formatExactInr } from "@/lib/format";
 import { DECISIONS } from "@/lib/config/business-rules";
-import { getServices } from "@/lib/services";
+import { adminOperationsStore, getServices } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Refunds", robots: { index: false } };
 
@@ -96,6 +96,16 @@ export default async function AdminRefundsPage({
               </Link>
             }
           />
+        ) : null}
+
+        {refunds.length === 0 && adminOperationsStore() === "backend" ? (
+          <Card className="p-[18px]">
+            <h2 className="t-card-title text-ink">No refund request is stored</h2>
+            <p className="t-body mt-[6px] text-body">
+              The published contract has no refund queue. Nothing here is a sample dispute.
+              Approving a request would still move nothing, because both halves of D-06 are open.
+            </p>
+          </Card>
         ) : null}
 
         <div className="flex flex-col gap-[12px]">

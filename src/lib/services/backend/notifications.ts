@@ -1,6 +1,8 @@
+import type { NotificationRecord, NotificationState } from "@/lib/domain/admin";
 import type { NotificationService } from "@/lib/services/contracts";
 import { ServiceError } from "@/lib/services/contracts";
 import type { BuyerNotification, NotificationCategory } from "@/lib/domain/types";
+import { formatDateTime } from "@/lib/format";
 import { callAs, type BackendRole } from "./session";
 
 /**
@@ -98,3 +100,55 @@ export function backendNotifications(role: BackendRole): NotificationService {
     },
   };
 }
+
+type BackendDelivery = {
+  id: string;
+  notificationId: string;
+  kind: string;
+  channel: string;
+  status: string;
+  attempts: number;
+  lastError: string | null;
+  nextAttemptAt: string | null;
+  sentAt: string | null;
+};
+
+const DELIVERY_STATES: readonly NotificationState[] = [
+  "queued", "sending", "sent", "failed", "suppressed", "unconfigured", "retrying",
+];
+
+function deliveryState(status: string): NotificationState {
+  return DELIVERY_STATES.find((state) => state === status) ?? "unconfigured";
+}
+
+/**
+ * Staff and the owning account read `GET /v1/notifications/deliveries`.
+ *
+ * The row has a channel and a status. It does not have an address, so this
+ * adapter does not invent a recipient. `unconfigured` and `suppressed` stay
+ * themselves: collapsing either into `failed` would say a message was attempted
+ * and bounced.
+ */
+export const backendAdminDeliveries = {
+  async listNotifications(filter?: NotificationState): Promise<readonly NotificationRecord[]> {
+    const { status, body } = await callAs<{ deliveries: BackendDelivery[] }>(
+      "staff", "/v1/notifications/deliveries");
+    if (status === 401) {
+      throw new ServiceError("unauthenticated", body.error ?? "Sign in again to read deliveries.");
+    }
+    if (status === 403) {
+      throw new ServiceError("forbidden", body.error ?? "This session cannot read deliveries.");
+    }
+    if (status !== 200) raise(status, body);
+    const records = body.deliveries.map((delivery): NotificationRecord => ({
+      id: delivery.id,
+      when: formatDateTime(delivery.sentAt ?? delivery.nextAttemptAt),
+      recipientName: delivery.kind,
+      recipientNumber: "No address is stored",
+      channel: delivery.channel,
+      message: delivery.lastError ?? "No provider error recorded",
+      state: deliveryState(delivery.status),
+    }));
+    return filter ? records.filter((record) => record.state === filter) : records;
+  },
+};

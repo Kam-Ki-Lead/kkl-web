@@ -261,6 +261,55 @@ These are the handoff fixtures. The FE1630 accounts were not used for this run.
 
 A builder account, if the Builder enquiry inbox is to be exercised in a later run. Do not create one through `/v1/dev/sessions` from this frontend.
 
+## Admin queues and two browser contexts, 30 September 2026
+
+This section is a later run. It does not change the `611bca9` results or the
+domain-switch results above.
+
+The same backend process was still listening on `http://127.0.0.1:4010`
+(pid 24008, started 18:23:54). Health stayed 200. The checkout was still
+`abf89fce39f6f38a689fccc352391bcae9bef0d7` (implementation
+`d4116b3b072c6050326cf1591acc69359c7b8502`, OpenAPI `1.0.0-phase3.l`).
+The frontend application for this section is the commit that contains it.
+`next build` then `next start` on port 3811. `POST /v1/dev/sessions` was not
+used. One further local code was issued for Review Buyer, through the sign-in
+form, so a second browser profile could sign in. That code was not a
+production message.
+
+The switches are the same set as the domain-switch section. No development
+secret was set on the frontend.
+
+### Accounts actually exercised
+
+Review Staff stayed in the IDE browser. Review Buyer was signed in through
+the published form in a separate headless Chrome profile (`--user-data-dir`
+of its own, remote debugging on port 9333). Both were open at the same time.
+Review Seller was not signed in again. The earlier “sign out of every session”
+result was not repeated.
+
+### Browser
+
+| Check | Result |
+|---|---|
+| Staff operations dashboard | PASS as a mixed read. Support tile and rail badge were 1, with “1 awaiting first reply”. Refund tile and badge were 0, “No refund request is stored”. Notifications had no failed badge. The fixture alerts for a failed send, intake run INT-2291, and webhook retries were absent. KYC stayed 4 and property review stayed 4, and the notice says those queues are still fixtures. Today’s six volume figures stayed labelled as fixtures. |
+| Staff support queue | PASS. The only row was `TK-02F76F84`, Review Seller, awaiting reply. The rail badge was 1. |
+| Staff notification deliveries | PASS as an empty read. “0 of 0 delivery attempts”. The empty state says a queued row is not a delivered message. Filters include Queued, Sending, Suppressed, and Not configured. No fixture recipient was shown. |
+| Staff refunds | PASS as an empty read and a refusal to move money. No sample dispute was listed. D-06 stayed open. |
+| Staff consent | PASS as an empty read. “No suppression is stored.” “0 entries.” The caption says no address is stored and this screen does not deliver a message. No address was added. |
+| Review Buyer on `/admin` in the other browser, while staff remained on `/admin/consent` | PASS as a refusal. The buyer page said the session is a buyer account and does not open the sample queues, and named Review Buyer. It did not show `TK-02F76F84` or the sample seller. The staff page still showed the suppression list and support badge 1. |
+| Review Buyer on `/seller/requests/new` in that same separate profile | PASS as a refusal. “The lead marketplace is for Seller and Builder accounts.” Named Review Buyer. Did not show the sample seller. |
+
+### Restrictions, not completions
+
+- KYC applications and property review on the operations dashboard are still the sample queues. Their badges still match those sample pages. Owner submissions and verification cases were already counted from the backend and stayed empty.
+- No delivery attempt was stored, so a queued, unconfigured, or suppressed row was not observed. The screen can show those states. None of them is treated as sent or failed.
+- A credit adjustment was not submitted.
+- Builder enquiries remain blocked on a builder account. The fixture request above still stands.
+- Listing submission for review remains blocked by missing fields and storage (Q-8).
+- Seller business profile, KYC, and billing-address screens remain the sample seller record.
+- Portal property cards remain the sample catalogue.
+- Local code delivery is not production OTP. A queued notification is not a delivered message.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name

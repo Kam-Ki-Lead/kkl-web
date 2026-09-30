@@ -23,7 +23,7 @@ import { backendCredits, backendLeadMarket } from "./backend/commerce";
 import { backendBuilderEnquiries } from "./backend/builder-enquiries";
 import { backendSupport } from "./backend/support";
 import { backendAdminAudit, backendAdminSupport } from "./backend/admin-support";
-import { backendNotifications } from "./backend/notifications";
+import { backendAdminDeliveries, backendNotifications } from "./backend/notifications";
 import { backendVerification } from "./backend/verification";
 import { backendAdminVerification } from "./backend/admin-verification";
 import { backendAdminOperations } from "./backend/admin-operations";
@@ -219,7 +219,11 @@ function withSupportStore(services: Services): Services {
  */
 function withNotificationStore(services: Services): Services {
   if (notificationStoreKind() !== "backend") return services;
-  return { ...services, notifications: backendNotifications("buyer") };
+  return {
+    ...services,
+    notifications: backendNotifications("buyer"),
+    admin: { ...services.admin, ...backendAdminDeliveries },
+  };
 }
 
 /**

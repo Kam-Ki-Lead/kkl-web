@@ -2,22 +2,34 @@ import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminTable, Primary } from "@/components/admin/admin-table";
 import { Chip, type ChipTone } from "@/components/ui/chip";
-import { getServices } from "@/lib/services";
+import { getServices, notificationStore } from "@/lib/services";
 import type { NotificationRecord } from "@/lib/domain/admin";
 
 export const metadata: Metadata = { title: "Notification delivery", robots: { index: false } };
 
-const FILTERS = [
+const SAMPLE_FILTERS = [
   { label: "All", value: "all" },
   { label: "Sent", value: "sent" },
   { label: "Failed", value: "failed" },
   { label: "Retrying", value: "retrying" },
 ];
 
+const DELIVERY_FILTERS = [
+  ...SAMPLE_FILTERS,
+  { label: "Queued", value: "queued" },
+  { label: "Sending", value: "sending" },
+  { label: "Suppressed", value: "suppressed" },
+  { label: "Not configured", value: "unconfigured" },
+];
+
 const STATE: Record<NotificationRecord["state"], { label: string; tone: ChipTone }> = {
   sent: { label: "Sent", tone: "success" },
   failed: { label: "Failed", tone: "danger" },
   retrying: { label: "Retrying", tone: "warning" },
+  queued: { label: "Queued", tone: "neutral" },
+  sending: { label: "Sending", tone: "warning" },
+  suppressed: { label: "Suppressed", tone: "muted" },
+  unconfigured: { label: "Not configured", tone: "warning" },
 };
 
 function one(v: string | string[] | undefined): string {
@@ -42,6 +54,7 @@ export default async function AdminNotificationsPage({
   const filter = one(params.filter) || "all";
   const query = one(params.q).trim().toLowerCase();
 
+  const fromBackend = notificationStore() === "backend";
   const all = await getServices().admin.listNotifications();
   const rows = all.filter((notification) => {
     if (filter !== "all" && notification.state !== filter) return false;
@@ -55,18 +68,26 @@ export default async function AdminNotificationsPage({
     <AdminShell title="Notification delivery" subtitle="Sent, failed and retrying">
       <AdminTable
         basePath="/admin/notifications"
-        filters={FILTERS}
+        filters={fromBackend ? DELIVERY_FILTERS : SAMPLE_FILTERS}
         activeFilter={filter}
         query={one(params.q)}
-        countLabel={`${rows.length} of ${all.length} notifications`}
-        emptyTitle="No notifications match"
-        emptyBody="Nothing matches this filter and search."
-        footnote="Read-only. Failures are retried automatically on a schedule, and nothing can be sent to a number on the suppression list — so there is no resend action here and the rows do not open further. No notification has actually been sent in this build; these records are fixtures."
+        countLabel={`${rows.length} of ${all.length} ${fromBackend ? "delivery attempts" : "notifications"}`}
+        emptyTitle={fromBackend && all.length === 0 ? "No delivery attempt is stored" : "No notifications match"}
+        emptyBody={
+          fromBackend && all.length === 0
+            ? "A queued row would appear here. A queued row is not a delivered message, and no provider is configured."
+            : "Nothing matches this filter and search."
+        }
+        footnote={
+          fromBackend
+            ? "Read-only. Each row is a delivery attempt. Queued, suppressed and not-configured are not sent messages. No address is stored on the row. There is no resend."
+            : "Read-only. Failures are retried automatically on a schedule, and nothing can be sent to a number on the suppression list — so there is no resend action here and the rows do not open further. No notification has actually been sent in this build; these records are fixtures."
+        }
         columns={[
           { header: "WHEN", width: "0.9fr" },
-          { header: "RECIPIENT", width: "1.2fr" },
+          { header: fromBackend ? "KIND" : "RECIPIENT", width: "1.2fr" },
           { header: "CHANNEL", width: "0.8fr" },
-          { header: "MESSAGE", width: "1.4fr" },
+          { header: fromBackend ? "DETAIL" : "MESSAGE", width: "1.4fr" },
           { header: "STATE", width: "0.9fr" },
         ]}
         rows={rows.map((notification) => ({

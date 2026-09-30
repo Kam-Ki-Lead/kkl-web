@@ -8,10 +8,10 @@ import type { QueueTile } from "@/lib/domain/admin";
  * live queues rather than written down, so a rail that says 7 and a queue that
  * holds 4 cannot happen.
  *
- * **Which items appear says nothing about what anybody may do.** There is one
- * staff identity in this build and no sign-in; real staff roles would hide some
- * of these and, more importantly, would be enforced server-side on every
- * request. Hiding a link has never been a permission check.
+ * **Which items appear says nothing about what anybody may do.** With
+ * `KKL_AUTH=backend` the shell refuses a session whose role is not staff
+ * before these links render. Hiding a link has never been a permission check;
+ * the backend still enforces each request.
  */
 export function adminRailItems(counts: {
   kyc: number;

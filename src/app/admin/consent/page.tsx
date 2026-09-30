@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Card } from "@/components/ui/card";
 import { DECISIONS } from "@/lib/config/business-rules";
-import { getServices } from "@/lib/services";
+import { adminOperationsStore, getServices } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Consent & suppression", robots: { index: false } };
 
@@ -49,6 +49,11 @@ export default async function AdminConsentPage() {
             Suppression list
           </h2>
           <ul>
+            {suppression.length === 0 && adminOperationsStore() === "backend" ? (
+              <li className="px-[18px] py-[14px] text-[15px] text-body">
+                No suppression is stored. An address is not kept on this list.
+              </li>
+            ) : null}
             {suppression.map((entry, index) => (
               <li
                 key={entry.maskedNumber ?? `${entry.when}-${index}`}
@@ -100,8 +105,18 @@ export default async function AdminConsentPage() {
         </div>
 
         <p className="t-caption text-muted">
-          Numbers are masked in the record. The suppression list itself is a fixture — there is no
-          contact pipeline in this build to enforce it against, and enforcement is kkl-backend&rsquo;s.
+          {adminOperationsStore() === "backend" ? (
+            <>
+              No address is stored, so nothing here is masked. The worker records{" "}
+              <span className="t-mono">suppressed</span> instead of sending. No provider is
+              configured, so this screen does not deliver a message.
+            </>
+          ) : (
+            <>
+              Numbers are masked in the record. The suppression list itself is a fixture — there is no
+              contact pipeline in this build to enforce it against, and enforcement is kkl-backend&rsquo;s.
+            </>
+          )}
         </p>
       </div>
     </AdminShell>

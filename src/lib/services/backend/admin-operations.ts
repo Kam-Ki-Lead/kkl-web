@@ -1,5 +1,5 @@
 import type {
-  AdminActionResult, AdminLedgerRow, AdminWallet, ConsentBasis, SuppressionEntry,
+  AdminActionResult, AdminLedgerRow, AdminWallet, ConsentBasis, RefundRequest, SuppressionEntry,
 } from "@/lib/domain/admin";
 import type { AccountRole, StaffRef } from "@/lib/domain/identity";
 import { ServiceError } from "@/lib/services/contracts";
@@ -151,6 +151,15 @@ export const backendAdminOperations = {
    * the table stores a digest. `maskedNumber` is null rather than a row of
    * dots — dots would say a value is being withheld, and nothing is.
    */
+  /**
+   * No refund queue is published. Returning the sample requests would present
+   * other people's disputes as this database's. An empty list is the stored
+   * state. A decision would still move nothing (D-06).
+   */
+  async listRefunds(): Promise<readonly RefundRequest[]> {
+    return [];
+  },
+
   async consent(): Promise<{
     readonly suppression: readonly SuppressionEntry[];
     readonly effects: readonly string[];
@@ -174,10 +183,15 @@ export const backendAdminOperations = {
           + "`suppressed` instead of attempting one.",
         "The check is on the hash, so an address can be tested without the "
           + "list ever holding it in the clear.",
-        `${body.total} ${body.total === 1 ? "entry" : "entries"} today: `
-          + Object.entries(body.byChannel)
+        (() => {
+          const channels = Object.entries(body.byChannel)
             .map(([channel, n]) => `${n} on ${channel}`)
-            .join(", ") + ".",
+            .join(", ");
+          const noun = body.total === 1 ? "entry" : "entries";
+          return channels
+            ? `${body.total} ${noun} today: ${channels}.`
+            : `${body.total} ${noun}.`;
+        })(),
       ],
       // The consent bases are a rule, not a record, and no rule has been
       // confirmed (Q-6). Saying so is the honest content of this panel.

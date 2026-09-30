@@ -1,5 +1,10 @@
 import { runtimeConfig } from "@/lib/config/runtime";
 import { authStoreKind } from "@/lib/services/backend/config";
+import {
+  adminOperationsStore,
+  notificationStore,
+  supportStore,
+} from "@/lib/services";
 import { Card } from "@/components/ui/card";
 
 /**
@@ -14,17 +19,22 @@ import { Card } from "@/components/ui/card";
  */
 export function AdminSampleNotice() {
   if (!runtimeConfig.isSampleMode) return null;
+  const signedIn = authStoreKind() === "backend";
+  const operations = adminOperationsStore() === "backend";
+  const connectedQueues = supportStore() === "backend" || notificationStore() === "backend";
 
   return (
     <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
-      <h2 className="t-card-title text-warning">This is not a staff console yet</h2>
+      <h2 className="t-card-title text-warning">
+        {signedIn ? "Part of this console is still sample data" : "This is not a staff console yet"}
+      </h2>
       <ul className="t-body mt-[8px] flex list-disc flex-col gap-[4px] pl-[20px] text-body">
         <li>
-          {authStoreKind() === "backend" ? (
+          {signedIn ? (
             <>
               <strong className="text-ink">The signed-in session is the only identity.</strong> A
-              customer session is refused by the service on staff operations. The screen does not
-              substitute a development staff account.
+              session that is not staff does not open these queues. The screen does not substitute
+              a development staff account.
             </>
           ) : (
             <>
@@ -35,28 +45,71 @@ export function AdminSampleNotice() {
           )}
         </li>
         <li>
-          <strong className="text-ink">There are no staff roles.</strong> Who may approve a
-          document, adjust a balance or read a transcript are kkl-backend&rsquo;s to decide and
-          enforce. Nothing here is separated by permission.
+          {signedIn ? (
+            <>
+              <strong className="text-ink">Staff-only requests are decided by kkl-backend.</strong>{" "}
+              The rail still lists every destination. Hiding a link is not the permission check.
+            </>
+          ) : (
+            <>
+              <strong className="text-ink">There are no staff roles.</strong> Who may approve a
+              document, adjust a balance or read a transcript are kkl-backend&rsquo;s to decide and
+              enforce. Nothing here is separated by permission.
+            </>
+          )}
         </li>
         <li>
-          <strong className="text-ink">No money moves.</strong> A credit adjustment posts an entry
-          in an in-memory ledger. A refund decision is recorded and moves nothing at all, because
-          the policy and the destination are both undecided (D-06).
+          {operations ? (
+            <>
+              <strong className="text-ink">No payment is taken.</strong> A credit adjustment, if one
+              is submitted, is a ledger entry in kkl-backend. No refund request is stored, and a
+              refund would still move nothing, because both halves of D-06 are open.
+            </>
+          ) : (
+            <>
+              <strong className="text-ink">No money moves.</strong> A credit adjustment posts an entry
+              in an in-memory ledger. A refund decision is recorded and moves nothing at all, because
+              the policy and the destination are both undecided (D-06).
+            </>
+          )}
         </li>
         <li>
-          <strong className="text-ink">The operational screens read fixtures.</strong> There is no
-          intake pipeline, no qualification call, no WhatsApp journey and no notification sender
-          anywhere in this repository. Those screens exist so their layout and states can be
-          reviewed.
+          {connectedQueues ? (
+            <>
+              <strong className="text-ink">Support and delivery attempts are stored.</strong> A
+              queued or unconfigured delivery was not sent. KYC applications, property review, voice
+              and WhatsApp on this console are still fixtures, and today&rsquo;s volume figures are
+              fixtures.
+            </>
+          ) : (
+            <>
+              <strong className="text-ink">The operational screens read fixtures.</strong> There is no
+              intake pipeline, no qualification call, no WhatsApp journey and no notification sender
+              anywhere in this repository. Those screens exist so their layout and states can be
+              reviewed.
+            </>
+          )}
         </li>
-        <li>Decisions, notes and adjustments are lost when the server restarts.</li>
+        <li>
+          {operations
+            ? "Wallet entries live in kkl-backend and stay after this frontend restarts."
+            : "Decisions, notes and adjustments are lost when the server restarts."}
+        </li>
       </ul>
       <p className="t-caption mt-[10px] text-muted">
-        What <em>is</em> connected: decisions on the two accounts whose consoles exist in this
-        build — verification, suspension, credit adjustments, support replies — reach those
-        consoles through the sample service layer. That is a demonstration of the join, not of any
-        control over it.
+        {signedIn ? (
+          <>
+            Portal property cards stay on the sample catalogue, which is why the site-wide sample
+            banner remains. A stored support ticket or wallet balance is not that catalogue.
+          </>
+        ) : (
+          <>
+            What <em>is</em> connected: decisions on the two accounts whose consoles exist in this
+            build — verification, suspension, credit adjustments, support replies — reach those
+            consoles through the sample service layer. That is a demonstration of the join, not of any
+            control over it.
+          </>
+        )}
       </p>
     </Card>
   );

@@ -4,6 +4,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminSampleNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { getServices } from "@/lib/services";
+import { liveAdminQueues } from "@/lib/services/live-admin-queues";
 
 export const metadata: Metadata = { title: "Operations dashboard", robots: { index: false } };
 
@@ -34,7 +35,8 @@ const ALERT_TONES = {
  * such, because there is no intake pipeline to count.
  */
 export default async function AdminDashboardPage() {
-  const { queues, volumes, alerts } = await getServices().admin.dashboard();
+  const { volumes } = await getServices().admin.dashboard();
+  const { queues, alerts } = await liveAdminQueues();
 
   return (
     <AdminShell title="Operations dashboard" subtitle="Queues, volumes and anything blocking">
@@ -85,15 +87,20 @@ export default async function AdminDashboardPage() {
                 six figures are the ones a reader is most likely to take for
                 today's traffic. */}
             <p className="t-caption mt-[12px] text-muted">
-              These six are fixtures. There is no intake pipeline, no qualification caller and no
-              marketplace telemetry in this build, so nothing here was counted — the tiles above
-              are, and they move when a queue does.
+              These six are fixtures. They are not counted from intake, qualification or the
+              marketplace. The tiles above are counted from the queues they name.
             </p>
           </Card>
 
           <Card className="p-[18px]">
             <h2 className="t-panel-title text-ink">Needs attention</h2>
             <div className="mt-[12px] flex flex-col gap-[10px]">
+              {alerts.length === 0 ? (
+                <p className="t-body text-body">
+                  No fixture alert is shown. A delivery that was not sent is listed on the
+                  notification screen, and it is not counted as a failed message.
+                </p>
+              ) : null}
               {alerts.map((alert) => (
                 <Link
                   key={alert.title}
