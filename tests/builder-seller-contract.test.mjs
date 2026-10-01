@@ -8,6 +8,7 @@ import {
   builderBlockers,
   configurationPayload,
   deleteFailureQuery,
+  deleteFollowUp,
   DraftDeleteRefusal,
   draftDeleteResult,
   fieldsNotStored,
@@ -243,4 +244,17 @@ test("deleting a draft follows the published statuses", () => {
   }
   assert.equal(deleteFailureQuery("unauthenticated"), "unavailable");
   assert.equal(deleteFailureQuery("deleted"), "unavailable");
+  assert.deepEqual(deleteFollowUp(draftDeleteResult(200, { deleted: true })), { type: "deleted" });
+  assert.deepEqual(deleteFollowUp(draftDeleteResult(401, {})), { type: "sign-in" });
+  assert.deepEqual(deleteFollowUp(draftDeleteResult(404, {})), { type: "refused", code: "not_found" });
+  assert.deepEqual(deleteFollowUp(draftDeleteResult(409, { code: "not_a_draft" })), {
+    type: "refused",
+    code: "not_a_draft",
+  });
+  assert.deepEqual(deleteFollowUp(draftDeleteResult(409, { code: "listing_referenced" })), {
+    type: "refused",
+    code: "listing_referenced",
+  });
+  assert.notEqual(deleteFollowUp(draftDeleteResult(401, {})).type, "deleted");
+  assert.notEqual(deleteFollowUp(draftDeleteResult(200, {})).type, "deleted");
 });

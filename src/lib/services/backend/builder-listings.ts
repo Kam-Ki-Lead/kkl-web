@@ -5,6 +5,7 @@ import {
   builderBlockers,
   builderSections,
   DraftDeleteRefusal,
+  deleteFollowUp,
   draftDeleteResult,
   listingListPresentation,
   listingsMatchingStatus,
@@ -173,10 +174,9 @@ export const backendBuilderListings: ListingService = {
       { method: "DELETE" },
     );
     const result = draftDeleteResult(status, body);
-    if (!result.ok) {
-      if (result.kind === "unauthenticated") throw new ServiceError(result.kind, result.message);
-      throw new DraftDeleteRefusal(result.code, result.message);
-    }
-    return { removed: true };
+    const follow = deleteFollowUp(result);
+    if (follow.type === "deleted" || result.ok) return { removed: true };
+    if (follow.type === "sign-in") throw new ServiceError("unauthenticated", result.message);
+    throw new DraftDeleteRefusal(follow.code, result.message);
   },
 };

@@ -158,6 +158,20 @@ export class DraftDeleteRefusal extends Error {
   }
 }
 
+export type DeleteFollowUp =
+  | { readonly type: "deleted" }
+  | { readonly type: "sign-in" }
+  | { readonly type: "refused"; readonly code: DeleteFailureCode };
+
+/** A 401 goes to sign-in. Every other failure stays a refusal, never a success. */
+export function deleteFollowUp(
+  result: { ok: true } | { ok: false; kind: string; code: string },
+): DeleteFollowUp {
+  if (result.ok) return { type: "deleted" };
+  if (result.kind === "unauthenticated") return { type: "sign-in" };
+  return { type: "refused", code: deleteFailureQuery(result.code) };
+}
+
 export function draftDeleteResult(
   status: number,
   body: { deleted?: boolean; error?: string; code?: string },

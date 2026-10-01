@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getServices } from "@/lib/services";
 import { listingStoreKind } from "@/lib/services/backend/config";
 import { DraftDeleteRefusal, fieldsNotStored } from "@/lib/services/backend/builder-draft";
+import { redirectForAuth } from "@/lib/auth/recover";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import type { ListingSectionId } from "@/lib/domain/types";
 
@@ -148,6 +149,7 @@ export async function deleteListing(formData: FormData): Promise<void> {
     if (error instanceof DraftDeleteRefusal) {
       redirect(`/builder/properties?delete=${error.code}`);
     }
+    redirectForAuth(error, id ? `/builder/properties/${id}/delete` : "/builder/properties");
     if (error instanceof ServiceError) {
       redirect("/builder/properties?delete=unavailable");
     }
