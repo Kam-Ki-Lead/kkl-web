@@ -1,7 +1,7 @@
-import type { SellerAccount } from "@/lib/domain/types";
+import type { BillingDetails, SellerAccount } from "@/lib/domain/types";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import { callAs } from "./session";
-import { sellerProfilePatch, sellerProfileView } from "./seller-profile-reading";
+import { billingPatch, billingView, sellerProfilePatch, sellerProfileView } from "./seller-profile-reading";
 
 /**
  * The signed-in account's profile, for the seller profile screen.
@@ -17,6 +17,14 @@ type BackendProfile = {
   displayName?: string | null;
   companyName: string | null;
   signInPhone: string | null;
+  status?: string | null;
+  billing?: {
+    billingName?: string | null;
+    gstin?: string | null;
+    addressLines?: readonly string[] | null;
+    invoiceEmail?: string | null;
+    contactName?: string | null;
+  } | null;
   error?: string;
   field?: string;
 };
@@ -34,7 +42,7 @@ function asAccount(body: BackendProfile): SellerAccount {
     areas: [],
     gstin: null,
     kycStatus: "not_submitted",
-    accountStatus: "active",
+    accountStatus: view.accountStatus ?? "active",
     alerts: {
       newLeadsInMyAreas: false,
       viewedLeadOnSale: false,
@@ -46,13 +54,19 @@ function asAccount(body: BackendProfile): SellerAccount {
 export async function readSellerProfile(): Promise<{
   account: SellerAccount;
   profileFullName: string | null;
+  accountStatus: "active" | "suspended" | null;
 }> {
   const { status, body } = await callAs<BackendProfile>("seller", "/v1/me/profile");
   if (status === 401) throw new ServiceError("unauthenticated", "Sign in to read this profile.");
   if (status !== 200) {
     throw new ServiceError("unavailable", body.error ?? `The profile service returned ${status}.`);
   }
-  return { account: asAccount(body), profileFullName: sellerProfileView(body).profileFullName };
+  const view = sellerProfileView(body);
+  return {
+    account: asAccount(body),
+    profileFullName: view.profileFullName,
+    accountStatus: view.accountStatus,
+  };
 }
 
 export async function writeSellerProfile(input: {
@@ -77,4 +91,29 @@ export async function writeSellerProfile(input: {
     throw new ServiceError("unavailable", body.error ?? `The profile service returned ${status}.`);
   }
   return asAccount(body);
+}
+
+export async function readSellerBilling(): Promise<BillingDetails> {
+  const { status, body } = await callAs<BackendProfile>("seller", "/v1/me/profile");
+  if (status === 401) throw new ServiceError("unauthenticated", "Sign in to read billing details.");
+  if (status !== 200) {
+    throw new ServiceError("unavailable", body.error ?? `The profile service returned ${status}.`);
+  }
+  return billingView(body);
+}
+
+export async function writeSellerBilling(input: BillingDetails): Promise<BillingDetails> {
+  const { status, body } = await callAs<BackendProfile>("seller", "/v1/me/profile", {
+    method: "PATCH",
+    body: billingPatch(input),
+  });
+  if (status === 422) {
+    const field = body.field === "billing" ? "form" : (body.field ?? "form");
+    throw new ValidationError({ [field]: body.error ?? "This value was not accepted." });
+  }
+  if (status === 401) throw new ServiceError("unauthenticated", "Sign in to save billing details.");
+  if (status !== 200) {
+    throw new ServiceError("unavailable", body.error ?? `The profile service returned ${status}.`);
+  }
+  return billingView(body);
 }

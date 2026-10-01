@@ -9,6 +9,7 @@ import { newSubscriptionToken } from "@/app/actions/builder-subscription";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatDate } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
 import type { BuilderSubscriptionState } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Subscription" };
@@ -51,8 +52,14 @@ const PANEL: Record<
 
 /** B-03 — subscription overview. */
 export default async function BuilderSubscriptionPage() {
-  const account = await getServices().builder.account.get();
-  const subscription = account.subscription;
+  const contractBound = profileStoreKind() === "backend";
+  const account = contractBound ? null : await getServices().builder.account.get();
+  const subscription = account?.subscription ?? {
+    state: "none" as const,
+    startedAt: null,
+    renewsAt: null,
+    priceInr: null,
+  };
   const panel = PANEL[subscription.state];
   const token = await newSubscriptionToken();
 
@@ -67,8 +74,14 @@ export default async function BuilderSubscriptionPage() {
 
             <dl className="mt-[18px] grid grid-cols-2 gap-[14px] rounded-[10px] border border-line bg-tint p-[16px] max-[560px]:grid-cols-1">
               <Detail label="Status" value={panel.chip} />
-              <Detail label="Started" value={formatDate(subscription.startedAt)} />
-              <Detail label="Next charge" value={formatDate(subscription.renewsAt)} />
+              <Detail
+                label="Started"
+                value={contractBound ? "Not stored" : formatDate(subscription.startedAt)}
+              />
+              <Detail
+                label="Next charge"
+                value={contractBound ? "Not stored" : formatDate(subscription.renewsAt)}
+              />
               <Detail
                 label="Amount"
                 value={
@@ -93,11 +106,13 @@ export default async function BuilderSubscriptionPage() {
                 idempotencyKey={token}
                 state={subscription.state}
                 blocked={
-                  account.accountStatus === "suspended"
-                    ? "This account is suspended, so a subscription cannot be started."
-                    : account.kycStatus !== "approved"
-                      ? "Your company documents are still being verified."
-                      : null
+                  contractBound
+                    ? "No subscription is stored for this account, so nothing can be started from this screen."
+                    : account?.accountStatus === "suspended"
+                      ? "This account is suspended, so a subscription cannot be started."
+                      : account?.kycStatus !== "approved"
+                        ? "Your company documents are still being verified."
+                        : null
                 }
               />
             </div>

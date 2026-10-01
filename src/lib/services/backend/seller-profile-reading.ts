@@ -17,6 +17,52 @@ export const BUSINESS_NOT_ON_PROFILE =
 export const BILLING_NOT_ON_PROFILE =
   "Billing name, address and GSTIN are not fields on the profile, so they were not saved.";
 
+export function billingPatch(input: {
+  billingName: string;
+  gstin: string | null;
+  addressLines: readonly string[];
+  invoiceEmail: string | null;
+  contactName: string | null;
+}) {
+  return {
+    billing: {
+      billingName: input.billingName,
+      gstin: input.gstin,
+      addressLines: [...input.addressLines],
+      invoiceEmail: input.invoiceEmail,
+      contactName: input.contactName,
+    },
+  };
+}
+
+export function billingView(body: {
+  billing?: {
+    billingName?: string | null;
+    gstin?: string | null;
+    addressLines?: readonly string[] | null;
+    invoiceEmail?: string | null;
+    contactName?: string | null;
+  } | null;
+}) {
+  const billing = body.billing;
+  if (!billing) {
+    return {
+      billingName: "",
+      gstin: null,
+      addressLines: [] as string[],
+      invoiceEmail: null,
+      contactName: null,
+    };
+  }
+  return {
+    billingName: billing.billingName ?? "",
+    gstin: billing.gstin ?? null,
+    addressLines: [...(billing.addressLines ?? [])],
+    invoiceEmail: billing.invoiceEmail ?? null,
+    contactName: billing.contactName ?? null,
+  };
+}
+
 export const IDENTITY_NOT_ON_PROFILE =
   "A PAN number and identity documents are not fields on the profile. Nothing was stored.";
 
@@ -32,11 +78,21 @@ export function sellerProfileView(body: {
   displayName?: string | null;
   companyName: string | null;
   signInPhone: string | null;
-}) {
+  status?: string | null;
+}): {
+  contactName: string;
+  profileFullName: string | null;
+  agencyName: string;
+  mobile: string;
+  accountStatus: "active" | "suspended" | null;
+} {
+  const accountStatus: "active" | "suspended" | null =
+    body.status === "suspended" ? "suspended" : body.status === "active" ? "active" : null;
   return {
     contactName: body.displayName ?? "",
     profileFullName: body.fullName,
     agencyName: body.companyName ?? "",
     mobile: body.signInPhone ?? "",
+    accountStatus,
   };
 }

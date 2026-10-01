@@ -19,11 +19,14 @@ export function ProfileForm({
   profile,
   areas,
   isSample,
+  accountName = null,
 }: {
   profile: BuyerProfile;
   /** The launch city's area records, from the location service (CR05). */
   areas: readonly AreaOption[];
   isSample: boolean;
+  /** The account name, which this form does not edit. */
+  accountName?: string | null;
 }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveProfile, {
     status: "idle",
@@ -43,8 +46,9 @@ export function ProfileForm({
           role="status"
           className="rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
         >
-          Your details were saved.
-          {isSample ? " In sample mode this is kept in memory only — see below." : ""}
+          {accountName
+            ? "The full name, email, area and contact preferences were written. The account name was not changed."
+            : `Your details were saved.${isSample ? " In sample mode this is kept in memory only — see below." : ""}`}
         </p>
       ) : null}
 
@@ -54,16 +58,28 @@ export function ProfileForm({
         </p>
       ) : null}
 
-      <Field id="fullName" label="Full name" error={err.fullName}>
+      <Field
+        id="fullName"
+        label="Full name"
+        error={err.fullName}
+        helper={
+          accountName
+            ? "This is the profile full name. Saving it does not change the account name."
+            : undefined
+        }
+      >
         <TextInput
           id="fullName"
           name="fullName"
           autoComplete="name"
           defaultValue={valueFor("fullName", current.fullName)}
           invalid={Boolean(err.fullName)}
-          aria-describedby={err.fullName ? "fullName-error" : undefined}
+          aria-describedby={err.fullName ? "fullName-error" : accountName ? "fullName-helper" : undefined}
         />
       </Field>
+      {accountName ? (
+        <p className="t-caption text-muted">The account name stays {accountName}.</p>
+      ) : null}
 
       <Field
         id="mobile"

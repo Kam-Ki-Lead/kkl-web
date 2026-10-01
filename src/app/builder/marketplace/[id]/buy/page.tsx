@@ -8,7 +8,8 @@ import { AccessPanel } from "@/components/ui/states";
 import { newPurchaseToken } from "@/app/actions/lead-purchase";
 import { formatAreaPath, formatCreditBalance, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
-import { UNPRICED_DETAIL, UNPRICED_LABEL } from "@/lib/domain/commerce-display";
+import { purchaseHold, UNPRICED_DETAIL, UNPRICED_LABEL } from "@/lib/domain/commerce-display";
+import { marketplaceStoreKind } from "@/lib/services/backend/config";
 
 /**
  * Read per-account at request time: with a backend store selected this page
@@ -38,10 +39,11 @@ export default async function PurchaseReviewPage({
 }) {
   const { id } = await params;
   const services = getServices();
+  const fromApi = marketplaceStoreKind() === "backend";
   const [lead, wallet, account, purchased] = await Promise.all([
     services.builder.leadMarket.get(id),
     services.builder.credits.wallet(),
-    services.builder.account.get(),
+    fromApi ? Promise.resolve(null) : services.builder.account.get(),
     services.builder.leadMarket.getPurchased(id),
   ]);
 
@@ -52,18 +54,32 @@ export default async function PurchaseReviewPage({
 
   // An unpriced lead has no shortfall to compute and no purchase to confirm:
   // it is blocked before any of the account questions are asked, because
-  // there is no amount. Zero would read as free.
-  const shortfall = lead.priceCredits === null ? 0 : lead.priceCredits - wallet.balanceCredits;
-  const blocked =
-    lead.priceCredits === null
+  // there is no amount. Zero would read as free. A backend lead uses the
+  // blockers on that lead, not a sample account's verification.
+  const hold = fromApi
+    ? purchaseHold({
+        priceCredits: lead.priceCredits,
+        balanceCredits: wallet.balanceCredits,
+        blockers: lead.blockers,
+      })
+    : null;
+  const shortfall = hold
+    ? hold.shortfall
+    : lead.priceCredits === null
+      ? 0
+      : lead.priceCredits - wallet.balanceCredits;
+  const blocked = hold
+    ? hold.kind
+    : lead.priceCredits === null
       ? ("unpriced" as const)
-      : account.accountStatus === "suspended"
+      : account?.accountStatus === "suspended"
         ? ("suspended" as const)
-        : account.kycStatus !== "approved"
+        : account?.kycStatus !== "approved"
           ? ("unverified" as const)
           : shortfall > 0
             ? ("funds" as const)
             : null;
+  const blockReason = hold?.reason ?? null;
 
   const token = await newPurchaseToken();
 
@@ -162,9 +178,25 @@ export default async function PurchaseReviewPage({
             footnote="Browsing the marketplace stays available while you wait."
           >
             <p>
-              PAN and Aadhaar are reviewed by an administrator before any lead can be purchased.
-              Your submission is {verificationWord(account.kycStatus)}.
+              {blockReason ??
+                `PAN and Aadhaar are reviewed by an administrator before any lead can be purchased. Your submission is ${verificationWord(account?.kycStatus ?? "not_submitted")}.`}
             </p>
+          </AccessPanel>
+        ) : null}
+
+        {blocked === "refused" ? (
+          <AccessPanel
+            tone="restricted"
+            chipLabel="Not available"
+            title="This lead cannot be bought"
+            actions={
+              <ButtonLink href="/builder/marketplace" variant="secondary">
+                Back to Buy Leads
+              </ButtonLink>
+            }
+            footnote="Nothing has been deducted."
+          >
+            <p>{blockReason}</p>
           </AccessPanel>
         ) : null}
 

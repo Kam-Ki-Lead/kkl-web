@@ -43,6 +43,36 @@ export function primaryBlocker(lead: Pick<MarketplaceLead, "blockers">):
   return lead.blockers[0] ?? null;
 }
 
+export type PurchaseHoldKind = "unpriced" | "unverified" | "funds" | "refused" | null;
+
+/**
+ * Why a marketplace purchase cannot be confirmed, from the lead's own blockers.
+ *
+ * A missing price stays the unpriced state. Verification, balance and every
+ * other refusal use the sentence the service sent. This does not consult a
+ * sample account's verification or suspension.
+ */
+export function purchaseHold(input: {
+  priceCredits: number | null;
+  balanceCredits: number;
+  blockers: readonly { readonly code: string; readonly reason: string }[];
+}): { readonly kind: PurchaseHoldKind; readonly reason: string | null; readonly shortfall: number } {
+  const shortfall =
+    input.priceCredits === null ? 0 : Math.max(0, input.priceCredits - input.balanceCredits);
+  const byCode = (code: string) => input.blockers.find((blocker) => blocker.code === code);
+  const unpriced = byCode("lead_price_not_configured");
+  if (input.priceCredits === null || unpriced) {
+    return { kind: "unpriced", reason: unpriced?.reason ?? null, shortfall };
+  }
+  const verification = byCode("verification_required");
+  if (verification) return { kind: "unverified", reason: verification.reason, shortfall };
+  const funds = byCode("insufficient_credits");
+  if (funds) return { kind: "funds", reason: funds.reason, shortfall };
+  const first = input.blockers[0];
+  if (first) return { kind: "refused", reason: first.reason, shortfall };
+  return { kind: null, reason: null, shortfall };
+}
+
 /**
  * The contact line for a recipient's enquiry.
  *

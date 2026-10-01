@@ -5,14 +5,13 @@ import type { ListingDraft, ListingSectionId, ListingSectionState, PublishBlocke
  * price.
  *
  * The editor collects configuration names (1–5 BHK) and one project range:
- * priceMinInr and priceMaxInr. The record stores one listing priceInr, and
- * each configuration may store its own priceInr. The range is neither of
- * those. Nothing here copies the range into priceInr, picks its minimum, or
- * splits it across configurations.
- *
- * Rewriting configurations replaces every row. A price, area or availability
- * already stored on a configuration is copied back onto that same name.
+ * priceMinInr and priceMaxInr. The range is stored on those two fields.
+ * It is not copied into the listing priceInr and it is not split across
+ * configurations. A configuration keeps its own priceInr, areaSqft and
+ * available count. Echoing those values writes the same numbers back;
+ * leaving one out would also keep it, and sending null would clear it.
  * A configuration the checkboxes cannot represent is kept as it was stored.
+ * Amenities are the labels the form already offers. There is no extra list.
  */
 
 export type StoredConfiguration = {
@@ -93,14 +92,9 @@ export function configurationPayload(
 
 const NOT_ON_LISTING: Record<string, readonly { key: string; label: string }[]> = {
   basics: [{ key: "possessionTarget", label: "Possession target" }],
-  pricing: [
-    { key: "priceMinInr", label: "Lowest price" },
-    { key: "priceMaxInr", label: "Highest price" },
-  ],
   specifications: [
     { key: "areaMin", label: "Smallest carpet area" },
     { key: "areaMax", label: "Largest carpet area" },
-    { key: "amenities", label: "Amenities" },
     { key: "reraRegistered", label: "RERA registered" },
   ],
   media: [
@@ -195,7 +189,17 @@ function positiveInteger(value: unknown): number | null | undefined {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-/** Fields this section may write. The price range is never among them. */
+/** A whole-rupee amount, including zero, so the service can refuse a zero. */
+function rupeeAmount(value: unknown): number | null | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+  if (!/^\d+$/.test(trimmed)) return undefined;
+  const parsed = Number(trimmed);
+  return Number.isSafeInteger(parsed) ? parsed : undefined;
+}
+
+/** Fields this section may write. The range is its own pair of fields. */
 export function sectionPatch(
   section: string,
   values: Readonly<Record<string, unknown>>,
@@ -220,13 +224,18 @@ export function sectionPatch(
     return patch;
   }
   if (section === "pricing") {
-    if (!Array.isArray(values.configurations)) return {};
-    return {
-      configurations: configurationPayload(
+    const patch: Record<string, unknown> = {};
+    if (Array.isArray(values.configurations)) {
+      patch.configurations = configurationPayload(
         values.configurations.filter((token): token is string => typeof token === "string"),
         existing,
-      ),
-    };
+      );
+    }
+    const lowest = rupeeAmount(values.priceMinInr);
+    const highest = rupeeAmount(values.priceMaxInr);
+    if (lowest !== undefined) patch.priceMinInr = lowest;
+    if (highest !== undefined) patch.priceMaxInr = highest;
+    return patch;
   }
   if (section === "specifications") {
     const patch: Record<string, unknown> = {};
@@ -234,6 +243,12 @@ export function sectionPatch(
     if (totalUnits !== undefined) patch.totalUnits = totalUnits;
     const reraNumber = text(values.reraNumber);
     if (reraNumber !== undefined) patch.reraId = reraNumber.trim() === "" ? null : reraNumber.trim();
+    if (Array.isArray(values.amenities)) {
+      patch.amenities = values.amenities
+        .filter((label): label is string => typeof label === "string")
+        .map((label) => label.trim())
+        .filter((label) => label !== "");
+    }
     return patch;
   }
   return {};
@@ -249,6 +264,9 @@ type ListingBody = {
   locationName?: string | null;
   addressLine?: string | null;
   priceInr?: number | null;
+  priceMinInr?: number | null;
+  priceMaxInr?: number | null;
+  amenities?: readonly string[] | null;
   reraId?: string | null;
   totalUnits?: number | null;
   updatedAt?: string | null;
@@ -286,14 +304,14 @@ export function toBuilderDraft(body: ListingBody): ListingDraft {
     localityId: body.locationId ?? null,
     addressLine: body.addressLine ?? "",
     configurations: tokens,
-    priceMinInr: null,
-    priceMaxInr: null,
+    priceMinInr: wholeNumber(body.priceMinInr ?? null) ?? null,
+    priceMaxInr: wholeNumber(body.priceMaxInr ?? null) ?? null,
     listingPriceInr: wholeNumber(body.priceInr ?? null) ?? null,
     configurationPrices,
     areaMin: "",
     areaMax: "",
     totalUnits: body.totalUnits == null ? "" : String(body.totalUnits),
-    amenities: [],
+    amenities: (body.amenities ?? []).filter((label): label is string => typeof label === "string"),
     reraRegistered: false,
     reraNumber: body.reraId ?? null,
     media: [],
@@ -345,7 +363,7 @@ export function builderBlockers(listing: ListingDraft): PublishBlocker[] {
       section: "pricing",
       sectionNumber: 3,
       message:
-        "The listing needs one priceInr. The lowest and highest prices on this form are a range, and that range is not saved as the listing price or as a configuration price.",
+        "The listing needs one priceInr. The lowest and highest prices are stored as the project range and are not used as that price or as a configuration price.",
     });
   }
   blockers.push({
@@ -357,7 +375,7 @@ export function builderBlockers(listing: ListingDraft): PublishBlocker[] {
 }
 
 export function priceWasNotCopied(patch: Record<string, unknown>): boolean {
-  if ("priceInr" in patch || "priceMinInr" in patch || "priceMaxInr" in patch) return false;
+  if ("priceInr" in patch) return false;
   const configurations = patch.configurations;
   if (!Array.isArray(configurations)) return true;
   return configurations.every((entry) => {

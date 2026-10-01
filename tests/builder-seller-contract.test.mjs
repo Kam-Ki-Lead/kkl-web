@@ -28,6 +28,8 @@ test("a price range is not written as priceInr or as a configuration price", () 
   );
   assert.equal(priceWasNotCopied(patch), true);
   assert.equal("priceInr" in patch, false);
+  assert.equal(patch.priceMinInr, 5000000);
+  assert.equal(patch.priceMaxInr, 9000000);
   assert.deepEqual(patch.configurations, [
     { configuration: "3 BHK", priceInr: 7200000, areaSqft: 980, available: 4 },
     { configuration: "2 BHK" },
@@ -35,7 +37,7 @@ test("a price range is not written as priceInr or as a configuration price", () 
   assert.deepEqual(fieldsNotStored("pricing", patch), []);
   assert.deepEqual(
     fieldsNotStored("pricing", { priceMinInr: "5000000", priceMaxInr: "9000000", configurations: ["2"] }),
-    ["Lowest price", "Highest price"],
+    [],
   );
 });
 
@@ -123,6 +125,7 @@ test("basics, location and specifications omit fields the listing does not carry
   assert.deepEqual(specifications, {
     totalUnits: 40,
     reraId: "WBRERA/P/NOR/2024/000001",
+    amenities: ["Gymnasium"],
   });
   assert.equal(sectionPatch("media", { photoCount: "3", videoUrl: "https://example.test" }).constructor, Object);
   assert.deepEqual(sectionPatch("media", { photoCount: "3" }), {});
@@ -174,5 +177,16 @@ test("the seller profile patch is only the supported names", () => {
     profileFullName: "Kept Profile Name",
     agencyName: "Review Agency",
     mobile: "+91 •••• 0102",
+    accountStatus: null,
   });
+  assert.equal(
+    sellerProfileView({
+      fullName: null,
+      displayName: "Review Seller",
+      companyName: null,
+      signInPhone: null,
+      status: "suspended",
+    }).accountStatus,
+    "suspended",
+  );
 });

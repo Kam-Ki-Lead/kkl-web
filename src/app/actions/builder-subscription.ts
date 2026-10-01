@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
 import type { SubscriptionOutcome } from "@/lib/services/contracts";
 
 /**
@@ -28,6 +29,13 @@ export async function startSubscription(
   _previous: SubscribeFormState,
   formData: FormData,
 ): Promise<SubscribeFormState> {
+  if (profileStoreKind() === "backend") {
+    return {
+      error:
+        "No subscription is stored for this account. Nothing was started, and no charge was made.",
+    };
+  }
+
   const idempotencyKey = String(formData.get("idempotencyKey") ?? "");
   if (!/^[0-9a-f-]{36}$/.test(idempotencyKey)) {
     return {

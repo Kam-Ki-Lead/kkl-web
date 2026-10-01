@@ -18,9 +18,15 @@ import { Field, TextInput } from "@/components/ui/field";
 export function BuilderProfileForm({
   account,
   isSample,
+  contractBound = false,
+  profileFullName = null,
 }: {
   account: BuilderAccount;
   isSample: boolean;
+  /** True when company, account name and email are written to the profile. */
+  contractBound?: boolean;
+  /** The profile full name, which this form does not edit. */
+  profileFullName?: string | null;
 }) {
   const [state, action, pending] = useActionState<BuilderProfileState, FormData>(
     saveBuilderProfile,
@@ -37,10 +43,21 @@ export function BuilderProfileForm({
         {state.status === "saved" ? (
           <p
             role="status"
-            className="rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
+            className={
+              contractBound
+                ? "rounded-[8px] bg-chip-warning-bg px-[14px] py-[10px] text-[14px] font-semibold text-warning"
+                : "rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
+            }
           >
-            Your details were saved.
-            {isSample ? " In sample mode this is kept in memory only." : ""}
+            {contractBound
+              ? "Company name, the account name and the contact email were written. The profile full name was not changed. RERA registration and the alert preferences were not stored."
+              : `Your details were saved.${isSample ? " In sample mode this is kept in memory only." : ""}`}
+          </p>
+        ) : null}
+
+        {err.form ? (
+          <p role="alert" className="rounded-[8px] bg-chip-danger-bg px-[14px] py-[10px] text-[14px] text-danger">
+            {err.form}
           </p>
         ) : null}
 
@@ -54,16 +71,30 @@ export function BuilderProfileForm({
           />
         </Field>
 
-        <Field id="contactName" label="Contact name" error={err.contactName}>
+        <Field
+          id="contactName"
+          label="Contact name"
+          error={err.contactName}
+          helper={
+            contractBound
+              ? "This is the name support uses. It is stored as the account name. The profile full name is a separate field, and saving does not change it."
+              : undefined
+          }
+        >
           <TextInput
             id="contactName"
             name="contactName"
             autoComplete="name"
             defaultValue={v.contactName ?? current.contactName}
             invalid={Boolean(err.contactName)}
-            aria-describedby={err.contactName ? "contactName-error" : undefined}
+            aria-describedby={
+              err.contactName ? "contactName-error" : contractBound ? "contactName-helper" : undefined
+            }
           />
         </Field>
+        {contractBound && profileFullName ? (
+          <p className="t-caption text-muted">The profile full name stays {profileFullName}.</p>
+        ) : null}
 
         <Field
           id="mobile"
@@ -88,7 +119,11 @@ export function BuilderProfileForm({
         <Field
           id="reraId"
           label="RERA registration"
-          helper="Shown on your listings when present. Nothing here is checked against a RERA register — that verification is not built."
+          helper={
+            contractBound
+              ? "RERA registration is stored on a listing, not on this profile. Saving this form does not write it."
+              : "Shown on your listings when present. Nothing here is checked against a RERA register — that verification is not built."
+          }
         >
           <TextInput
             id="reraId"
@@ -116,8 +151,9 @@ export function BuilderProfileForm({
             defaultChecked={current.alerts.subscriptionReminders}
           />
           <p className="t-caption text-muted">
-            These record a preference. Delivery is kkl-backend&rsquo;s and is not connected, so
-            turning one on does not start sending anything.
+            {contractBound
+              ? "These preferences are not profile fields. Saving does not store them, and nothing is sent."
+              : "These record a preference. Delivery is kkl-backend’s and is not connected, so turning one on does not start sending anything."}
           </p>
         </fieldset>
 

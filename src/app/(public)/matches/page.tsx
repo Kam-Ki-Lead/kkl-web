@@ -12,6 +12,10 @@ import { PropertyCard } from "@/components/property/property-card";
 import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/states";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { readRequirementMatches, saveBuyerRequirement } from "@/lib/services/backend/buyer-records";
+import { ServiceError, ValidationError } from "@/lib/services/contracts";
+import type { MatchedProperty } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Matching homes" };
 
@@ -24,14 +28,31 @@ export default async function MatchesPage({
   const params = await searchParams;
   const requirement = parseRequirement(params);
   const services = getServices();
-  const [matches, localityRecords] = await Promise.all([
-    services.properties.match(requirement),
-    // The name comes from the location records (CR05), so any area id —
-    // not only the featured six — resolves.
-    requirement.locationId
-      ? services.locations.getMany([requirement.locationId])
-      : Promise.resolve([]),
-  ]);
+  const stored = profileStoreKind() === "backend";
+  let storedMessage: string | null = null;
+  let matches: readonly MatchedProperty[] = [];
+  if (stored) {
+    try {
+      await saveBuyerRequirement(requirement);
+      const result = await readRequirementMatches();
+      storedMessage = result.message;
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        storedMessage = Object.values(error.fields)[0] ?? "This requirement was not accepted.";
+      } else if (error instanceof ServiceError && error.kind === "unauthenticated") {
+        storedMessage = "Sign in to store this requirement. Sample matches are not shown in its place.";
+      } else if (error instanceof ServiceError) {
+        storedMessage = error.message;
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    matches = await services.properties.match(requirement);
+  }
+  const localityRecords = requirement.locationId
+    ? await services.locations.getMany([requirement.locationId])
+    : [];
 
   const localityName = localityRecords[0]?.name;
   const summary = [
@@ -46,9 +67,12 @@ export default async function MatchesPage({
     <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[50px] pt-[28px] max-[1060px]:px-[18px]">
       <h1 className="t-title text-ink">Matching homes</h1>
       <p className="mt-[6px] text-[16px] text-body">
-        {matches.length === 0
-          ? "Nothing published matches every answer yet."
-          : `${matches.length} published ${matches.length === 1 ? "project matches" : "projects match"} your requirement.`}
+        {stored
+          ? (storedMessage ??
+            "The requirement is stored. No matching rule is approved, so nothing is scored.")
+          : matches.length === 0
+            ? "Nothing published matches every answer yet."
+            : `${matches.length} published ${matches.length === 1 ? "project matches" : "projects match"} your requirement.`}
       </p>
 
       <div className="mt-[12px] flex flex-wrap items-center gap-[8px]">
@@ -65,7 +89,20 @@ export default async function MatchesPage({
         </Link>
       </div>
 
-      {matches.length === 0 ? (
+      {stored ? (
+        <div className="mt-[20px]">
+          <StateMessage
+            title="No properties are scored from this requirement"
+            action={
+              <ButtonLink href="/auth?next=/matches" size="sm" variant="secondary">
+                Sign in
+              </ButtonLink>
+            }
+          >
+            {storedMessage}
+          </StateMessage>
+        </div>
+      ) : matches.length === 0 ? (
         <div className="mt-[20px]">
           <StateMessage
             title="No published project matches all of it"

@@ -5,6 +5,10 @@ import { ButtonLink } from "@/components/ui/button";
 import { AccessPanel, PendingRule } from "@/components/ui/states";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { readSellerProfile } from "@/lib/services/backend/seller-profile";
+import { ServiceError } from "@/lib/services/contracts";
+import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Account restricted" };
 
@@ -24,15 +28,52 @@ export const metadata: Metadata = { title: "Account restricted" };
  * what a request is permitted to do.
  */
 export default async function RestrictedPage() {
-  const account = await getServices().sellerAccount.get();
-
-  const suspended = account.accountStatus === "suspended";
-  const unverified = account.kycStatus !== "approved";
+  const contractBound = profileStoreKind() === "backend";
+  let suspended = false;
+  let unverified = false;
+  let statusNote: string | null = null;
+  let verificationWord = "not submitted yet";
+  if (contractBound) {
+    try {
+      const loaded = await readSellerProfile();
+      suspended = loaded.accountStatus === "suspended";
+      statusNote = suspended
+        ? null
+        : "Verification is not a field on this profile, so this screen does not report the account as verified.";
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        return (
+          <SellerShell title="Account restricted" subtitle="Access is limited until this is resolved">
+            <StateMessage title="This account could not be read">
+              {error.message} The sample seller is not shown in its place.
+            </StateMessage>
+          </SellerShell>
+        );
+      }
+      throw error;
+    }
+  } else {
+    const account = await getServices().sellerAccount.get();
+    suspended = account.accountStatus === "suspended";
+    unverified = account.kycStatus !== "approved";
+    verificationWord =
+      account.kycStatus === "pending"
+        ? "in review"
+        : account.kycStatus === "rejected"
+          ? "not approved — the status screen says why"
+          : "not submitted yet";
+  }
 
   return (
     <SellerShell title="Account restricted" subtitle="Access is limited until this is resolved">
       <div className="flex max-w-[760px] flex-col gap-[16px]">
-        {!suspended && !unverified ? (
+        {statusNote ? (
+          <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
+            <p className="t-body text-body">{statusNote}</p>
+          </Card>
+        ) : null}
+
+        {!suspended && !unverified && !contractBound ? (
           <AccessPanel
             tone="neutral"
             chipLabel="No restriction"
@@ -93,13 +134,7 @@ export default async function RestrictedPage() {
           >
             <p>
               PAN and Aadhaar are reviewed by an administrator before any purchase. Your
-              submission is{" "}
-              {account.kycStatus === "pending"
-                ? "in review"
-                : account.kycStatus === "rejected"
-                  ? "not approved — the status screen says why"
-                  : "not submitted yet"}
-              . <PendingRule>{DECISIONS["D-11"].pendingCopy}</PendingRule>
+              submission is {verificationWord}. <PendingRule>{DECISIONS["D-11"].pendingCopy}</PendingRule>
             </p>
           </AccessPanel>
         ) : null}

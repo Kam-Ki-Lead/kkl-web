@@ -5,6 +5,10 @@ import { Chip, type ChipTone } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { readBuilderProfile } from "@/lib/services/backend/builder-profile";
+import { ServiceError } from "@/lib/services/contracts";
+import { StateMessage } from "@/components/ui/states";
 
 export const metadata: Metadata = { title: "Access restrictions" };
 
@@ -85,27 +89,60 @@ const RESTRICTIONS: readonly Restriction[] = [
 ];
 
 export default async function BuilderRestrictionsPage() {
-  const account = await getServices().builder.account.get();
-
-  // Which row describes this account right now, so the reference is anchored to
-  // something real rather than being an abstract table.
-  const current =
-    account.accountStatus === "suspended"
-      ? "suspended"
-      : account.kycStatus === "not_submitted"
-        ? "not_verified"
-        : account.kycStatus === "pending"
-          ? "pending"
-          : account.subscription.state === "expired"
-            ? "expired"
-            : account.subscription.state === "none"
-              ? "no_subscription"
-              : null;
+  const contractBound = profileStoreKind() === "backend";
+  let current: string | null = null;
+  let statusNote: string | null = null;
+  if (contractBound) {
+    try {
+      const loaded = await readBuilderProfile();
+      current = loaded.accountStatus === "suspended" ? "suspended" : null;
+      statusNote =
+        loaded.accountStatus === "suspended"
+          ? "This account is suspended. Verification and subscription are not fields on the profile, so those rows are not marked as this account."
+          : loaded.accountStatus === "active"
+            ? "This account is active. Verification and subscription are not fields on the profile, so those rows are not marked as this account."
+            : "Account status was not on the profile. Verification and subscription are not marked from a sample account.";
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        return (
+          <BuilderShell title="Access restrictions" subtitle="What each state allows and how to recover">
+            <StateMessage title="This account could not be read">
+              {error.message} The sample builder is not shown in its place.
+            </StateMessage>
+          </BuilderShell>
+        );
+      }
+      throw error;
+    }
+  } else {
+    const account = await getServices().builder.account.get();
+    // Which row describes this account right now, so the reference is anchored to
+    // something real rather than being an abstract table.
+    current =
+      account.accountStatus === "suspended"
+        ? "suspended"
+        : account.kycStatus === "not_submitted"
+          ? "not_verified"
+          : account.kycStatus === "pending"
+            ? "pending"
+            : account.subscription.state === "expired"
+              ? "expired"
+              : account.subscription.state === "none"
+                ? "no_subscription"
+                : null;
+  }
 
   return (
     <BuilderShell title="Access restrictions" subtitle="What each state allows and how to recover">
       <div className="flex max-w-[1000px] flex-col gap-[16px]">
-        {current === null ? (
+        {statusNote ? (
+          <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
+            <p className="text-[15px] font-semibold text-ink">This account</p>
+            <p className="t-body mt-[2px] text-body">{statusNote}</p>
+          </Card>
+        ) : null}
+
+        {current === null && !contractBound ? (
           <Card className="border-[#BFE0CE] bg-chip-success-bg p-[18px]">
             <p className="text-[15px] font-semibold text-success">
               Nothing is restricted on this account right now.

@@ -1,6 +1,7 @@
 import type { BuyerProfile } from "@/lib/domain/types";
 import type { ProfileService } from "@/lib/services/contracts";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
+import { buyerProfilePatch, buyerProfileView } from "./buyer-profile-reading";
 import { callAs } from "./session";
 
 /**
@@ -12,6 +13,9 @@ import { callAs } from "./session";
  *
  * The two notification opt-ins are consent. They default to off, only the
  * person themselves sets them, and nothing in this adapter infers one.
+ *
+ * Full name writes the profile column only. The account name is a separate
+ * field and is not copied from the full name.
  */
 
 type BackendProfile = {
@@ -24,37 +28,35 @@ type BackendProfile = {
   emailOptIn: boolean;
 };
 
-const toProfile = (p: BackendProfile): BuyerProfile => ({
-  fullName: p.fullName ?? p.displayName,
-  mobile: p.signInPhone ?? "Not set",
-  email: p.contactEmail,
-  preferredLocalityId: p.primaryLocationId,
-  notifyByWhatsApp: p.whatsappOptIn,
-  notifyByEmail: p.emailOptIn,
-});
+const toProfile = (p: BackendProfile): BuyerProfile => buyerProfileView(p).profile;
+
+export async function readBuyerProfile(): Promise<{
+  profile: BuyerProfile;
+  accountName: string;
+}> {
+  const { status, body } = await callAs<BackendProfile>("buyer", "/v1/me/profile");
+  if (status === 401) throw new ServiceError("unauthenticated", "Sign in to read this profile.");
+  if (status !== 200) {
+    throw new ServiceError("unavailable", body.error ?? `Profile service returned ${status}.`);
+  }
+  return buyerProfileView(body);
+}
 
 export const backendProfile: ProfileService = {
   async get() {
-    const { status, body } = await callAs<BackendProfile>("buyer", "/v1/me/profile");
-    if (status !== 200) {
-      throw new ServiceError("unavailable", body.error ?? `Profile service returned ${status}.`);
-    }
-    return toProfile(body);
+    return (await readBuyerProfile()).profile;
   },
 
   async save(input) {
     const { status, body } = await callAs<BackendProfile>("buyer", "/v1/me/profile", {
       method: "PATCH",
-      body: {
+      body: buyerProfilePatch({
         fullName: input.fullName,
-        // The display name follows the full name: one field on the screen
-        // should not leave two names disagreeing in the record.
-        displayName: input.fullName,
-        contactEmail: input.email,
-        primaryLocationId: input.preferredLocalityId,
-        whatsappOptIn: input.notifyByWhatsApp,
-        emailOptIn: input.notifyByEmail,
-      },
+        email: input.email,
+        preferredLocalityId: input.preferredLocalityId,
+        notifyByWhatsApp: input.notifyByWhatsApp,
+        notifyByEmail: input.notifyByEmail,
+      }),
     });
 
     if (status === 422) {

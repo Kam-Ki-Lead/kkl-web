@@ -8,6 +8,10 @@ import { Chip } from "@/components/ui/chip";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
 import { runtimeConfig } from "@/lib/config/runtime";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { readBuilderProfile } from "@/lib/services/backend/builder-profile";
+import { ServiceError } from "@/lib/services/contracts";
+import { StateMessage } from "@/components/ui/states";
 import type { BuilderSubscriptionState, KycStatus } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Profile & settings" };
@@ -30,7 +34,32 @@ const SUBSCRIPTION: Record<BuilderSubscriptionState, string> = {
 
 /** B-24 — company details, alerts and account status. */
 export default async function BuilderProfilePage() {
-  const account = await getServices().builder.account.get();
+  const contractBound = profileStoreKind() === "backend";
+  let account;
+  let profileFullName: string | null = null;
+  let accountStatus: "active" | "suspended" | null = null;
+  if (contractBound) {
+    try {
+      const loaded = await readBuilderProfile();
+      account = loaded.account;
+      profileFullName = loaded.profileFullName;
+      accountStatus = loaded.accountStatus;
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        return (
+          <BuilderShell title="Profile & settings" subtitle="Company details, alerts and account status">
+            <StateMessage title="This profile could not be read">
+              {error.message} The sample builder is not shown in its place.
+            </StateMessage>
+          </BuilderShell>
+        );
+      }
+      throw error;
+    }
+  } else {
+    account = await getServices().builder.account.get();
+    accountStatus = account.accountStatus;
+  }
   const verification = VERIFICATION[account.kycStatus];
   const subscription = SUBSCRIPTION[account.subscription.state];
 
@@ -38,7 +67,12 @@ export default async function BuilderProfilePage() {
     <BuilderShell title="Profile & settings" subtitle="Company details, alerts and account status">
       <div className="grid max-w-[1000px] grid-cols-[minmax(0,1fr)_320px] gap-[18px] max-[1060px]:grid-cols-1">
         <div className="flex flex-col gap-[16px]">
-          <BuilderProfileForm account={account} isSample={runtimeConfig.isSampleMode} />
+          <BuilderProfileForm
+            account={account}
+            isSample={runtimeConfig.isSampleMode}
+            contractBound={contractBound}
+            profileFullName={profileFullName}
+          />
 
           <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
             <h2 className="t-card-title text-ink">Pending decisions on this screen</h2>
@@ -64,11 +98,15 @@ export default async function BuilderProfilePage() {
             <div className="mt-[12px] grid grid-cols-2 gap-[12px] max-[619px]:grid-cols-1">
               <div className="rounded-[8px] bg-tint px-[15px] py-[13px]">
                 <p className="text-[12px] text-muted">Verification</p>
-                <p className="mt-[3px] text-[16px] font-semibold text-ink">{verification}</p>
+                <p className="mt-[3px] text-[16px] font-semibold text-ink">
+                  {contractBound ? "Not on this profile" : verification}
+                </p>
               </div>
               <div className="rounded-[8px] bg-tint px-[15px] py-[13px]">
                 <p className="text-[12px] text-muted">Subscription</p>
-                <p className="mt-[3px] text-[16px] font-semibold text-ink">{subscription}</p>
+                <p className="mt-[3px] text-[16px] font-semibold text-ink">
+                  {contractBound ? "None stored" : subscription}
+                </p>
               </div>
             </div>
             <div className="mt-[14px] flex flex-wrap gap-[12px]">
@@ -86,9 +124,13 @@ export default async function BuilderProfilePage() {
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">Suspension</h2>
             <div className="mt-[8px]">
-              <Chip tone={account.accountStatus === "active" ? "success" : "danger"}>
-                {account.accountStatus === "active" ? "Active" : "Suspended"}
-              </Chip>
+              {accountStatus === null ? (
+                <p className="t-body text-body">Account status was not on the profile.</p>
+              ) : (
+                <Chip tone={accountStatus === "active" ? "success" : "danger"}>
+                  {accountStatus === "active" ? "Active" : "Suspended"}
+                </Chip>
+              )}
             </div>
             <p className="t-caption mt-[8px] text-muted">
               Separate from verification and from your subscription. Suspending an account does

@@ -17,9 +17,12 @@ import { Chip } from "@/components/ui/chip";
 export function BillingDetailsForm({
   details,
   isSample,
+  storedOnProfile = false,
 }: {
   details: BillingDetails;
   isSample: boolean;
+  /** True when the profile stores these fields and does not issue an invoice. */
+  storedOnProfile?: boolean;
 }) {
   const [state, action, pending] = useActionState<BillingFormState, FormData>(saveBilling, {
     status: "idle",
@@ -41,8 +44,9 @@ export function BillingDetailsForm({
           role="status"
           className="rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
         >
-          Billing details saved. They apply to invoices issued from now on, not to ones already
-          issued.
+          {storedOnProfile
+            ? "Billing name, GSTIN, address, invoice email and billing contact were stored. No invoice was issued and no tax treatment was set."
+            : "Billing details saved. They apply to invoices issued from now on, not to ones already issued."}
         </p>
       ) : null}
 
@@ -88,7 +92,11 @@ export function BillingDetailsForm({
         id="invoiceEmail"
         label="Invoice email"
         error={err.invoiceEmail}
-        helper="Where invoices are sent once email delivery is in place."
+        helper={
+          storedOnProfile
+            ? "Stored as the invoice email. No invoice is sent from this form."
+            : "Where invoices are sent once email delivery is in place."
+        }
       >
         <TextInput
           id="invoiceEmail"

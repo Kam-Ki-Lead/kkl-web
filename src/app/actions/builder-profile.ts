@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { writeBuilderProfile } from "@/lib/services/backend/builder-profile";
+import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import type { BuilderAccount } from "@/lib/domain/types";
 
 /**
@@ -54,11 +57,35 @@ export async function saveBuilderProfile(
     return { status: "idle", errors, values: raw };
   }
 
+  const email = parsed.data.email === "" ? null : parsed.data.email;
+
+  if (profileStoreKind() === "backend") {
+    try {
+      const written = await writeBuilderProfile({
+        companyName: parsed.data.companyName,
+        contactName: parsed.data.contactName,
+        email,
+      });
+      revalidatePath("/builder/profile");
+      revalidatePath("/builder");
+      return { status: "saved", saved: written.account };
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return { status: "idle", errors: error.fields, values: raw };
+      }
+      const message =
+        error instanceof ServiceError
+          ? error.message
+          : "The details could not be saved. Please try again.";
+      return { status: "idle", errors: { form: message }, values: raw };
+    }
+  }
+
   const services = getServices().builder.account;
   await services.saveCompany({
     companyName: parsed.data.companyName,
     contactName: parsed.data.contactName,
-    email: parsed.data.email === "" ? null : parsed.data.email,
+    email,
     reraId: parsed.data.reraId === "" ? null : parsed.data.reraId,
   });
   const saved = await services.saveAlerts({

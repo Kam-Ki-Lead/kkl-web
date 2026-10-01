@@ -4,11 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getServices } from "@/lib/services";
 import { profileStoreKind } from "@/lib/services/backend/config";
-import { writeSellerProfile } from "@/lib/services/backend/seller-profile";
-import {
-  BILLING_NOT_ON_PROFILE,
-  BUSINESS_NOT_ON_PROFILE,
-} from "@/lib/services/backend/seller-profile-reading";
+import { writeSellerBilling, writeSellerProfile } from "@/lib/services/backend/seller-profile";
+import { BUSINESS_NOT_ON_PROFILE } from "@/lib/services/backend/seller-profile-reading";
 import { ValidationError } from "@/lib/services/contracts";
 import type { BillingDetails, SellerAccount } from "@/lib/domain/types";
 
@@ -113,9 +110,6 @@ export async function saveBilling(
   _previous: BillingFormState,
   formData: FormData,
 ): Promise<BillingFormState> {
-  if (profileStoreKind() === "backend") {
-    return { status: "idle", errors: { form: BILLING_NOT_ON_PROFILE } };
-  }
   const raw = {
     billingName: String(formData.get("billingName") ?? ""),
     gstin: String(formData.get("gstin") ?? ""),
@@ -129,7 +123,7 @@ export async function saveBilling(
     return { status: "idle", errors: fieldErrors(parsed.error), values: raw };
   }
 
-  const saved = await getServices().sellerAccount.saveBillingDetails({
+  const details = {
     billingName: parsed.data.billingName,
     gstin: parsed.data.gstin === "" ? null : parsed.data.gstin,
     // One textarea, split on newlines, so an address keeps the shape it was
@@ -140,7 +134,20 @@ export async function saveBilling(
       .filter(Boolean),
     invoiceEmail: parsed.data.invoiceEmail === "" ? null : parsed.data.invoiceEmail,
     contactName: parsed.data.contactName === "" ? null : parsed.data.contactName,
-  });
+  };
+  if (profileStoreKind() === "backend") {
+    try {
+      const saved = await writeSellerBilling(details);
+      revalidatePath("/seller/billing/details");
+      return { status: "saved", saved };
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return { status: "idle", errors: error.fields, values: raw };
+      }
+      throw error;
+    }
+  }
+  const saved = await getServices().sellerAccount.saveBillingDetails(details);
 
   revalidatePath("/seller/billing/details");
   return { status: "saved", saved };

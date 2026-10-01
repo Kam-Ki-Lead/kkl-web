@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { getServices } from "@/lib/services";
 import { runtimeConfig } from "@/lib/config/runtime";
 import { profileStoreKind } from "@/lib/services/backend/config";
+import { readBuyerProfile } from "@/lib/services/backend/profile";
+import { ServiceError } from "@/lib/services/contracts";
+import { StateMessage } from "@/components/ui/states";
 import { ProfileForm } from "@/components/account/profile-form";
 import { Card } from "@/components/ui/card";
 
@@ -11,10 +14,29 @@ export const metadata: Metadata = { title: "Profile & settings" };
 export default async function ProfilePage() {
   const services = getServices();
   const profileIsSample = profileStoreKind() !== "backend";
-  const [profile, areas] = await Promise.all([
-    services.profile.get(),
-    services.locations.areaOptions({ cityId: "in-wb-kol" }),
-  ]);
+  let profile;
+  let accountName: string | null = null;
+  if (profileIsSample) {
+    profile = await services.profile.get();
+  } else {
+    try {
+      const loaded = await readBuyerProfile();
+      profile = loaded.profile;
+      accountName = loaded.accountName;
+    } catch (error) {
+      if (error instanceof ServiceError) {
+        return (
+          <div className="mx-auto max-w-[660px] px-[32px] pb-[60px] pt-[28px] max-[1060px]:px-[18px]">
+            <StateMessage title="This profile could not be read">
+              {error.message} The sample profile is not shown in its place.
+            </StateMessage>
+          </div>
+        );
+      }
+      throw error;
+    }
+  }
+  const areas = await services.locations.areaOptions({ cityId: "in-wb-kol" });
 
   return (
     <div className="mx-auto max-w-[660px] px-[32px] pb-[60px] pt-[28px] max-[1060px]:px-[18px]">
@@ -28,6 +50,7 @@ export default async function ProfilePage() {
           profile={profile}
           areas={areas}
           isSample={profileIsSample}
+          accountName={accountName}
         />
       </Card>
 
