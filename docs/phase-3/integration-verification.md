@@ -1234,6 +1234,33 @@ not store. Publication (Q-3), matching, verification (Q-4), Q-1a through
 Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain.
 Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
 
+## Unsigned delete reaches sign-in, 2 October 2026
+
+Frontend `1de518a`. This section does not replace the `891e8bd` checks.
+Cancel, successful deletion, and the reload that showed the disposable
+draft gone are the results already recorded there for
+`257c9f0d-1d57-40b6-8667-8ea29b4b1370`. That draft was not created again.
+Shared draft `d48bd9ea-b31b-4a55-ae97-ed838b5def4f` was not deleted.
+
+The review API was still process 28328 on `94fa614` / OpenAPI
+`1.0.0-phase3.p`. This frontend did not restart it. The frontend on 3811
+for this check is process 24476. No development-identity secret was set.
+No further OTP was used.
+
+An unsigned request for
+`/builder/properties/00000000-0000-4000-8000-000000000099/delete` returned
+307 to `/auth?next=` that same path. The response did not say the draft was
+deleted. A 401 from the delete mapper is `sign-in`. A missing listing, a
+submitted listing, and an enquiry conflict stay refusals. A 200 that does
+not carry `deleted: true` is not treated as success.
+
+Contract tests passed 16 of 16. `tsc --noEmit` and `next build` passed.
+
+The three alert choices remain an approved feature that this profile does
+not store. Publication (Q-3), matching, verification (Q-4), Q-1a through
+Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain.
+Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
