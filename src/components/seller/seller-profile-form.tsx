@@ -19,9 +19,12 @@ import { Chip } from "@/components/ui/chip";
 export function SellerProfileForm({
   account,
   isSample,
+  alertsStored = true,
 }: {
   account: SellerAccount;
   isSample: boolean;
+  /** False when the profile resource does not carry the three alert toggles. */
+  alertsStored?: boolean;
 }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveSellerProfile, {
     status: "idle",
@@ -40,7 +43,11 @@ export function SellerProfileForm({
             className="rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
           >
             Your details were saved.
-            {isSample ? " In sample mode this is kept in memory only." : ""}
+            {alertsStored
+              ? isSample
+                ? " In sample mode this is kept in memory only."
+                : ""
+              : " Contact name and agency name were written to the profile. Alert preferences were not."}
           </p>
         ) : null}
 
@@ -91,8 +98,9 @@ export function SellerProfileForm({
             defaultChecked={current.alerts.lowBalance}
           />
           <p className="t-caption text-muted">
-            These record a preference. Delivery — by WhatsApp, email or push — is kkl-backend&rsquo;s
-            and is not connected, so turning one on does not start sending anything.
+            {alertsStored
+              ? "These record a preference. Delivery — by WhatsApp, email or push — is kkl-backend’s and is not connected, so turning one on does not start sending anything."
+              : "These switches are not fields on the profile. Saving does not store them, and it does not turn delivery on."}
           </p>
         </fieldset>
 
@@ -100,7 +108,8 @@ export function SellerProfileForm({
           <Button type="submit" disabled={pending}>
             {pending ? "Saving…" : "Save changes"}
           </Button>
-          {isSample ? <Chip tone="warning">Not connected to an account</Chip> : null}
+          {alertsStored && isSample ? <Chip tone="warning">Not connected to an account</Chip> : null}
+          {alertsStored ? null : <Chip tone="warning">Alerts are not stored</Chip>}
         </div>
       </form>
     </Card>

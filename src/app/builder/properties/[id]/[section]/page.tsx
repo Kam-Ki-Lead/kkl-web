@@ -10,6 +10,7 @@ import { PropertyImage } from "@/components/property/property-image";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatAreaPath, formatPriceRange } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { listingStoreKind } from "@/lib/services/backend/config";
 import type { ListingSectionId } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Listing editor" };
@@ -22,6 +23,17 @@ const ORDER: readonly ListingSectionId[] = [
   "media",
   "preview",
 ];
+
+const CONTRACT_NOTES: Partial<Record<ListingSectionId, string>> = {
+  basics:
+    "Possession target is not a field on the listing, so it is not saved. Title, property type and description are saved.",
+  pricing:
+    "Lowest and highest price are a range across the project. The listing stores one priceInr, and each configuration may store its own priceInr. This range is neither of those, so it is not saved. Selected configurations are saved as names. A price already stored on a configuration is kept with that name and is not replaced by the range.",
+  specifications:
+    "Carpet area is a range on this form and one areaSqft on the listing, so the range is not saved. Amenities are not a field on the listing. Total units and the RERA number are saved. A RERA number is recorded and is not a registry check.",
+  media:
+    "A photograph count is not an uploaded photograph, and this form does not store one. A builder submission is not held to an owner's photograph requirement.",
+};
 
 /**
  * B-08 to B-13, and B-15 when the listing already exists.
@@ -40,10 +52,11 @@ export default async function ListingSectionPage({
   const section = raw as ListingSectionId;
 
   const services = getServices().builder;
+  const listingsFromBackend = listingStoreKind() === "backend";
   const [listing, sections, account, areas] = await Promise.all([
     services.listings.get(id),
     services.listings.sections(id),
-    services.account.get(),
+    listingsFromBackend ? Promise.resolve(null) : services.account.get(),
     // The location section's picker options — the launch city's area records.
     getServices().locations.areaOptions({ cityId: "in-wb-kol" }),
   ]);
@@ -74,7 +87,13 @@ export default async function ListingSectionPage({
         formId={section === "preview" ? null : SECTION_FORM_ID}
       >
         {section === "preview" ? (
-          <PreviewSection listingId={id} listing={listing} previousHref={previous} account={account} />
+          <PreviewSection
+            listingId={id}
+            listing={listing}
+            previousHref={previous}
+            account={account}
+            listingsFromBackend={listingsFromBackend}
+          />
         ) : (
           <SectionForm
             listing={listing}
@@ -83,6 +102,7 @@ export default async function ListingSectionPage({
             previousHref={previous}
             nextHref={next ?? `/builder/properties/${id}/preview`}
             nextLabel={`Next: ${sections[index + 1]?.label ?? "Preview"}`}
+            contractNote={listingsFromBackend ? CONTRACT_NOTES[section] : undefined}
           />
         )}
       </EditorShell>
@@ -95,23 +115,30 @@ async function PreviewSection({
   listing,
   previousHref,
   account,
+  listingsFromBackend,
 }: {
   listingId: string;
   listing: NonNullable<Awaited<ReturnType<ReturnType<typeof getServices>["builder"]["listings"]["get"]>>>;
   previousHref: string | null;
-  account: Awaited<ReturnType<ReturnType<typeof getServices>["builder"]["account"]["get"]>>;
+  account: Awaited<ReturnType<ReturnType<typeof getServices>["builder"]["account"]["get"]>> | null;
+  listingsFromBackend: boolean;
 }) {
   const blockers = await getServices().builder.listings.publishBlockers(listingId);
-  const price = formatPriceRange({ minInr: listing.priceMinInr, maxInr: listing.priceMaxInr });
+  const price = listingsFromBackend
+    ? listing.listingPriceInr == null
+      ? null
+      : `Listing price ₹${listing.listingPriceInr.toLocaleString("en-IN")}`
+    : formatPriceRange({ minInr: listing.priceMinInr, maxInr: listing.priceMaxInr });
   // The location label comes from the record (CR05) — no name-prefix logic.
   const locationLabel = listing.localityId
     ? formatAreaPath(await getServices().locations.displayPath(listing.localityId))
     : "Location not entered";
 
-  const accountBlocked =
-    account.accountStatus === "suspended"
+  const accountBlocked = listingsFromBackend
+    ? null
+    : account?.accountStatus === "suspended"
       ? "This account is suspended, so publishing is paused."
-      : account.kycStatus !== "approved"
+      : account?.kycStatus !== "approved"
         ? "Publishing opens once an administrator approves your company documents."
         : account.subscription.state === "none"
           ? "An active subscription is needed to publish."
@@ -166,7 +193,7 @@ async function PreviewSection({
             {/* Styled on the approved buyer-preview card: 23px/800 price,
                 19px/700 name, 15px body lines, 14px amenity tiles. */}
             <p className="font-[family-name:var(--font-heading)] text-[23px] font-extrabold tracking-[-0.025em] text-ink">
-              {price ?? "Price on request"}
+              {price ?? (listingsFromBackend ? "No listing price stored" : "Price on request")}
             </p>
             <h3 className="t-subsection mt-[2px] text-ink">{listing.title || "Untitled project"}</h3>
             <p className="mt-[1px] text-[15px] text-body">
@@ -210,9 +237,9 @@ async function PreviewSection({
           would be reviewed first is not decided, and the screen says so rather
           than implying a moderation step that nobody has agreed to staff. */}
       <p className="t-caption text-muted">
-        {DECISIONS["D-10"].question} — D-10. This build publishes straight to the portal. Whether
-        a listing is reviewed before or after it goes live is undecided, so no review step is
-        shown and none is implied.
+        {listingsFromBackend
+          ? "This screen does not publish a listing. The lowest and highest prices are not shown here, because they are not stored. A price already on the listing is the single priceInr."
+          : `${DECISIONS["D-10"].question} — D-10. This build publishes straight to the portal. Whether a listing is reviewed before or after it goes live is undecided, so no review step is shown and none is implied.`}
       </p>
     </div>
   );

@@ -3,6 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { writeSellerProfile } from "@/lib/services/backend/seller-profile";
+import {
+  BILLING_NOT_ON_PROFILE,
+  BUSINESS_NOT_ON_PROFILE,
+} from "@/lib/services/backend/seller-profile-reading";
+import { ValidationError } from "@/lib/services/contracts";
 import type { BillingDetails, SellerAccount } from "@/lib/domain/types";
 
 /**
@@ -68,8 +75,12 @@ function fieldErrors(error: z.ZodError): Record<string, string> {
 
 export async function saveBusinessDetails(
   _previous: AccountFormState,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<AccountFormState> {
+  if (profileStoreKind() === "backend") {
+    return { status: "idle", errors: { form: BUSINESS_NOT_ON_PROFILE } };
+  }
+  const formData = _formData;
   const raw = {
     agencyName: String(formData.get("agencyName") ?? ""),
     businessType: String(formData.get("businessType") ?? "proprietorship"),
@@ -102,6 +113,9 @@ export async function saveBilling(
   _previous: BillingFormState,
   formData: FormData,
 ): Promise<BillingFormState> {
+  if (profileStoreKind() === "backend") {
+    return { status: "idle", errors: { form: BILLING_NOT_ON_PROFILE } };
+  }
   const raw = {
     billingName: String(formData.get("billingName") ?? ""),
     gstin: String(formData.get("gstin") ?? ""),
@@ -146,6 +160,19 @@ export async function saveSellerProfile(
   const parsed = profileSchema.safeParse(raw);
   if (!parsed.success) {
     return { status: "idle", errors: fieldErrors(parsed.error), values: raw };
+  }
+
+  if (profileStoreKind() === "backend") {
+    try {
+      const saved = await writeSellerProfile(parsed.data);
+      revalidatePath("/seller/profile");
+      return { status: "saved", saved };
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return { status: "idle", errors: error.fields, values: raw };
+      }
+      throw error;
+    }
   }
 
   const saved = await getServices().sellerAccount.saveProfile({

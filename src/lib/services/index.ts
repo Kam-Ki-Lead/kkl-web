@@ -19,6 +19,7 @@ import { backendLocations } from "./backend/locations";
 import { backendProfile } from "./backend/profile";
 import { backendEnquiries } from "./backend/enquiries";
 import { backendAdminOwnerListings, backendOwnerListings } from "./backend/owner-listings";
+import { backendBuilderListings } from "./backend/builder-listings";
 import { backendCredits, backendLeadMarket } from "./backend/commerce";
 import { backendBuilderEnquiries } from "./backend/builder-enquiries";
 import { backendSupport } from "./backend/support";
@@ -136,6 +137,7 @@ function withListingStore(services: Services): Services {
   return {
     ...services,
     ownerListings: backendOwnerListings,
+    builder: { ...services.builder, listings: backendBuilderListings },
     admin: { ...services.admin, ...backendAdminOwnerListings, ...backendAdminPropertyGuard },
   };
 }

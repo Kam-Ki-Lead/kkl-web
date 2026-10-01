@@ -8,7 +8,9 @@ import { ButtonLink } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { listingStoreKind } from "@/lib/services/backend/config";
 import { bearerMode } from "@/lib/services/backend/session";
+import { ServiceError } from "@/lib/services/contracts";
 
 export const metadata: Metadata = { title: "Builder dashboard" };
 
@@ -16,11 +18,23 @@ export const metadata: Metadata = { title: "Builder dashboard" };
 export default async function BuilderDashboardPage() {
   const services = getServices().builder;
   const signedIn = bearerMode() === "browser-session";
-  const [published, drafts, enquiries] = await Promise.all([
-    signedIn ? Promise.resolve([]) : services.listings.list({ status: "published" }),
-    signedIn ? Promise.resolve([]) : services.listings.list({ status: "draft" }),
-    services.enquiries.list(),
-  ]);
+  const listingsFromBackend = listingStoreKind() === "backend";
+  const readListings = !signedIn || listingsFromBackend;
+  let published: Awaited<ReturnType<typeof services.listings.list>> = [];
+  let drafts: Awaited<ReturnType<typeof services.listings.list>> = [];
+  let listingsUnreadable = false;
+  const enquiries = await services.enquiries.list();
+  if (readListings) {
+    try {
+      [published, drafts] = await Promise.all([
+        services.listings.list({ status: "published" }),
+        services.listings.list({ status: "draft" }),
+      ]);
+    } catch (error) {
+      if (!(error instanceof ServiceError)) throw error;
+      listingsUnreadable = true;
+    }
+  }
 
   const unread = enquiries.filter((e) => !e.read).length;
   const siteVisits = enquiries.filter((e) => e.kind === "site_visit").length;
@@ -31,14 +45,26 @@ export default async function BuilderDashboardPage() {
         <StatTiles
           tiles={[
             {
-              value: signedIn ? "—" : String(published.length),
+              value: listingsUnreadable || (signedIn && !listingsFromBackend) ? "—" : String(published.length),
               label: "Published",
-              note: signedIn ? "Not this account's property list" : "Live on the portal",
+              note: listingsUnreadable
+                ? "The listing list could not be read"
+                : listingsFromBackend
+                  ? "Nothing on this screen publishes a listing"
+                  : signedIn
+                    ? "Not this account's property list"
+                    : "Live on the portal",
             },
             {
-              value: signedIn ? "—" : String(drafts.length),
+              value: listingsUnreadable || (signedIn && !listingsFromBackend) ? "—" : String(drafts.length),
               label: drafts.length === 1 ? "Draft" : "Drafts",
-              note: signedIn ? "Not this account's property list" : "Not yet submitted",
+              note: listingsUnreadable
+                ? "The listing list could not be read"
+                : listingsFromBackend
+                  ? "Saved on this account"
+                  : signedIn
+                    ? "Not this account's property list"
+                    : "Not yet submitted",
             },
             {
               value: String(enquiries.length),

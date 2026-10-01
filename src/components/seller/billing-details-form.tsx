@@ -31,6 +31,11 @@ export function BillingDetailsForm({
 
   return (
     <form action={action} className="flex flex-col gap-[16px]">
+      {err.form ? (
+        <p role="alert" className="t-body text-danger">
+          {err.form}
+        </p>
+      ) : null}
       {state.status === "saved" ? (
         <p
           role="status"

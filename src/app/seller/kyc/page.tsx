@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { OnboardingShell } from "@/components/seller/onboarding-shell";
 import { KycForm } from "@/components/seller/kyc-form";
 import { runtimeConfig } from "@/lib/config/runtime";
+import { profileStoreKind } from "@/lib/services/backend/config";
 
 export const metadata: Metadata = { title: "Verify your identity" };
 
@@ -15,7 +16,10 @@ export default function SellerKycPage() {
         are reviewed by an administrator.
       </p>
       <div className="mt-[20px]">
-        <KycForm isSample={runtimeConfig.isSampleMode} />
+        <KycForm
+          isSample={runtimeConfig.isSampleMode}
+          storesIdentity={profileStoreKind() !== "backend"}
+        />
       </div>
     </OnboardingShell>
   );

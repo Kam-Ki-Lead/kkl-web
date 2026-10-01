@@ -23,10 +23,12 @@ export function ListingActions({
   listingId,
   status,
   canPublish,
+  allowDelete = true,
 }: {
   listingId: string;
   status: ListingStatus;
   canPublish: boolean;
+  allowDelete?: boolean;
 }) {
   /*
    * The approved row draws one filled action (Edit listing), one bordered
@@ -74,12 +76,16 @@ export function ListingActions({
         </ButtonLink>
       ) : null}
 
-      <form action={deleteListing}>
-        <input type="hidden" name="listingId" value={listingId} />
-        <Button type="submit" variant="quietDanger" size="action">
-          Delete
-        </Button>
-      </form>
+      {allowDelete ? (
+        <form action={deleteListing}>
+          <input type="hidden" name="listingId" value={listingId} />
+          <Button type="submit" variant="quietDanger" size="action">
+            Delete
+          </Button>
+        </form>
+      ) : (
+        <p className="t-caption text-muted">No request deletes a listing.</p>
+      )}
 
       {status === "published" ? (
         <Link

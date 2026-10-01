@@ -60,6 +60,7 @@ export function SectionForm({
   previousHref,
   nextHref,
   nextLabel,
+  contractNote,
 }: {
   listing: ListingDraft;
   section: ListingSectionId;
@@ -68,6 +69,8 @@ export function SectionForm({
   previousHref: string | null;
   nextHref: string;
   nextLabel: string;
+  /** What this section does not write when the listing record is in use. */
+  contractNote?: string;
 }) {
   const [state, action, pending] = useActionState<SectionFormState, FormData>(
     saveListingSection,
@@ -89,6 +92,16 @@ export function SectionForm({
           Draft saved.
         </p>
       ) : null}
+
+      {state.errors
+        ? Object.entries(state.errors).map(([key, message]) => (
+            <p key={key} role="alert" className="t-body text-danger">
+              {message}
+            </p>
+          ))
+        : null}
+
+      {contractNote ? <p className="t-caption text-muted">{contractNote}</p> : null}
 
       {section === "basics" ? <BasicsFields listing={listing} /> : null}
       {section === "location" ? <LocationFields listing={listing} areas={areas} /> : null}
@@ -257,6 +270,22 @@ function PricingFields({ listing }: { listing: ListingDraft }) {
         Prices are yours to set and are shown to buyers as entered. Kam Ki Lead does not add a
         margin, and the platform&rsquo;s own lead prices are a separate, unresolved decision (D-03).
       </p>
+      {listing.listingPriceInr != null ? (
+        <p className="t-caption text-body">
+          This listing already has one price of ₹{listing.listingPriceInr.toLocaleString("en-IN")}.
+          The range above does not change it.
+        </p>
+      ) : null}
+      {listing.configurationPrices && listing.configurationPrices.length > 0 ? (
+        <ul className="t-caption flex flex-col gap-[4px] text-body">
+          {listing.configurationPrices.map((price) => (
+            <li key={`${price.label}-${price.priceInr}`}>
+              {price.label} already has a stored price of ₹{price.priceInr.toLocaleString("en-IN")}.
+              The range above does not replace it.
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </>
   );
 }

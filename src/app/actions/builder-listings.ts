@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServices } from "@/lib/services";
+import { ValidationError } from "@/lib/services/contracts";
 import type { ListingSectionId } from "@/lib/domain/types";
 
 /**
@@ -83,7 +84,14 @@ export async function saveListingSection(
     values.reraRegistered = formData.get("reraRegistered") === "on";
   }
 
-  await getServices().builder.listings.saveSection({ id, section, values });
+  try {
+    await getServices().builder.listings.saveSection({ id, section, values });
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return { status: "idle", errors: error.fields };
+    }
+    throw error;
+  }
   revalidateListing(id);
 
   const next = String(formData.get("next") ?? "");
@@ -141,6 +149,8 @@ function refusal(reason: string): string {
       return "Your subscription has lapsed, so publishing is locked until it is reactivated.";
     case "account_suspended":
       return "Publishing is paused while this account is suspended.";
+    case "publication_not_decided":
+      return "No request publishes a listing. The draft stays a draft.";
     default:
       return "This listing is missing something it needs before it can go live.";
   }

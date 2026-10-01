@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { IDENTITY_NOT_ON_PROFILE } from "@/lib/services/backend/seller-profile-reading";
 
 /**
  * S-03 KYC submission.
@@ -54,6 +56,9 @@ export async function submitKyc(
   _previous: KycFormState,
   formData: FormData,
 ): Promise<KycFormState> {
+  if (profileStoreKind() === "backend") {
+    return { errors: { form: IDENTITY_NOT_ON_PROFILE } };
+  }
   const panNumber = String(formData.get("panNumber") ?? "");
 
   const parsed = kycSchema.safeParse({

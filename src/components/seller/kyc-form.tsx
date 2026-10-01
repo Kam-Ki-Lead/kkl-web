@@ -20,13 +20,18 @@ import { Field, TextInput } from "@/components/ui/field";
  * rule; until those exist, accepting the file and dropping it would leave
  * someone believing their documents were submitted.
  */
-export function KycForm({ isSample }: { isSample: boolean }) {
+export function KycForm({ isSample, storesIdentity = true }: { isSample: boolean; storesIdentity?: boolean }) {
   const [state, action, pending] = useActionState<KycFormState, FormData>(submitKyc, {});
   const err = state.errors ?? {};
   const v = state.values ?? {};
 
   return (
     <form action={action} encType="multipart/form-data" className="flex flex-col gap-[16px]">
+      {err.form ? (
+        <p role="alert" className="t-body text-danger">
+          {err.form}
+        </p>
+      ) : null}
       <DocumentSlot
         id="panDocument"
         title="PAN card"
@@ -61,11 +66,11 @@ export function KycForm({ isSample }: { isSample: boolean }) {
           Lead administrators.
         </p>
         <p className="t-caption mt-[8px] text-warning">
-          <strong>Nothing is uploaded yet.</strong> The file you choose is not sent or stored:
-          document storage, virus scanning, access logging and a retention rule are kkl-backend&rsquo;s
-          and do not exist. This form records that you selected a file, and the PAN number, so the
-          flow can be reviewed end to end.
-          {isSample ? " No administrator will see anything." : ""}
+          <strong>Nothing is uploaded yet.</strong>{" "}
+          {storesIdentity
+            ? "The file you choose is not sent or stored: document storage, virus scanning, access logging and a retention rule are kkl-backend’s and do not exist. This form records that you selected a file, and the PAN number, so the flow can be reviewed end to end."
+            : "The profile does not accept a PAN number or an identity document. Submitting this form stores nothing."}
+          {isSample && storesIdentity ? " No administrator will see anything." : ""}
         </p>
       </Card>
 

@@ -60,6 +60,11 @@ export function BusinessDetailsForm({ account }: { account: SellerAccount }) {
 
   return (
     <form action={action} className="flex flex-col gap-[16px]">
+      {err.form ? (
+        <p role="alert" className="t-body text-danger">
+          {err.form}
+        </p>
+      ) : null}
       <Field id="agencyName" label="Legal / trade name" error={err.agencyName}>
         <TextInput
           id="agencyName"

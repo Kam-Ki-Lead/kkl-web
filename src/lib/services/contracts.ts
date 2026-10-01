@@ -448,7 +448,8 @@ export type ListingBlockReason =
   | "not_verified"
   | "no_subscription"
   | "subscription_expired"
-  | "account_suspended";
+  | "account_suspended"
+  | "publication_not_decided";
 
 /**
  * Listings (B-07 to B-15).

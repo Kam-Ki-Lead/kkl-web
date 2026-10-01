@@ -910,8 +910,26 @@ export type ListingDraft = {
   readonly localityId: string | null;
   readonly addressLine: string;
   readonly configurations: readonly string[];
+  /**
+   * Lowest and highest price on the approved editor. A builder project is a
+   * range across configurations. These are not the listing's single priceInr
+   * and they are not a price stored on one configuration.
+   */
   readonly priceMinInr: number | null;
   readonly priceMaxInr: number | null;
+  /**
+   * The listing record's single priceInr, when one is already stored. The
+   * editor shows it and does not write the range into it.
+   */
+  readonly listingPriceInr?: number | null;
+  /**
+   * A price already stored on a configuration. Shown with that configuration.
+   * Saving the range does not replace these amounts.
+   */
+  readonly configurationPrices?: readonly {
+    readonly label: string;
+    readonly priceInr: number;
+  }[];
   readonly areaMin: string;
   readonly areaMax: string;
   readonly totalUnits: string;

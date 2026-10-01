@@ -7,7 +7,9 @@ import { PropertyImage } from "@/components/property/property-image";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
+import { listingStoreKind } from "@/lib/services/backend/config";
 import { bearerMode } from "@/lib/services/backend/session";
+import { ServiceError } from "@/lib/services/contracts";
 import type { ListingStatus } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "My properties" };
@@ -42,7 +44,9 @@ export default async function BuilderPropertiesPage({
   const tab = TABS.find((t) => t.key === tabKey) ?? TABS[0];
   const justPublished = one(params.published);
 
-  if (bearerMode() === "browser-session") {
+  const listingsFromBackend = listingStoreKind() === "backend";
+
+  if (bearerMode() === "browser-session" && !listingsFromBackend) {
     return (
       <BuilderShell title="My properties" subtitle="Everything you have listed">
         <StateMessage title="This account has no property list here">
@@ -56,21 +60,38 @@ export default async function BuilderPropertiesPage({
   }
 
   const services = getServices().builder;
-  const [listings, account] = await Promise.all([
-    services.listings.list(tab?.status ? { status: tab.status } : undefined),
-    services.account.get(),
-  ]);
-
-  const canPublish =
-    account.accountStatus === "active" &&
-    account.kycStatus === "approved" &&
-    account.subscription.state !== "none" &&
-    account.subscription.state !== "expired";
+  let listings;
+  let canPublish = false;
+  try {
+    const [listed, account] = await Promise.all([
+      services.listings.list(tab?.status ? { status: tab.status } : undefined),
+      listingsFromBackend ? Promise.resolve(null) : services.account.get(),
+    ]);
+    listings = listed;
+    canPublish =
+      !listingsFromBackend &&
+      account !== null &&
+      account.accountStatus === "active" &&
+      account.kycStatus === "approved" &&
+      account.subscription.state !== "none" &&
+      account.subscription.state !== "expired";
+  } catch (error) {
+    if (error instanceof ServiceError) {
+      return (
+        <BuilderShell title="My properties" subtitle="Everything you have listed">
+          <StateMessage title="This account’s listings could not be read">
+            {error.message} Sample projects are not shown in their place.
+          </StateMessage>
+        </BuilderShell>
+      );
+    }
+    throw error;
+  }
 
   return (
     <BuilderShell title="My properties" subtitle="Everything you have listed">
       <div className="flex flex-col gap-[16px]">
-        {justPublished ? (
+        {justPublished && !listingsFromBackend ? (
           <p
             role="status"
             className="rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
@@ -131,9 +152,11 @@ export default async function BuilderPropertiesPage({
                         <div
                           role="img"
                           aria-label={
-                            listing.hasMedia
-                              ? `Photograph for ${listing.title} was chosen but no file is kept in sample mode`
-                              : `No photographs yet — ${listing.title}`
+                            listingsFromBackend
+                              ? `Photographs are not on this list — ${listing.title}`
+                              : listing.hasMedia
+                                ? `Photograph for ${listing.title} was chosen but no file is kept in sample mode`
+                                : `No photographs yet — ${listing.title}`
                           }
                           className="flex h-full w-full flex-col items-center justify-center gap-[6px] text-muted"
                         >
@@ -141,7 +164,11 @@ export default async function BuilderPropertiesPage({
                             ▣
                           </span>
                           <span className="px-[8px] text-center text-[13px]">
-                            {listing.hasMedia ? "No file kept — sample mode" : "No photos yet"}
+                            {listingsFromBackend
+                              ? "Photographs are not on this list"
+                              : listing.hasMedia
+                                ? "No file kept — sample mode"
+                                : "No photos yet"}
                           </span>
                         </div>
                       )}
@@ -168,20 +195,25 @@ export default async function BuilderPropertiesPage({
                           </p>
                           <p className="mt-[6px] text-[14px] text-muted">{listing.detailLine}</p>
                         </div>
-                        <div className="flex-none whitespace-nowrap text-right">
-                          <p className="font-[family-name:var(--font-heading)] text-[22px] font-extrabold text-ink">
-                            {listing.enquiryCount}
-                          </p>
-                          <p className="t-caption text-muted">
-                            {listing.enquiryCount === 1 ? "enquiry" : "enquiries"}
-                          </p>
-                        </div>
+                        {listingsFromBackend ? (
+                          <p className="t-caption text-muted">Enquiry count is not on this list.</p>
+                        ) : (
+                          <div className="flex-none whitespace-nowrap text-right">
+                            <p className="font-[family-name:var(--font-heading)] text-[22px] font-extrabold text-ink">
+                              {listing.enquiryCount}
+                            </p>
+                            <p className="t-caption text-muted">
+                              {listing.enquiryCount === 1 ? "enquiry" : "enquiries"}
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       <ListingActions
                         listingId={listing.id}
                         status={listing.status}
                         canPublish={canPublish}
+                        allowDelete={!listingsFromBackend}
                       />
                     </div>
                   </article>

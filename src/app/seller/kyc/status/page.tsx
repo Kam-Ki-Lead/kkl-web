@@ -6,6 +6,7 @@ import { Chip, type ChipTone } from "@/components/ui/chip";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatDateTime } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { profileStoreKind } from "@/lib/services/backend/config";
 import type { KycStatus } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Verification status" };
@@ -42,6 +43,17 @@ const PANEL: Record<
 
 /** S-04 — KYC status and the verification timeline. */
 export default async function KycStatusPage() {
+  if (profileStoreKind() === "backend") {
+    return (
+      <OnboardingShell step="review">
+        <h1 className="t-flow-title text-ink">Verification status</h1>
+        <p className="t-body mt-[8px] text-body">
+          Verification status is not a field on the profile. This screen does not report one, and
+          it does not show a sample timeline.
+        </p>
+      </OnboardingShell>
+    );
+  }
   const services = getServices();
   const [account, timeline] = await Promise.all([
     services.sellerAccount.get(),
