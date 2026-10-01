@@ -1147,6 +1147,53 @@ payment credentials (Q-5); consent provenance (Q-6); message delivery (Q-7);
 object storage (Q-8); a routed builder enquiry. Phase 3 is not complete.
 The admin-queue slice stays closed at `8079ee0`.
 
+## Guest shortlist, listing counts, and draft delete, 1 October 2026
+
+Frontend `4b0db0a`. This section does not replace the `4334601` results.
+
+The review API was still process 28328, started at 22:58 local, command
+`node src/http/server.mjs`, on checkout `94fa614` (implementation `e482dfc`,
+OpenAPI `1.0.0-phase3.p`). Migrations `021` and `022` are the files that
+handoff names. This frontend did not restart the API, did not change that
+checkout, and did not query the migration table. The possession words,
+carpet-area words, https video link, enquiry count, image-record count, and
+draft delete were accepted by that process.
+
+The frontend on 3811 for this pass is process 30044, built with
+`NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then
+`next start` with the documented domain switches. No development-identity
+secret was set. One further local OTP was used for the buyer number ending
+0103. The code is not recorded here.
+
+| Check | Result |
+| --- | --- |
+| Signed-out header | An unsigned homepage contains `Shortlist` with `/auth?next=/account/shortlist`. It does not say unavailable. |
+| Signed-in empty shortlist | The builder session’s menu showed `Shortlist (0)`. |
+| Builder profile RERA | The box stayed disabled and empty. The helper says to add the number on the property listing, and that this profile does not store it. |
+| Amenities and listing words | Draft `d48bd9ea-b31b-4a55-ae97-ed838b5def4f` reloaded Lift checked, 40 units, RERA number `WBRERA/P/NOR/2024/000001`, carpet words `985 sq ft` and `1420 sq ft`. |
+| Listing counts | The same draft’s list row showed `0 enquiries` and `0 image records. An image record is not a stored photograph.` A missing count is not rendered as zero. |
+| Draft delete | A new draft `6483906a-b62c-4d90-bbc4-1ec15d23888d`, titled `Disposable delete check`, was opened on its confirmation page and then deleted. The shared draft stayed on the list. Delete was not used on that shared draft. |
+| Buyer profile | Number ending 0103. Full name reloaded as `Review Buyer`. The caption said the account name stays Review Buyer. |
+| Buyer requirement locations | `/find-my-match` with no query prefilled `Rajarhat, Kolkata` from the location list (56 options). The page said no matching rule is approved and nothing is scored. |
+
+Contract tests passed 16 of 16 before this server start. `tsc --noEmit` and
+`next build` passed.
+
+### Scope that is engineering, not a new client decision
+
+- Public “Report a listing” opens `/support`. The staff property queue already
+  records `property_reports_not_decided` for the reported filter and for
+  `dismiss_report`. No separate public report-intake route was found in the
+  published path list. That is an unwired route, not a new decision recorded here.
+- A routed builder enquiry is still a fixture dependency. It is not a new
+  business rule.
+- Profile fields that the contract still does not accept stay off the save:
+  the three alert choices, a subscription price, and identity numbers.
+
+Phase 3 is not complete. Publication (Q-3), matching, verification (Q-4),
+Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder
+enquiry remain. The admin-queue slice stays closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
