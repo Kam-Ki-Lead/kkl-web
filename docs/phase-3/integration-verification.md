@@ -947,6 +947,102 @@ Unresolved product decisions, separate from those missing fields:
 - Q-8: object storage. A selected file is not a stored photograph.
 - A populated builder inbox still needs an enquiry addressed to Review Builder. The stored enquiries remain unrouted.
 
+## Configuration prices and the account name, 1 October 2026
+
+The application is `978f4e6`. The earlier draft save at `5c99b26` stays as
+recorded. This pass checks the configuration columns on the running review
+server before treating the project range as unmapped, and it stops writing
+contact name into both profile names.
+
+The API process 30804 was not restarted. Its working directory is the
+backend checkout. That checkout is `3b4cbda` (`2026-10-01 15:24:03 +0530`),
+the tree was clean, and `server.mjs`, `listings.mjs` and `docs/api/v1.yaml`
+were last written before the process started at 15:24:53. `GET /health` on
+port 4010 returned `ok: true` and `environment: review`. OpenAPI is
+`1.0.0-phase3.n`.
+
+The process is connected to database `kkl_review` on port 5433. The
+application role cannot read `schema_migrations` (SQLSTATE 42501). The live
+table `listing_configurations` was probed and has `price_inr` (bigint),
+`area_sqft` (integer), `available` (integer) and `sort_order` (integer).
+Those four columns are created together by migration `007_listings.sql`.
+No later migration changes them. `sortOrder` is not a field on the published
+listing configuration object. The write sets `sort_order` from the array
+position, and a read comes back in that order.
+
+### What the editor can store
+
+| Approved field | Published field | This save |
+|---|---|---|
+| Configuration checkbox “N BHK” | `configurations[].configuration` | Written. Existing rows stay in their stored order, which keeps `sort_order`. A newly checked name is appended. |
+| A price, area or availability already stored on that name | `priceInr`, `areaSqft`, `available` | Copied back onto the same name. An available count of zero is kept. The form does not collect a new amount, area or count. |
+| Lowest price and highest price | None. Listing `priceInr` is one whole-rupee integer. A configuration `priceInr` is one integer on one name. | Not written, and not converted. The save says “Not stored: Lowest price, Highest price.” |
+| Possession target, carpet-area text, amenities, “RERA registered” | None | Not written. A save that sends one names it. |
+| Photograph file, photograph count, video link | Media bytes are still Q-8. A count is not a photograph. | Not written. The save says they were not stored. The count field is left blank. A blank field is not zero photographs. |
+
+Review Builder, in the browser, saved lowest 5100000 and highest 9100000 on
+draft `d48bd9ea-b31b-4a55-ae97-ed838b5def4f`. The status said those two
+amounts were not stored. A fresh load left both fields empty, left 2 BHK and
+3 BHK checked, and the list still says “Price not stored”. A photograph
+count of 3 was typed on the media section. The status said the photographs,
+the count and the video link were not stored, and the count field was blank
+afterwards. The list says photographs are not on this list, and “Enquiry
+count is not on this list.” It does not show a zero.
+
+All and Draft both show that draft, labelled Draft. Published shows
+“Nothing in this state” and does not show the draft. This account has no
+published listing, so a published row on All was not a browser check. The
+isolated test covers a mixed list: All keeps published, and each named tab
+returns only that status. A `submitted` row is not labelled Draft.
+
+Publication and deletion stay refused. No request publishes a listing.
+
+### Contact name
+
+`displayName` is the account name. Support messages and “Signed in as” use
+it, and the profile patch writes it with `setDisplayName`. `fullName` is
+`account_profiles.full_name`, a separate column. The seller form has one
+“Contact name” control, whose validation says it is the name support should
+use. The patch sends `displayName` and `companyName`. It does not send
+`fullName`.
+
+Review Seller’s profile already had full name “Review Seller” from the
+earlier save that wrote both names. Contact name was changed to “Review
+Seller Desk” and an alert switch was turned on. After reload, contact name
+was “Review Seller Desk”, the page said the profile full name stays “Review
+Seller”, the agency was still “Review Agency Phase 3”, and the alert switch
+was off. Contact name was then saved back to “Review Seller”. “Signed in as
+Review Seller” confirms that restore. The sign-in phone stayed masked.
+
+Review Seller opening the builder draft receives 404 and does not see the
+project name. `/builder/properties` says the session is a seller account and
+does not open the sample builder.
+
+The earlier seller save at `5c99b26` did write both names. This correction
+does not undo that past write. It stops a later contact-name save from
+changing `fullName`.
+
+### Checks
+
+`tests/builder-seller-contract.test.mjs` passed, 7 of 7. Those fixtures are
+not `kkl_review` rows. `npx tsc --noEmit` passed. `next build` passed with
+`NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`. The
+frontend was served with `next start -p 3811` (listener 39888) and the same
+documented runtime switches. No development secret was set on the frontend.
+The API on 4010 (process 30804) was left running. `kkl_review` was not
+reset. `docs/phase-2/visual/geometry-1440.json` stayed unstaged.
+
+Sign-in for the seller check used the local one-time-code channel. That is
+not production authentication. The code is not recorded here.
+
+The field gaps in the previous handoff still stand, with this correction:
+the range remains unmapped because it has no equivalent, and contact name
+maps to `displayName` only. Per-configuration price, area and availability
+are stored when they already exist. The approved checkboxes still do not
+collect a new amount. Publication (Q-3), a verification pass (Q-4), object
+storage (Q-8) and a routed builder enquiry remain open. The admin-queue
+slice stays closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name

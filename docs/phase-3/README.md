@@ -6,7 +6,7 @@ of that run. It does not revise the Phase 2 sample-service handoff in
 
 | Document | What it answers |
 |---|---|
-| **[integration-verification.md](integration-verification.md)** | The `611bca9` run against backend `abf89fc`, then the domain switches, the admin-queue check, the builder inbox, the owner listing draft, the photograph-eligibility check at `f0eb675` against backend `a8d9b1a`, the inspection at `d9fe279` that those admin routes were unpublished, the wiring at `eaab830` against backend `3b4cbda` / OpenAPI `1.0.0-phase3.n`, the capability and unread-count correction at `3912c3d`, and the builder draft and seller profile save at `5c99b26` |
+| **[integration-verification.md](integration-verification.md)** | The `611bca9` run against backend `abf89fc`, then the domain switches, the admin-queue check, the builder inbox, the owner listing draft, the photograph-eligibility check at `f0eb675` against backend `a8d9b1a`, the inspection at `d9fe279` that those admin routes were unpublished, the wiring at `eaab830` against backend `3b4cbda` / OpenAPI `1.0.0-phase3.n`, the capability and unread-count correction at `3912c3d`, the builder draft and seller profile save at `5c99b26`, and the configuration-price and account-name correction at `978f4e6` |
 
 ## Older records stay on their own revisions
 
