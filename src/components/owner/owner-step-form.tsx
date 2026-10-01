@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
 import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
+import { photographRecordLabel } from "@/lib/domain/listing-photographs";
 import type { OwnerListing, OwnerListingStepId } from "@/lib/domain/types";
 
 /**
@@ -61,8 +62,9 @@ export function OwnerStepForm({
   nextLabel: string;
   /**
    * Sample drafts remember chosen file names in process memory. A backend
-   * draft does not: a name in this browser is not a photograph, and no media
-   * row is created while storage cannot keep the file.
+   * draft can record the selected file's name, type and size. That row is
+   * declared metadata: the bytes are not uploaded, and it does not complete
+   * the photograph step.
    */
   keepsPhotographNames?: boolean;
 }) {
@@ -402,11 +404,7 @@ function PhotoFields({
               <span className="min-w-0 break-words text-[15px] text-ink">
                 {photo.fileName}
                 <span className="t-caption ml-[8px] text-muted">
-                  {photo.sizeLabel} · {photo.retained && photo.availability === "available"
-                    ? "stored"
-                    : photo.availability === "unavailable"
-                      ? "not available"
-                      : "declared, not uploaded"}
+                  {photo.sizeLabel} · {photographRecordLabel(photo)}
                 </span>
               </span>
               <button

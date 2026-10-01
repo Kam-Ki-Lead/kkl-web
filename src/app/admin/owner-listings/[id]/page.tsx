@@ -9,23 +9,11 @@ import {
 import { OWNER_STATUS } from "@/components/owner/owner-status";
 import { Card, InsetPanel, SectionHeader } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import type { OwnerListingPhoto } from "@/lib/domain/types";
+import { coverBadge, photographRecordLabel, staffPhotographSubtitle, storedPhotographCount } from "@/lib/domain/listing-photographs";
 import { getServices } from "@/lib/services";
 import { areaLabel } from "@/lib/services/sample/locations";
 
 export const metadata: Metadata = { title: "Owner submission", robots: { index: false } };
-
-function adminPhotographSubtitle(photos: readonly OwnerListingPhoto[]): string {
-  if (photos.length === 0) return "None on this listing";
-  if (photos.every((photo) => photo.availability === undefined)) {
-    return `${photos.length} chosen by the owner`;
-  }
-  const stored = photos.filter((photo) => photo.retained && photo.availability === "available").length;
-  if (stored > 0) return stored === 1 ? "1 stored" : `${stored} stored`;
-  return photos.length === 1
-    ? "1 file record, not uploaded"
-    : `${photos.length} file records, not uploaded`;
-}
 
 /**
  * CR02 — one owner submission, staff side.
@@ -104,37 +92,31 @@ export default async function AdminOwnerListingPage({
       <Card className="mt-[16px] p-[22px]">
         <SectionHeader
           title="Photographs"
-          subtitle={adminPhotographSubtitle(listing.photos)}
+          subtitle={staffPhotographSubtitle(listing.photos)}
         />
         {listing.photos.length === 0 ? null : (
           <ul className="flex flex-col gap-[6px]">
-            {listing.photos.map((p, i) => (
+            {listing.photos.map((p) => (
               <li key={p.id} className="t-body text-body">
-                {p.availability === undefined && i === 0 ? (
+                {coverBadge(p, listing.photos) === "stored" || coverBadge(p, listing.photos) === "sample-name" ? (
                   <strong className="text-ink">Cover · </strong>
                 ) : null}
                 {p.fileName}{" "}
                 <span className="t-caption text-muted">
                   ({p.sizeLabel}
-                  {p.availability === undefined
-                    ? ""
-                    : p.retained && p.availability === "available"
-                      ? " · stored"
-                      : p.availability === "unavailable"
-                        ? " · not available"
-                        : " · declared, not uploaded"}
-                  )
+                  {p.availability == null ? "" : ` · ${photographRecordLabel(p)}`})
                 </span>
               </li>
             ))}
           </ul>
         )}
         <p className="t-caption mt-[10px] rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[13px] py-[10px] text-body">
-          {listing.photos.some((photo) => photo.availability !== undefined) ? (
+          {listing.photos.some((photo) => photo.availability != null) ? (
             <>
-              <strong className="text-ink">There are no images to look at.</strong> A file record
-              is a name, type and size. It was not uploaded, so a photograph review is not possible
-              here.
+              <strong className="text-ink">There are no images to look at.</strong>{" "}
+              {storedPhotographCount(listing.photos) > 0
+                ? "A confirmed photograph is counted. This screen does not retrieve the file, so nothing is drawn here."
+                : "The name, type and size were recorded. The bytes were not uploaded, so a photograph review is not possible here."}
             </>
           ) : (
             <>

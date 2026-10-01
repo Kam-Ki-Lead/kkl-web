@@ -6,7 +6,7 @@ import { OWNER_STATUS, ownerCanEdit } from "@/components/owner/owner-status";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, InsetPanel, SectionHeader } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import type { OwnerListing } from "@/lib/domain/types";
+import { ownerPhotographLine } from "@/lib/domain/listing-photographs";
 import { getServices, listingStore } from "@/lib/services";
 import { ServiceError } from "@/lib/services/contracts";
 import { OWNER_STEPS, stepStates } from "@/lib/services/sample/owner-listing-store";
@@ -30,19 +30,8 @@ function one(v: string | string[] | undefined): string {
   return (Array.isArray(v) ? v[0] : v) ?? "";
 }
 
-function photographLine(listing: OwnerListing): string {
-  const stored = listing.photos.filter(
-    (photo) => photo.retained && photo.availability === "available",
-  ).length;
-  if (stored > 0) return stored === 1 ? "1 stored" : `${stored} stored`;
-  if (listing.photos.length === 0) return "None";
-  if (listingStore() === "backend") {
-    const records = listing.photos.length;
-    return records === 1
-      ? "None stored · 1 file record, not uploaded"
-      : `None stored · ${records} file records, not uploaded`;
-  }
-  return `${listing.photos.length} chosen · files not stored in this build`;
+function photographLine(listing: { photos: Parameters<typeof ownerPhotographLine>[0] }): string {
+  return ownerPhotographLine(listing.photos, listingStore() === "backend" ? "backend" : "sample");
 }
 
 /**

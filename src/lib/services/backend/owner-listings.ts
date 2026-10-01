@@ -9,6 +9,13 @@ import type {
 import type { AdminActionResult, AdminOwnerListing, AdminTicketMessage } from "@/lib/domain/admin";
 import type { OwnerListingService } from "@/lib/services/contracts";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
+import {
+  declarationsToAdd,
+  imageFromMedia,
+  photographStepComplete,
+  storedPhotographCount,
+  type MediaDeclaration,
+} from "@/lib/domain/listing-photographs";
 import { callAs } from "./session";
 
 /**
@@ -49,6 +56,7 @@ type BackendMedia = {
   id: string;
   kind: "image" | "video" | "document";
   fileName: string;
+  contentType?: string;
   byteSize: number;
   stored: boolean;
   availability?: "declared" | "unavailable" | "available";
@@ -109,29 +117,10 @@ const STATUS: Record<string, OwnerListingStatus> = {
   published: "cleared",
 };
 
-const size = (bytes: number): string =>
-  bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
-
-/** A photograph counts only when the storage adapter has confirmed the bytes. */
-function storedPhotograph(photo: { retained: boolean; availability?: string }): boolean {
-  return photo.retained && photo.availability === "available";
-}
-
 const photosOf = (listing: BackendListing): readonly OwnerListingPhoto[] =>
-  (listing.media ?? []).filter((m) => m.kind === "image").map((m) => {
-    const availability = m.availability === "available" || m.availability === "declared" || m.availability === "unavailable"
-      ? m.availability
-      : undefined;
-    return {
-      id: m.id,
-      fileName: m.fileName,
-      sizeLabel: size(m.byteSize),
-      availability,
-      // `stored` alone is not enough. A declared or unavailable row, and a
-      // row whose key was set without adapter confirmation, stays unretained.
-      retained: availability === "available" && m.stored === true,
-    };
-  });
+  (listing.media ?? [])
+    .map((media) => imageFromMedia(media))
+    .filter((photo): photo is OwnerListingPhoto => photo !== null);
 
 function toListing(l: BackendListing): OwnerListing {
   return {
@@ -193,7 +182,7 @@ function stepComplete(l: OwnerListing, step: OwnerListingStepId): boolean {
     case "pricing":
       return l.priceInr !== null && l.configuration !== null;
     case "photos":
-      return l.photos.some((photo) => storedPhotograph(photo));
+      return photographStepComplete(l.photos, "backend");
     case "contact":
       return l.contactPreference !== null && l.contactName.trim() !== "";
     case "preview":
@@ -221,7 +210,7 @@ function toSummary(raw: BackendListing, label: string): OwnerListingSummary {
     locationLabel: label,
     priceLabel: price,
     detailLine: details.length > 0 ? details.join(" · ") : "Details not filled in yet",
-    photoCount: l.photos.filter((photo) => storedPhotograph(photo)).length,
+    photoCount: storedPhotographCount(l.photos),
     stepsComplete: STEP_ORDER.filter((s) => stepComplete(l, s)).length,
     stepsTotal: STEP_ORDER.length,
     updatedAt: l.updatedAt,
@@ -350,7 +339,7 @@ async function declareSelected(
   const names = postedList(values, "photoFileName");
   const sizes = postedList(values, "photoByteSize");
   const types = postedList(values, "photoContentType");
-  let declared = 0;
+  const incoming: MediaDeclaration[] = [];
   for (let index = 0; index < names.length; index += 1) {
     const fileName = names[index]?.trim() ?? "";
     if (fileName === "") continue;
@@ -364,14 +353,25 @@ async function declareSelected(
         photos: "The selected file did not include a usable size and type, so it was not recorded.",
       });
     }
+    incoming.push({ fileName, byteSize, contentType });
+  }
+  const current = await fetchOne(listingId);
+  const existing = (current.media ?? [])
+    .filter((media) => media.kind === "image")
+    .map((media) => ({
+      fileName: media.fileName,
+      byteSize: media.byteSize,
+      contentType: media.contentType ?? "",
+    }));
+  const fresh = declarationsToAdd(existing, incoming);
+  for (const row of fresh) {
     const { status, body } = await callAs<BackendListing>("owner", `/v1/listings/${listingId}/media`, {
       method: "POST",
-      body: { kind: "image", contentType, byteSize, fileName },
+      body: { kind: "image", contentType: row.contentType, byteSize: row.byteSize, fileName: row.fileName },
     });
     if (status !== 201) raise(status, body);
-    declared += 1;
   }
-  return declared;
+  return fresh.length;
 }
 
 async function removeDeclared(

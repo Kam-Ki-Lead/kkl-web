@@ -6,7 +6,8 @@ import { submitOwnerListing, type OwnerSubmitState } from "@/app/actions/owner-l
 import { Button } from "@/components/ui/button";
 import { Card, InsetPanel } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import type { OwnerListing, OwnerListingBlocker, OwnerListingPhoto } from "@/lib/domain/types";
+import { coverBadge, photographRecordLabel, storedPhotographCount } from "@/lib/domain/listing-photographs";
+import type { OwnerListing, OwnerListingBlocker } from "@/lib/domain/types";
 
 /**
  * CR02 — the last step: what the listing says, and the send.
@@ -24,17 +25,6 @@ import type { OwnerListing, OwnerListingBlocker, OwnerListingPhoto } from "@/lib
  * box that looks like a loading image, or a stock photograph, would both read
  * as "my photos are in there".
  */
-function storedPhotographCount(listing: OwnerListing): number {
-  return listing.photos.filter((photo) => photo.retained && photo.availability === "available").length;
-}
-
-function photographState(photo: OwnerListingPhoto, uploadUnavailable: boolean): string {
-  if (photo.retained && photo.availability === "available") return "stored";
-  if (photo.availability === "unavailable") return "not available";
-  if (photo.availability === "declared" || uploadUnavailable) return "declared, not uploaded";
-  return "not stored";
-}
-
 export function OwnerPreview({
   listing,
   blockers,
@@ -103,9 +93,9 @@ export function OwnerPreview({
         <h3 className="t-card-title text-ink">
           Photographs{" "}
           <span className="t-caption font-normal text-muted">
-            {storedPhotographCount(listing) === 0
+            {storedPhotographCount(listing.photos) === 0
               ? "none stored"
-              : `${storedPhotographCount(listing)} stored`}
+              : `${storedPhotographCount(listing.photos)} stored`}
           </span>
         </h3>
         {listing.photos.length === 0 ? (
@@ -117,15 +107,17 @@ export function OwnerPreview({
         ) : (
           <>
             <ul className="mt-[10px] flex flex-col gap-[6px]">
-              {listing.photos.map((p, i) => (
+              {listing.photos.map((p) => (
                 <li key={p.id} className="t-body text-body">
-                  {(p.retained && p.availability === "available" && i === 0) ||
-                  (!photographUploadUnavailable && i === 0) ? (
+                  {coverBadge(p, listing.photos) === "stored" ? (
+                    <strong className="text-ink">Cover · </strong>
+                  ) : null}
+                  {coverBadge(p, listing.photos) === "sample-name" ? (
                     <strong className="text-ink">Cover · </strong>
                   ) : null}
                   {p.fileName}{" "}
                   <span className="t-caption text-muted">
-                    ({p.sizeLabel} · {photographState(p, photographUploadUnavailable)})
+                    ({p.sizeLabel} · {photographRecordLabel(p)})
                   </span>
                 </li>
               ))}
@@ -133,9 +125,9 @@ export function OwnerPreview({
             <p className="t-caption mt-[10px] rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[13px] py-[10px] text-body">
               {photographUploadUnavailable ? (
                 <>
-                  <strong className="text-ink">The file was not stored.</strong> A declared file
-                  record is a name, type and size. It is not an uploaded photograph, and it does not
-                  satisfy the photograph requirement. There is nothing to show here.
+                  <strong className="text-ink">The bytes were not uploaded.</strong> The name, type
+                  and size were recorded. That record does not satisfy the photograph requirement.
+                  There is nothing to show here.
                 </>
               ) : (
                 <>

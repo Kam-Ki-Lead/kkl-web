@@ -13,6 +13,7 @@ import type {
 } from "@/lib/domain/types";
 import type { AdminOwnerListing, AdminTicketMessage } from "@/lib/domain/admin";
 import type { StaffRef } from "@/lib/domain/identity";
+import { photographStepComplete } from "@/lib/domain/listing-photographs";
 import { ValidationError } from "@/lib/services/contracts";
 import { processState } from "./process-state";
 import { areaLabel, getLocation } from "./locations";
@@ -233,13 +234,7 @@ function stepComplete(l: OwnerListing, step: OwnerListingStepId): boolean {
     case "pricing":
       return l.priceInr !== null && l.configuration !== null;
     case "photos":
-      // A backend row carries availability. Only a confirmed upload completes
-      // the step. A sample row has no availability, and a chosen name still
-      // counts there because that build records names on purpose.
-      if (l.photos.some((photo) => photo.availability !== undefined)) {
-        return l.photos.some((photo) => photo.retained && photo.availability === "available");
-      }
-      return l.photos.length > 0;
+      return photographStepComplete(l.photos, "sample");
     case "contact":
       return l.contactPreference !== null && l.contactName.trim() !== "";
     case "preview":
