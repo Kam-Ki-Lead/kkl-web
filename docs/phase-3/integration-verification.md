@@ -1079,6 +1079,74 @@ per-configuration amounts, which the approved checkboxes do not collect;
 object storage (Q-8); a routed builder enquiry. The admin-queue slice stays
 closed at `8079ee0`.
 
+## Shortlist, requirement locations, and listing words, 1 October 2026
+
+Frontend `4334601`. This section does not replace the `2dc98fc` results above.
+
+The review API on 4010 was process 32100 at the start of the browser pass
+(checkout then `d3aba31`, implementation `a802bb4`, OpenAPI `1.0.0-phase3.o`,
+migration `020`). During the pass the backend window replaced that process.
+The listener at the later checks is process 28328, started at 22:58 local,
+after implementation `e482dfc` (22:57) and docs `94fa614` (22:58). Its command
+is `node src/http/server.mjs` from that checkout. OpenAPI in the checkout is
+`1.0.0-phase3.p`. Migrations `021` and `022` are the specification and video
+files named by that handoff. The possession words, carpet-area words, and
+https video link were saved and came back on reload, so the running database
+accepted those columns. This frontend did not query the migration table and
+did not restart 4010.
+
+The frontend on 3811 for the later reload is process 40620. It was built with
+`NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then
+started with `next start` and the documented domain switches, including
+`KKL_PROFILES=backend`, `KKL_LOCATIONS=backend`, and `KKL_LISTINGS=backend`.
+No development-identity secret was set. Sign-in used the published form.
+This slice used one local OTP for the buyer number ending 0103, one for the
+seller number ending 0102, and one later OTP for the builder number ending
+0104. The codes are not recorded here.
+
+| Screen | What the browser showed |
+| --- | --- |
+| Builder profile RERA | Review Builder, number ending 0104, on the API before the restart. The RERA box was disabled and empty. The helper said the profile contract does not accept it and that a listing can store a number. Company, contact name, and email stayed. Saving that form cannot write a typed RERA value. |
+| Listing RERA and amenities | Same builder draft `d48bd9ea-b31b-4a55-ae97-ed838b5def4f`. Lift stayed checked after reload. Total units stayed 40. RERA number `WBRERA/P/NOR/2024/000001` stayed. The registered checkbox is not a field. |
+| Possession, carpet words, video | After process 28328 was listening, and again after the frontend rebuild: possession `Dec 2027` reloaded; carpet words `985 sq ft` and `1420 sq ft` reloaded; video `https://example.test/tour` reloaded. The media helper says an https address is stored and is not an uploaded file. Photographs are still not stored. `priceInr` stayed unset on the list (`Price not stored`). |
+| Shortlist header | Signed-in builder and signed-in buyer both showed `Shortlist (0)`. That is an empty authenticated read. Unavailable stays a different label; the unit test covers it. The public catalogue entry is not a UUID, and its page says it cannot be shortlisted. No published listing exists, so add and remove were not clicked in the browser. |
+| Find my match | The locality list is the location service (56 labels, including Rajarhat, Kolkata). `locality=not-a-place` stayed selected as unavailable. A stored buyer requirement with no query prefilled Rajarhat, Kolkata. The page said nothing is scored. |
+| Buyer profile | Number ending 0103. Full name was saved as a distinct value and reloaded, then restored to `Review Buyer` and reloaded. The caption kept the account name. |
+| Buyer requirement | The same buyer session stored locality `rajarhat`, 2 BHK, the ₹50L – ₹1Cr band, handover Ready to move, and intent end use. The page said the requirement is stored and nothing is scored. |
+| Seller account name | Number ending 0102. Full name reloaded as `Review Seller`, and the caption said the account name stays Review Seller. It was not changed again. |
+| Builder property list | After the rebuild, the draft row showed `0 enquiries` and a Delete control. Delete was not clicked. The review draft was not removed. |
+
+Contract tests `tests/account-forms-contract.test.mjs` and
+`tests/builder-seller-contract.test.mjs` passed, 16 of 16. `tsc --noEmit`
+and `next build` passed before this server start.
+
+### Commerce, per screen
+
+These rows keep the earlier evidence. This slice did not repeat the staff
+order cycle and does not fold those screens into the sample catalogue.
+
+| Screen or action | Status |
+| --- | --- |
+| Staff order list, detail, filters, pagination, cancellation | Backend (`KKL_STAFF_ORDERS`). Browser-tested at `611bca9`: 101 orders, page size 100, filters, detail, and cancellation. Not repeated here. |
+| A customer opening staff orders or intake | Browser-tested at `611bca9`. 403 `staff_only`. Sample rows were absent. |
+| Staff orders when 4010 is unreachable | Browser-tested at `611bca9` against a second frontend pointed at an empty port. The unavailable sentence was shown. Sample rows were absent. The review API was not stopped. |
+| Seller and builder My purchases | `KKL_MARKETPLACE=backend` calls `GET /v1/orders` as the signed-in account. This slice did not open those screens. They are not the staff list and they are not the sample order ids. |
+| Seller wallet and recharge | Browser-tested earlier on Review Seller. Balance ₹0. Recharge refused because no payment provider credentials are configured (Q-5). Nothing was charged. |
+| Buy Leads | Browser-tested earlier. 0 leads, with the sentence that prices are not set (Q-1a). |
+| Purchase | The hold uses the lead blockers when the marketplace switch is backend. A purchase was not completed. |
+| Purchased-lead export | The backend store throws unavailable. It does not write a sample CSV. |
+| Staff wallets | Browser-tested earlier as a read. Review Buyer and Review Seller at ₹0. An adjustment was not submitted. |
+| Admin refund approval and wallet adjustment | The screens explain D-06 and do not move credits. Not repeated here. |
+
+Still refused, and still not a completed journey: publication (Q-3), so the
+shortlist stays empty and the public catalogue stays the sample set; a
+matching rule (`matching_not_decided`); a verification pass and documents
+(Q-4); lead price, aging, credit expiry, refunds, and tax (Q-1a through
+Q-1e); builder contact entitlement (Q-2a); notification wording (Q-2b);
+payment credentials (Q-5); consent provenance (Q-6); message delivery (Q-7);
+object storage (Q-8); a routed builder enquiry. Phase 3 is not complete.
+The admin-queue slice stays closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
