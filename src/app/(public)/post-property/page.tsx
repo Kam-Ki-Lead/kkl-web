@@ -143,8 +143,9 @@ export default async function PostPropertyPage() {
           <p className="t-caption mt-[16px] max-w-[70ch] text-muted">
             {listingStore() === "backend" ? (
               <>
-                Drafts on this account are stored. They are not published from this page. A file
-                name is not kept as a photograph while storage is unavailable.
+                Drafts on this account are stored. They are not published from this page. A selected
+                file can be recorded by name and size. That record is not an uploaded photograph
+                while storage is unavailable.
               </>
             ) : (
               <>

@@ -6,7 +6,7 @@ import { submitOwnerListing, type OwnerSubmitState } from "@/app/actions/owner-l
 import { Button } from "@/components/ui/button";
 import { Card, InsetPanel } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import type { OwnerListing, OwnerListingBlocker } from "@/lib/domain/types";
+import type { OwnerListing, OwnerListingBlocker, OwnerListingPhoto } from "@/lib/domain/types";
 
 /**
  * CR02 — the last step: what the listing says, and the send.
@@ -24,6 +24,17 @@ import type { OwnerListing, OwnerListingBlocker } from "@/lib/domain/types";
  * box that looks like a loading image, or a stock photograph, would both read
  * as "my photos are in there".
  */
+function storedPhotographCount(listing: OwnerListing): number {
+  return listing.photos.filter((photo) => photo.retained && photo.availability === "available").length;
+}
+
+function photographState(photo: OwnerListingPhoto, uploadUnavailable: boolean): string {
+  if (photo.retained && photo.availability === "available") return "stored";
+  if (photo.availability === "unavailable") return "not available";
+  if (photo.availability === "declared" || uploadUnavailable) return "declared, not uploaded";
+  return "not stored";
+}
+
 export function OwnerPreview({
   listing,
   blockers,
@@ -92,13 +103,15 @@ export function OwnerPreview({
         <h3 className="t-card-title text-ink">
           Photographs{" "}
           <span className="t-caption font-normal text-muted">
-            {listing.photos.length === 0 ? "none added" : `${listing.photos.length} added`}
+            {storedPhotographCount(listing) === 0
+              ? "none stored"
+              : `${storedPhotographCount(listing)} stored`}
           </span>
         </h3>
         {listing.photos.length === 0 ? (
           <p className="t-caption mt-[6px] text-muted">
             {photographUploadUnavailable
-              ? "No photograph is stored. Choosing a file name does not upload one, and this draft does not keep that name. Send for review stays blocked on a photograph until a file can be stored. The other steps of this draft still save."
+              ? "No photograph is stored. A file selected on the photograph step is not an upload. Saving can record its name, type and size, and that record does not satisfy the photograph requirement. The other steps of this draft still save."
               : "A listing needs at least one photograph before it can be sent."}
           </p>
         ) : (
@@ -106,17 +119,23 @@ export function OwnerPreview({
             <ul className="mt-[10px] flex flex-col gap-[6px]">
               {listing.photos.map((p, i) => (
                 <li key={p.id} className="t-body text-body">
-                  {i === 0 ? <strong className="text-ink">Cover · </strong> : null}
+                  {(p.retained && p.availability === "available" && i === 0) ||
+                  (!photographUploadUnavailable && i === 0) ? (
+                    <strong className="text-ink">Cover · </strong>
+                  ) : null}
                   {p.fileName}{" "}
-                  <span className="t-caption text-muted">({p.sizeLabel})</span>
+                  <span className="t-caption text-muted">
+                    ({p.sizeLabel} · {photographState(p, photographUploadUnavailable)})
+                  </span>
                 </li>
               ))}
             </ul>
             <p className="t-caption mt-[10px] rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[13px] py-[10px] text-body">
               {photographUploadUnavailable ? (
                 <>
-                  <strong className="text-ink">The file was not stored.</strong> A name on a media
-                  record is not the photograph. There is nothing to show here.
+                  <strong className="text-ink">The file was not stored.</strong> A declared file
+                  record is a name, type and size. It is not an uploaded photograph, and it does not
+                  satisfy the photograph requirement. There is nothing to show here.
                 </>
               ) : (
                 <>

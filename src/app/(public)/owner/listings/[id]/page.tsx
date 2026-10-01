@@ -6,6 +6,7 @@ import { OWNER_STATUS, ownerCanEdit } from "@/components/owner/owner-status";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, InsetPanel, SectionHeader } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
+import type { OwnerListing } from "@/lib/domain/types";
 import { getServices, listingStore } from "@/lib/services";
 import { ServiceError } from "@/lib/services/contracts";
 import { OWNER_STEPS, stepStates } from "@/lib/services/sample/owner-listing-store";
@@ -27,6 +28,21 @@ export const metadata: Metadata = { title: "Your property listing", robots: { in
 
 function one(v: string | string[] | undefined): string {
   return (Array.isArray(v) ? v[0] : v) ?? "";
+}
+
+function photographLine(listing: OwnerListing): string {
+  const stored = listing.photos.filter(
+    (photo) => photo.retained && photo.availability === "available",
+  ).length;
+  if (stored > 0) return stored === 1 ? "1 stored" : `${stored} stored`;
+  if (listing.photos.length === 0) return "None";
+  if (listingStore() === "backend") {
+    const records = listing.photos.length;
+    return records === 1
+      ? "None stored · 1 file record, not uploaded"
+      : `None stored · ${records} file records, not uploaded`;
+  }
+  return `${listing.photos.length} chosen · files not stored in this build`;
 }
 
 /**
@@ -134,11 +150,7 @@ export default async function OwnerListingPage({
           <Row label="Carpet area" value={listing.carpetArea ? `${listing.carpetArea} sq ft` : "Not set"} />
           <Row
             label="Photographs"
-            value={
-              listing.photos.length === 0
-                ? "None"
-                : `${listing.photos.length} chosen · files not stored in this build`
-            }
+            value={photographLine(listing)}
           />
           <Row
             label="Steps complete"
@@ -231,9 +243,10 @@ export default async function OwnerListingPage({
       <p className="t-caption mt-[20px] max-w-[70ch] text-muted">
         {listingStore() === "backend" ? (
           <>
-            This draft is stored. Saving it does not publish it, and a file name is not kept as a
-            photograph. Posting a property costs nothing in this build, and what it costs in the
-            product is part of the owner policy still to be confirmed.
+            This draft is stored. Saving it does not publish it. A selected file can be recorded
+            by name and size, and that record is not an uploaded photograph. Posting a property
+            costs nothing in this build, and what it costs in the product is part of the owner
+            policy still to be confirmed.
           </>
         ) : (
           <>

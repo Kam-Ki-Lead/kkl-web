@@ -9,10 +9,23 @@ import {
 import { OWNER_STATUS } from "@/components/owner/owner-status";
 import { Card, InsetPanel, SectionHeader } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
+import type { OwnerListingPhoto } from "@/lib/domain/types";
 import { getServices } from "@/lib/services";
 import { areaLabel } from "@/lib/services/sample/locations";
 
 export const metadata: Metadata = { title: "Owner submission", robots: { index: false } };
+
+function adminPhotographSubtitle(photos: readonly OwnerListingPhoto[]): string {
+  if (photos.length === 0) return "None on this listing";
+  if (photos.every((photo) => photo.availability === undefined)) {
+    return `${photos.length} chosen by the owner`;
+  }
+  const stored = photos.filter((photo) => photo.retained && photo.availability === "available").length;
+  if (stored > 0) return stored === 1 ? "1 stored" : `${stored} stored`;
+  return photos.length === 1
+    ? "1 file record, not uploaded"
+    : `${photos.length} file records, not uploaded`;
+}
 
 /**
  * CR02 — one owner submission, staff side.
@@ -91,27 +104,46 @@ export default async function AdminOwnerListingPage({
       <Card className="mt-[16px] p-[22px]">
         <SectionHeader
           title="Photographs"
-          subtitle={
-            listing.photos.length === 0
-              ? "None on this listing"
-              : `${listing.photos.length} chosen by the owner`
-          }
+          subtitle={adminPhotographSubtitle(listing.photos)}
         />
         {listing.photos.length === 0 ? null : (
           <ul className="flex flex-col gap-[6px]">
             {listing.photos.map((p, i) => (
               <li key={p.id} className="t-body text-body">
-                {i === 0 ? <strong className="text-ink">Cover · </strong> : null}
-                {p.fileName} <span className="t-caption text-muted">({p.sizeLabel})</span>
+                {p.availability === undefined && i === 0 ? (
+                  <strong className="text-ink">Cover · </strong>
+                ) : null}
+                {p.fileName}{" "}
+                <span className="t-caption text-muted">
+                  ({p.sizeLabel}
+                  {p.availability === undefined
+                    ? ""
+                    : p.retained && p.availability === "available"
+                      ? " · stored"
+                      : p.availability === "unavailable"
+                        ? " · not available"
+                        : " · declared, not uploaded"}
+                  )
+                </span>
               </li>
             ))}
           </ul>
         )}
         <p className="t-caption mt-[10px] rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[13px] py-[10px] text-body">
-          <strong className="text-ink">There are no images to look at.</strong> This build records
-          which files an owner chose so the counts are right, but the files themselves were never
-          stored — media storage, virus scanning and a retention rule belong to kkl-backend and do
-          not exist yet. A real review of the photographs is not possible here.
+          {listing.photos.some((photo) => photo.availability !== undefined) ? (
+            <>
+              <strong className="text-ink">There are no images to look at.</strong> A file record
+              is a name, type and size. It was not uploaded, so a photograph review is not possible
+              here.
+            </>
+          ) : (
+            <>
+              <strong className="text-ink">There are no images to look at.</strong> This build records
+              which files an owner chose so the counts are right, but the files themselves were never
+              stored — media storage, virus scanning and a retention rule belong to kkl-backend and do
+              not exist yet. A real review of the photographs is not possible here.
+            </>
+          )}
         </p>
       </Card>
 

@@ -993,17 +993,22 @@ export type OwnerListingIntent = "sell" | "rent";
 /**
  * A photograph an owner added.
  *
- * `retained` is the honest bit. In sample mode a chosen file's bytes are not
- * kept anywhere — media storage belongs to kkl-backend — so the record says
- * the photograph was chosen and that nothing was stored, and the screens
- * render that rather than a broken image or a stock photo standing in for
- * someone's flat.
+ * `retained` is the honest bit. It is true only when the backend reports the
+ * row as an available asset whose bytes were stored. In sample mode a chosen
+ * file's bytes are not kept anywhere, so the record says the photograph was
+ * chosen and that nothing was stored.
+ *
+ * `availability` is the backend's media state when the row came from the API.
+ * `declared` is a name and size only. `unavailable` is a failed or unusable
+ * upload. `available` is reserved for an object the storage adapter confirmed.
+ * A sample row has no availability.
  */
 export type OwnerListingPhoto = {
   readonly id: string;
   readonly fileName: string;
   readonly sizeLabel: string;
   readonly retained: boolean;
+  readonly availability?: "declared" | "unavailable" | "available";
 };
 
 /** One movement of an owner's listing through its statuses. */

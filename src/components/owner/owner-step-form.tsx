@@ -313,8 +313,9 @@ function PricingFields({ listing, errors }: { listing: OwnerListing; errors: Err
  *
  * The file picker lists names in this browser. It does not upload the file.
  * A sample draft can remember those names in process memory. A backend draft
- * does not: while object storage is unavailable, saving this step adds no
- * media row, and a name here is not a photograph.
+ * can record the selected file's name, type and size. That row is declared
+ * metadata: object storage is not configured, so the bytes are not accepted
+ * and the row does not satisfy the photograph requirement.
  */
 function PhotoFields({
   listing,
@@ -325,8 +326,10 @@ function PhotoFields({
   errors: Errors;
   keepsPhotographNames: boolean;
 }) {
-  const [chosen, setChosen] = useState<{ name: string; size: string }[]>(
-    listing.photos.map((p) => ({ name: p.fileName, size: p.sizeLabel })),
+  const [chosen, setChosen] = useState<{ name: string; size: string; bytes?: number; type?: string }[]>(
+    keepsPhotographNames
+      ? listing.photos.map((p) => ({ name: p.fileName, size: p.sizeLabel }))
+      : [],
   );
   const inputId = useId();
 
@@ -340,12 +343,14 @@ function PhotoFields({
           Choose photographs
         </label>
         <p className="t-caption mt-[6px] text-muted">
-          JPG or PNG. The first one becomes the cover. Up to twelve.
+          {keepsPhotographNames
+            ? "JPG or PNG. The first one becomes the cover. Up to twelve."
+            : "JPG, PNG or WebP. Up to twelve. A file selected here is not uploaded."}
         </p>
         <input
           id={inputId}
           type="file"
-          accept="image/jpeg,image/png"
+          accept={keepsPhotographNames ? "image/jpeg,image/png" : "image/jpeg,image/png,image/webp"}
           multiple
           className="mt-[8px] block w-full cursor-pointer rounded-[8px] border border-dashed border-[#B9C3EC] bg-white px-[13px] py-[11px] text-[15px] text-body file:mr-[12px] file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-chip-neutral-bg file:px-[13px] file:py-[8px] file:text-[14px] file:font-semibold file:text-brand"
           onChange={(event) => {
@@ -354,6 +359,8 @@ function PhotoFields({
               files.slice(0, 12).map((f) => ({
                 name: f.name,
                 size: `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+                bytes: f.size,
+                type: f.type,
               })),
             );
           }}
@@ -369,10 +376,11 @@ function PhotoFields({
             </>
           ) : (
             <>
-              <strong className="text-ink">These files are not uploaded.</strong> A file name held
-              in this browser is not a photograph. Saving this step does not send the file and does
-              not add a media record. Object storage does not exist yet, so the rest of the draft
-              still saves, and send for review stays blocked on a photograph.
+              <strong className="text-ink">These files are not uploaded.</strong> A file you select
+              stays in this browser until you save. Saving records its name, type and size as a
+              declared file. Object storage is not configured, so the file cannot be accepted, and
+              a declared record does not satisfy the photograph requirement. The rest of this draft
+              still saves.
             </>
           )}
         </p>
@@ -384,9 +392,39 @@ function PhotoFields({
         </p>
       ) : null}
 
-      {chosen.length === 0 ? (
+      {!keepsPhotographNames && listing.photos.length > 0 ? (
+        <ul className="flex flex-col gap-[8px]">
+          {listing.photos.map((photo) => (
+            <li
+              key={photo.id}
+              className="flex flex-wrap items-center justify-between gap-[10px] rounded-[8px] border border-line bg-white px-[13px] py-[10px]"
+            >
+              <span className="min-w-0 break-words text-[15px] text-ink">
+                {photo.fileName}
+                <span className="t-caption ml-[8px] text-muted">
+                  {photo.sizeLabel} · {photo.retained && photo.availability === "available"
+                    ? "stored"
+                    : photo.availability === "unavailable"
+                      ? "not available"
+                      : "declared, not uploaded"}
+                </span>
+              </span>
+              <button
+                type="submit"
+                name="removePhotoId"
+                value={photo.id}
+                className="min-h-[44px] rounded-[8px] border border-line px-[13px] text-[14px] font-semibold text-body hover:border-[#B9C3EC]"
+              >
+                Remove record
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {chosen.length === 0 && (keepsPhotographNames || listing.photos.length === 0) ? (
         <p className="t-body text-muted">No photographs on this listing yet.</p>
-      ) : (
+      ) : chosen.length > 0 ? (
         <ul className="flex flex-col gap-[8px]">
           {chosen.map((f, i) => (
             <li
@@ -394,10 +432,10 @@ function PhotoFields({
               className="flex flex-wrap items-center justify-between gap-[10px] rounded-[8px] border border-line bg-white px-[13px] py-[10px]"
             >
               <span className="min-w-0 break-words text-[15px] text-ink">
-                {i === 0 ? <strong>Cover · </strong> : null}
+                {keepsPhotographNames && i === 0 ? <strong>Cover · </strong> : null}
                 {f.name}
                 <span className="t-caption ml-[8px] text-muted">
-                  {f.size} · {keepsPhotographNames ? "not stored" : "not saved"}
+                  {f.size} · {keepsPhotographNames ? "not stored" : "selected here, not saved"}
                 </span>
               </span>
               <button
@@ -412,11 +450,17 @@ function PhotoFields({
                   <input type="hidden" name="photoNames" value={f.name} />
                   <input type="hidden" name="photoSizes" value={f.size} />
                 </>
-              ) : null}
+              ) : (
+                <>
+                  <input type="hidden" name="photoFileName" value={f.name} />
+                  <input type="hidden" name="photoByteSize" value={String(f.bytes ?? "")} />
+                  <input type="hidden" name="photoContentType" value={f.type ?? ""} />
+                </>
+              )}
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
 
       {keepsPhotographNames ? (
         // With scripting off the list above cannot be built from the file input,
@@ -433,8 +477,8 @@ function PhotoFields({
       ) : (
         <noscript>
           <p className="t-caption text-body">
-            A photograph cannot be added from this browser. Typing a file name would not upload the
-            file and would not be kept. The other steps of this draft still save.
+            Without JavaScript a file cannot be selected here. Typing a name would not upload a
+            photograph and is not recorded. The other steps of this draft still save.
           </p>
         </noscript>
       )}

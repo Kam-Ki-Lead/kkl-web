@@ -19,11 +19,14 @@ import { callAs } from "./session";
  * asks it to.
  *
  * PHOTOGRAPHS
- * Object storage is not configured (Q-8). A file name held in the browser is
- * not a photograph, and this adapter does not POST /v1/listings/{id}/media to
- * create a metadata row for one. The photograph step still saves: it leaves
- * the draft as it is. An owner submission stays blocked on a photograph until
- * a file can actually be stored. A builder listing is not held to that rule.
+ * Object storage is not configured (Q-8). A file selected in the browser is
+ * not an upload. Saving the photograph step can POST the file's own name,
+ * content type and byte size to /v1/listings/{id}/media. The backend records
+ * that as availability `declared` and stored false, and that row does not
+ * satisfy an owner's photograph requirement. The upload route is called so
+ * its refusal is the one the owner sees; a 503 does not mark the row
+ * available, and this adapter never supplies a storage key. A builder listing
+ * is not held to the photograph rule.
  */
 
 const STEP_ORDER: readonly OwnerListingStepId[] =
@@ -48,6 +51,7 @@ type BackendMedia = {
   fileName: string;
   byteSize: number;
   stored: boolean;
+  availability?: "declared" | "unavailable" | "available";
 };
 
 type BackendHistory = {
@@ -108,14 +112,26 @@ const STATUS: Record<string, OwnerListingStatus> = {
 const size = (bytes: number): string =>
   bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 
+/** A photograph counts only when the storage adapter has confirmed the bytes. */
+function storedPhotograph(photo: { retained: boolean; availability?: string }): boolean {
+  return photo.retained && photo.availability === "available";
+}
+
 const photosOf = (listing: BackendListing): readonly OwnerListingPhoto[] =>
-  (listing.media ?? []).filter((m) => m.kind === "image").map((m) => ({
-    id: m.id,
-    fileName: m.fileName,
-    sizeLabel: size(m.byteSize),
-    // False, and the screens say why: there is nowhere to keep the bytes yet.
-    retained: m.stored,
-  }));
+  (listing.media ?? []).filter((m) => m.kind === "image").map((m) => {
+    const availability = m.availability === "available" || m.availability === "declared" || m.availability === "unavailable"
+      ? m.availability
+      : undefined;
+    return {
+      id: m.id,
+      fileName: m.fileName,
+      sizeLabel: size(m.byteSize),
+      availability,
+      // `stored` alone is not enough. A declared or unavailable row, and a
+      // row whose key was set without adapter confirmation, stays unretained.
+      retained: availability === "available" && m.stored === true,
+    };
+  });
 
 function toListing(l: BackendListing): OwnerListing {
   return {
@@ -177,7 +193,7 @@ function stepComplete(l: OwnerListing, step: OwnerListingStepId): boolean {
     case "pricing":
       return l.priceInr !== null && l.configuration !== null;
     case "photos":
-      return l.photos.length > 0;
+      return l.photos.some((photo) => storedPhotograph(photo));
     case "contact":
       return l.contactPreference !== null && l.contactName.trim() !== "";
     case "preview":
@@ -205,7 +221,7 @@ function toSummary(raw: BackendListing, label: string): OwnerListingSummary {
     locationLabel: label,
     priceLabel: price,
     detailLine: details.length > 0 ? details.join(" · ") : "Details not filled in yet",
-    photoCount: l.photos.length,
+    photoCount: l.photos.filter((photo) => storedPhotograph(photo)).length,
     stepsComplete: STEP_ORDER.filter((s) => stepComplete(l, s)).length,
     stepsTotal: STEP_ORDER.length,
     updatedAt: l.updatedAt,
@@ -248,6 +264,9 @@ const FORM_FIELD: Record<string, string> = {
   priceInr: "price",
   transaction: "intent",
   contactPreference: "contactPreference",
+  contentType: "photos",
+  byteSize: "photos",
+  fileName: "photos",
 };
 
 function patchFrom(step: OwnerListingStepId, values: Readonly<Record<string, string | readonly string[]>>) {
@@ -307,6 +326,85 @@ function raise(status: number, body: { error?: string; field?: string }): never 
   throw new ServiceError("unavailable", body.error ?? `Listing service returned ${status}.`);
 }
 
+const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+function postedList(
+  values: Readonly<Record<string, string | readonly string[]>>,
+  key: string,
+): readonly string[] {
+  const value = values[key];
+  if (value === undefined) return [];
+  return (Array.isArray(value) ? value : [value]).map((item) => String(item));
+}
+
+/**
+ * Record the files the owner actually selected. The name, type and size come
+ * from that selection. A missing size is refused here rather than replaced
+ * with a guess, and no storage key is sent. The row the API returns is
+ * declared metadata; it is not marked stored.
+ */
+async function declareSelected(
+  listingId: string,
+  values: Readonly<Record<string, string | readonly string[]>>,
+): Promise<number> {
+  const names = postedList(values, "photoFileName");
+  const sizes = postedList(values, "photoByteSize");
+  const types = postedList(values, "photoContentType");
+  let declared = 0;
+  for (let index = 0; index < names.length; index += 1) {
+    const fileName = names[index]?.trim() ?? "";
+    if (fileName === "") continue;
+    const byteSize = Number(sizes[index]);
+    const contentType = (types[index] ?? "").trim().toLowerCase();
+    if (fileName.includes("/") || fileName.includes("\\") || fileName.length > 200) {
+      throw new ValidationError({ photos: "That file name cannot be recorded." });
+    }
+    if (!Number.isInteger(byteSize) || byteSize <= 0 || !IMAGE_TYPES.has(contentType)) {
+      throw new ValidationError({
+        photos: "The selected file did not include a usable size and type, so it was not recorded.",
+      });
+    }
+    const { status, body } = await callAs<BackendListing>("owner", `/v1/listings/${listingId}/media`, {
+      method: "POST",
+      body: { kind: "image", contentType, byteSize, fileName },
+    });
+    if (status !== 201) raise(status, body);
+    declared += 1;
+  }
+  return declared;
+}
+
+async function removeDeclared(
+  listingId: string,
+  values: Readonly<Record<string, string | readonly string[]>>,
+): Promise<void> {
+  const mediaId = postedList(values, "removePhotoId").find((id) => id.trim() !== "")?.trim();
+  if (!mediaId) return;
+  const { status, body } = await callAs<BackendListing>(
+    "owner",
+    `/v1/listings/${listingId}/media/${mediaId}`,
+    { method: "DELETE" },
+  );
+  if (status !== 200) raise(status, body);
+}
+
+/**
+ * Ask the upload route to accept the file. While storage is unconfigured it
+ * answers 503 and leaves every row declared. That refusal is not a failure
+ * of the draft, and it is not turned into a stored photograph.
+ */
+async function refuseUpload(listingId: string): Promise<void> {
+  const { status, body } = await callAs<{ code?: string }>(
+    "owner",
+    `/v1/listings/${listingId}/media/upload`,
+    { method: "POST", body: {} },
+  );
+  if (status === 503) return;
+  if (status === 401 || status === 403 || status === 404) raise(status, body);
+  // Any other answer is still not proof the bytes were stored. The following
+  // read of the listing is what decides availability.
+}
+
 export const backendOwnerListings: OwnerListingService = {
   async listMine() {
     const { status, body } = await callAs<{ listings: BackendListing[] }>("owner", "/v1/listings");
@@ -331,9 +429,9 @@ export const backendOwnerListings: OwnerListingService = {
 
   async saveStep({ listingId, step, values }) {
     if (step === "photos") {
-      // The form may still carry a file name chosen in this browser. That name
-      // is not sent. Creating a media row here would count as a photograph
-      // while the file itself was never stored.
+      await removeDeclared(listingId, values);
+      const declared = await declareSelected(listingId, values);
+      if (declared > 0) await refuseUpload(listingId);
       return toListing(await fetchOne(listingId));
     }
     const patch = patchFrom(step, values);

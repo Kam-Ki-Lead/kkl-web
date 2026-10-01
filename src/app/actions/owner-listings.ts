@@ -37,9 +37,10 @@ import { ValidationError } from "@/lib/services/contracts";
  * -----------
  * With KKL_LISTINGS=backend the draft is stored by kkl-backend and survives a
  * frontend restart. Saving a step does not publish it, and sending it for
- * review does not publish it either. A file name is not stored as a
- * photograph: object storage is not configured, and this action does not
- * create a media row to stand in for the file.
+ * review does not publish it either. A selected file can be recorded by its
+ * name, type and size. That record is declared metadata, not an uploaded
+ * photograph, and it does not satisfy the photograph requirement while object
+ * storage is unconfigured.
  * With the sample store, drafts stay in process memory.
  */
 

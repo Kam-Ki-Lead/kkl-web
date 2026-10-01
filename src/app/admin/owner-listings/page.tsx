@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
-import type { OwnerListingStatus } from "@/lib/domain/types";
+import type { OwnerListingPhoto, OwnerListingStatus } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Owner submissions", robots: { index: false } };
 
@@ -26,6 +26,18 @@ const STATUSES: readonly OwnerListingStatus[] = [
   "declined",
   "withdrawn",
 ];
+
+function photographQueueLabel(photos: readonly OwnerListingPhoto[]): string {
+  const fromApi = photos.some((photo) => photo.availability !== undefined);
+  if (!fromApi) {
+    return photos.length === 0
+      ? "no photographs"
+      : `${photos.length} photograph${photos.length === 1 ? "" : "s"}`;
+  }
+  const stored = photos.filter((photo) => photo.retained && photo.availability === "available").length;
+  if (stored > 0) return stored === 1 ? "1 stored" : `${stored} stored`;
+  return photos.length === 1 ? "1 file record, not uploaded" : `${photos.length} file records, not uploaded`;
+}
 
 function one(v: string | string[] | undefined): string {
   return (Array.isArray(v) ? v[0] : v) ?? "";
@@ -113,9 +125,7 @@ export default async function AdminOwnerListingsPage({
                         {" · "}
                         {l.configuration === null ? "configuration not set" : `${l.configuration} BHK`}
                         {" · "}
-                        {l.photos.length === 0
-                          ? "no photographs"
-                          : `${l.photos.length} photograph${l.photos.length === 1 ? "" : "s"}`}
+                        {photographQueueLabel(l.photos)}
                       </p>
                       {l.internalNotes.length > 0 ? (
                         <p className="t-caption mt-[2px] text-muted">

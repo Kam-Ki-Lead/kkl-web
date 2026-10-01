@@ -89,7 +89,7 @@ export default async function OwnerListingsPage() {
         Posting a property is a different journey from buying leads as a broker or managing a
         project as a builder — this account is not a subscription and there are no credits here.{" "}
         {listingStore() === "backend"
-          ? "Drafts on this account are stored, and nothing an owner sends is published: submissions go to a review queue, and the publication policy is still to be confirmed with the client. A file name is not kept as a photograph."
+          ? "Drafts on this account are stored, and nothing an owner sends is published: submissions go to a review queue, and the publication policy is still to be confirmed with the client. A selected file can be recorded by name and size. That record is not an uploaded photograph."
           : "In this review build listings are kept for the session only, and nothing an owner sends is published: submissions go to a review queue, and the publication policy is still to be confirmed with the client."}
       </p>
     </div>
