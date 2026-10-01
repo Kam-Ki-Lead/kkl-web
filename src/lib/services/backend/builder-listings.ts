@@ -4,6 +4,7 @@ import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import {
   builderBlockers,
   builderSections,
+  DraftDeleteRefusal,
   draftDeleteResult,
   listingListPresentation,
   listingsMatchingStatus,
@@ -172,7 +173,10 @@ export const backendBuilderListings: ListingService = {
       { method: "DELETE" },
     );
     const result = draftDeleteResult(status, body);
-    if (!result.ok) throw new ServiceError(result.kind, result.message);
+    if (!result.ok) {
+      if (result.kind === "unauthenticated") throw new ServiceError(result.kind, result.message);
+      throw new DraftDeleteRefusal(result.code, result.message);
+    }
     return { removed: true };
   },
 };

@@ -10,3 +10,23 @@ export function imageRecordLabel(count: number | null): string | null {
   const records = count === 1 ? "1 image record" : `${count} image records`;
   return `${records}. An image record is not a stored photograph.`;
 }
+
+/**
+ * Owner-list caption. A missing declared count stays the older photograph
+ * sentence. A present count, including zero, names stored photographs and
+ * image records as separate numbers.
+ */
+export function ownerCountLine(
+  photoCount: number,
+  declaredImageCount: number | null,
+  enquiryCount: number | null,
+): string {
+  const photos =
+    declaredImageCount == null
+      ? photoCount === 0
+        ? "no photographs"
+        : `${photoCount} photograph${photoCount === 1 ? "" : "s"}`
+      : `${photoCount} stored photograph${photoCount === 1 ? "" : "s"} · ${imageRecordLabel(declaredImageCount)}`;
+  const enquiries = enquiryCountLabel(enquiryCount);
+  return enquiries ? `${photos} · ${enquiries}` : photos;
+}

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServices } from "@/lib/services";
 import { listingStoreKind } from "@/lib/services/backend/config";
-import { fieldsNotStored } from "@/lib/services/backend/builder-draft";
+import { DraftDeleteRefusal, fieldsNotStored } from "@/lib/services/backend/builder-draft";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import type { ListingSectionId } from "@/lib/domain/types";
 
@@ -145,16 +145,11 @@ export async function deleteListing(formData: FormData): Promise<void> {
   try {
     await getServices().builder.listings.remove(id);
   } catch (error) {
+    if (error instanceof DraftDeleteRefusal) {
+      redirect(`/builder/properties?delete=${error.code}`);
+    }
     if (error instanceof ServiceError) {
-      const code =
-        error.message.includes("referenced by an enquiry")
-          ? "listing_referenced"
-          : error.message.includes("Only a draft can be deleted")
-            ? "not_a_draft"
-            : error.kind === "not_found"
-              ? "not_found"
-              : "unavailable";
-      redirect(`/builder/properties?delete=${code}`);
+      redirect("/builder/properties?delete=unavailable");
     }
     throw error;
   }

@@ -161,6 +161,7 @@ export function PublicHeader({
             ))}
             <Link
               href={shortlistHref(shortlist)}
+              aria-label={shortlistAccessibleName(shortlist)}
               onClick={() => setDrawerOpen(false)}
               className="flex min-h-[44px] items-center border-b border-line text-[16px] font-medium text-body"
             >

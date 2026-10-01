@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { deleteListing } from "@/app/actions/builder-listings";
 import { BuilderShell } from "@/components/builder/builder-shell";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -36,7 +35,15 @@ export default async function DeleteDraftPage({
     }
     throw error;
   }
-  if (!listing) notFound();
+  if (!listing) {
+    return (
+      <BuilderShell title="Delete draft" subtitle="This draft was not removed">
+        <StateMessage title="This listing was not deleted">
+          That listing is not on this account. A sample project is not shown in its place.
+        </StateMessage>
+      </BuilderShell>
+    );
+  }
 
   const recordStatus = listing.recordStatus ?? listing.status;
   if (recordStatus !== "draft") {

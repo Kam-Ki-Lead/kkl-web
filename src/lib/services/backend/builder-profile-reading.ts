@@ -14,7 +14,7 @@ export const RERA_NOT_ON_PROFILE =
   "Add the RERA registration number on the property listing. This profile does not store it.";
 
 export const ALERTS_NOT_ON_PROFILE =
-  "These alert choices are not saved on this profile, and no alert is sent.";
+  "These choices are unavailable. This profile does not store them, and no alert is sent.";
 
 export function builderProfilePatch(input: {
   contactName: string;

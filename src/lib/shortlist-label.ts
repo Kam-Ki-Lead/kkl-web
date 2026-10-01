@@ -14,9 +14,9 @@ export function shortlistVisibleLabel(state: ShortlistHeaderState): string {
 }
 
 export function shortlistAccessibleName(state: ShortlistHeaderState): string {
-  if (state.kind === "guest") return "Shortlist";
-  if (state.kind === "unavailable") return "Shortlist, count unavailable";
-  return `Shortlist (${state.total}), ${state.total} saved`;
+  const visible = shortlistVisibleLabel(state);
+  if (state.kind === "count") return `${visible}, ${state.total} saved`;
+  return visible;
 }
 
 export function shortlistHref(state: ShortlistHeaderState): string {

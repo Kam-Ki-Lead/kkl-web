@@ -141,6 +141,23 @@ const DRAFT_DELETE_NOT_A_DRAFT =
 const DRAFT_DELETE_REFERENCED =
   "This draft is referenced by an enquiry, so it was not deleted.";
 
+export type DeleteFailureCode = "not_a_draft" | "listing_referenced" | "not_found" | "unavailable";
+
+/** A failed delete never uses a success code. An unknown failure stays unavailable. */
+export function deleteFailureQuery(code: string): DeleteFailureCode {
+  if (code === "not_a_draft" || code === "listing_referenced" || code === "not_found") return code;
+  return "unavailable";
+}
+
+export class DraftDeleteRefusal extends Error {
+  readonly code: DeleteFailureCode;
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "DraftDeleteRefusal";
+    this.code = deleteFailureQuery(code);
+  }
+}
+
 export function draftDeleteResult(
   status: number,
   body: { deleted?: boolean; error?: string; code?: string },

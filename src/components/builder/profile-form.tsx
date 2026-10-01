@@ -44,13 +44,11 @@ export function BuilderProfileForm({
           <p
             role="status"
             className={
-              contractBound
-                ? "rounded-[8px] bg-chip-warning-bg px-[14px] py-[10px] text-[14px] font-semibold text-warning"
-                : "rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
+              "rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
             }
           >
             {contractBound
-              ? "Company name, the account name and the contact email were saved. The profile full name was not changed. Add a RERA registration number on the property listing — this profile does not store it. Alert choices were not saved, and no alert was sent."
+              ? "Company name, the account name and the contact email were saved. Add a RERA registration number on the property listing. This profile does not store it."
               : `Your details were saved.${isSample ? " In sample mode this is kept in memory only." : ""}`}
           </p>
         ) : null}
@@ -137,28 +135,28 @@ export function BuilderProfileForm({
           )}
         </Field>
 
-        <fieldset className="flex flex-col gap-[10px]">
+        <fieldset className="flex flex-col gap-[10px]" disabled={contractBound} aria-describedby="alerts-note">
           <legend className="t-label mb-[4px] text-body">Alert me when</legend>
-          <Toggle
-            name="newEnquiry"
-            label="A buyer enquires about one of my listings"
-            defaultChecked={current.alerts.newEnquiry}
-          />
-          <Toggle
-            name="siteVisitRequest"
-            label="A buyer requests a site visit"
-            defaultChecked={current.alerts.siteVisitRequest}
-          />
-          <Toggle
-            name="subscriptionReminders"
-            label="My subscription is due for renewal"
-            defaultChecked={current.alerts.subscriptionReminders}
-          />
-          <p className="t-caption text-muted">
+          <p id="alerts-note" className="t-caption text-muted">
             {contractBound
-              ? "These choices are not saved on this profile, and no alert is sent."
+              ? "These choices are unavailable. This profile does not store them, and no alert is sent."
               : "These record a preference. Delivery is kkl-backend’s and is not connected, so turning one on does not start sending anything."}
           </p>
+          <Toggle
+            name={contractBound ? undefined : "newEnquiry"}
+            label="A buyer enquires about one of my listings"
+            defaultChecked={contractBound ? false : current.alerts.newEnquiry}
+          />
+          <Toggle
+            name={contractBound ? undefined : "siteVisitRequest"}
+            label="A buyer requests a site visit"
+            defaultChecked={contractBound ? false : current.alerts.siteVisitRequest}
+          />
+          <Toggle
+            name={contractBound ? undefined : "subscriptionReminders"}
+            label="My subscription is due for renewal"
+            defaultChecked={contractBound ? false : current.alerts.subscriptionReminders}
+          />
         </fieldset>
 
         <div className="flex flex-wrap items-center gap-[14px]">
@@ -177,12 +175,12 @@ function Toggle({
   label,
   defaultChecked,
 }: {
-  name: string;
+  name?: string;
   label: string;
   defaultChecked: boolean;
 }) {
   return (
-    <label className="flex min-h-[44px] cursor-pointer items-center gap-[10px] rounded-[8px] border border-line px-[12px]">
+    <label className="flex min-h-[44px] items-center gap-[10px] rounded-[8px] border border-line px-[12px] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
       <input type="checkbox" name={name} defaultChecked={defaultChecked} />
       <span className="text-[15px] text-ink">{label}</span>
     </label>

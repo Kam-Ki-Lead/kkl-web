@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 import {
   builderBlockers,
   configurationPayload,
+  deleteFailureQuery,
+  DraftDeleteRefusal,
   draftDeleteResult,
   fieldsNotStored,
   listingListPresentation,
@@ -215,4 +217,30 @@ test("deleting a draft follows the published statuses", () => {
   assert.equal(missing.ok, false);
   if (!missing.ok) assert.equal(missing.kind, "not_found");
   assert.equal(draftDeleteResult(200, {}).ok, false);
+  const otherAccount = draftDeleteResult(404, { error: "Not found" });
+  assert.equal(otherAccount.ok, false);
+  if (!otherAccount.ok) {
+    assert.equal(otherAccount.code, "not_found");
+    assert.equal(deleteFailureQuery(otherAccount.code), "not_found");
+    const refusal = new DraftDeleteRefusal(otherAccount.code, otherAccount.message);
+    assert.equal(refusal.code, "not_found");
+    assert.equal(refusal.message.includes("deleted"), false);
+  }
+  const submitted = draftDeleteResult(409, {
+    code: "not_a_draft",
+    error: "Only a draft can be deleted. A listing with the review team is withdrawn, and a published listing is taken down by staff.",
+  });
+  assert.equal(submitted.ok, false);
+  if (!submitted.ok) assert.equal(deleteFailureQuery(submitted.code), "not_a_draft");
+  const enquiryConflict = draftDeleteResult(409, {
+    code: "listing_referenced",
+    error: "This draft is referenced by an enquiry, so it was not deleted.",
+  });
+  assert.equal(enquiryConflict.ok, false);
+  if (!enquiryConflict.ok) {
+    assert.equal(deleteFailureQuery(enquiryConflict.code), "listing_referenced");
+    assert.match(enquiryConflict.message, /was not deleted/);
+  }
+  assert.equal(deleteFailureQuery("unauthenticated"), "unavailable");
+  assert.equal(deleteFailureQuery("deleted"), "unavailable");
 });
