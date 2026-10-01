@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { DECISIONS } from "@/lib/config/business-rules";
-import { getServices } from "@/lib/services";
+import { getServices, listingStore } from "@/lib/services";
 
 /**
  * Per-account data is not static data.
@@ -141,10 +141,19 @@ export default async function PostPropertyPage() {
           )}
 
           <p className="t-caption mt-[16px] max-w-[70ch] text-muted">
-            In this review build there is no sign-in, so every listing here belongs to the one sample
-            owner, and drafts are kept for the session only — durable storage for owner listings is a
-            kkl-backend dependency and is not claimed. Photographs you choose are recorded by name;
-            the files themselves are not stored anywhere.
+            {listingStore() === "backend" ? (
+              <>
+                Drafts on this account are stored. They are not published from this page. A file
+                name is not kept as a photograph while storage is unavailable.
+              </>
+            ) : (
+              <>
+                In this review build there is no sign-in, so every listing here belongs to the one sample
+                owner, and drafts are kept for the session only — durable storage for owner listings is a
+                kkl-backend dependency and is not claimed. Photographs you choose are recorded by name;
+                the files themselves are not stored anywhere.
+              </>
+            )}
           </p>
         </Card>
       </div>

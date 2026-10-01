@@ -19,12 +19,11 @@ import { callAs } from "./session";
  * asks it to.
  *
  * PHOTOGRAPHS
- * A chosen file's bytes still go nowhere. Object storage is not configured
- * (Q-8), so kkl-backend records the file's name, type and size after
- * validating them and reports `stored: false`. This adapter passes that
- * through as `retained: false`, and the screens already render it honestly —
- * no stock photograph stands in for somebody's flat, and no upload is shown
- * as having succeeded.
+ * Object storage is not configured (Q-8). A file name held in the browser is
+ * not a photograph, and this adapter does not POST /v1/listings/{id}/media to
+ * create a metadata row for one. The photograph step still saves: it leaves
+ * the draft as it is. An owner submission stays blocked on a photograph until
+ * a file can actually be stored. A builder listing is not held to that rule.
  */
 
 const STEP_ORDER: readonly OwnerListingStepId[] =
@@ -290,39 +289,6 @@ function patchFrom(step: OwnerListingStepId, values: Readonly<Record<string, str
   return patch;
 }
 
-/**
- * The photographs step. Each chosen file becomes a validated record in
- * kkl-backend and **no bytes are stored** — there is nowhere to put them
- * (Q-8). The record comes back `stored: false`, the screen says the file was
- * chosen and not kept, and nothing anywhere reports a successful upload.
- */
-async function savePhotos(
-  listingId: string,
-  values: Readonly<Record<string, string | readonly string[]>>,
-): Promise<void> {
-  const names = values.photoNames === undefined
-    ? []
-    : (Array.isArray(values.photoNames) ? [...values.photoNames] : [values.photoNames as string]);
-  const sizes = values.photoSizes === undefined
-    ? []
-    : (Array.isArray(values.photoSizes) ? [...values.photoSizes] : [values.photoSizes as string]);
-
-  for (const [index, fileName] of names.entries()) {
-    if (!fileName || !fileName.trim()) continue;
-    const byteSize = Number(sizes[index] ?? 0) || 1024;
-    const extension = fileName.split(".").pop()?.toLowerCase() ?? "jpg";
-    const contentType = extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : "image/jpeg";
-    const { status, body } = await callAs<BackendListing>("owner", `/v1/listings/${listingId}/media`, {
-      method: "POST",
-      body: { kind: "image", contentType, byteSize, fileName: fileName.trim() },
-    });
-    if (status === 422 || status === 409) {
-      throw new ValidationError({ photos: body.error ?? "That file was not accepted." });
-    }
-    if (status !== 201) raise(status, body);
-  }
-}
-
 async function fetchOne(id: string): Promise<BackendListing> {
   const { status, body } = await callAs<BackendListing>("owner", `/v1/listings/${id}`);
   if (status === 404) throw new ServiceError("not_found", "That listing could not be found.");
@@ -365,7 +331,9 @@ export const backendOwnerListings: OwnerListingService = {
 
   async saveStep({ listingId, step, values }) {
     if (step === "photos") {
-      await savePhotos(listingId, values);
+      // The form may still carry a file name chosen in this browser. That name
+      // is not sent. Creating a media row here would count as a photograph
+      // while the file itself was never stored.
       return toListing(await fetchOne(listingId));
     }
     const patch = patchFrom(step, values);

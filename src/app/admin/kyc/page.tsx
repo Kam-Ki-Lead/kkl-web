@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
@@ -46,6 +47,10 @@ export default async function AdminKycQueuePage({
   return (
     <AdminShell title="KYC queue" subtitle="Verification applications awaiting review">
       <div className="flex max-w-[900px] flex-col gap-[12px]">
+        <FixtureNotice>
+          These rows are sample KYC applications. They are not verification cases, and the
+          verification queue does not stand in for them. No contract lists KYC applications.
+        </FixtureNotice>
         <div className="flex flex-wrap gap-[8px]">
           {FILTERS.map((option) => {
             const active = option.value === raw;

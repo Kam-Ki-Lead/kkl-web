@@ -46,8 +46,10 @@ export default async function BuilderPropertiesPage({
     return (
       <BuilderShell title="My properties" subtitle="Everything you have listed">
         <StateMessage title="This account has no property list here">
-          The sample builder&rsquo;s projects are not shown. A listing stored for this account
-          is not on this screen.
+          The sample builder&rsquo;s projects are not shown, and this screen does not start a
+          listing or record a photograph count. A builder listing is not held to an owner&rsquo;s
+          contact, configuration, or photograph requirement. The price range on the sample editor
+          is not written as the listing price.
         </StateMessage>
       </BuilderShell>
     );

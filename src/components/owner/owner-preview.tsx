@@ -28,11 +28,18 @@ export function OwnerPreview({
   listing,
   blockers,
   idempotencyKey,
+  photographUploadUnavailable = false,
 }: {
   listing: OwnerListing;
   blockers: readonly OwnerListingBlocker[];
   /** Minted per page visit, so a double click sends once. */
   idempotencyKey: string;
+  /**
+   * True when the listing service cannot keep a file. A name chosen on the
+   * photograph step is then not a stored photograph, and submission stays
+   * blocked on that requirement.
+   */
+  photographUploadUnavailable?: boolean;
 }) {
   const [state, action, pending] = useActionState<OwnerSubmitState, FormData>(
     submitOwnerListing,
@@ -90,7 +97,9 @@ export function OwnerPreview({
         </h3>
         {listing.photos.length === 0 ? (
           <p className="t-caption mt-[6px] text-muted">
-            A listing needs at least one photograph before it can be sent.
+            {photographUploadUnavailable
+              ? "No photograph is stored. Choosing a file name does not upload one, and this draft does not keep that name. Send for review stays blocked on a photograph until a file can be stored. The other steps of this draft still save."
+              : "A listing needs at least one photograph before it can be sent."}
           </p>
         ) : (
           <>
@@ -104,10 +113,19 @@ export function OwnerPreview({
               ))}
             </ul>
             <p className="t-caption mt-[10px] rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[13px] py-[10px] text-body">
-              <strong className="text-ink">The images themselves were not stored.</strong> This
-              build records which files you chose so the listing and the review team show the right
-              number of photographs. Media storage belongs to kkl-backend and does not exist yet, so
-              there is nothing to show you here.
+              {photographUploadUnavailable ? (
+                <>
+                  <strong className="text-ink">The file was not stored.</strong> A name on a media
+                  record is not the photograph. There is nothing to show here.
+                </>
+              ) : (
+                <>
+                  <strong className="text-ink">The images themselves were not stored.</strong> This
+                  build records which files you chose so the listing and the review team show the right
+                  number of photographs. Media storage belongs to kkl-backend and does not exist yet, so
+                  there is nothing to show you here.
+                </>
+              )}
             </p>
           </>
         )}

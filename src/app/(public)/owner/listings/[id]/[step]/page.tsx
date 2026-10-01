@@ -8,7 +8,7 @@ import { OWNER_STATUS, ownerCanEdit } from "@/components/owner/owner-status";
 import { AccessPanel } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
 import { newOwnerToken } from "@/app/actions/owner-listings";
-import { getServices } from "@/lib/services";
+import { getServices, listingStore } from "@/lib/services";
 import { ServiceError } from "@/lib/services/contracts";
 import { OWNER_STEPS, stepStates } from "@/lib/services/sample/owner-listing-store";
 import type { OwnerListingStepId } from "@/lib/domain/types";
@@ -116,6 +116,7 @@ export default async function OwnerStepPage({
           listing={listing}
           blockers={await services.ownerListings.blockers(id)}
           idempotencyKey={await newOwnerToken()}
+          photographUploadUnavailable={listingStore() === "backend"}
         />
       ) : (
         <OwnerStepForm
@@ -125,6 +126,7 @@ export default async function OwnerStepPage({
           previousHref={previous}
           nextHref={next}
           nextLabel={nextLabel}
+          keepsPhotographNames={listingStore() !== "backend"}
         />
       )}
     </OwnerEditorShell>

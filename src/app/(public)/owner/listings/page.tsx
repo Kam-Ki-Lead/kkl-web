@@ -5,7 +5,7 @@ import { StartListingButton } from "@/components/owner/start-listing-button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
-import { getServices } from "@/lib/services";
+import { getServices, listingStore } from "@/lib/services";
 
 export const metadata: Metadata = { title: "My property listings", robots: { index: false } };
 
@@ -87,10 +87,10 @@ export default async function OwnerListingsPage() {
 
       <p className="t-caption mt-[22px] max-w-[70ch] text-muted">
         Posting a property is a different journey from buying leads as a broker or managing a
-        project as a builder — this account is not a subscription and there are no credits here. In
-        this review build listings are kept for the session only, and nothing an owner sends is
-        published: submissions go to a review queue, and the publication policy is still to be
-        confirmed with the client.
+        project as a builder — this account is not a subscription and there are no credits here.{" "}
+        {listingStore() === "backend"
+          ? "Drafts on this account are stored, and nothing an owner sends is published: submissions go to a review queue, and the publication policy is still to be confirmed with the client. A file name is not kept as a photograph."
+          : "In this review build listings are kept for the session only, and nothing an owner sends is published: submissions go to a review queue, and the publication policy is still to be confirmed with the client."}
       </p>
     </div>
   );

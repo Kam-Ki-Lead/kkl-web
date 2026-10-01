@@ -35,10 +35,12 @@ import { ValidationError } from "@/lib/services/contracts";
  *
  * Persistence
  * -----------
- * Owner drafts are held by the sample store, in process memory, and the
- * screens say so. Unlike CR03 — where the client required lead requests to be
- * stored and they now are — no persistence requirement has been stated for
- * owner drafts, so none is claimed.
+ * With KKL_LISTINGS=backend the draft is stored by kkl-backend and survives a
+ * frontend restart. Saving a step does not publish it, and sending it for
+ * review does not publish it either. A file name is not stored as a
+ * photograph: object storage is not configured, and this action does not
+ * create a media row to stand in for the file.
+ * With the sample store, drafts stay in process memory.
  */
 
 function revalidateOwner(id?: string) {

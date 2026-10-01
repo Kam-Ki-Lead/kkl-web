@@ -50,6 +50,7 @@ export function OwnerStepForm({
   previousHref,
   nextHref,
   nextLabel,
+  keepsPhotographNames = true,
 }: {
   listing: OwnerListing;
   step: OwnerListingStepId;
@@ -58,6 +59,12 @@ export function OwnerStepForm({
   previousHref: string | null;
   nextHref: string;
   nextLabel: string;
+  /**
+   * Sample drafts remember chosen file names in process memory. A backend
+   * draft does not: a name in this browser is not a photograph, and no media
+   * row is created while storage cannot keep the file.
+   */
+  keepsPhotographNames?: boolean;
 }) {
   const [state, action, pending] = useActionState<OwnerStepFormState, FormData>(saveOwnerStep, {
     status: "idle",
@@ -92,7 +99,9 @@ export function OwnerStepForm({
       {step === "basics" ? <BasicsFields listing={listing} errors={errors} /> : null}
       {step === "location" ? <LocationFields listing={listing} areas={areas} errors={errors} /> : null}
       {step === "pricing" ? <PricingFields listing={listing} errors={errors} /> : null}
-      {step === "photos" ? <PhotoFields listing={listing} errors={errors} /> : null}
+      {step === "photos" ? (
+        <PhotoFields listing={listing} errors={errors} keepsPhotographNames={keepsPhotographNames} />
+      ) : null}
       {step === "contact" ? <ContactFields listing={listing} errors={errors} /> : null}
 
       <div className="flex flex-wrap items-center gap-[10px] border-t border-line pt-[16px]">
@@ -302,16 +311,20 @@ function PricingFields({ listing, errors }: { listing: OwnerListing; errors: Err
 /**
  * The photographs step.
  *
- * The file picker is real: choosing files lists their names and sizes, and any
- * one of them can be taken off the list before saving. What is not real is
- * storage — the bytes go nowhere, because media storage, virus scanning and a
- * retention rule belong to kkl-backend and do not exist yet.
- *
- * So the screen says so, in those words, next to the files it is showing. The
- * alternative — a thumbnail grid built from object URLs that vanish on reload
- * — would look like an upload that worked.
+ * The file picker lists names in this browser. It does not upload the file.
+ * A sample draft can remember those names in process memory. A backend draft
+ * does not: while object storage is unavailable, saving this step adds no
+ * media row, and a name here is not a photograph.
  */
-function PhotoFields({ listing, errors }: { listing: OwnerListing; errors: Errors }) {
+function PhotoFields({
+  listing,
+  errors,
+  keepsPhotographNames,
+}: {
+  listing: OwnerListing;
+  errors: Errors;
+  keepsPhotographNames: boolean;
+}) {
   const [chosen, setChosen] = useState<{ name: string; size: string }[]>(
     listing.photos.map((p) => ({ name: p.fileName, size: p.sizeLabel })),
   );
@@ -347,10 +360,21 @@ function PhotoFields({ listing, errors }: { listing: OwnerListing; errors: Error
         />
 
         <p className="t-caption mt-[12px] rounded-[8px] border border-[#F3DFB4] bg-[#FFF7E8] px-[13px] py-[10px] text-body">
-          <strong className="text-ink">These files are not uploaded.</strong> The names below are
-          recorded so the listing, the preview and the review team show the right number of
-          photographs, but the images themselves are not stored anywhere in this build. Media
-          storage belongs to kkl-backend and does not exist yet.
+          {keepsPhotographNames ? (
+            <>
+              <strong className="text-ink">These files are not uploaded.</strong> The names below are
+              recorded so the listing, the preview and the review team show the right number of
+              photographs, but the images themselves are not stored anywhere in this build. Media
+              storage belongs to kkl-backend and does not exist yet.
+            </>
+          ) : (
+            <>
+              <strong className="text-ink">These files are not uploaded.</strong> A file name held
+              in this browser is not a photograph. Saving this step does not send the file and does
+              not add a media record. Object storage does not exist yet, so the rest of the draft
+              still saves, and send for review stays blocked on a photograph.
+            </>
+          )}
         </p>
       </Card>
 
@@ -372,7 +396,9 @@ function PhotoFields({ listing, errors }: { listing: OwnerListing; errors: Error
               <span className="min-w-0 break-words text-[15px] text-ink">
                 {i === 0 ? <strong>Cover · </strong> : null}
                 {f.name}
-                <span className="t-caption ml-[8px] text-muted">{f.size} · not stored</span>
+                <span className="t-caption ml-[8px] text-muted">
+                  {f.size} · {keepsPhotographNames ? "not stored" : "not saved"}
+                </span>
               </span>
               <button
                 type="button"
@@ -381,25 +407,37 @@ function PhotoFields({ listing, errors }: { listing: OwnerListing; errors: Error
               >
                 Remove
               </button>
-              <input type="hidden" name="photoNames" value={f.name} />
-              <input type="hidden" name="photoSizes" value={f.size} />
+              {keepsPhotographNames ? (
+                <>
+                  <input type="hidden" name="photoNames" value={f.name} />
+                  <input type="hidden" name="photoSizes" value={f.size} />
+                </>
+              ) : null}
             </li>
           ))}
         </ul>
       )}
 
-      {/* With scripting off the list above cannot be built from the file input,
-          so the form still needs a way to say how many photographs there are.
-          This is that way, and it says what it is. */}
-      <noscript>
-        <Field
-          id="photoNamesFallback"
-          label="Photograph file names, one per line (without JavaScript)"
-          helper="The file picker above cannot list what you chose without scripting. Type the file names so the listing records the right number."
-        >
-          <TextArea id="photoNamesFallback" name="photoNames" rows={4} />
-        </Field>
-      </noscript>
+      {keepsPhotographNames ? (
+        // With scripting off the list above cannot be built from the file input,
+        // so the sample draft still needs a way to say how many names it holds.
+        <noscript>
+          <Field
+            id="photoNamesFallback"
+            label="Photograph file names, one per line (without JavaScript)"
+            helper="The file picker above cannot list what you chose without scripting. Type the file names so the listing records the right number."
+          >
+            <TextArea id="photoNamesFallback" name="photoNames" rows={4} />
+          </Field>
+        </noscript>
+      ) : (
+        <noscript>
+          <p className="t-caption text-body">
+            A photograph cannot be added from this browser. Typing a file name would not upload the
+            file and would not be kept. The other steps of this draft still save.
+          </p>
+        </noscript>
+      )}
     </>
   );
 }

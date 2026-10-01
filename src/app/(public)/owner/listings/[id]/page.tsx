@@ -6,7 +6,7 @@ import { OWNER_STATUS, ownerCanEdit } from "@/components/owner/owner-status";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, InsetPanel, SectionHeader } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import { getServices } from "@/lib/services";
+import { getServices, listingStore } from "@/lib/services";
 import { ServiceError } from "@/lib/services/contracts";
 import { OWNER_STEPS, stepStates } from "@/lib/services/sample/owner-listing-store";
 import { areaLabel } from "@/lib/services/sample/locations";
@@ -229,10 +229,20 @@ export default async function OwnerListingPage({
       ) : null}
 
       <p className="t-caption mt-[20px] max-w-[70ch] text-muted">
-        In this review build your drafts are kept for the session only — durable storage for owner
-        listings is a kkl-backend dependency and is not claimed here. Posting a property costs
-        nothing in this build, and what it costs in the product is part of the owner policy still to
-        be confirmed.
+        {listingStore() === "backend" ? (
+          <>
+            This draft is stored. Saving it does not publish it, and a file name is not kept as a
+            photograph. Posting a property costs nothing in this build, and what it costs in the
+            product is part of the owner policy still to be confirmed.
+          </>
+        ) : (
+          <>
+            In this review build your drafts are kept for the session only — durable storage for owner
+            listings is a kkl-backend dependency and is not claimed here. Posting a property costs
+            nothing in this build, and what it costs in the product is part of the owner policy still to
+            be confirmed.
+          </>
+        )}
       </p>
     </div>
   );

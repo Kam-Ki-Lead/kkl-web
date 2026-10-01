@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
@@ -50,6 +51,11 @@ export default async function AdminPropertiesPage({
   return (
     <AdminShell title="Property review" subtitle="Listings awaiting review or reported">
       <div className="flex max-w-[900px] flex-col gap-[12px]">
+        <FixtureNotice>
+          These rows are sample portal listings. They are not owner submissions, and the
+          owner-submission queue does not stand in for them. No contract moderates a live or
+          reported listing.
+        </FixtureNotice>
         <div className="flex flex-wrap gap-[8px]">
           {FILTERS.map((option) => {
             const active = option.value === raw;
