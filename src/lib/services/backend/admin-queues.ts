@@ -221,7 +221,7 @@ function sampleHidden(what: string): never {
   throw new ServiceError("unavailable", `${what} ${SAMPLE_HIDDEN}`);
 }
 
-/** Replaces the sample KYC methods so a missed branch cannot list fixture applications. */
+/** Replaces the sample KYC methods so a missed branch cannot list fixture cases. */
 export const backendAdminKycGuard = {
   async listApplications(): Promise<never> {
     sampleHidden("The KYC queue is read from verification cases.");

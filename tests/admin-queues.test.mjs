@@ -5,6 +5,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { railCounts, adminRailItems } from "../src/components/admin/admin-nav.ts";
 import {
   approvalIsAction,
   capabilityBlocked,
@@ -109,6 +110,52 @@ test("a resubmitted filter with resubmission unavailable is not an empty inbox",
   assert.notEqual(kind.kind, "empty-open");
 });
 
+test("an available resubmission with no rows is an empty page", () => {
+  const page = kycPage({
+    filter: "resubmitted",
+    applications: [],
+    total: 0,
+    resubmission: {
+      available: true,
+      code: "resubmission_open",
+      message: "A case can be sent back for more information.",
+    },
+  });
+  const kind = kycListKind(page);
+  assert.equal(kind.kind, "empty-open");
+  assert.match(kind.title, /resubmitted/i);
+  assert.notEqual(kind.kind, "resubmission-unavailable");
+});
+
+test("a resubmitted filter without a capability flag is a contract error", () => {
+  assert.equal(
+    kycPage({
+      filter: "resubmitted",
+      applications: [],
+      total: 0,
+      resubmission: { code: "documents_not_collected", message: "Nothing can be resubmitted." },
+    }),
+    null,
+  );
+});
+
+test("a reported filter with reporting available and no rows is empty", () => {
+  const page = propertyPage({
+    filter: "reported",
+    listings: [],
+    total: 0,
+    reports: { available: true, code: "reports_open", message: "Reports can be read." },
+  });
+  const kind = propertyListKind(page);
+  assert.equal(kind.kind, "empty");
+  assert.match(kind.title, /reported/i);
+  assert.notEqual(kind.kind, "reports-unavailable");
+});
+
+test("a property page without a reports flag is a contract error", () => {
+  assert.equal(propertyPage({ reports: { message: "No reports." } }), null);
+});
+
 test("an empty pending page is an open queue with nothing waiting", () => {
   const page = kycPage({ applications: [], total: 0 });
   assert.equal(kycListKind(page).kind, "empty-open");
@@ -193,4 +240,48 @@ test("a takedown notice does not say the notification was delivered", () => {
   assert.equal(takenDown.listings[0].outcome, "unpublished");
   assert.equal(takenDown.listings[0].history[0].reason, "Address could not be confirmed");
   assert.equal(takenDown.submissionQueue, undefined);
+});
+
+test("a null queue count stays unavailable on the rail", () => {
+  const counts = railCounts(
+    [
+      {
+        value: null,
+        label: "KYC applications",
+        note: "The open-case count could not be read.",
+        flag: null,
+        tone: "neutral",
+        href: "/admin/kyc",
+      },
+      {
+        value: 0,
+        label: "Listings to review",
+        note: "No listing is published or unpublished.",
+        flag: null,
+        tone: "neutral",
+        href: "/admin/properties",
+      },
+      {
+        value: null,
+        label: "Support tickets",
+        note: "The support count could not be read.",
+        flag: null,
+        tone: "neutral",
+        href: "/admin/support",
+      },
+    ],
+    0,
+    0,
+    0,
+  );
+  assert.equal(counts.kyc, null);
+  assert.equal(counts.listings, 0);
+  assert.equal(counts.tickets, null);
+  assert.equal(counts.refunds, null);
+  const items = adminRailItems(counts);
+  const badge = (href) => items.find((item) => item.href === href)?.badge ?? "missing";
+  assert.equal(badge("/admin/kyc"), "—");
+  assert.equal(badge("/admin/properties"), "missing");
+  assert.equal(badge("/admin/support"), "—");
+  assert.equal(badge("/admin/refunds"), "—");
 });

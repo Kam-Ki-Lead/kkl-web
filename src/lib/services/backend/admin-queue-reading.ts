@@ -91,27 +91,40 @@ export type PropertyPageView = {
   readonly reports: Capability;
 };
 
-const UNDESCRIBED = "This capability was not described. It is not treated as ready.";
-
-export function readCapability(value: unknown): Capability {
-  if (!value || typeof value !== "object") {
-    return { available: null, reachable: null, code: null, dependency: null, message: UNDESCRIBED };
-  }
+/**
+ * A capability is a contract object: `code`, `message`, and one boolean flag.
+ * A missing object, a missing flag, or a non-boolean flag is not "unavailable".
+ * Callers treat `null` as a response that cannot be shown.
+ */
+export function readCapability(value: unknown): Capability | null {
+  if (!value || typeof value !== "object") return null;
   const row = value as Record<string, unknown>;
-  const message = typeof row.message === "string" && row.message.trim() ? row.message : UNDESCRIBED;
+  if (typeof row.code !== "string" || !row.code.trim()) return null;
+  if (typeof row.message !== "string" || !row.message.trim()) return null;
+  if ("available" in row && typeof row.available !== "boolean") return null;
+  if ("reachable" in row && typeof row.reachable !== "boolean") return null;
+  const available = typeof row.available === "boolean" ? row.available : null;
+  const reachable = typeof row.reachable === "boolean" ? row.reachable : null;
+  if (available === null && reachable === null) return null;
+  if (available === true && reachable === false) return null;
+  if (available === false && reachable === true) return null;
   return {
-    available: row.available === true ? true : row.available === false ? false : null,
-    reachable: row.reachable === true ? true : row.reachable === false ? false : null,
-    code: typeof row.code === "string" ? row.code : null,
-    dependency: typeof row.dependency === "string" ? row.dependency : null,
-    message,
+    available,
+    reachable,
+    code: row.code,
+    dependency: typeof row.dependency === "string" && row.dependency.trim() ? row.dependency : null,
+    message: row.message,
   };
 }
 
-/** A capability is blocked unless the payload says it is available or reachable. */
+/** `unavailable` only when a flag explicitly says so. */
+export function capabilityVerdict(state: Capability): "available" | "unavailable" {
+  if (state.available === false || state.reachable === false) return "unavailable";
+  return "available";
+}
+
 export function capabilityBlocked(state: Capability): boolean {
-  if (state.available === false || state.reachable === false) return true;
-  return state.available !== true && state.reachable !== true;
+  return capabilityVerdict(state) === "unavailable";
 }
 
 export function isKycFilter(value: string): value is KycFilter {
@@ -146,6 +159,10 @@ function readApplication(value: unknown): KycApplicationView | null {
   if (row.source !== "verification_case") return null;
   if (row.state !== "pending" && row.state !== "ageing") return null;
   if (row.decision !== null && row.decision !== "rejected") return null;
+  const documents = readCapability(row.documents);
+  const checks = readCapability(row.checks);
+  const approval = readCapability(row.approval);
+  if (!documents || !checks || !approval) return null;
   const decision = row.decision === "rejected" ? "rejected" : null;
   const events = Array.isArray(row.events) ? row.events : null;
   if (!events) return null;
@@ -177,9 +194,9 @@ function readApplication(value: unknown): KycApplicationView | null {
     submittedAt,
     waitingSeconds,
     decision,
-    documents: readCapability(row.documents),
-    checks: readCapability(row.checks),
-    approval: readCapability(row.approval),
+    documents,
+    checks,
+    approval,
     events: parsedEvents,
   };
 }
@@ -192,6 +209,11 @@ export function readKycPage(body: unknown): KycPageView | null {
   const limit = integer(row.limit);
   const offset = integer(row.offset);
   if (total === null || limit === null || offset === null || !Array.isArray(row.applications)) return null;
+  const documents = readCapability(row.documents);
+  const checks = readCapability(row.checks);
+  const approval = readCapability(row.approval);
+  const resubmission = readCapability(row.resubmission);
+  if (!documents || !checks || !approval || !resubmission) return null;
   if (row.source !== "verification_cases") return null;
   const applications: KycApplicationView[] = [];
   for (const item of row.applications) {
@@ -205,10 +227,10 @@ export function readKycPage(body: unknown): KycPageView | null {
     total,
     limit,
     offset,
-    documents: readCapability(row.documents),
-    checks: readCapability(row.checks),
-    approval: readCapability(row.approval),
-    resubmission: readCapability(row.resubmission),
+    documents,
+    checks,
+    approval,
+    resubmission,
   };
 }
 
@@ -265,6 +287,9 @@ export function readPropertyPage(body: unknown): PropertyPageView | null {
   const offset = integer(row.offset);
   if (total === null || limit === null || offset === null || !Array.isArray(row.listings)) return null;
   if (row.source !== "listings" || row.excludes !== "owner_submissions") return null;
+  const publication = readCapability(row.publication);
+  const reports = readCapability(row.reports);
+  if (!publication || !reports) return null;
   const listings: ModeratedPropertyView[] = [];
   for (const item of row.listings) {
     const listing = readListing(item);
@@ -277,8 +302,8 @@ export function readPropertyPage(body: unknown): PropertyPageView | null {
     total,
     limit,
     offset,
-    publication: readCapability(row.publication),
-    reports: readCapability(row.reports),
+    publication,
+    reports,
   };
 }
 
@@ -297,17 +322,28 @@ export type KycListKind =
   | { readonly kind: "rows" };
 
 /**
- * `resubmission.available === false` is the capability, including when the
- * page is empty. It is not a count of resubmitted applications.
+ * The resubmitted filter follows `resubmission`, not the filter name.
+ * `unavailable` explains the capability. `available` is the returned rows,
+ * or an empty page when none were returned.
  */
 export function kycListKind(page: KycPageView): KycListKind {
-  if (page.filter === "resubmitted" && capabilityBlocked(page.resubmission)) {
+  if (
+    page.filter === "resubmitted" &&
+    capabilityVerdict(page.resubmission) === "unavailable"
+  ) {
     return { kind: "resubmission-unavailable", message: page.resubmission.message };
   }
   if (page.applications.length === 0 && page.total > 0 && page.offset >= page.total) {
     return { kind: "past-end" };
   }
   if (page.applications.length === 0 && page.total === 0) {
+    if (page.filter === "resubmitted") {
+      return {
+        kind: "empty-open",
+        title: "No resubmitted case is open",
+        body: "Resubmission is available. This page has no case in that state.",
+      };
+    }
     if (page.filter === "ageing") {
       return {
         kind: "empty-open",
@@ -345,14 +381,25 @@ export type PropertyListKind =
   | { readonly kind: "empty"; readonly title: string; readonly body: string }
   | { readonly kind: "rows" };
 
+/**
+ * The reported filter follows `reports`. Unavailable explains the capability.
+ * Available renders the returned listings, or an empty page when none match.
+ */
 export function propertyListKind(page: PropertyPageView): PropertyListKind {
-  if (page.filter === "reported" && capabilityBlocked(page.reports)) {
+  if (page.filter === "reported" && capabilityVerdict(page.reports) === "unavailable") {
     return { kind: "reports-unavailable", message: page.reports.message };
   }
   if (page.listings.length === 0 && page.total > 0 && page.offset >= page.total) {
     return { kind: "past-end" };
   }
   if (page.listings.length === 0 && page.total === 0) {
+    if (page.filter === "reported") {
+      return {
+        kind: "empty",
+        title: "No reported listing is in this list",
+        body: "Reporting is available. This page has no listing in that state. Drafts and owner submissions are a different queue.",
+      };
+    }
     if (page.filter === "unpublished") {
       return {
         kind: "empty",

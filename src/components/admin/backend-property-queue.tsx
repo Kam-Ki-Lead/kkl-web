@@ -4,7 +4,7 @@ import { PageNav } from "@/components/admin/page-nav";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
-import { propertyListKind } from "@/lib/services/backend/admin-queue-reading";
+import { capabilityVerdict, propertyListKind } from "@/lib/services/backend/admin-queue-reading";
 import {
   loadModeratedProperties,
   selectedPropertyFilter,
@@ -91,7 +91,11 @@ function QueueBody({
   return (
     <>
       <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
-        <h2 className="t-card-title text-warning">Reporting is unavailable</h2>
+        <h2 className="t-card-title text-warning">
+          {capabilityVerdict(page.reports) === "unavailable"
+            ? "Reporting is unavailable"
+            : "Reporting is available"}
+        </h2>
         <p className="t-body mt-[6px] text-body">{page.reports.message}</p>
         <p className="t-caption mt-[8px] text-muted">
           {page.publication.message} This queue does not publish or republish a listing.

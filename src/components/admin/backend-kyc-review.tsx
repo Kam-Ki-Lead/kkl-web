@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
-import { approvalIsAction, capabilityBlocked } from "@/lib/services/backend/admin-queue-reading";
+import { approvalIsAction, capabilityVerdict } from "@/lib/services/backend/admin-queue-reading";
 import { loadKycApplication } from "@/lib/services/backend/admin-queues";
 
 function one(v: string | string[] | undefined): string {
@@ -43,7 +43,7 @@ export async function BackendKycReview({
   if (!loaded.value) notFound();
   const application = loaded.value;
   const open = OPEN.has(application.outcome) && application.decision === null;
-  const approvalBlocked = capabilityBlocked(application.approval) || !approvalIsAction(application.approval);
+  const approvalBlocked = capabilityVerdict(application.approval) === "unavailable" || !approvalIsAction(application.approval);
 
   return (
     <AdminShell title="KYC review" subtitle="Required verification case">
@@ -90,17 +90,25 @@ export async function BackendKycReview({
         <Card className="p-[20px]">
           <h2 className="t-card-title text-ink">Documents</h2>
           <p className="t-body mt-[8px] text-body">{application.documents.message}</p>
-          <p className="t-caption mt-[8px] text-muted">
-            Documents are unavailable. There is no upload to mark as missing or complete.
-          </p>
+          {capabilityVerdict(application.documents) === "unavailable" ? (
+            <p className="t-caption mt-[8px] text-muted">
+              Documents are unavailable. There is no upload to mark as missing or complete.
+            </p>
+          ) : (
+            <p className="t-caption mt-[8px] text-muted">No document row was returned with this case.</p>
+          )}
         </Card>
 
         <Card className="p-[20px]">
           <h2 className="t-card-title text-ink">Checklist</h2>
           <p className="t-body mt-[8px] text-body">{application.checks.message}</p>
-          <p className="t-caption mt-[8px] text-muted">
-            Checks are unavailable. Nothing here is ticked or left unticked.
-          </p>
+          {capabilityVerdict(application.checks) === "unavailable" ? (
+            <p className="t-caption mt-[8px] text-muted">
+              Checks are unavailable. Nothing here is ticked or left unticked.
+            </p>
+          ) : (
+            <p className="t-caption mt-[8px] text-muted">No checklist row was returned with this case.</p>
+          )}
         </Card>
 
         {approvalBlocked ? (

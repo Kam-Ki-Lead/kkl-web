@@ -18,8 +18,8 @@ export function adminRailItems(counts: {
   verification: number;
   listings: number | null;
   ownerListings: number;
-  tickets: number;
-  refunds: number;
+  tickets: number | null;
+  refunds: number | null;
   notifications: number;
 }): readonly RailItem[] {
   const badge = (n: number | null) => (n === null ? "—" : n > 0 ? String(n) : null);
@@ -80,7 +80,7 @@ export function railCounts(
 ): Parameters<typeof adminRailItems>[0] {
   const find = (label: string): number | null => {
     const queue = queues.find((q) => q.label.toLowerCase().startsWith(label));
-    if (!queue) return 0;
+    if (!queue) return null;
     return queue.value;
   };
   return {
@@ -88,8 +88,8 @@ export function railCounts(
     verification,
     listings: find("listings"),
     ownerListings,
-    tickets: find("support") ?? 0,
-    refunds: find("refund") ?? 0,
+    tickets: find("support"),
+    refunds: find("refund"),
     notifications,
   };
 }

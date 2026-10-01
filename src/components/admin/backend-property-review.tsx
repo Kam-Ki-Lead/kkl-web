@@ -74,10 +74,10 @@ export async function BackendPropertyReview({
         </Card>
 
         <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
-          <h2 className="t-card-title text-warning">Dismiss report is unavailable</h2>
+          <h2 className="t-card-title text-warning">Dismiss report is not offered</h2>
           <p className="t-body mt-[6px] text-body">
-            No approved rule records a report against a live listing, so a report cannot be
-            dismissed. This screen does not publish or republish a listing.
+            This screen does not dismiss a report. Reporting state is read on the queue, from
+            the reports capability. This screen does not publish or republish a listing.
           </p>
         </Card>
 

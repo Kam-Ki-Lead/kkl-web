@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import {
-  capabilityBlocked,
+  capabilityVerdict,
   kycFilterCaption,
   kycListKind,
 } from "@/lib/services/backend/admin-queue-reading";
@@ -39,8 +39,8 @@ function waiting(seconds: number): string {
 }
 
 /**
- * KYC applications from required verification cases.
- * Sample document applications are not rendered on this path.
+ * Required-action verification cases from `GET /v1/admin/kyc/applications`.
+ * This path does not render a document packet.
  */
 export async function BackendKycQueue({
   searchParams,
@@ -109,13 +109,28 @@ function QueueBody({
     <>
       {caption ? <p className="t-caption text-muted">{caption}</p> : null}
       <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
-        <h2 className="t-card-title text-warning">Documents, checks and approval are unavailable</h2>
+        <h2 className="t-card-title text-warning">Documents, checks and approval</h2>
         <ul className="t-body mt-[8px] flex list-disc flex-col gap-[4px] pl-[20px] text-body">
-          <li>{page.documents.message}</li>
-          <li>{page.checks.message}</li>
-          <li>{page.approval.message}</li>
+          <li>
+            {capabilityVerdict(page.documents) === "unavailable"
+              ? "Documents are unavailable. "
+              : "Documents are available. "}
+            {page.documents.message}
+          </li>
+          <li>
+            {capabilityVerdict(page.checks) === "unavailable"
+              ? "Checks are unavailable. "
+              : "Checks are available. "}
+            {page.checks.message}
+          </li>
+          <li>
+            {capabilityVerdict(page.approval) === "unavailable"
+              ? "Approval is unavailable. "
+              : "Approval is available. "}
+            {page.approval.message}
+          </li>
         </ul>
-        {capabilityBlocked(page.approval) ? (
+        {capabilityVerdict(page.approval) === "unavailable" ? (
           <p className="t-caption mt-[8px] text-muted">
             Approval is not a working action on this queue.
           </p>

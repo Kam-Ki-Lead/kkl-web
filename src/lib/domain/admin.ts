@@ -48,6 +48,10 @@ export type AdminHistoryEntry = {
 };
 
 // ----------------------------------------------------------------- KYC queue --
+// The sample queue below is a document application. The backend queue
+// (`KKL_VERIFICATION=backend`) is required-action verification cases and does
+// not use these document rows. Live listings are a separate moderation record
+// from owner submissions.
 
 export type KycApplicationState = "pending" | "resubmitted" | "ageing";
 
