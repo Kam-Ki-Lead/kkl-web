@@ -480,6 +480,71 @@ Q-8 is open. This frontend will not create those rows.
 - Publication remains refused (`publication_not_decided`, Q-3). Submission
   validation and publication are different checks.
 
+## Photograph availability, 1 October 2026
+
+This section is a later run. It does not change the runs above.
+
+Backend checkout `a8d9b1af43ee26ef07b9d86899b917d677763e86`
+(`a8d9b1a`, “Require a confirmed upload before a photograph counts”),
+OpenAPI `1.0.0-phase3.m`, migration `018_listing_media_availability.sql`.
+The API was already listening on `http://127.0.0.1:4010` (pid 29692). It was
+not restarted. Health reported storage `storesBytes: false`, `integrated: false`,
+dependency Q-8. The frontend application for this section is `4b4334e`.
+`next build` then `next start` on port 3811 (pid 22048). The switches are the
+same set as the domain-switch section. `POST /v1/dev/sessions` was not used.
+No development secret was set on the frontend. One local code was used for
+Review Seller. That is not a production message.
+
+The media contract, read from the API and not from the migration name:
+
+- `POST /v1/listings/{id}/media` stores a row as `availability: declared` and
+  `stored: false`. A client storage key, provider, or confirmation is ignored.
+- `availability` is `declared`, `unavailable`, or `available`. `stored` is true
+  only for an image the storage adapter has confirmed.
+- `POST /v1/listings/{id}/media/upload` refuses while storage is unconfigured
+  and does not mark a row available.
+- An owner submission with no image row is `photograph_missing` (“Add at least
+  one photograph of the property.”). An image row that is not available is
+  `photograph_not_available` (“No uploaded photograph is available. A file
+  record does not satisfy the requirement.”). Submission does not publish.
+
+### What persisted
+
+The same owner draft, `PL-5362CF550A`
+(`dce729f6-eeda-405c-a455-f0b628a3d907`), Review Seller, `posted_as` owner.
+After this frontend was rebuilt, the listing page still showed ₹71,00,000,
+Rajarhat, Kolkata, 3 BHK, contact preference phone, and status draft.
+A save of the photograph step with no newly selected file left the existing
+row in place and did not add a second one.
+
+### Media states and submission
+
+| Check | Result |
+|---|---|
+| No image row, before this save | The listing page showed Photographs “None”, 4 of 6 steps, and “Add at least one photograph of the property.” |
+| File selected, not yet saved | The photograph step listed `living-room.jpg` as “selected here, not saved” and said the file is not uploaded. |
+| Save of that selection | One image row: `image/jpeg`, 2048 bytes, `availability = declared`, no storage key, `confirmed_at` unset. The byte size is the selected file’s size. |
+| After reload | Photographs “None stored · 1 file record, not uploaded”. The list says “no photographs”. The photograph step is not marked complete. Preview says “none stored” and “declared, not uploaded”. |
+| Upload while storage is unconfigured | The save calls the upload route. The row stayed declared and unconfirmed. Health still reports that storage does not store bytes. This run did not observe an `available` row. |
+| `availability = unavailable` | Not produced by this upload refusal, so that label was not exercised on a live row. |
+| Submission | Preview blocker: “No uploaded photograph is available. A file record does not satisfy the requirement.” Send for review stayed disabled. A submit from that form stayed on the preview and left `status = draft`. Nothing was published. |
+
+### What this does not verify
+
+- The builder enquiry inbox is not verified as a whole. Populated recipient
+  detail, read and status actions, and recipient-specific isolation remain
+  pending until a legitimate routed fixture exists.
+- A builder draft was not created. The approved builder editor posts a price
+  range, not `priceInr`, so that range is still not written as the listing price.
+  A builder listing is still not held to an owner’s contact, configuration, or
+  photograph requirement.
+- No photograph bytes were stored. A successful upload is not claimed.
+- KYC applications and live or reported property moderation still need
+  contracts. Verification cases and the owner-submission queue were not used
+  as substitutes.
+- Publication remains a separate operation and was not changed
+  (`publication_not_decided`, Q-3).
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
