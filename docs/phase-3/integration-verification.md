@@ -397,6 +397,89 @@ These are not the same gap as storage.
   route moderates a live portal listing or a buyer report. Replacing that
   queue needs that contract. It does not need listing-media storage.
 
+The inbox checks above are not a verified inbox journey. Empty and
+unread-empty states, a missing session, a non-builder session, and an
+unreachable API were tested. A populated recipient detail, mark-read and
+status actions, and isolation of an enquiry routed to this builder were not.
+No enquiry has this builder as recipient.
+
+The sentence above that the photograph step does not call the media endpoint
+described the screen. The listing adapter still posted a media row from a
+file name, and it invented a byte size when the form sent a label such as
+“1.2 MB”. That post is removed in the section below.
+
+## Owner listing draft, 1 October 2026
+
+This section is a later run. It does not change the runs above.
+
+The same backend process was still listening on `http://127.0.0.1:4010`
+(pid 24008). The checkout was still
+`abf89fce39f6f38a689fccc352391bcae9bef0d7` (implementation
+`d4116b3b072c6050326cf1591acc69359c7b8502`, OpenAPI `1.0.0-phase3.l`).
+The frontend application for this section is `6f12b11`. `next build` then
+`next start` on port 3811. The switches are the same set as the domain-switch
+section. `POST /v1/dev/sessions` was not used. No development secret was set
+on the frontend. Local codes were used for Review Seller, Review Staff, and
+Review Builder. They are not production messages.
+
+### Contract, by role
+
+An owner listing (`posted_as = owner`) must have title, property type,
+location, price, transaction, configuration, contact name, contact preference,
+and at least one image row before submission. A builder listing must have
+title, property type, location, and price. It is not held to the owner contact,
+configuration, or photograph rules. This frontend does not copy a builder
+price range into `priceInr`, and it does not add owner fields to satisfy
+validation.
+
+### Browser
+
+The draft is `PL-5362CF550A` (`dce729f6-eeda-405c-a455-f0b628a3d907`), owned by
+Review Seller, `posted_as` owner, status draft.
+
+| Check | Result |
+|---|---|
+| Review Builder opening that draft before any of these fields were saved | PASS as a refusal. 404. The listing title was not shown. |
+| Save through the existing controls | PASS. Selling, Rajarhat, ₹72,00,000, 3 BHK, contact name Review Seller, preference phone. The photograph step was saved with no file and added no media row. |
+| Reload | PASS. The listing page showed ₹72,00,000, Rajarhat, Kolkata, 3 BHK, no photographs, and the photograph blocker only. |
+| Edit | PASS. The price was changed to ₹71,00,000 and saved. After a frontend restart the same page still showed ₹71,00,000, Rajarhat, and 4 of 6 steps. Status stayed draft. |
+| Review Builder opening the same draft after those saves | PASS as a refusal. 404. The price and title were not shown. |
+| Submission | PASS as validation, not publication. Preview listed one blocker: add at least one photograph. Send for review stayed disabled. A submit from that form did not leave the preview, did not show “Sent for review”, and left the row `status = draft` with `images = 0`. The page still says nothing publishes. |
+| Staff opening `/admin/kyc` and `/admin/properties` | PASS as labelled fixtures. KYC says the rows are sample applications and are not verification cases. Property review says the rows are sample portal listings and are not owner submissions. A seller session is refused before either queue. |
+| Review Builder properties | PASS as not this account’s list. The screen does not start a listing or record a photograph count, and it says a builder listing is not held to an owner’s contact, configuration, or photograph requirement. |
+
+Stored after the edit: `transaction = sale`, location set, `price_inr = 7100000`,
+`configuration = 3`, contact name set, `contact_preference = phone`, image
+count 0, status draft, same account.
+
+### Photographs
+
+A file name held in the browser is not uploaded and is not written as a media
+row. The photograph step remains saveable. The preview says no photograph is
+stored and that send for review stays blocked until a file can be stored.
+`POST /v1/listings/{id}/media` can still insert a row without a storage key,
+and the photograph rule counts that row. This frontend does not call it to
+clear the blocker. `uploadMedia` already refuses with `storage_not_configured`
+(Q-8).
+
+For the backend window: please leave the photograph count tied to a stored
+file. A metadata-only image row should not satisfy an owner submission while
+Q-8 is open. This frontend will not create those rows.
+
+### What this does not verify
+
+- The builder enquiry inbox is not verified as a whole. Empty, unread-empty,
+  session, role, and service-failure checks stand. Populated recipient detail,
+  read and status actions, and recipient-specific isolation remain untested.
+- A builder draft was not created. The sample editor’s price range and
+  photograph count are not the contract fields, so they are not written in
+  their place.
+- KYC applications and live or reported property moderation still need
+  contracts. Verification cases and the owner-submission queue were not used
+  as substitutes. Both sample queues stay labelled.
+- Publication remains refused (`publication_not_decided`, Q-3). Submission
+  validation and publication are different checks.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
