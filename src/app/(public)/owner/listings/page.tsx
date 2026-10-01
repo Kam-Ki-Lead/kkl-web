@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { getServices, listingStore } from "@/lib/services";
+import { enquiryCountLabel, imageRecordLabel } from "@/lib/listing-counts";
 
 export const metadata: Metadata = { title: "My property listings", robots: { index: false } };
 
@@ -70,7 +71,11 @@ export default async function OwnerListingsPage() {
                         {l.priceLabel} · {l.locationLabel}
                       </p>
                       <p className="t-caption mt-[2px] text-muted">
-                        {l.detailLine} · {l.photoCount === 0 ? "no photographs" : `${l.photoCount} photograph${l.photoCount === 1 ? "" : "s"}`}
+                        {l.detailLine}
+                        {l.declaredImageCount == null
+                          ? ` · ${l.photoCount === 0 ? "no photographs" : `${l.photoCount} photograph${l.photoCount === 1 ? "" : "s"}`}`
+                          : ` · ${l.photoCount} stored photograph${l.photoCount === 1 ? "" : "s"} · ${imageRecordLabel(l.declaredImageCount)}`}
+                        {enquiryCountLabel(l.enquiryCount) ? ` · ${enquiryCountLabel(l.enquiryCount)}` : ""}
                         {l.stepsComplete < l.stepsTotal
                           ? ` · ${l.stepsComplete} of ${l.stepsTotal} steps filled in`
                           : ""}

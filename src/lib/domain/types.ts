@@ -899,6 +899,8 @@ export type PublishBlocker = {
 export type ListingDraft = {
   readonly id: string;
   readonly status: ListingStatus;
+  /** The status stored on the listing, including values outside the three tabs. */
+  readonly recordStatus?: string;
   readonly title: string;
   readonly propertyType: string | null;
   readonly possessionTarget: string | null;
@@ -1091,6 +1093,10 @@ export type OwnerListingSummary = {
   readonly priceLabel: string;
   readonly detailLine: string;
   readonly photoCount: number;
+  /** Absent when this response has no enquiry count. A missing count is not zero. */
+  readonly enquiryCount: number | null;
+  /** Image records on the owner's listing. Absent is not zero, and the count is not stored photographs. */
+  readonly declaredImageCount: number | null;
   readonly stepsComplete: number;
   readonly stepsTotal: number;
   readonly updatedAt: string;
@@ -1111,6 +1117,8 @@ export type ListingSummary = {
   readonly recordStatus?: string;
   /** Absent when the list does not carry an enquiry count. A missing count is not zero. */
   readonly enquiryCount: number | null;
+  /** Image records on the owner's listing. Absent is not zero, and the count is not stored photographs. */
+  readonly declaredImageCount: number | null;
   readonly hasMedia: boolean;
   /**
    * The listing's first renderable photograph — B-07's thumbnail. Null when

@@ -326,6 +326,8 @@ type ListingBody = {
   carpetAreaMin?: string | null;
   carpetAreaMax?: string | null;
   videoUrl?: string | null;
+  enquiryCount?: number | null;
+  declaredImageCount?: number | null;
   updatedAt?: string | null;
   configurations?: readonly StoredConfiguration[];
   media?: readonly { kind?: string; stored?: boolean; availability?: string }[];
@@ -354,6 +356,7 @@ export function toBuilderDraft(body: ListingBody): ListingDraft {
   return {
     id: body.id ?? "",
     status: knownStatus(body.status),
+    recordStatus: body.status,
     title: body.title ?? "",
     propertyType: body.propertyType ?? null,
     possessionTarget: body.possessionTarget ?? "",
@@ -375,7 +378,7 @@ export function toBuilderDraft(body: ListingBody): ListingDraft {
     videoUrl: body.videoUrl ?? null,
     publishedAt: null,
     updatedAt: body.updatedAt ?? "",
-    enquiryCount: null,
+    enquiryCount: typeof body.enquiryCount === "number" ? body.enquiryCount : null,
   };
 }
 

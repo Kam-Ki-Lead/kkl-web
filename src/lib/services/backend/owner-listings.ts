@@ -100,6 +100,8 @@ type BackendListing = {
   media?: readonly BackendMedia[];
   history?: readonly BackendHistory[];
   duplicate?: boolean;
+  enquiryCount?: number | null;
+  declaredImageCount?: number | null;
 };
 
 /** kkl-backend says `rejected`; the approved screens say `declined`. */
@@ -211,6 +213,8 @@ function toSummary(raw: BackendListing, label: string): OwnerListingSummary {
     priceLabel: price,
     detailLine: details.length > 0 ? details.join(" · ") : "Details not filled in yet",
     photoCount: storedPhotographCount(l.photos),
+    enquiryCount: typeof raw.enquiryCount === "number" ? raw.enquiryCount : null,
+    declaredImageCount: typeof raw.declaredImageCount === "number" ? raw.declaredImageCount : null,
     stepsComplete: STEP_ORDER.filter((s) => stepComplete(l, s)).length,
     stepsTotal: STEP_ORDER.length,
     updatedAt: l.updatedAt,

@@ -11,7 +11,8 @@ import {
   shortlistAddResult,
   shortlistRemoveResult,
 } from "../src/lib/services/backend/shortlist-contract.ts";
-import { shortlistVisibleLabel } from "../src/lib/shortlist-label.ts";
+import { shortlistHref, shortlistVisibleLabel } from "../src/lib/shortlist-label.ts";
+import { enquiryCountLabel, imageRecordLabel } from "../src/lib/listing-counts.ts";
 import { describeLocation, withStoredAnswers } from "../src/lib/requirement.ts";
 import {
   builderProfilePatch,
@@ -144,8 +145,15 @@ test("shortlist add and remove follow the published statuses", () => {
   assert.equal(shortlistAddResult(401), "unauthenticated");
   assert.equal(shortlistRemoveResult(200), "removed");
   assert.equal(shortlistRemoveResult(401), "unauthenticated");
-  assert.equal(shortlistVisibleLabel(null), "Shortlist (unavailable)");
-  assert.equal(shortlistVisibleLabel(0), "Shortlist (0)");
+  assert.equal(shortlistVisibleLabel({ kind: "guest" }), "Shortlist");
+  assert.equal(shortlistHref({ kind: "guest" }), "/auth?next=/account/shortlist");
+  assert.equal(shortlistVisibleLabel({ kind: "unavailable" }), "Shortlist (unavailable)");
+  assert.equal(shortlistVisibleLabel({ kind: "count", total: 0 }), "Shortlist (0)");
+  assert.equal(enquiryCountLabel(null), null);
+  assert.equal(enquiryCountLabel(0), "0 enquiries");
+  assert.equal(imageRecordLabel(null), null);
+  assert.match(imageRecordLabel(0) ?? "", /0 image records/);
+  assert.match(imageRecordLabel(1) ?? "", /not a stored photograph/);
 });
 
 test("a stored requirement fills only answers the address bar does not carry", () => {

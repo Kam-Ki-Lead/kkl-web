@@ -293,6 +293,8 @@ export function listMine(): readonly OwnerListingSummary[] {
         priceLabel: priceLabel(l),
         detailLine: detailLine(l),
         photoCount: l.photos.length,
+        enquiryCount: null,
+        declaredImageCount: null,
         stepsComplete: stepStates(projected).filter((s) => s.complete).length,
         stepsTotal: steps,
         updatedAt: l.updatedAt,

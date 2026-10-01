@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  deleteListing,
   republishListing,
   unpublishListing,
 } from "@/app/actions/builder-listings";
@@ -14,10 +13,8 @@ import type { ListingStatus } from "@/lib/domain/types";
  * server action, so none of them depends on JavaScript and none can be
  * triggered by pressing Enter in a neighbouring one.
  *
- * Delete asks for no confirmation here, and that is a gap rather than a
- * decision: a confirm dialog belongs to C-07, which is not built, and a
- * `window.confirm` would be a control that disappears without JavaScript. It is
- * recorded rather than faked.
+ * Delete opens a confirmation page. The draft is removed only when that
+ * page is submitted, so a list view cannot delete it by itself.
  */
 export function ListingActions({
   listingId,
@@ -80,12 +77,13 @@ export function ListingActions({
       ) : null}
 
       {allowDelete ? (
-        <form action={deleteListing}>
-          <input type="hidden" name="listingId" value={listingId} />
-          <Button type="submit" variant="quietDanger" size="action">
-            Delete
-          </Button>
-        </form>
+        <ButtonLink
+          href={`/builder/properties/${listingId}/delete`}
+          variant="quietDanger"
+          size="action"
+        >
+          Delete
+        </ButtonLink>
       ) : (
         <p className="t-caption text-muted">Only a draft can be deleted from this list.</p>
       )}

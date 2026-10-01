@@ -9,6 +9,8 @@ import {
   type ShortlistAddResult,
 } from "./shortlist-contract";
 import { callAs, isFrameworkSignal } from "./session";
+import { hasBrowserSession } from "@/lib/auth/backend";
+import type { ShortlistHeaderState } from "@/lib/shortlist-label";
 
 /**
  * The signed-in account's requirement and shortlist.
@@ -104,17 +106,22 @@ export async function readShortlist(): Promise<{
 }
 
 /**
- * The header count. Null is unavailable: the profile service is off, the
- * session is signed out, or the read failed. An empty shortlist is 0.
+ * The header count.
+ * No session is a normal shortlist entry. An empty signed-in list is zero.
+ * Unavailable is only a signed-in read that failed.
  */
-export async function headerShortlistCount(): Promise<number | null> {
-  if (profileStoreKind() !== "backend") return null;
+export async function headerShortlistCount(): Promise<ShortlistHeaderState> {
+  if (profileStoreKind() !== "backend") return { kind: "guest" };
+  // No cookie is a guest. Calling the shortlist here would redirect the
+  // whole page to sign-in, which is not a failed shortlist read.
+  if (!(await hasBrowserSession())) return { kind: "guest" };
   try {
     const list = await readShortlist();
-    return list.total;
+    return { kind: "count", total: list.total };
   } catch (error) {
     if (isFrameworkSignal(error)) throw error;
-    return null;
+    if (error instanceof ServiceError && error.kind === "unauthenticated") return { kind: "guest" };
+    return { kind: "unavailable" };
   }
 }
 

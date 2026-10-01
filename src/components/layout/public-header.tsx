@@ -4,7 +4,12 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
-import { shortlistAccessibleName, shortlistVisibleLabel } from "@/lib/shortlist-label";
+import {
+  shortlistAccessibleName,
+  shortlistHref,
+  shortlistVisibleLabel,
+  type ShortlistHeaderState,
+} from "@/lib/shortlist-label";
 
 /**
  * C-03 public header: "A light public header on white for buyers."
@@ -61,7 +66,11 @@ export function PublicHeaderFallback() {
   );
 }
 
-export function PublicHeader({ shortlistCount = null }: { shortlistCount?: number | null }) {
+export function PublicHeader({
+  shortlist = { kind: "guest" },
+}: {
+  shortlist?: ShortlistHeaderState;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -99,14 +108,14 @@ export function PublicHeader({ shortlistCount = null }: { shortlistCount?: numbe
 
         <div className="ml-auto flex items-center gap-[22px] whitespace-nowrap max-[1060px]:hidden">
           <Link
-            href="/account/shortlist"
+            href={shortlistHref(shortlist)}
             /* 2.5.3 Label in Name: the visible text has to be inside the
                accessible name, or "click Shortlist (0)" matches nothing. */
-            aria-label={shortlistAccessibleName(shortlistCount)}
+            aria-label={shortlistAccessibleName(shortlist)}
             className="text-[16px] font-medium text-body hover:text-brand"
           >
             <span aria-hidden="true">♡ </span>
-            {shortlistVisibleLabel(shortlistCount)}
+            {shortlistVisibleLabel(shortlist)}
           </Link>
           <Link href="/builders" className="text-[16px] font-medium text-body hover:text-brand">
             List a project
@@ -151,12 +160,12 @@ export function PublicHeader({ shortlistCount = null }: { shortlistCount?: numbe
               </Link>
             ))}
             <Link
-              href="/account/shortlist"
+              href={shortlistHref(shortlist)}
               onClick={() => setDrawerOpen(false)}
               className="flex min-h-[44px] items-center border-b border-line text-[16px] font-medium text-body"
             >
               <span aria-hidden="true">♡&nbsp;</span>
-              {shortlistVisibleLabel(shortlistCount)}
+              {shortlistVisibleLabel(shortlist)}
             </Link>
             <Link
               href="/builders"

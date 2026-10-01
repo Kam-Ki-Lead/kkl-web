@@ -27,6 +27,7 @@ type ListingResponse = Parameters<typeof toBuilderDraft>[0] & {
   priceInr?: number | null;
   configurations?: readonly StoredConfiguration[];
   enquiryCount?: number | null;
+  declaredImageCount?: number | null;
   error?: string;
   field?: string;
 };
@@ -76,6 +77,7 @@ function summary(body: ListingResponse): ListingSummary {
     priceLabel,
     detailLine: presented.detailLine,
     enquiryCount: typeof body.enquiryCount === "number" ? body.enquiryCount : null,
+    declaredImageCount: typeof body.declaredImageCount === "number" ? body.declaredImageCount : null,
     hasMedia: false,
     coverImage: null,
     sectionsComplete: sections.filter((section) => section.complete).length,

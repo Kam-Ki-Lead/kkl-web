@@ -50,7 +50,7 @@ export function BuilderProfileForm({
             }
           >
             {contractBound
-              ? "Company name, the account name and the contact email were written. The profile full name was not changed. RERA registration and the alert preferences were not stored."
+              ? "Company name, the account name and the contact email were saved. The profile full name was not changed. Add a RERA registration number on the property listing — this profile does not store it. Alert choices were not saved, and no alert was sent."
               : `Your details were saved.${isSample ? " In sample mode this is kept in memory only." : ""}`}
           </p>
         ) : null}
@@ -121,8 +121,8 @@ export function BuilderProfileForm({
           label="RERA registration"
           helper={
             contractBound
-              ? "RERA registration is not a field on this profile. The published profile contract does not accept it, so this box is not editable and saving does not write it. A listing can store a registration number on that listing."
-              : "Shown on your listings when present. Nothing here is checked against a RERA register — that verification is not built."
+              ? "Add the RERA registration number on the property listing. This profile does not store it, and nothing here is checked against a RERA register."
+              : "Shown on your listings when present. Nothing here is checked against a RERA register."
           }
         >
           {contractBound ? (
@@ -156,7 +156,7 @@ export function BuilderProfileForm({
           />
           <p className="t-caption text-muted">
             {contractBound
-              ? "These preferences are not profile fields. Saving does not store them, and nothing is sent."
+              ? "These choices are not saved on this profile, and no alert is sent."
               : "These record a preference. Delivery is kkl-backend’s and is not connected, so turning one on does not start sending anything."}
           </p>
         </fieldset>

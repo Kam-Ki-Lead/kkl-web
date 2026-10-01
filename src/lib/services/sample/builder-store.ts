@@ -639,6 +639,7 @@ export function listSummaries(filter?: { status?: ListingStatus }): readonly Lis
         priceLabel: price,
         detailLine: detailLineFor(listing),
         enquiryCount: listing.enquiryCount,
+        declaredImageCount: null,
         hasMedia: listing.media.length > 0,
         // A real photograph wins; in a review session the approved baseline's
         // stand-in imagery fills the seeded listings' slots so the

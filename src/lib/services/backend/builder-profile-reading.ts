@@ -11,10 +11,10 @@
  */
 
 export const RERA_NOT_ON_PROFILE =
-  "RERA registration is stored on a listing, not on the profile, so it was not written.";
+  "Add the RERA registration number on the property listing. This profile does not store it.";
 
 export const ALERTS_NOT_ON_PROFILE =
-  "The three alert preferences are not profile fields, so they were not written.";
+  "These alert choices are not saved on this profile, and no alert is sent.";
 
 export function builderProfilePatch(input: {
   contactName: string;

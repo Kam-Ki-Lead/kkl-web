@@ -11,6 +11,7 @@ import { listingStoreKind } from "@/lib/services/backend/config";
 import { bearerMode } from "@/lib/services/backend/session";
 import { ServiceError } from "@/lib/services/contracts";
 import type { ListingStatus } from "@/lib/domain/types";
+import { imageRecordLabel } from "@/lib/listing-counts";
 
 export const metadata: Metadata = { title: "My properties" };
 
@@ -180,7 +181,8 @@ export default async function BuilderPropertiesPage({
                           role="img"
                           aria-label={
                             listingsFromBackend
-                              ? `Photographs are not on this list — ${listing.title}`
+                              ? imageRecordLabel(listing.declaredImageCount) ??
+                                `Image record count is not on this list — ${listing.title}`
                               : listing.hasMedia
                                 ? `Photograph for ${listing.title} was chosen but no file is kept in sample mode`
                                 : `No photographs yet — ${listing.title}`
@@ -192,7 +194,8 @@ export default async function BuilderPropertiesPage({
                           </span>
                           <span className="px-[8px] text-center text-[13px]">
                             {listingsFromBackend
-                              ? "Photographs are not on this list"
+                              ? imageRecordLabel(listing.declaredImageCount) ??
+                                "Image record count is not on this list"
                               : listing.hasMedia
                                 ? "No file kept — sample mode"
                                 : "No photos yet"}
