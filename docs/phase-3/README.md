@@ -6,7 +6,7 @@ of that run. It does not revise the Phase 2 sample-service handoff in
 
 | Document | What it answers |
 |---|---|
-| **[integration-verification.md](integration-verification.md)** | The `611bca9` run against backend `abf89fc`, then the domain switches, the admin-queue check, the builder inbox, the owner listing draft, and the photograph-eligibility check at `f0eb675` against backend `a8d9b1a` |
+| **[integration-verification.md](integration-verification.md)** | The `611bca9` run against backend `abf89fc`, then the domain switches, the admin-queue check, the builder inbox, the owner listing draft, the photograph-eligibility check at `f0eb675` against backend `a8d9b1a`, and the 1 October inspection that left `/admin/kyc` and `/admin/properties` on sample data because that contract is not published |
 
 ## Older records stay on their own revisions
 

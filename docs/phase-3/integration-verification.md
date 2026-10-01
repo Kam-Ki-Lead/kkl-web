@@ -582,6 +582,101 @@ record does not say that a stored photograph is drawn. No upload succeeded.
 
 The builder inbox populated check remains pending. Publication was not changed.
 
+## Admin KYC and property review, 1 October 2026
+
+This section is a later inspection. It does not change the photograph
+sections above, and it does not start another photograph cycle.
+
+Backend checkout `a8d9b1af43ee26ef07b9d86899b917d677763e86`
+(`a8d9b1a`), OpenAPI `1.0.0-phase3.m`. The API was still listening on
+`http://127.0.0.1:4010`. It was not restarted. Health still reported
+storage `storesBytes: false` and `integrated: false`. No frontend
+application change was made. `docs/phase-2/visual/geometry-1440.json`
+was left unstaged.
+
+### What the screens still call
+
+`/admin/kyc` and `/admin/kyc/[id]` call `listApplications`,
+`getApplication`, `setDocumentVerdict`, `toggleCheck`, and
+`decideApplication`. Those methods exist only on the sample admin store.
+The queue says the rows are sample KYC applications and are not
+verification cases. Decisions are approve, reject, and resubmit. Approval
+is gated on the sample checklist. The documents on the review screen are
+names, not files.
+
+`/admin/properties` and `/admin/properties/[id]` call `listListings`,
+`getListing`, and `moderateListing`. Those methods exist only on the
+sample admin store. The queue says the rows are sample portal listings
+and are not owner submissions. The actions are unpublish and dismiss a
+report. There is no approve action. The screen says no media is shown.
+
+`liveAdminQueues` still leaves the KYC and property-review tiles on those
+sample counts. Support, refunds, and the other switched tiles are counted
+from their own backend calls. The dashboard badges for these two queues
+therefore still match the sample pages.
+
+### What the published contract contains
+
+The path list in `docs/api/v1.yaml` at this revision has no KYC
+application resource and no buyer-report or live-listing moderation
+resource. Slice C’s “moderation” in the document introduction is the
+staff decision on a listing submission (`/v1/listings/{listingId}/decision`),
+already used by `/admin/owner-listings`. It is not unpublish or dismiss
+report.
+
+These published paths were read and were not used as substitutes:
+
+| Path | Why it is not this queue |
+|---|---|
+| `GET /v1/verification/cases`, `GET /v1/verification/queues` | Verification cases. Already used by `/admin/verification`. A case is not a PAN/Aadhaar application, and deciding one does not approve KYC. |
+| `GET /v1/listings/queue` | Owner submissions waiting on a reviewer. Already used by `/admin/owner-listings`. An unsent draft is not in it. |
+| `GET /v1/properties` | The public portal inventory. It returns published listings only. |
+| `GET /v1/leads` | The Seller and Builder marketplace. Already used there. It is not the staff lead-lifecycle queue. |
+| `POST /v1/accounts/{accountId}/status` | Suspend or reinstate one known account. There is no list of accounts, so `/admin/users` was not rewired. |
+
+### Review-server probe, unauthenticated
+
+These calls did not use a session and did not use `POST /v1/dev/sessions`.
+
+| Request | Result |
+|---|---|
+| `GET /health` | 200. Storage still does not store bytes. |
+| `GET /v1/properties` | 200. `properties` length 0. The note says publication is not a decided rule (Q-3) and no listing is published. |
+| `GET /v1/kyc`, `GET /v1/kyc/applications`, `GET /v1/reports` | 401 `unauthorized`. |
+| `GET /v1/listings/queue`, `GET /v1/verification/cases`, `GET /v1/verification/queues` | 401 `unauthorized`. |
+
+The 401 is the session gate. The handler requires an identity before it
+walks the rest of the route table, and an unmatched `/v1` path after that
+returns 404. The 401 does not mean a KYC or report route exists. No staff
+session was spent to observe that 404: the route table in this checkout
+has no match for those paths.
+
+### What stays unavailable
+
+Approve, reject, and resubmit on a KYC application; document verdicts;
+the approval checklist; unpublish; dismiss report. Verification policy
+(Q-4) and publication policy (Q-3) were not changed. The sample notices
+stay in place so the queues are not presented as the verification queue
+or the owner-submission queue.
+
+### Other documented work that is still blocked
+
+- A populated builder inbox needs an enquiry whose recipient is Review
+  Builder. The two stored enquiries are still unrouted.
+- A builder draft was not created. The approved editor posts a price
+  range, and that range is not `priceInr`.
+- Seller business details, KYC submission, and billing address stay on
+  the sample seller record. The profile resource has a company name,
+  a full name, about text, contact fields, and two opt-ins. It does not
+  have a GSTIN, a PAN, an Aadhaar record, a business type, service areas,
+  or an invoice address. The seller alert toggles are not those opt-ins.
+- Voice-bridge paths are published as not implemented.
+
+No pagination, empty or populated queue, customer denial, reload
+persistence, or service-failure check was run for these two admin
+queues. Those checks wait on a contract that lists the applications and
+the moderated listings. This inspection is not that check.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
