@@ -1194,6 +1194,46 @@ Phase 3 is not complete. Publication (Q-3), matching, verification (Q-4),
 Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder
 enquiry remain. The admin-queue slice stays closed at `8079ee0`.
 
+## Header states, alert controls, and draft-delete confirmation, 2 October 2026
+
+Frontend `891e8bd`. This section does not replace the `4334601` results,
+which were recorded against OpenAPI `1.0.0-phase3.o`, and it does not
+replace the `4b0db0a` results.
+
+The review API for this pass was still process 28328, started at 22:58
+local on 1 October, command `node src/http/server.mjs`, on checkout
+`94fa614` (implementation `e482dfc`, OpenAPI `1.0.0-phase3.p`). This
+frontend did not restart that API and did not change that checkout.
+
+The frontend on 3811 for the checks below is process 31740, built with
+`NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then
+`next start` with the documented domain switches. No development-identity
+secret was set. One local OTP was used for the builder number ending 0104.
+The code is not recorded here. The earlier persistence reloads of amenities,
+carpet words, possession, the video link, and the buyer name were not
+repeated.
+
+| Check | Result |
+| --- | --- |
+| Signed-out header | An unsigned homepage link reads `Shortlist`, accessible name `Shortlist`, and goes to `/auth?next=/account/shortlist`. It does not say unavailable. |
+| Signed-in empty shortlist | Desktop and the mobile menu both showed visible text `Shortlist (0)`, accessible name `Shortlist (0), 0 saved`, and `/account/shortlist`. |
+| Populated shortlist | No published listing exists, so the header was not filled above zero. The label for a count of 3 is covered by the contract test, and both links use that same label. |
+| Failed shortlist read | Not induced against the live API. The unavailable label is `Shortlist (unavailable)` on both links, and its destination stays `/account/shortlist`. |
+| Builder profile RERA | The box stayed disabled and empty. The helper says to add the number on the property listing, and that this profile does not store it. |
+| Alert choices | The three choices were disabled before any click, with no field name, and the note above them said they are unavailable, this profile does not store them, and no alert is sent. They stay on the remaining-work list. |
+| Owner counts | My property listings showed `0 stored photographs`, `0 image records. An image record is not a stored photograph.`, and `0 enquiries` for the signed-in draft. A missing count is not rendered as zero. A public property page does not include those counts. |
+| Draft delete, cancel | Disposable draft `257c9f0d-1d57-40b6-8667-8ea29b4b1370`, titled `Disposable cancel then delete`, was opened on its confirmation page. Keep the draft returned to the list, and a reload still showed that title. |
+| Draft delete, confirm | The same draft was then deleted. A reload of the list no longer showed it. Shared draft `d48bd9ea-b31b-4a55-ae97-ed838b5def4f` stayed. |
+| Draft delete, failure | Opening delete for an id that is not on this account showed `This listing was not deleted` and `That listing is not on this account`. It did not say the draft was deleted. Ownership `404` and the two `409` conflicts stay failures in the contract test, including a code named `deleted`, which is reported as unavailable. |
+
+Contract tests passed 16 of 16. `tsc --noEmit` passed. `next build` passed,
+including the later message for a listing that is not on the account.
+
+The three alert choices remain an approved feature that this profile does
+not store. Publication (Q-3), matching, verification (Q-4), Q-1a through
+Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain.
+Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
