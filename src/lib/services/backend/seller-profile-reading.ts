@@ -1,9 +1,10 @@
 /**
  * S-25 fields the profile resource already carries.
  *
- * Contact name is the profile's full name and display name, kept the same so
- * one field on the screen cannot leave two names disagreeing. Agency name is
- * companyName. The sign-in phone is read and not patched.
+ * Contact name is the account display name: the name support messages use.
+ * It is written with setDisplayName and is not the profile's fullName.
+ * The form has no full-name control, so a stored fullName is left as it is.
+ * Agency name is companyName. The sign-in phone is read and not patched.
  *
  * Alert toggles, business type, service areas, GSTIN, billing, PAN and
  * Aadhaar are not on this resource. They are not folded into companyName,
@@ -21,7 +22,6 @@ export const IDENTITY_NOT_ON_PROFILE =
 
 export function sellerProfilePatch(input: { contactName: string; agencyName: string }) {
   return {
-    fullName: input.contactName,
     displayName: input.contactName,
     companyName: input.agencyName,
   };
@@ -34,7 +34,8 @@ export function sellerProfileView(body: {
   signInPhone: string | null;
 }) {
   return {
-    contactName: body.fullName ?? "",
+    contactName: body.displayName ?? "",
+    profileFullName: body.fullName,
     agencyName: body.companyName ?? "",
     mobile: body.signInPhone ?? "",
   };

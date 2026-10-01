@@ -940,7 +940,8 @@ export type ListingDraft = {
   readonly videoUrl: string | null;
   readonly publishedAt: string | null;
   readonly updatedAt: string;
-  readonly enquiryCount: number;
+  /** Absent when the record does not carry an enquiry count. A missing count is not zero. */
+  readonly enquiryCount: number | null;
 };
 
 /**
@@ -1103,7 +1104,13 @@ export type ListingSummary = {
   readonly configurationLabel: string;
   readonly priceLabel: string;
   readonly detailLine: string;
-  readonly enquiryCount: number;
+  /**
+   * The status stored on the listing. The three list tabs use `status`.
+   * A record status outside those three is kept here and is not labelled Draft.
+   */
+  readonly recordStatus?: string;
+  /** Absent when the list does not carry an enquiry count. A missing count is not zero. */
+  readonly enquiryCount: number | null;
   readonly hasMedia: boolean;
   /**
    * The listing's first renderable photograph — B-07's thumbnail. Null when

@@ -6,7 +6,8 @@ import { sellerProfilePatch, sellerProfileView } from "./seller-profile-reading"
 /**
  * The signed-in account's profile, for the seller profile screen.
  *
- * Only contact name and agency name are written. The phone is the sign-in
+ * Contact name writes the account display name. Agency name writes
+ * companyName. The profile full name is not sent. The phone is the sign-in
  * number and stays read-only. Alert preferences are not on this resource.
  */
 
@@ -42,13 +43,16 @@ function asAccount(body: BackendProfile): SellerAccount {
   };
 }
 
-export async function readSellerProfile(): Promise<SellerAccount> {
+export async function readSellerProfile(): Promise<{
+  account: SellerAccount;
+  profileFullName: string | null;
+}> {
   const { status, body } = await callAs<BackendProfile>("seller", "/v1/me/profile");
   if (status === 401) throw new ServiceError("unauthenticated", "Sign in to read this profile.");
   if (status !== 200) {
     throw new ServiceError("unavailable", body.error ?? `The profile service returned ${status}.`);
   }
-  return asAccount(body);
+  return { account: asAccount(body), profileFullName: sellerProfileView(body).profileFullName };
 }
 
 export async function writeSellerProfile(input: {
@@ -60,7 +64,12 @@ export async function writeSellerProfile(input: {
     body: sellerProfilePatch(input),
   });
   if (status === 422) {
-    const field = body.field === "companyName" ? "agencyName" : body.field === "fullName" ? "contactName" : "form";
+    const field =
+      body.field === "companyName"
+        ? "agencyName"
+        : body.field === "displayName"
+          ? "contactName"
+          : "form";
     throw new ValidationError({ [field]: body.error ?? "This value was not accepted." });
   }
   if (status === 401) throw new ServiceError("unauthenticated", "Sign in to save this profile.");

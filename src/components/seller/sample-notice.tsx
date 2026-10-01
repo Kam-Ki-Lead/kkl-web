@@ -20,7 +20,7 @@ export function SellerSampleNotice({ children }: { children?: React.ReactNode })
     <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
       <h2 className="t-card-title text-warning">
         {profileStoreKind() === "backend"
-          ? "Contact name and agency name on the profile are this account’s"
+          ? "Contact name and agency name on this account are stored"
           : "Nothing on these screens is a real account"}
       </h2>
       <ul className="t-body mt-[8px] flex list-disc flex-col gap-[4px] pl-[20px] text-body">
@@ -31,7 +31,7 @@ export function SellerSampleNotice({ children }: { children?: React.ReactNode })
         </li>
         <li>
           {profileStoreKind() === "backend"
-            ? "Contact name and agency name are read from the profile. Alert preferences, business type, service areas, GSTIN, billing and identity documents are not fields on that profile, so those forms do not save them."
+            ? "Contact name is the account name support uses. Agency name is the profile’s company name. The profile full name is not edited here. Alert preferences, business type, service areas, GSTIN, billing and identity documents are not saved."
             : "Verification is not verification. KYC status is a value that can be switched for review; no document is checked and no administrator has approved anything."}
         </li>
         <li>

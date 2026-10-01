@@ -4,6 +4,8 @@ import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import {
   builderBlockers,
   builderSections,
+  listingListPresentation,
+  listingsMatchingStatus,
   sectionPatch,
   toBuilderDraft,
   type StoredConfiguration,
@@ -59,20 +61,19 @@ async function readListing(id: string): Promise<ListingResponse> {
 function summary(body: ListingResponse): ListingSummary {
   const draft = toBuilderDraft(body);
   const sections = builderSections(draft);
+  const presented = listingListPresentation(body.status);
   const priceLabel =
     draft.listingPriceInr == null ? "Price not stored" : `Listing price ₹${draft.listingPriceInr.toLocaleString("en-IN")}`;
   return {
     id: draft.id,
     title: draft.title || "Untitled project",
-    status: draft.status,
+    status: presented.status,
+    recordStatus: presented.recordStatus,
     locationLabel: body.locationName || "Locality not chosen",
     configurationLabel: "Configurations are on the listing, not on this list",
     priceLabel,
-    detailLine:
-      body.status && body.status !== draft.status
-        ? `Record status: ${body.status}`
-        : "Draft. Nothing on this screen publishes it.",
-    enquiryCount: 0,
+    detailLine: presented.detailLine,
+    enquiryCount: null,
     hasMedia: false,
     coverImage: null,
     sectionsComplete: sections.filter((section) => section.complete).length,
@@ -90,7 +91,7 @@ export const backendBuilderListings: ListingService = {
     if (status !== 200 || !Array.isArray(body.listings)) {
       throw new ServiceError("unavailable", body.error ?? `The listing service returned ${status}.`);
     }
-    return body.listings.map(summary);
+    return listingsMatchingStatus(body.listings, filter?.status).map(summary);
   },
 
   async get(id) {

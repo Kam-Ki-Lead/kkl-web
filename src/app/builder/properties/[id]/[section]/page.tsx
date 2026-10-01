@@ -28,7 +28,7 @@ const CONTRACT_NOTES: Partial<Record<ListingSectionId, string>> = {
   basics:
     "Possession target is not a field on the listing, so it is not saved. Title, property type and description are saved.",
   pricing:
-    "Lowest and highest price are a range across the project. The listing stores one priceInr, and each configuration may store its own priceInr. This range is neither of those, so it is not saved. Selected configurations are saved as names. A price already stored on a configuration is kept with that name and is not replaced by the range.",
+    "Lowest and highest price are a range across the project. The listing stores one priceInr, and each configuration may store its own priceInr, areaSqft and available count. This range is neither a listing price nor a configuration price, so it is not saved and it is not converted. Selected configurations are saved as names, in the order already stored. A price, area or availability already stored on a name is kept. Sort position is that order; the form has no separate sort field.",
   specifications:
     "Carpet area is a range on this form and one areaSqft on the listing, so the range is not saved. Amenities are not a field on the listing. Total units and the RERA number are saved. A RERA number is recorded and is not a registry check.",
   media:

@@ -56,20 +56,130 @@ function echo(name: string, prior: StoredConfiguration | undefined): Configurati
   };
 }
 
+/**
+ * Names the checkboxes still select, in the order already stored.
+ *
+ * `sort_order` is not a field on the published configuration object. The
+ * write assigns it from the array position, and a read comes back in that
+ * order. Keeping the stored order keeps the sort. A newly checked name is
+ * appended. An unchecked 1–5 BHK name is left out. Any other stored name
+ * stays, with its price, area and availability.
+ */
 export function configurationPayload(
   selectedTokens: readonly string[],
   existing: readonly StoredConfiguration[],
 ): ConfigurationWrite[] {
-  const selected = selectedTokens
-    .map((token) => (typeof token === "string" ? configurationName(token) : null))
-    .filter((name): name is string => name !== null);
-  const known = selected.map((name) =>
-    echo(name, existing.find((entry) => entry.configuration === name)),
+  const selected = new Set(
+    selectedTokens
+      .map((token) => (typeof token === "string" ? configurationName(token) : null))
+      .filter((name): name is string => name !== null),
   );
-  const kept = existing
-    .filter((entry) => entry.configuration && !STORED_NAME.test(entry.configuration))
-    .map((entry) => echo(entry.configuration as string, entry));
-  return [...kept, ...known];
+  const written: ConfigurationWrite[] = [];
+  const seen = new Set<string>();
+  for (const entry of existing) {
+    const name = entry.configuration?.trim();
+    if (!name || seen.has(name)) continue;
+    if (STORED_NAME.test(name) && !selected.has(name)) continue;
+    written.push(echo(name, entry));
+    seen.add(name);
+  }
+  for (const name of selected) {
+    if (seen.has(name)) continue;
+    written.push(echo(name, undefined));
+    seen.add(name);
+  }
+  return written;
+}
+
+const NOT_ON_LISTING: Record<string, readonly { key: string; label: string }[]> = {
+  basics: [{ key: "possessionTarget", label: "Possession target" }],
+  pricing: [
+    { key: "priceMinInr", label: "Lowest price" },
+    { key: "priceMaxInr", label: "Highest price" },
+  ],
+  specifications: [
+    { key: "areaMin", label: "Smallest carpet area" },
+    { key: "areaMax", label: "Largest carpet area" },
+    { key: "amenities", label: "Amenities" },
+    { key: "reraRegistered", label: "RERA registered" },
+  ],
+  media: [
+    { key: "photos", label: "Photographs" },
+    { key: "photoCount", label: "Photograph count" },
+    { key: "videoUrl", label: "Video link" },
+  ],
+};
+
+function filled(value: unknown): boolean {
+  if (typeof value === "string") return value.trim() !== "";
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "boolean") return value;
+  return false;
+}
+
+/** Labels for values the form sent that this section does not write. */
+export function fieldsNotStored(section: string, values: Readonly<Record<string, unknown>>): string[] {
+  return (NOT_ON_LISTING[section] ?? [])
+    .filter((field) => filled(values[field.key]))
+    .map((field) => field.label);
+}
+
+/**
+ * What a save may say. Media writes nothing, so it never reports a saved draft.
+ * A section that did write says so, and names any value that was left out.
+ */
+export function sectionSaveMessage(section: string, omitted: readonly string[]): string {
+  if (section === "media") {
+    return "Photographs, the photograph count and the video link were not stored.";
+  }
+  if (omitted.length === 0) return "Draft saved.";
+  return `Saved. Not stored: ${omitted.join(", ")}.`;
+}
+
+/**
+ * All returns every status the list returned, including published.
+ * A named tab returns only rows whose status is that name.
+ */
+export function listingsMatchingStatus<T extends { status?: string | null }>(
+  listings: readonly T[],
+  status?: string,
+): T[] {
+  if (!status) return [...listings];
+  return listings.filter((listing) => listing.status === status);
+}
+
+export function listingListPresentation(status: string | undefined): {
+  status: ListingDraft["status"];
+  recordStatus: string;
+  detailLine: string;
+} {
+  const recordStatus = status && status.trim() !== "" ? status : "draft";
+  if (recordStatus === "published") {
+    return {
+      status: "published",
+      recordStatus,
+      detailLine: "Published on the record. This screen does not publish or unpublish.",
+    };
+  }
+  if (recordStatus === "unpublished") {
+    return {
+      status: "unpublished",
+      recordStatus,
+      detailLine: "Unpublished on the record. This screen does not republish.",
+    };
+  }
+  if (recordStatus === "draft") {
+    return {
+      status: "draft",
+      recordStatus,
+      detailLine: "Draft. Nothing on this screen publishes it.",
+    };
+  }
+  return {
+    status: "draft",
+    recordStatus,
+    detailLine: `Record status: ${recordStatus}. This screen does not publish it.`,
+  };
 }
 
 function text(value: unknown): string | undefined {
@@ -190,7 +300,7 @@ export function toBuilderDraft(body: ListingBody): ListingDraft {
     videoUrl: null,
     publishedAt: null,
     updatedAt: body.updatedAt ?? "",
-    enquiryCount: 0,
+    enquiryCount: null,
   };
 }
 

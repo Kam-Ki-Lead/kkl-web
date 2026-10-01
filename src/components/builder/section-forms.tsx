@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
 import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
 import type { ListingDraft, ListingSectionId } from "@/lib/domain/types";
+import { sectionSaveMessage } from "@/lib/services/backend/builder-draft";
 
 /**
  * The five editable sections of the listing editor (B-08 to B-12).
@@ -85,12 +86,7 @@ export function SectionForm({
       <RestoredDraftNotice />
 
       {state.status === "saved" ? (
-        <p
-          role="status"
-          className="rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
-        >
-          Draft saved.
-        </p>
+        <SaveNotice section={section} omitted={state.omitted} contractBound={Boolean(contractNote)} />
       ) : null}
 
       {state.errors
@@ -107,7 +103,7 @@ export function SectionForm({
       {section === "location" ? <LocationFields listing={listing} areas={areas} /> : null}
       {section === "pricing" ? <PricingFields listing={listing} /> : null}
       {section === "specifications" ? <SpecificationFields listing={listing} /> : null}
-      {section === "media" ? <MediaFields listing={listing} /> : null}
+      {section === "media" ? <MediaFields listing={listing} contractBound={Boolean(contractNote)} /> : null}
 
       <div className="flex flex-wrap items-center gap-[10px] border-t border-line pt-[16px]">
         {previousHref ? (
@@ -358,7 +354,30 @@ function SpecificationFields({ listing }: { listing: ListingDraft }) {
  * exist — and accepting a file and dropping it would leave a Builder believing
  * their photographs were uploaded. The screen says so instead.
  */
-function MediaFields({ listing }: { listing: ListingDraft }) {
+function SaveNotice({
+  section,
+  omitted,
+  contractBound,
+}: {
+  section: ListingSectionId;
+  omitted: readonly string[] | undefined;
+  contractBound: boolean;
+}) {
+  const incomplete = contractBound && (section === "media" || (omitted?.length ?? 0) > 0);
+  const message = contractBound ? sectionSaveMessage(section, omitted ?? []) : "Draft saved.";
+  return (
+    <p
+      role="status"
+      className={`rounded-[8px] px-[14px] py-[10px] text-[14px] font-semibold ${
+        incomplete ? "bg-[#FFF7E8] text-warning" : "bg-chip-success-bg text-success"
+      }`}
+    >
+      {message}
+    </p>
+  );
+}
+
+function MediaFields({ listing, contractBound }: { listing: ListingDraft; contractBound: boolean }) {
   return (
     <>
       <Card className="bg-tint p-[18px]">
@@ -384,27 +403,34 @@ function MediaFields({ listing }: { listing: ListingDraft }) {
         />
 
         <p className="t-caption mt-[10px] text-warning">
-          <strong>Nothing is uploaded yet.</strong> Media storage, virus scanning and a retention
-          rule are kkl-backend&rsquo;s and do not exist. To review the editor end to end, record how
-          many photographs a listing has below — the count is what the preview and the publish
-          check read.
+          <strong>Nothing is uploaded yet.</strong>{" "}
+          {contractBound
+            ? "A selected file and the count below are not written to the listing. Saving does not store a photograph."
+            : "Media storage, virus scanning and a retention rule are kkl-backend’s and do not exist. To review the editor end to end, record how many photographs a listing has below — the count is what the preview and the publish check read."}
         </p>
 
         <Field
           id="photoCount"
           label="Photographs on this listing (review stand-in)"
+          helper={contractBound ? "This count is not saved, and a blank field is not zero photographs." : undefined}
           className="mt-[12px]"
         >
           <TextInput
             id="photoCount"
             name="photoCount"
             inputMode="numeric"
-            defaultValue={String(listing.media.length)}
+            defaultValue={contractBound ? "" : String(listing.media.length)}
+            aria-describedby={contractBound ? "photoCount-helper" : undefined}
           />
         </Field>
       </Card>
 
-      {listing.media.length === 0 ? (
+      {contractBound ? (
+        <p className="t-body text-body">
+          Photographs are not stored from this form. A builder submission is not held to an
+          owner&rsquo;s photograph requirement.
+        </p>
+      ) : listing.media.length === 0 ? (
         <p className="t-body text-body">
           <strong className="text-ink">No photographs yet.</strong> A listing can be saved as a
           draft without them, but it cannot be published without at least one.
@@ -420,7 +446,11 @@ function MediaFields({ listing }: { listing: ListingDraft }) {
       <Field
         id="videoUrl"
         label="Video link (optional)"
-        helper="360° walkthroughs are out of scope, so only a standard video link is offered."
+        helper={
+          contractBound
+            ? "This link is not saved."
+            : "360° walkthroughs are out of scope, so only a standard video link is offered."
+        }
       >
         <TextInput
           id="videoUrl"

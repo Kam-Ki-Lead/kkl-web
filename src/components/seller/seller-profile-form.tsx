@@ -20,11 +20,14 @@ export function SellerProfileForm({
   account,
   isSample,
   alertsStored = true,
+  profileFullName = null,
 }: {
   account: SellerAccount;
   isSample: boolean;
   /** False when the profile resource does not carry the three alert toggles. */
   alertsStored?: boolean;
+  /** The profile full name, which this form does not edit. */
+  profileFullName?: string | null;
 }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveSellerProfile, {
     status: "idle",
@@ -47,20 +50,34 @@ export function SellerProfileForm({
               ? isSample
                 ? " In sample mode this is kept in memory only."
                 : ""
-              : " Contact name and agency name were written to the profile. Alert preferences were not."}
+              : " Contact name was written to the account name. Agency name was written to the profile. The profile full name was not changed. Alert preferences were not stored."}
           </p>
         ) : null}
 
-        <Field id="contactName" label="Contact name" error={err.contactName}>
+        <Field
+          id="contactName"
+          label="Contact name"
+          error={err.contactName}
+          helper={
+            alertsStored
+              ? undefined
+              : "This is the name support uses. It is stored as the account name. The profile full name is a separate field, and saving does not change it."
+          }
+        >
           <TextInput
             id="contactName"
             name="contactName"
             autoComplete="name"
             defaultValue={v.contactName ?? current.contactName}
             invalid={Boolean(err.contactName)}
-            aria-describedby={err.contactName ? "contactName-error" : undefined}
+            aria-describedby={
+              err.contactName ? "contactName-error" : alertsStored ? undefined : "contactName-helper"
+            }
           />
         </Field>
+        {!alertsStored && profileFullName ? (
+          <p className="t-caption text-muted">The profile full name stays {profileFullName}.</p>
+        ) : null}
 
         <Field id="agencyName" label="Agency" error={err.agencyName}>
           <TextInput

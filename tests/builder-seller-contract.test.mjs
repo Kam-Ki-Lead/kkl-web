@@ -7,8 +7,12 @@ import assert from "node:assert/strict";
 import {
   builderBlockers,
   configurationPayload,
+  fieldsNotStored,
+  listingListPresentation,
+  listingsMatchingStatus,
   priceWasNotCopied,
   sectionPatch,
+  sectionSaveMessage,
   toBuilderDraft,
 } from "../src/lib/services/backend/builder-draft.ts";
 import {
@@ -25,9 +29,60 @@ test("a price range is not written as priceInr or as a configuration price", () 
   assert.equal(priceWasNotCopied(patch), true);
   assert.equal("priceInr" in patch, false);
   assert.deepEqual(patch.configurations, [
-    { configuration: "2 BHK" },
     { configuration: "3 BHK", priceInr: 7200000, areaSqft: 980, available: 4 },
+    { configuration: "2 BHK" },
   ]);
+  assert.deepEqual(fieldsNotStored("pricing", patch), []);
+  assert.deepEqual(
+    fieldsNotStored("pricing", { priceMinInr: "5000000", priceMaxInr: "9000000", configurations: ["2"] }),
+    ["Lowest price", "Highest price"],
+  );
+});
+
+test("stored configuration order is kept, and an available count of zero stays", () => {
+  const payload = configurationPayload(
+    ["3", "1"],
+    [
+      { configuration: "3 BHK", priceInr: 7200000, areaSqft: 1100, available: 0 },
+      { configuration: "1 BHK", priceInr: null, areaSqft: null, available: null },
+    ],
+  );
+  assert.deepEqual(payload, [
+    { configuration: "3 BHK", priceInr: 7200000, areaSqft: 1100, available: 0 },
+    { configuration: "1 BHK" },
+  ]);
+});
+
+test("a mixed-status list keeps published on All and matches each tab", () => {
+  const listings = [
+    { id: "d", status: "draft" },
+    { id: "p", status: "published" },
+    { id: "u", status: "unpublished" },
+    { id: "s", status: "submitted" },
+  ];
+  assert.deepEqual(
+    listingsMatchingStatus(listings).map((listing) => listing.id),
+    ["d", "p", "u", "s"],
+  );
+  assert.deepEqual(
+    listingsMatchingStatus(listings, "published").map((listing) => listing.id),
+    ["p"],
+  );
+  assert.deepEqual(
+    listingsMatchingStatus(listings, "unpublished").map((listing) => listing.id),
+    ["u"],
+  );
+  assert.deepEqual(
+    listingsMatchingStatus(listings, "draft").map((listing) => listing.id),
+    ["d"],
+  );
+  const submitted = listingListPresentation("submitted");
+  assert.equal(submitted.recordStatus, "submitted");
+  assert.equal(submitted.detailLine.includes("Draft."), false);
+  assert.equal(listingListPresentation("published").status, "published");
+  assert.equal(listingListPresentation("unpublished").status, "unpublished");
+  assert.equal(sectionSaveMessage("media", []), "Photographs, the photograph count and the video link were not stored.");
+  assert.equal(sectionSaveMessage("pricing", ["Lowest price", "Highest price"]).includes("Not stored"), true);
 });
 
 test("a configuration the checkboxes cannot show is kept, with its price", () => {
@@ -87,6 +142,7 @@ test("a stored configuration price is shown and is not folded into the range", (
   assert.equal(draft.priceMinInr, null);
   assert.equal(draft.priceMaxInr, null);
   assert.equal(draft.listingPriceInr, 8000000);
+  assert.equal(draft.enquiryCount, null);
   assert.deepEqual(draft.configurations, ["3", "4"]);
   assert.deepEqual(draft.configurationPrices, [{ label: "3 BHK", priceInr: 7200000 }]);
   const messages = builderBlockers(draft).map((blocker) => blocker.message);
@@ -100,20 +156,22 @@ test("the seller profile patch is only the supported names", () => {
     agencyName: "Review Agency",
   });
   assert.deepEqual(patch, {
-    fullName: "Review Seller",
     displayName: "Review Seller",
     companyName: "Review Agency",
   });
+  assert.equal("fullName" in patch, false);
   assert.equal("whatsappOptIn" in patch, false);
   assert.equal("emailOptIn" in patch, false);
   assert.equal("gstin" in patch, false);
   const view = sellerProfileView({
-    fullName: "Review Seller",
+    fullName: "Kept Profile Name",
+    displayName: "Review Seller",
     companyName: "Review Agency",
     signInPhone: "+91 •••• 0102",
   });
   assert.deepEqual(view, {
     contactName: "Review Seller",
+    profileFullName: "Kept Profile Name",
     agencyName: "Review Agency",
     mobile: "+91 •••• 0102",
   });

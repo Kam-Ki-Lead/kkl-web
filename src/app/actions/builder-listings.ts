@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServices } from "@/lib/services";
+import { listingStoreKind } from "@/lib/services/backend/config";
+import { fieldsNotStored } from "@/lib/services/backend/builder-draft";
 import { ValidationError } from "@/lib/services/contracts";
 import type { ListingSectionId } from "@/lib/domain/types";
 
@@ -49,6 +51,8 @@ export type SectionFormState = {
    * would look like no change at all. This is read only for its inequality.
    */
   readonly savedAt?: number;
+  /** Values the listing record did not accept. Present only for that record. */
+  readonly omitted?: readonly string[];
 };
 
 /**
@@ -70,11 +74,14 @@ export async function saveListingSection(
   }
 
   const values: Record<string, string | readonly string[] | boolean | null> = {};
+  let photographsSelected = false;
   for (const [key, raw] of formData.entries()) {
     if (key === "listingId" || key === "section" || key === "next") continue;
     if (key === "configurations" || key === "amenities") continue;
+    if (key === "photos" && typeof raw !== "string" && raw.size > 0) photographsSelected = true;
     values[key] = typeof raw === "string" ? raw : null;
   }
+  if (photographsSelected) values.photos = "selected";
   // Multi-value fields have to be read as a group, not overwritten one at a time.
   const configurations = formData.getAll("configurations").map(String);
   if (formData.has("configurationsPresent")) values.configurations = configurations;
@@ -96,7 +103,8 @@ export async function saveListingSection(
 
   const next = String(formData.get("next") ?? "");
   if (next.startsWith("/builder/")) redirect(next);
-  return { status: "saved", savedAt: Date.now() };
+  const omitted = listingStoreKind() === "backend" ? fieldsNotStored(section, values) : undefined;
+  return { status: "saved", savedAt: Date.now(), omitted };
 }
 
 export type PublishFormState = {

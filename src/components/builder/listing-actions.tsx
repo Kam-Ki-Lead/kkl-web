@@ -24,11 +24,14 @@ export function ListingActions({
   status,
   canPublish,
   allowDelete = true,
+  recordStatus,
 }: {
   listingId: string;
   status: ListingStatus;
   canPublish: boolean;
   allowDelete?: boolean;
+  /** The stored status, when it is not one of the three tabs. */
+  recordStatus?: string;
 }) {
   /*
    * The approved row draws one filled action (Edit listing), one bordered
@@ -70,7 +73,7 @@ export function ListingActions({
         </form>
       ) : null}
 
-      {status === "draft" ? (
+      {status === "draft" && (recordStatus === undefined || recordStatus === "draft") ? (
         <ButtonLink href={`/builder/properties/${listingId}/basics`} variant="quiet" size="action">
           {toggleLabel}
         </ButtonLink>

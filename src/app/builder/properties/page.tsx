@@ -134,7 +134,11 @@ export default async function BuilderPropertiesPage({
         ) : (
           <ul className="flex flex-col gap-[14px]">
             {listings.map((listing) => {
-              const status = STATUS[listing.status];
+              const record = listing.recordStatus ?? listing.status;
+              const status = STATUS[record as ListingStatus] ?? {
+                label: record.replaceAll("_", " "),
+                tone: "muted" as const,
+              };
               return (
                 <li key={listing.id}>
                   {/*
@@ -195,7 +199,7 @@ export default async function BuilderPropertiesPage({
                           </p>
                           <p className="mt-[6px] text-[14px] text-muted">{listing.detailLine}</p>
                         </div>
-                        {listingsFromBackend ? (
+                        {listing.enquiryCount == null ? (
                           <p className="t-caption text-muted">Enquiry count is not on this list.</p>
                         ) : (
                           <div className="flex-none whitespace-nowrap text-right">
@@ -212,6 +216,7 @@ export default async function BuilderPropertiesPage({
                       <ListingActions
                         listingId={listing.id}
                         status={listing.status}
+                        recordStatus={listing.recordStatus}
                         canPublish={canPublish}
                         allowDelete={!listingsFromBackend}
                       />

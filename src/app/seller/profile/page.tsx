@@ -26,9 +26,12 @@ const VERIFICATION = {
 export default async function SellerProfilePage() {
   const profilesFromBackend = profileStoreKind() === "backend";
   let account;
+  let profileFullName: string | null = null;
   if (profilesFromBackend) {
     try {
-      account = await readSellerProfile();
+      const loaded = await readSellerProfile();
+      account = loaded.account;
+      profileFullName = loaded.profileFullName;
     } catch (error) {
       if (error instanceof ServiceError) {
         return (
@@ -54,6 +57,7 @@ export default async function SellerProfilePage() {
             account={account}
             isSample={runtimeConfig.isSampleMode}
             alertsStored={!profilesFromBackend}
+            profileFullName={profileFullName}
           />
 
           {/* D-08 and the sign-in question, both open. No password field and no
