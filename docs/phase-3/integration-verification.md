@@ -824,6 +824,129 @@ reject, resubmit, or unpublish was not run: no dedicated synthetic case or
 published listing was used, and `VER-EC4FAE39` was left open. Populated
 takedown remains an isolated-test fixture, not a browser check.
 
+## Builder drafts and seller profile names, 1 October 2026
+
+The admin-queue slice stays closed at `8079ee0`. Successful reject, resubmit
+and unpublish were not browser-tested there, and those checks were not
+repeated. This section is the next integration: a builder listing draft, and
+the seller profile fields the published profile already carries. Backend
+`3b4cbda`, OpenAPI `1.0.0-phase3.n`. The frontend application is `5c99b26`.
+`docs/phase-2/visual/geometry-1440.json` stayed unstaged. `kkl_review` was
+not reset. The API process 30804 on port 4010 was not restarted.
+
+The frontend was rebuilt with `NEXT_PUBLIC_KKL_ENV=review` and
+`NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then served with `next start -p 3811`
+(listener 22692) and the documented runtime switches. No development secret
+was set on the frontend. There is no new switch: listings stay on
+`KKL_LISTINGS=backend` and the profile stays on `KKL_PROFILES=backend`.
+
+### The price mismatch
+
+The approved builder editor collects configuration checkboxes (1–5 BHK) and
+one project range, lowest price and highest price. The published listing
+stores one `priceInr` for the whole listing, and each configuration object
+may store its own `priceInr`. Neither of those is a minimum or a maximum.
+Rewriting `configurations` replaces every row, so a price already stored on
+a configuration is copied back onto that same name. The range is not written
+into the listing price, not chosen as the minimum, and not split across the
+configurations.
+
+Submission of a builder listing still requires the single `priceInr`. This
+screen does not invent one, so the preview says the listing cannot be
+published yet and the publish control stays disabled. No request publishes a
+listing. No request deletes one.
+
+### What a builder draft stores
+
+Review Builder, in the browser, created draft
+`d48bd9ea-b31b-4a55-ae97-ed838b5def4f`. A fresh tab reload, which does not
+restore the previous tab’s unsaved possession target, showed:
+
+| Field | Result |
+|---|---|
+| Title | “Phase 3 builder draft”, then edited to “Phase 3 builder draft revised” and reloaded. |
+| Property type | Apartment. The value list remains the D-09 proposal. |
+| Description | Saved and reloaded. |
+| Possession target | Typed as Dec 2028. Absent on a fresh-tab reload. It is not a listing field. |
+| Locality and address | Rajarhat, “12 Main Road”. |
+| Configurations | 2 BHK and 3 BHK checked on reload. No price was attached. |
+| Lowest and highest price | 5000000 and 9000000 were typed. Both fields were empty on reload. Preview says “No listing price stored”. |
+| Total units | 40, reloaded. |
+| Carpet-area range and amenities | Typed, empty on reload. |
+| RERA number | `WBRERA/P/NOR/2024/000001`, reloaded. The “RERA registered” checkbox was not restored. A number is not a registry check. |
+| Photographs | Not stored. The list says photographs are not on this list. |
+| Publish | Disabled. The preview names the missing `priceInr` and says no request publishes a listing. |
+| Delete | Not offered. The list says no request deletes a listing. |
+
+The list shows the draft, “Price not stored”, and “Enquiry count is not on
+this list.” A staff session on `/builder/properties` is refused and does not
+open the sample projects. Review Seller opening that draft’s editor receives
+404 and does not see the project name. After signing back in as Review
+Builder, the same draft is still on the list.
+
+### What a seller profile stores
+
+Review Seller saved contact name “Review Seller” and agency “Review Agency
+Phase 3”. A reload showed both, with the sign-in phone still masked and
+disabled. An alert switch that was turned on was off after reload. The page
+says those switches are not stored and does not report a verification status.
+
+Business details, billing details and the identity form refuse the save.
+The business and billing screens do not show the sample agency “Sen
+Properties”. The verification-status screen does not show a sample timeline.
+Submitting business details did not replace the saved agency name.
+
+Review Builder’s own profile page shows an empty contact name and agency,
+and a phone ending 0104. It does not show “Review Agency Phase 3”.
+
+No cookie on `/seller/profile` or `/builder/properties` returns 307 to
+`/auth`.
+
+With the frontend pointed at closed port 4019, both pages say the service
+is not responding and that the records are not served from this process.
+They do not show sample projects or the sample agency. The API on 4010
+(process 30804) was left running, and the frontend was pointed back at it
+(listener 22692).
+
+### Isolated tests
+
+`tests/builder-seller-contract.test.mjs` passed, 5 of 5. Those fixtures are
+not `kkl_review` rows. They cover the range staying out of `priceInr`, a
+stored configuration price being kept, unsupported draft fields being
+omitted, and the profile patch being limited to full name, display name and
+company name. `npx tsc --noEmit` passed. `next build` passed. The isolated
+tests are not the browser checks above.
+
+### Backend handoff
+
+Absent from the published contract, so the frontend does not invent them:
+
+| Approved UI | What it means | Validation already documented | What stays blocked |
+|---|---|---|---|
+| Lowest price and highest price | One range across the project, not one price. | The sample editor treats the range as rupee amounts. The API’s price rule is a positive whole-rupee integer, with the message “Enter the amount in figures — for example 7200000.” | A builder listing cannot be submitted while `priceInr` is empty, and the range must not be copied into it. |
+| Price on each configuration | The API already has `configurations[].priceInr`. The approved checkboxes collect a name (“2 BHK”), not an amount per configuration. | A configuration price, when present, must be a positive integer. | The editor cannot collect or change a per-configuration price until the screen is extended. A stored one is shown and kept. |
+| Possession target | A date-like label, blank for ready to move. | Free text on the sample form. | Not saved. |
+| Carpet area range | Smallest and largest carpet area, as text such as “985 sq ft”. | Not an integer. `areaSqft` is one whole number. | Not saved. |
+| Amenities | A set of named facilities. | Checkbox names on the sample form. | Not saved. |
+| Photograph count and video URL | A count is not an uploaded file. | Owner photographs use the media route and stay `declared` until storage confirms them (Q-8). A builder is not held to that rule. | Not saved. Publication of a file is still Q-8. |
+| “RERA registered” checkbox | A claim that the project is registered. | `reraId` is letters, digits, hyphens and slashes, max 64. It is recorded and not checked. `reraVerified` is absent. | The checkbox is not saved. The number is. |
+| Seller alert toggles | Three preferences: new leads, a viewed lead on sale, low balance. | They are not `whatsappOptIn` or `emailOptIn`. | Not saved. Turning one on does not start delivery. |
+| Business type, service areas, GSTIN | S-02. GSTIN format on the sample form is `^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$`. | Whether GST is mandatory is D-13 and is not settled here. | The form refuses. Nothing is written. |
+| Billing name, address, invoice email | S-21 invoice details. | Name at least 2 characters, address at least 6, invoice email optional and must be an email when present. | The form refuses. Nothing is written. |
+| PAN and Aadhaar | S-03 identity. PAN shape `^[A-Z]{5}[0-9]{4}[A-Z]$`. | Document bytes are not accepted by this frontend. | The form stores nothing. A PAN is not placed in another profile field. |
+
+Unresolved product decisions, separate from those missing fields:
+
+- D-09: the property-type list is a design proposal.
+- D-03: the platform’s own lead prices.
+- D-13: whether GST invoicing is mandatory.
+- D-08: whether one person may hold both broker and builder roles.
+- Password versus one-time-code sign-in only.
+- Q-3: publication. No request creates a published listing.
+- Q-4: a verification pass. Approval stays unauthorised.
+- Q-8: object storage. A selected file is not a stored photograph.
+- A populated builder inbox still needs an enquiry addressed to Review Builder. The stored enquiries remain unrouted.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
