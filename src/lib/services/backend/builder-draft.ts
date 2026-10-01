@@ -91,16 +91,10 @@ export function configurationPayload(
 }
 
 const NOT_ON_LISTING: Record<string, readonly { key: string; label: string }[]> = {
-  basics: [{ key: "possessionTarget", label: "Possession target" }],
-  specifications: [
-    { key: "areaMin", label: "Smallest carpet area" },
-    { key: "areaMax", label: "Largest carpet area" },
-    { key: "reraRegistered", label: "RERA registered" },
-  ],
+  specifications: [{ key: "reraRegistered", label: "RERA registered" }],
   media: [
     { key: "photos", label: "Photographs" },
     { key: "photoCount", label: "Photograph count" },
-    { key: "videoUrl", label: "Video link" },
   ],
 };
 
@@ -124,7 +118,7 @@ export function fieldsNotStored(section: string, values: Readonly<Record<string,
  */
 export function sectionSaveMessage(section: string, omitted: readonly string[]): string {
   if (section === "media") {
-    return "Photographs, the photograph count and the video link were not stored.";
+    return "An https video link is stored as an address. It is not an uploaded file. Photographs and the photograph count were not stored.";
   }
   if (omitted.length === 0) return "Draft saved.";
   return `Saved. Not stored: ${omitted.join(", ")}.`;
@@ -140,6 +134,46 @@ export function listingsMatchingStatus<T extends { status?: string | null }>(
 ): T[] {
   if (!status) return [...listings];
   return listings.filter((listing) => listing.status === status);
+}
+
+const DRAFT_DELETE_NOT_A_DRAFT =
+  "Only a draft can be deleted. A listing with the review team is withdrawn, and a published listing is taken down by staff.";
+const DRAFT_DELETE_REFERENCED =
+  "This draft is referenced by an enquiry, so it was not deleted.";
+
+export function draftDeleteResult(
+  status: number,
+  body: { deleted?: boolean; error?: string; code?: string },
+): { ok: true } | { ok: false; kind: "not_found" | "forbidden" | "unauthenticated" | "unavailable"; code: string; message: string } {
+  if (status === 200 && body.deleted === true) return { ok: true };
+  if (status === 404) {
+    return { ok: false, kind: "not_found", code: "not_found", message: "That listing is not on this account." };
+  }
+  if (status === 401) {
+    return { ok: false, kind: "unauthenticated", code: "unauthenticated", message: "Sign in again to delete a draft." };
+  }
+  if (status === 409 && body.code === "not_a_draft") {
+    return {
+      ok: false,
+      kind: "forbidden",
+      code: "not_a_draft",
+      message: body.error?.trim() || DRAFT_DELETE_NOT_A_DRAFT,
+    };
+  }
+  if (status === 409 && body.code === "listing_referenced") {
+    return {
+      ok: false,
+      kind: "forbidden",
+      code: "listing_referenced",
+      message: body.error?.trim() || DRAFT_DELETE_REFERENCED,
+    };
+  }
+  return {
+    ok: false,
+    kind: "unavailable",
+    code: "unavailable",
+    message: body.error?.trim() || `The listing service returned ${status}. The draft was not deleted.`,
+  };
 }
 
 export function listingListPresentation(status: string | undefined): {
@@ -213,6 +247,8 @@ export function sectionPatch(
     if (title !== undefined) patch.title = title.trim() === "" ? null : title.trim();
     if (propertyType !== undefined) patch.propertyType = propertyType.trim() === "" ? null : propertyType.trim();
     if (description !== undefined) patch.description = description;
+    const possession = optionalText(values.possessionTarget);
+    if (possession !== undefined) patch.possessionTarget = possession;
     return patch;
   }
   if (section === "location") {
@@ -243,6 +279,10 @@ export function sectionPatch(
     if (totalUnits !== undefined) patch.totalUnits = totalUnits;
     const reraNumber = text(values.reraNumber);
     if (reraNumber !== undefined) patch.reraId = reraNumber.trim() === "" ? null : reraNumber.trim();
+    const areaMin = optionalText(values.areaMin);
+    const areaMax = optionalText(values.areaMax);
+    if (areaMin !== undefined) patch.carpetAreaMin = areaMin;
+    if (areaMax !== undefined) patch.carpetAreaMax = areaMax;
     if (Array.isArray(values.amenities)) {
       patch.amenities = values.amenities
         .filter((label): label is string => typeof label === "string")
@@ -251,7 +291,20 @@ export function sectionPatch(
     }
     return patch;
   }
+  if (section === "media") {
+    const patch: Record<string, unknown> = {};
+    const video = optionalText(values.videoUrl);
+    if (video !== undefined) patch.videoUrl = video;
+    return patch;
+  }
   return {};
+}
+
+function optionalText(value: unknown): string | null | undefined {
+  const raw = text(value);
+  if (raw === undefined) return undefined;
+  const trimmed = raw.trim();
+  return trimmed === "" ? null : trimmed;
 }
 
 type ListingBody = {
@@ -269,6 +322,10 @@ type ListingBody = {
   amenities?: readonly string[] | null;
   reraId?: string | null;
   totalUnits?: number | null;
+  possessionTarget?: string | null;
+  carpetAreaMin?: string | null;
+  carpetAreaMax?: string | null;
+  videoUrl?: string | null;
   updatedAt?: string | null;
   configurations?: readonly StoredConfiguration[];
   media?: readonly { kind?: string; stored?: boolean; availability?: string }[];
@@ -299,7 +356,7 @@ export function toBuilderDraft(body: ListingBody): ListingDraft {
     status: knownStatus(body.status),
     title: body.title ?? "",
     propertyType: body.propertyType ?? null,
-    possessionTarget: null,
+    possessionTarget: body.possessionTarget ?? "",
     description: body.description ?? "",
     localityId: body.locationId ?? null,
     addressLine: body.addressLine ?? "",
@@ -308,14 +365,14 @@ export function toBuilderDraft(body: ListingBody): ListingDraft {
     priceMaxInr: wholeNumber(body.priceMaxInr ?? null) ?? null,
     listingPriceInr: wholeNumber(body.priceInr ?? null) ?? null,
     configurationPrices,
-    areaMin: "",
-    areaMax: "",
+    areaMin: body.carpetAreaMin ?? "",
+    areaMax: body.carpetAreaMax ?? "",
     totalUnits: body.totalUnits == null ? "" : String(body.totalUnits),
     amenities: (body.amenities ?? []).filter((label): label is string => typeof label === "string"),
     reraRegistered: false,
     reraNumber: body.reraId ?? null,
     media: [],
-    videoUrl: null,
+    videoUrl: body.videoUrl ?? null,
     publishedAt: null,
     updatedAt: body.updatedAt ?? "",
     enquiryCount: null,

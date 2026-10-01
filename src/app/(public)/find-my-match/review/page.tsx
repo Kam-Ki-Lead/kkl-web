@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getServices } from "@/lib/services";
 import {
   budgetLabel,
   intentLabel,
@@ -9,6 +8,7 @@ import {
   toQuery,
   type RequirementParams,
 } from "@/lib/requirement";
+import { describeLocation, loadRequirementLocations } from "@/lib/requirement-locations";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 
@@ -22,14 +22,20 @@ export default async function RequirementReviewPage({
 }) {
   const params = await searchParams;
   const requirement = parseRequirement(params);
-  const localities = (await getServices().properties.getHomepage()).localities;
+  const locations = await loadRequirementLocations();
+  const described = locations.ok ? describeLocation(locations.options, requirement.locationId) : null;
+  const localityValue = !requirement.locationId
+    ? null
+    : !locations.ok
+      ? "The location list could not be read"
+      : described?.label ?? null;
   const missing = missingAnswers(requirement);
 
   const rows: ReadonlyArray<{ step: number; label: string; value: string | null }> = [
     {
       step: 1,
       label: "Locality",
-      value: localities.find((l) => l.id === requirement.locationId)?.name ?? null,
+      value: localityValue,
     },
     {
       step: 2,

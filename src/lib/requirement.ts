@@ -73,10 +73,44 @@ export function budgetLabel(requirement: BuyerRequirement): string | null {
   );
 }
 
+export function describeLocation(
+  options: readonly { readonly id: string; readonly label: string }[],
+  locationId: string | null,
+): { readonly label: string; readonly available: boolean } | null {
+  if (!locationId) return null;
+  const found = options.find((option) => option.id === locationId);
+  if (!found) return { label: "This location is not available", available: false };
+  return { label: found.label, available: true };
+}
+
 export function intentLabel(intent: PurchaseIntent | null): string | null {
   if (intent === "end_use") return "To live in";
   if (intent === "investment") return "As an investment";
   return null;
+}
+
+/**
+ * Fill answers the address bar does not carry from a stored requirement.
+ * A value already in the URL is left as the person sent it, including one
+ * the location list does not recognise.
+ */
+export function withStoredAnswers(
+  params: RequirementParams,
+  stored: BuyerRequirement | null,
+): RequirementParams {
+  if (!stored) return params;
+  const next: RequirementParams = { ...params };
+  if (params.locality === undefined && stored.locationId) next.locality = stored.locationId;
+  if (params.bhk === undefined && stored.configurations.length) {
+    next.bhk = [...stored.configurations];
+  }
+  if (params.budget === undefined) {
+    const label = budgetLabel(stored);
+    if (label) next.budget = label;
+  }
+  if (params.handover === undefined && stored.handoverTiming) next.handover = stored.handoverTiming;
+  if (params.intent === undefined && stored.intent) next.intent = stored.intent;
+  return next;
 }
 
 /** Rebuild the query string from the answers collected so far. */

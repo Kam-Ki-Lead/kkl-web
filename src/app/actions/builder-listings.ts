@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getServices } from "@/lib/services";
 import { listingStoreKind } from "@/lib/services/backend/config";
 import { fieldsNotStored } from "@/lib/services/backend/builder-draft";
-import { ValidationError } from "@/lib/services/contracts";
+import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import type { ListingSectionId } from "@/lib/domain/types";
 
 /**
@@ -142,7 +142,22 @@ export async function republishListing(formData: FormData): Promise<void> {
 export async function deleteListing(formData: FormData): Promise<void> {
   const id = String(formData.get("listingId") ?? "");
   if (!id) return;
-  await getServices().builder.listings.remove(id);
+  try {
+    await getServices().builder.listings.remove(id);
+  } catch (error) {
+    if (error instanceof ServiceError) {
+      const code =
+        error.message.includes("referenced by an enquiry")
+          ? "listing_referenced"
+          : error.message.includes("Only a draft can be deleted")
+            ? "not_a_draft"
+            : error.kind === "not_found"
+              ? "not_found"
+              : "unavailable";
+      redirect(`/builder/properties?delete=${code}`);
+    }
+    throw error;
+  }
   revalidateListing(id);
   redirect("/builder/properties");
 }

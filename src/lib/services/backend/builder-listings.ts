@@ -4,6 +4,7 @@ import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import {
   builderBlockers,
   builderSections,
+  draftDeleteResult,
   listingListPresentation,
   listingsMatchingStatus,
   sectionPatch,
@@ -25,6 +26,7 @@ type ListingResponse = Parameters<typeof toBuilderDraft>[0] & {
   locationName?: string | null;
   priceInr?: number | null;
   configurations?: readonly StoredConfiguration[];
+  enquiryCount?: number | null;
   error?: string;
   field?: string;
 };
@@ -73,7 +75,7 @@ function summary(body: ListingResponse): ListingSummary {
     configurationLabel: "Configurations are on the listing, not on this list",
     priceLabel,
     detailLine: presented.detailLine,
-    enquiryCount: null,
+    enquiryCount: typeof body.enquiryCount === "number" ? body.enquiryCount : null,
     hasMedia: false,
     coverImage: null,
     sectionsComplete: sections.filter((section) => section.complete).length,
@@ -161,10 +163,14 @@ export const backendBuilderListings: ListingService = {
     return PUBLICATION_REFUSAL;
   },
 
-  async remove() {
-    throw new ServiceError(
-      "unavailable",
-      "No request deletes a listing. The draft was not removed, and a sample project is not shown in its place.",
+  async remove(id) {
+    const { status, body } = await callAs<{ deleted?: boolean; error?: string; code?: string }>(
+      "builder",
+      `/v1/listings/${id}`,
+      { method: "DELETE" },
     );
+    const result = draftDeleteResult(status, body);
+    if (!result.ok) throw new ServiceError(result.kind, result.message);
+    return { removed: true };
   },
 };

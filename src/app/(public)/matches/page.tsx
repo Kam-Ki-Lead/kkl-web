@@ -56,7 +56,7 @@ export default async function MatchesPage({
 
   const localityName = localityRecords[0]?.name;
   const summary = [
-    localityName,
+    requirement.locationId && !localityName ? "Location not available" : localityName,
     requirement.configurations.length ? `${requirement.configurations.join(", ")} BHK` : null,
     budgetLabel(requirement),
     requirement.handoverTiming,

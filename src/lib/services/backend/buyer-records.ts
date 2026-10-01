@@ -1,7 +1,14 @@
 import type { BuyerRequirement } from "@/lib/domain/types";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
+import { profileStoreKind } from "./config";
 import { requirementBody } from "./buyer-profile-reading";
-import { callAs } from "./session";
+import {
+  shortlistAddBody,
+  shortlistAddResult,
+  shortlistRemoveResult,
+  type ShortlistAddResult,
+} from "./shortlist-contract";
+import { callAs, isFrameworkSignal } from "./session";
 
 /**
  * The signed-in account's requirement and shortlist.
@@ -42,6 +49,15 @@ type ShortlistBody = {
   offset?: number;
   error?: string;
 };
+
+export async function readBuyerRequirement(): Promise<BuyerRequirement | null> {
+  const { status, body } = await callAs<RequirementBody>("buyer", "/v1/me/requirement");
+  if (status === 401) throw new ServiceError("unauthenticated", "Sign in to read this requirement.");
+  if (status !== 200) {
+    throw new ServiceError("unavailable", body.error ?? `The requirement service returned ${status}.`);
+  }
+  return body.requirement ?? null;
+}
 
 export async function saveBuyerRequirement(requirement: BuyerRequirement): Promise<BuyerRequirement | null> {
   const { status, body } = await callAs<RequirementBody & BuyerRequirement>("buyer", "/v1/me/requirement", {
@@ -85,4 +101,53 @@ export async function readShortlist(): Promise<{
     throw new ServiceError("unavailable", body.error ?? `The shortlist service returned ${status}.`);
   }
   return { items: body.items ?? [], total: body.total ?? 0 };
+}
+
+/**
+ * The header count. Null is unavailable: the profile service is off, the
+ * session is signed out, or the read failed. An empty shortlist is 0.
+ */
+export async function headerShortlistCount(): Promise<number | null> {
+  if (profileStoreKind() !== "backend") return null;
+  try {
+    const list = await readShortlist();
+    return list.total;
+  } catch (error) {
+    if (isFrameworkSignal(error)) throw error;
+    return null;
+  }
+}
+
+const ADD_MESSAGE: Record<Exclude<ShortlistAddResult, "added" | "already" | "rejected">, string> = {
+  missing: "No published property with that id is visible on this account.",
+  not_public: "This property is not public, so it was not shortlisted.",
+  unauthenticated: "Sign in to save a property.",
+};
+
+export async function addToShortlist(listingId: string): Promise<"added" | "already"> {
+  const { status, body } = await callAs<{ error?: string }>("buyer", "/v1/me/shortlist", {
+    method: "POST",
+    body: shortlistAddBody(listingId),
+  });
+  const result = shortlistAddResult(status);
+  if (result === "added" || result === "already") return result;
+  if (result === "rejected") {
+    throw new ServiceError("unavailable", body.error ?? `The shortlist service returned ${status}.`);
+  }
+  const kind = result === "unauthenticated" ? "unauthenticated" : result === "missing" ? "not_found" : "forbidden";
+  throw new ServiceError(kind, body.error ?? ADD_MESSAGE[result]);
+}
+
+export async function removeFromShortlist(listingId: string): Promise<{ removed: boolean }> {
+  const { status, body } = await callAs<{ removed?: boolean; error?: string }>(
+    "buyer",
+    `/v1/me/shortlist/${encodeURIComponent(listingId)}`,
+    { method: "DELETE" },
+  );
+  const result = shortlistRemoveResult(status);
+  if (result === "removed") return { removed: body.removed === true };
+  if (result === "unauthenticated") {
+    throw new ServiceError("unauthenticated", "Sign in to change this shortlist.");
+  }
+  throw new ServiceError("unavailable", body.error ?? `The shortlist service returned ${status}.`);
 }

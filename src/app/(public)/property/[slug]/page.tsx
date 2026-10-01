@@ -7,6 +7,9 @@ import { formatInr, formatPriceRange } from "@/lib/format";
 import { PropertyImage } from "@/components/property/property-image";
 import { Card, InsetPanel } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
+import { ShortlistAddButton } from "@/components/account/shortlist-controls";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { isPublishedListingId } from "@/lib/services/backend/shortlist-contract";
 
 async function load(slug: string): Promise<PropertyDetail> {
   try {
@@ -62,12 +65,20 @@ export default async function PropertyDetailPage({
                 {property.locationPath.slice(-2).join(", ")}
               </p>
             </div>
-            <Link
-              href="/auth?intent=shortlist"
-              className="rounded-[6px] border-[1.5px] border-line bg-white px-[16px] py-[10px] text-[15px] font-semibold text-brand hover:border-brand"
-            >
-              <span aria-hidden="true">♡ </span>Save
-            </Link>
+            {profileStoreKind() === "backend" && isPublishedListingId(property.id) ? (
+              <ShortlistAddButton listingId={property.id} />
+            ) : profileStoreKind() === "backend" ? (
+              <p className="max-w-[240px] text-right text-[14px] text-muted">
+                This catalogue entry is not a published listing, so it cannot be shortlisted.
+              </p>
+            ) : (
+              <Link
+                href="/auth?intent=shortlist"
+                className="rounded-[6px] border-[1.5px] border-line bg-white px-[16px] py-[10px] text-[15px] font-semibold text-brand hover:border-brand"
+              >
+                <span aria-hidden="true">♡ </span>Save
+              </Link>
+            )}
           </div>
 
           <div className="mt-[12px] flex flex-wrap items-baseline gap-[14px]">

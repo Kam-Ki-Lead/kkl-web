@@ -1,14 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getServices } from "@/lib/services";
 import {
   BUDGET_OPTIONS,
   HANDOVER_OPTIONS,
   REQUIREMENT_STEPS,
   parseRequirement,
   toQuery,
+  withStoredAnswers,
   type RequirementParams,
 } from "@/lib/requirement";
+import { describeLocation, loadRequirementLocations } from "@/lib/requirement-locations";
+import { profileStoreKind } from "@/lib/services/backend/config";
+import { readBuyerRequirement } from "@/lib/services/backend/buyer-records";
+import { ServiceError } from "@/lib/services/contracts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -32,10 +36,20 @@ export default async function FindMyMatchPage({
 }: {
   searchParams: Promise<RequirementParams>;
 }) {
-  const params = await searchParams;
+  const incoming = await searchParams;
+  let stored = null;
+  if (profileStoreKind() === "backend") {
+    try {
+      stored = await readBuyerRequirement();
+    } catch (error) {
+      if (!(error instanceof ServiceError)) throw error;
+    }
+  }
+  const params = withStoredAnswers(incoming, stored);
   const step = Math.min(Math.max(Number(one(params.step)) || 1, 1), REQUIREMENT_STEPS);
-  const localities = (await getServices().properties.getHomepage()).localities;
+  const locations = await loadRequirementLocations();
   const current = parseRequirement(params);
+  const chosen = locations.ok ? describeLocation(locations.options, current.locationId) : null;
 
   const backQuery = toQuery(params, { step: String(step - 1) });
 
@@ -74,16 +88,39 @@ export default async function FindMyMatchPage({
           {step === 1 ? (
             <fieldset className="flex flex-col gap-[10px]">
               <legend className="t-label mb-[6px] text-ink">Preferred locality</legend>
-              {localities.map((l) => (
-                <Radio
-                  key={l.id}
-                  name="locality"
-                  value={l.id}
-                  label={`${l.name}, Kolkata`}
-                  hint={`${l.listingCount} ${l.listingCount === 1 ? "listing" : "listings"}`}
-                  defaultChecked={current.locationId === l.id}
-                />
-              ))}
+              {locations.ok ? (
+                <>
+                  <p className="t-caption text-muted">
+                    Places come from the location records. Choosing one stores the answer. It does
+                    not score a property.
+                  </p>
+                  {chosen && !chosen.available ? (
+                    <p role="status" className="rounded-[8px] bg-chip-warning-bg px-[14px] py-[10px] text-[14px] text-warning">
+                      This location is not available. It stays selected so a different place is not
+                      chosen for you.
+                    </p>
+                  ) : null}
+                  <select
+                    name="locality"
+                    defaultValue={current.locationId ?? ""}
+                    className="min-h-[44px] rounded-[8px] border-[1.5px] border-control-border bg-white px-[13px] text-[15px] text-ink"
+                  >
+                    <option value="">Choose a locality</option>
+                    {chosen && !chosen.available && current.locationId ? (
+                      <option value={current.locationId}>This location is not available</option>
+                    ) : null}
+                    {locations.options.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <p role="alert" className="rounded-[8px] bg-chip-danger-bg px-[14px] py-[10px] text-[14px] text-danger">
+                  {locations.message} Sample localities are not shown in their place.
+                </p>
+              )}
             </fieldset>
           ) : null}
 
@@ -181,9 +218,9 @@ export default async function FindMyMatchPage({
       </Card>
 
       <p id="how" className="t-caption mt-[16px] text-muted">
-        How matching works: we compare your answers against published listings only. Locality and
-        configuration must match; budget and timing move a project up or down the list. We never
-        rank a project higher because a builder paid.
+        {profileStoreKind() === "backend"
+          ? "No matching rule is approved. Sending these answers stores them. It does not score a property, and a project is not ranked because a builder paid."
+          : "How matching works: we compare your answers against published listings only. Locality and configuration must match; budget and timing move a project up or down the list. We never rank a project higher because a builder paid."}
       </p>
     </div>
   );

@@ -6,6 +6,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buyerProfilePatch, buyerProfileView, requirementBody } from "../src/lib/services/backend/buyer-profile-reading.ts";
 import {
+  isPublishedListingId,
+  shortlistAddBody,
+  shortlistAddResult,
+  shortlistRemoveResult,
+} from "../src/lib/services/backend/shortlist-contract.ts";
+import { shortlistVisibleLabel } from "../src/lib/shortlist-label.ts";
+import { describeLocation, withStoredAnswers } from "../src/lib/requirement.ts";
+import {
   builderProfilePatch,
   builderProfileView,
 } from "../src/lib/services/backend/builder-profile-reading.ts";
@@ -122,4 +130,51 @@ test("a purchase hold uses the lead blockers and not a sample verification", () 
     purchaseHold({ priceCredits: 100, balanceCredits: 100, blockers: [] }).kind,
     null,
   );
+});
+
+test("shortlist add and remove follow the published statuses", () => {
+  const id = "d48bd9ea-b31b-4a55-ae97-ed838b5def4f";
+  assert.equal(isPublishedListingId(id), true);
+  assert.equal(isPublishedListingId("p-ivy-court"), false);
+  assert.deepEqual(shortlistAddBody(id), { listingId: id });
+  assert.equal(shortlistAddResult(201), "added");
+  assert.equal(shortlistAddResult(200), "already");
+  assert.equal(shortlistAddResult(404), "missing");
+  assert.equal(shortlistAddResult(409), "not_public");
+  assert.equal(shortlistAddResult(401), "unauthenticated");
+  assert.equal(shortlistRemoveResult(200), "removed");
+  assert.equal(shortlistRemoveResult(401), "unauthenticated");
+  assert.equal(shortlistVisibleLabel(null), "Shortlist (unavailable)");
+  assert.equal(shortlistVisibleLabel(0), "Shortlist (0)");
+});
+
+test("a stored requirement fills only answers the address bar does not carry", () => {
+  const stored = {
+    locationId: "in-wb-kol-rajarhat",
+    configurations: ["2"],
+    minBudgetInr: 5000000,
+    maxBudgetInr: 10000000,
+    handoverTiming: "Ready to move",
+    intent: "end_use",
+  };
+  const filled = withStoredAnswers({}, stored);
+  assert.equal(filled.locality, "in-wb-kol-rajarhat");
+  assert.deepEqual(filled.bhk, ["2"]);
+  assert.equal(filled.budget, "₹50L – ₹1Cr");
+  const kept = withStoredAnswers({ locality: "missing-place", bhk: "3" }, stored);
+  assert.equal(kept.locality, "missing-place");
+  assert.equal(kept.bhk, "3");
+});
+
+test("an unknown requirement location stays unavailable", () => {
+  const options = [{ id: "in-wb-kol-rajarhat", label: "Rajarhat, Kolkata" }];
+  assert.deepEqual(describeLocation(options, "in-wb-kol-rajarhat"), {
+    label: "Rajarhat, Kolkata",
+    available: true,
+  });
+  assert.deepEqual(describeLocation(options, "retired-place"), {
+    label: "This location is not available",
+    available: false,
+  });
+  assert.equal(describeLocation(options, null), null);
 });

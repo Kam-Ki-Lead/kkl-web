@@ -448,7 +448,7 @@ function MediaFields({ listing, contractBound }: { listing: ListingDraft; contra
         label="Video link (optional)"
         helper={
           contractBound
-            ? "This link is not saved."
+            ? "An https address is stored on this listing. It is not an uploaded file."
             : "360° walkthroughs are out of scope, so only a standard video link is offered."
         }
       >

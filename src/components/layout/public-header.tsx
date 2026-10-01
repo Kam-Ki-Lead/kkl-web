@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
+import { shortlistAccessibleName, shortlistVisibleLabel } from "@/lib/shortlist-label";
 
 /**
  * C-03 public header: "A light public header on white for buyers."
@@ -60,7 +61,7 @@ export function PublicHeaderFallback() {
   );
 }
 
-export function PublicHeader({ shortlistCount = 0 }: { shortlistCount?: number }) {
+export function PublicHeader({ shortlistCount = null }: { shortlistCount?: number | null }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -101,11 +102,11 @@ export function PublicHeader({ shortlistCount = 0 }: { shortlistCount?: number }
             href="/account/shortlist"
             /* 2.5.3 Label in Name: the visible text has to be inside the
                accessible name, or "click Shortlist (0)" matches nothing. */
-            aria-label={`Shortlist (${shortlistCount}), ${shortlistCount} saved`}
+            aria-label={shortlistAccessibleName(shortlistCount)}
             className="text-[16px] font-medium text-body hover:text-brand"
           >
             <span aria-hidden="true">♡ </span>
-            Shortlist ({shortlistCount})
+            {shortlistVisibleLabel(shortlistCount)}
           </Link>
           <Link href="/builders" className="text-[16px] font-medium text-body hover:text-brand">
             List a project
@@ -154,7 +155,8 @@ export function PublicHeader({ shortlistCount = 0 }: { shortlistCount?: number }
               onClick={() => setDrawerOpen(false)}
               className="flex min-h-[44px] items-center border-b border-line text-[16px] font-medium text-body"
             >
-              <span aria-hidden="true">♡&nbsp;</span>Shortlist ({shortlistCount})
+              <span aria-hidden="true">♡&nbsp;</span>
+              {shortlistVisibleLabel(shortlistCount)}
             </Link>
             <Link
               href="/builders"

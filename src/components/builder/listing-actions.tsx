@@ -87,7 +87,7 @@ export function ListingActions({
           </Button>
         </form>
       ) : (
-        <p className="t-caption text-muted">No request deletes a listing.</p>
+        <p className="t-caption text-muted">Only a draft can be deleted from this list.</p>
       )}
 
       {status === "published" ? (

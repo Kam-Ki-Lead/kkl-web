@@ -121,16 +121,20 @@ export function BuilderProfileForm({
           label="RERA registration"
           helper={
             contractBound
-              ? "RERA registration is stored on a listing, not on this profile. Saving this form does not write it."
+              ? "RERA registration is not a field on this profile. The published profile contract does not accept it, so this box is not editable and saving does not write it. A listing can store a registration number on that listing."
               : "Shown on your listings when present. Nothing here is checked against a RERA register — that verification is not built."
           }
         >
-          <TextInput
-            id="reraId"
-            name="reraId"
-            defaultValue={v.reraId ?? current.reraId ?? ""}
-            aria-describedby="reraId-helper"
-          />
+          {contractBound ? (
+            <TextInput id="reraId" value="" disabled readOnly aria-describedby="reraId-helper" />
+          ) : (
+            <TextInput
+              id="reraId"
+              name="reraId"
+              defaultValue={v.reraId ?? current.reraId ?? ""}
+              aria-describedby="reraId-helper"
+            />
+          )}
         </Field>
 
         <fieldset className="flex flex-col gap-[10px]">

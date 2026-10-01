@@ -26,13 +26,13 @@ const ORDER: readonly ListingSectionId[] = [
 
 const CONTRACT_NOTES: Partial<Record<ListingSectionId, string>> = {
   basics:
-    "Possession target is not a field on the listing, so it is not saved. Title, property type and description are saved.",
+    "Possession target is stored as typed. It is not parsed into a date. Title, property type and description are saved.",
   pricing:
     "Lowest and highest price are stored as the project range. They are not written into the listing priceInr and they are not split across configurations. Selected configurations are saved as names, in the order already stored. A price, area or availability already stored on a name is kept. Sort position is that order; the form has no separate sort field.",
   specifications:
-    "Carpet area is a range on this form and one areaSqft on the listing, so the range is not saved. The amenity labels that are ticked are stored as typed. Total units and the RERA number are saved. A RERA number is recorded and is not a registry check. The registered checkbox is not a separate field.",
+    "Smallest and largest carpet area are stored as typed words. They are not written into areaSqft and they are not compared as numbers. The amenity labels that are ticked are stored as typed. Total units and the RERA number are saved. A RERA number is recorded and is not a registry check. The registered checkbox is not a separate field.",
   media:
-    "A photograph count is not an uploaded photograph, and this form does not store one. A builder submission is not held to an owner's photograph requirement.",
+    "An https video link is stored as an address. It is not an uploaded file. A photograph count is not an uploaded photograph, and this form does not store one. A builder submission is not held to an owner's photograph requirement.",
 };
 
 /**

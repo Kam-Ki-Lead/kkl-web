@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import {
   builderBlockers,
   configurationPayload,
+  draftDeleteResult,
   fieldsNotStored,
   listingListPresentation,
   listingsMatchingStatus,
@@ -83,7 +84,10 @@ test("a mixed-status list keeps published on All and matches each tab", () => {
   assert.equal(submitted.detailLine.includes("Draft."), false);
   assert.equal(listingListPresentation("published").status, "published");
   assert.equal(listingListPresentation("unpublished").status, "unpublished");
-  assert.equal(sectionSaveMessage("media", []), "Photographs, the photograph count and the video link were not stored.");
+  assert.equal(
+    sectionSaveMessage("media", []),
+    "An https video link is stored as an address. It is not an uploaded file. Photographs and the photograph count were not stored.",
+  );
   assert.equal(sectionSaveMessage("pricing", ["Lowest price", "Highest price"]).includes("Not stored"), true);
 });
 
@@ -109,6 +113,7 @@ test("basics, location and specifications omit fields the listing does not carry
     title: "Riverside",
     propertyType: "Apartment",
     description: "A draft",
+    possessionTarget: "Dec 2027",
   });
 
   const location = sectionPatch("location", { locality: "loc-1", addressLine: "12 Main Road" });
@@ -126,8 +131,13 @@ test("basics, location and specifications omit fields the listing does not carry
     totalUnits: 40,
     reraId: "WBRERA/P/NOR/2024/000001",
     amenities: ["Gymnasium"],
+    carpetAreaMin: "985 sq ft",
+    carpetAreaMax: "1420 sq ft",
   });
-  assert.equal(sectionPatch("media", { photoCount: "3", videoUrl: "https://example.test" }).constructor, Object);
+  assert.equal("reraRegistered" in specifications, false);
+  assert.deepEqual(sectionPatch("media", { photoCount: "3", videoUrl: "https://example.test/tour" }), {
+    videoUrl: "https://example.test/tour",
+  });
   assert.deepEqual(sectionPatch("media", { photoCount: "3" }), {});
 });
 
@@ -189,4 +199,20 @@ test("the seller profile patch is only the supported names", () => {
     }).accountStatus,
     "suspended",
   );
+});
+
+test("deleting a draft follows the published statuses", () => {
+  assert.deepEqual(draftDeleteResult(200, { deleted: true }), { ok: true });
+  assert.equal(draftDeleteResult(409, { code: "not_a_draft" }).ok, false);
+  assert.equal(
+    draftDeleteResult(409, { code: "not_a_draft", error: "Only a draft can be deleted." }).ok,
+    false,
+  );
+  const referenced = draftDeleteResult(409, { code: "listing_referenced" });
+  assert.equal(referenced.ok, false);
+  if (!referenced.ok) assert.equal(referenced.code, "listing_referenced");
+  const missing = draftDeleteResult(404, {});
+  assert.equal(missing.ok, false);
+  if (!missing.ok) assert.equal(missing.kind, "not_found");
+  assert.equal(draftDeleteResult(200, {}).ok, false);
 });

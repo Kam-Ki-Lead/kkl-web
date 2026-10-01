@@ -43,6 +43,7 @@ export default async function BuilderPropertiesPage({
   const tabKey = one(params.tab) ?? "all";
   const tab = TABS.find((t) => t.key === tabKey) ?? TABS[0];
   const justPublished = one(params.published);
+  const deleteCode = one(params.delete);
 
   const listingsFromBackend = listingStoreKind() === "backend";
 
@@ -91,6 +92,28 @@ export default async function BuilderPropertiesPage({
   return (
     <BuilderShell title="My properties" subtitle="Everything you have listed">
       <div className="flex flex-col gap-[16px]">
+        {deleteCode === "not_a_draft" ? (
+          <StateMessage title="This listing was not deleted">
+            Only a draft can be deleted. A listing with the review team is withdrawn, and a
+            published listing is taken down by staff.
+          </StateMessage>
+        ) : null}
+        {deleteCode === "listing_referenced" ? (
+          <StateMessage title="This listing was not deleted">
+            This draft is referenced by an enquiry, so it was not deleted.
+          </StateMessage>
+        ) : null}
+        {deleteCode === "not_found" ? (
+          <StateMessage title="This listing was not deleted">
+            That listing is not on this account.
+          </StateMessage>
+        ) : null}
+        {deleteCode === "unavailable" ? (
+          <StateMessage title="This listing was not deleted">
+            The draft was not deleted, and a sample project is not shown in its place.
+          </StateMessage>
+        ) : null}
+
         {justPublished && !listingsFromBackend ? (
           <p
             role="status"
@@ -218,7 +241,7 @@ export default async function BuilderPropertiesPage({
                         status={listing.status}
                         recordStatus={listing.recordStatus}
                         canPublish={canPublish}
-                        allowDelete={!listingsFromBackend}
+                        allowDelete={!listingsFromBackend || listing.recordStatus === "draft"}
                       />
                     </div>
                   </article>
