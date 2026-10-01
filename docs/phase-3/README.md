@@ -6,7 +6,7 @@ of that run. It does not revise the Phase 2 sample-service handoff in
 
 | Document | What it answers |
 |---|---|
-| **[integration-verification.md](integration-verification.md)** | The `611bca9` run against backend `abf89fc`, then the domain switches, the admin-queue check, the builder inbox, the owner listing draft, and the photograph-availability check against backend `a8d9b1a` |
+| **[integration-verification.md](integration-verification.md)** | The `611bca9` run against backend `abf89fc`, then the domain switches, the admin-queue check, the builder inbox, the owner listing draft, and the photograph-eligibility check at `f0eb675` against backend `a8d9b1a` |
 
 ## Older records stay on their own revisions
 

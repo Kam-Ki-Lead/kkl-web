@@ -545,6 +545,43 @@ row in place and did not add a second one.
 - Publication remains a separate operation and was not changed
   (`publication_not_decided`, Q-3).
 
+## Photograph eligibility, 1 October 2026
+
+This section is a later run. It does not change the runs above.
+
+Frontend application `f0eb675`. The same backend `a8d9b1a` stayed on
+`http://127.0.0.1:4010`. One predicate, `isStoredPhotograph`, is what the
+owner steps, summaries, cards and staff screens use. A row counts only when
+`retained` is true and `availability` is `available`. A missing availability
+does not count. The cover is the first row that passes that test. A sample
+preview may still label the first chosen name, and only when no row carries
+an availability. That label is not a stored cover.
+
+`tests/listing-photographs.test.mjs` passed, 8 of 8. Those fixtures are not
+rows in `kkl_review`. They cover no media, declared with `stored` false,
+unavailable, available with `stored` true, missing and inconsistent fields,
+and a mixed list whose count and cover are the one stored row. A repeated
+declaration of the same name, type and size is not added again.
+
+### Review draft
+
+`PL-5362CF550A`, Review Seller, against `a8d9b1a`.
+
+| Check | Result |
+|---|---|
+| Save the same selected file twice | One row remained: `living-room.jpg`, JPEG, 2048 bytes, `availability = declared`, no storage key, not confirmed. |
+| Remove and reload | The row was gone. The listing showed Photographs “None”, 4 of 6 steps, and “Add at least one photograph of the property.” Send for review stayed disabled. Status stayed draft. |
+| Save metadata again and reload | “None stored · 1 file record, not uploaded.” The photograph step was not marked complete. The record says the name, type and size were recorded and the bytes were not uploaded. |
+| Submission | “No uploaded photograph is available. A file record does not satisfy the requirement.” Send for review stayed disabled. Status stayed draft. |
+| Staff detail | The same wording: “1 file record, not uploaded”, and no image was drawn. |
+| Staff queue | The unsent draft is not in the waiting queue. |
+
+`availability = unavailable` and `availability = available` with `stored` true
+were not created in `kkl_review`. No image retrieval was exercised, so this
+record does not say that a stored photograph is drawn. No upload succeeded.
+
+The builder inbox populated check remains pending. Publication was not changed.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
