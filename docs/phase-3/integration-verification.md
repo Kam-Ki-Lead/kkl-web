@@ -677,6 +677,94 @@ persistence, or service-failure check was run for these two admin
 queues. Those checks wait on a contract that lists the applications and
 the moderated listings. This inspection is not that check.
 
+## Admin KYC and live-property queues, wired 1 October 2026
+
+The inspection above was written against backend `a8d9b1a` / OpenAPI
+`1.0.0-phase3.m`, and it was right for that revision: those routes were not
+published. Backend `3b4cbda05685d39273d8a7e128f55c88074f17a6` (`3b4cbda`,
+“Serve the admin KYC and live-property queues from the records that already
+exist.”) publishes them in OpenAPI `1.0.0-phase3.n`, with migration
+`019_listing_unpublished.sql`. The frontend application is `eaab830`. This
+section is that wiring. It does not reopen the photograph check, and
+`docs/phase-2/visual/geometry-1440.json` stayed unstaged.
+
+The API stayed on `http://127.0.0.1:4010`, process 30804. It was not
+restarted and `kkl_review` was not reset. The frontend was rebuilt with
+`NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then
+served with `next start -p 3811` (listener 26164) and the documented runtime
+switches. No development secret was set on the frontend.
+
+### Switches
+
+There is no new variable.
+
+| Queue | Switch | Sample behaviour |
+|---|---|---|
+| `/admin/kyc` | `KKL_VERIFICATION=backend` | Unset stays on the sample application store. |
+| `/admin/properties` | `KKL_LISTINGS=backend` | Unset stays on the sample portal listings. |
+
+`/admin/verification` stays the staff case workflow
+(`GET /v1/verification/queues`). `/admin/owner-listings` stays the submission
+queue. When either switch is backend, a failed read does not fall back to
+the sample store. Dashboard tiles and rail badges for these two queues use
+the same backend totals. A count that could not be read is “—”. A real zero
+stays 0. `filter=all` on KYC is open cases only.
+
+### Review-server checks, staff session
+
+Review Staff, against `3b4cbda`. The only open application is
+`VER-EC4FAE39` (Review Seller, purchase lead, `needs_review`, opened
+2026-09-30 18:05:45 UTC, about 16 hours old). It was not failed and it was
+not asked to resubmit. `kkl_review` has no published or unpublished listing.
+The owner draft `PL-5362CF550A` was not published.
+
+| Check | Result |
+|---|---|
+| `/admin/kyc` pending | 1–1 of 1. `VER-EC4FAE39`, Review Seller. Documents, checks and approval unavailable. Rail badge 1. |
+| `filter=resubmitted` | “Resubmission is unavailable”, with the API sentence. The case is not listed as a resubmission. |
+| `filter=ageing` | “None of the open cases are over 24 hours old.” The caption says the classification does not approve a case and does not promise a response time. |
+| `filter=all` | “Open cases only.” The same one open case. |
+| pending `offset=50` | Past the end. Previous and First page. No Next. |
+| Detail `VER-EC4FAE39` | No approve action. Fail and ask-for-more-information are offered. History is the required event and the needs-review event. |
+| Empty-reason fail | 422, “Record why.” Reload still shows the case pending, history unchanged, badge still 1. |
+| `/admin/properties` published | “No listing is published.” Reporting unavailable. Publication is not a request this queue can make. No property-review rail badge. |
+| `filter=reported` | “Reporting is unavailable”, with the API sentence. |
+| `filter=unpublished` | “No listing has been taken down.” |
+| `filter=all` | “No live or taken-down listing is stored.” |
+| Owner draft id on `/admin/properties/{id}` | 404. |
+| Dashboard | KYC tile 1, “None opened more than 24 hours ago.” Listings tile 0, “Reports are not part of this count.” |
+| `/admin/verification` | Still the case workflow. Needs a person 0, with the service 0. The notice says required open cases are on the KYC queue. |
+
+### Session, role, and a closed API
+
+| Check | Result |
+|---|---|
+| No cookie, `/admin/kyc` and `/admin/properties` | 307 to `/auth?next=…`. |
+| Review Seller session | API `GET /v1/admin/kyc/applications` returned 403. Both pages say the session is a seller account and do not open the sample queues. Sample applicant names are absent. |
+| `KKL_BACKEND_BASE_URL` pointed at closed port 4019, staff cookie kept | Both pages say the account could not be read and do not open the sample queues. The queue loader was not reached, because the session read uses the same base URL. The API process on 4010 was left running. The frontend was then pointed back at 4010. |
+
+### Isolated tests, not browser checks
+
+`tests/admin-queues.test.mjs` passed, 10 of 10. Those fixtures are not rows
+in `kkl_review`. They cover an unavailable resubmission versus an empty
+pending page, `filter=all` staying open, blocked documents, checks and
+approval, a missing total, reporting unavailable versus an empty published
+list, offset pagination, a failed count versus a real zero, an unread age
+split, and a takedown notice that does not say the notification was
+delivered. `npx tsc --noEmit` passed. `next build` passed.
+
+A populated live listing and a successful unpublish were not created in
+`kkl_review`. No dedicated synthetic KYC case was available, so a successful
+reject or resubmit was not submitted. `approved` was not posted. Dismiss
+report is not an action on the backend screen. A recorded notification is
+not described as a delivered message.
+
+### Still separate
+
+A populated builder inbox, builder pricing (`priceInr`), and the seller
+business, KYC and billing profile fields remain as recorded earlier. They
+do not block these two queues.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
