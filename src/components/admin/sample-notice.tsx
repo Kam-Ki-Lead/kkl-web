@@ -2,8 +2,10 @@ import { runtimeConfig } from "@/lib/config/runtime";
 import { authStoreKind } from "@/lib/services/backend/config";
 import {
   adminOperationsStore,
+  listingStore,
   notificationStore,
   supportStore,
+  verificationStore,
 } from "@/lib/services";
 import { Card } from "@/components/ui/card";
 
@@ -77,9 +79,14 @@ export function AdminSampleNotice() {
           {connectedQueues ? (
             <>
               <strong className="text-ink">Support and delivery attempts are stored.</strong> A
-              queued or unconfigured delivery was not sent. KYC applications, property review, voice
-              and WhatsApp on this console are still fixtures, and today&rsquo;s volume figures are
-              fixtures.
+              queued or unconfigured delivery was not sent.{" "}
+              {verificationStore() === "backend"
+                ? "Open KYC applications are read from kkl-backend."
+                : "KYC applications on this console are still fixtures."}{" "}
+              {listingStore() === "backend"
+                ? "Live property review is read from kkl-backend. Drafts stay on owner submissions."
+                : "Property review on this console is still a fixture."}{" "}
+              Voice, WhatsApp and today&rsquo;s volume figures are fixtures.
             </>
           ) : (
             <>

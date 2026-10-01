@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { DECISIONS } from "@/lib/config/business-rules";
-import { getServices } from "@/lib/services";
+import { BackendPropertyQueue } from "@/components/admin/backend-property-queue";
+import { getServices, listingStore } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Property review", robots: { index: false } };
 
@@ -42,6 +43,10 @@ export default async function AdminPropertiesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (listingStore() === "backend") {
+    return <BackendPropertyQueue searchParams={searchParams} />;
+  }
+
   const raw = one((await searchParams).filter) || "reported";
   const filter =
     raw === "reported" || raw === "published" || raw === "unpublished" ? raw : undefined;

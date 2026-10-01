@@ -7,7 +7,8 @@ import { moderateListing } from "@/app/actions/admin";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
-import { getServices } from "@/lib/services";
+import { BackendPropertyReview } from "@/components/admin/backend-property-review";
+import { getServices, listingStore } from "@/lib/services";
 
 export const metadata: Metadata = { title: "Property", robots: { index: false } };
 
@@ -32,6 +33,10 @@ export default async function AdminPropertyPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (listingStore() === "backend") {
+    return <BackendPropertyReview params={params} searchParams={searchParams} />;
+  }
+
   const { id } = await params;
   const action = (await searchParams).action;
 

@@ -8,7 +8,8 @@ import { decideApplication, reviewDocument, toggleKycCheck } from "@/app/actions
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
-import { getServices } from "@/lib/services";
+import { BackendKycReview } from "@/components/admin/backend-kyc-review";
+import { getServices, verificationStore } from "@/lib/services";
 
 export const metadata: Metadata = { title: "KYC review", robots: { index: false } };
 
@@ -48,6 +49,10 @@ export default async function AdminKycReviewPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (verificationStore() === "backend") {
+    return <BackendKycReview params={params} searchParams={searchParams} />;
+  }
+
   const { id } = await params;
   const action = (await searchParams).action;
 

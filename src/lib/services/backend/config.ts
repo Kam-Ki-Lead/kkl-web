@@ -129,6 +129,10 @@ export function listingStoreKind(): "sample" | "backend" {
   return read("KKL_LISTINGS") === "backend" ? "backend" : "sample";
 }
 
+// Live property moderation uses this same switch
+// (`GET /v1/admin/properties`). Owner submissions stay on the owner-listing
+// methods. Nothing on the property-review path publishes a listing.
+
 export function enquiryStoreKind(): "sample" | "backend" {
   return read("KKL_ENQUIRIES") === "backend" ? "backend" : "sample";
 }
@@ -189,6 +193,10 @@ export function notificationStoreKind(): "sample" | "backend" {
 // What this does not need is a provider. The case, its history, the policy it
 // was judged under and the staff workflow are all real without one; what a
 // provider would add is the ability for a case to *pass*, which is Q-4.
+//
+// The Admin KYC queue uses this same switch. Its rows are verification cases
+// the policy marks required (`GET /v1/admin/kyc/applications`). It is not a
+// second document store. `/admin/verification` stays the case workflow.
 // ---------------------------------------------------------------------------
 
 export function verificationStoreKind(): "sample" | "backend" {

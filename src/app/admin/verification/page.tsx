@@ -5,7 +5,7 @@ import { OUTCOME } from "@/components/verification/outcome";
 import { Card, SectionHeader } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
-import { getServices } from "@/lib/services";
+import { getServices, verificationStore } from "@/lib/services";
 import { formatDateTime } from "@/lib/format";
 import type { VerificationCase } from "@/lib/domain/types";
 
@@ -38,11 +38,18 @@ export default async function AdminVerificationPage() {
     >
       <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[16px]">
         <p className="t-body text-body">
-          <strong className="text-ink">No provider has been selected</strong>, and these cases were
-          produced by a labelled sample service. Nothing here is a compliance control and no
-          identity document has been collected. A case that the service could not answer is{" "}
-          <strong className="text-ink">not</strong> an approval — it is on this queue for exactly
-          that reason.
+          <strong className="text-ink">No provider has been selected.</strong> Nothing here is a
+          compliance control and no identity document has been collected. A case that the service
+          could not answer is <strong className="text-ink">not</strong> an approval.
+          {verificationStore() === "backend" ? (
+            <>
+              {" "}
+              This list is the staff workflow from kkl-backend. Required open cases are on the KYC
+              queue, and this screen does not approve an account.
+            </>
+          ) : (
+            <> These rows were produced by a labelled sample service.</>
+          )}
         </p>
       </Card>
 

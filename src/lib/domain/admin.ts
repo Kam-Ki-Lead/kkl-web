@@ -447,7 +447,8 @@ export type FieldChange = {
 // ----------------------------------------------------------------- dashboard --
 
 export type QueueTile = {
-  readonly value: number;
+  /** Null when the count could not be read. That is not zero, and not a fixture. */
+  readonly value: number | null;
   readonly label: string;
   readonly note: string;
   readonly flag: string | null;

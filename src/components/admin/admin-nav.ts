@@ -14,24 +14,24 @@ import type { QueueTile } from "@/lib/domain/admin";
  * the backend still enforces each request.
  */
 export function adminRailItems(counts: {
-  kyc: number;
+  kyc: number | null;
   verification: number;
-  listings: number;
+  listings: number | null;
   ownerListings: number;
   tickets: number;
   refunds: number;
   notifications: number;
 }): readonly RailItem[] {
-  const badge = (n: number) => (n > 0 ? String(n) : null);
+  const badge = (n: number | null) => (n === null ? "—" : n > 0 ? String(n) : null);
   return [
     { group: "OVERVIEW", href: "/admin", label: "Dashboard", match: "exact" },
 
     { group: "ACCOUNTS", href: "/admin/users", label: "Users" },
     { group: "ACCOUNTS", href: "/admin/kyc", label: "KYC queue", badge: badge(counts.kyc) },
-    // CR07: verification cases under the confirmed action-based policy. Separate
-    // from the KYC queue above, which is document submissions: this one answers
-    // whether a check was required for an action at all, and its badge counts
-    // only what needs a person — routine processing is not a backlog.
+    // Verification cases stay their own screen. With KKL_VERIFICATION=backend
+    // the KYC queue is the required-action cases, not a document packet. Its
+    // badge is "—" when that count could not be read. A missing badge is a
+    // real zero. This badge still counts only cases waiting on a person.
     {
       group: "ACCOUNTS",
       href: "/admin/verification",
@@ -78,15 +78,18 @@ export function railCounts(
   ownerListings = 0,
   verification = 0,
 ): Parameters<typeof adminRailItems>[0] {
-  const find = (label: string) =>
-    queues.find((q) => q.label.toLowerCase().startsWith(label))?.value ?? 0;
+  const find = (label: string): number | null => {
+    const queue = queues.find((q) => q.label.toLowerCase().startsWith(label));
+    if (!queue) return 0;
+    return queue.value;
+  };
   return {
     kyc: find("kyc"),
     verification,
     listings: find("listings"),
     ownerListings,
-    tickets: find("support"),
-    refunds: find("refund"),
+    tickets: find("support") ?? 0,
+    refunds: find("refund") ?? 0,
     notifications,
   };
 }

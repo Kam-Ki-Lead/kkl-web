@@ -26,6 +26,7 @@ import { backendAdminAudit, backendAdminSupport } from "./backend/admin-support"
 import { backendAdminDeliveries, backendNotifications } from "./backend/notifications";
 import { backendVerification } from "./backend/verification";
 import { backendAdminVerification } from "./backend/admin-verification";
+import { backendAdminKycGuard, backendAdminPropertyGuard } from "./backend/admin-queues";
 import { backendAdminOperations } from "./backend/admin-operations";
 
 /**
@@ -135,7 +136,7 @@ function withListingStore(services: Services): Services {
   return {
     ...services,
     ownerListings: backendOwnerListings,
-    admin: { ...services.admin, ...backendAdminOwnerListings },
+    admin: { ...services.admin, ...backendAdminOwnerListings, ...backendAdminPropertyGuard },
   };
 }
 
@@ -233,13 +234,17 @@ function withNotificationStore(services: Services): Services {
  * screens gain a real case with a real history; what they do not gain is a
  * way to pass one, because no provider is selected (Q-4) and no staff hand
  * may award it (undecided).
+ *
+ * The KYC queue moves with the same switch. Its service methods stop
+ * returning the sample applications. The screen reads
+ * `GET /v1/admin/kyc/applications` itself.
  */
 function withVerificationStore(services: Services): Services {
   if (verificationStoreKind() !== "backend") return services;
   return {
     ...services,
     verification: backendVerification("seller"),
-    admin: { ...services.admin, ...backendAdminVerification },
+    admin: { ...services.admin, ...backendAdminVerification, ...backendAdminKycGuard },
   };
 }
 

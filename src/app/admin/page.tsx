@@ -52,7 +52,7 @@ export default async function AdminDashboardPage() {
                 {/* 28px, as the approved A-02 declares. .t-figure is the shared
                     21px step the Seller and Builder tiles use. */}
                 <span className="font-[family-name:var(--font-heading)] text-[28px] font-extrabold leading-[1.2] tracking-[-0.03em] text-ink">
-                  {queue.value}
+                  {queue.value === null ? "—" : queue.value}
                 </span>
                 {queue.flag ? (
                   <span

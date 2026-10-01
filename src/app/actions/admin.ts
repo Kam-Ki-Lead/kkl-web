@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { SAMPLE_STAFF } from "@/lib/domain/identity";
-import { getServices } from "@/lib/services";
+import { getServices, listingStore, verificationStore } from "@/lib/services";
+import { NOTIFICATION_RECORDED } from "@/lib/services/backend/admin-queue-reading";
+import { decideKycApplication, moderateLiveProperty } from "@/lib/services/backend/admin-queues";
 
 /**
  * Staff actions (A-04, A-06, A-09, A-19, A-20, A-23).
@@ -84,6 +86,8 @@ export async function reviewDocument(formData: FormData): Promise<void> {
   const raw = String(formData.get("verdict") ?? "");
   if (raw !== "ok" && raw !== "problem") return;
 
+  if (verificationStore() === "backend") return;
+
   await getServices().admin.setDocumentVerdict({ applicationId, documentKey, verdict: raw });
   revalidatePath(`/admin/kyc/${applicationId}`);
 }
@@ -91,6 +95,7 @@ export async function reviewDocument(formData: FormData): Promise<void> {
 export async function toggleKycCheck(formData: FormData): Promise<void> {
   const applicationId = String(formData.get("applicationId") ?? "");
   const checkKey = String(formData.get("checkKey") ?? "");
+  if (verificationStore() === "backend") return;
   await getServices().admin.toggleCheck({ applicationId, checkKey });
   revalidatePath(`/admin/kyc/${applicationId}`);
 }
@@ -105,11 +110,29 @@ export async function decideApplication(
     return { error: "That decision was not recognised." };
   }
 
+  const reason = String(formData.get("reason") ?? "");
+  if (verificationStore() === "backend") {
+    const result = await decideKycApplication({ reference: applicationId, decision: raw, reason });
+    if (!result.ok) return { error: result.message };
+    if (raw === "approved") {
+      return { error: "Approval is not authorised. The case was not recorded as passed." };
+    }
+    refreshAccountSurfaces();
+    revalidatePath(`/admin/kyc/${applicationId}`);
+    revalidatePath("/admin/verification");
+    return {
+      done:
+        raw === "rejected"
+          ? "The case was recorded as failed and leaves the open queue. The reason is kept with the decision."
+          : "The case stays open as needing more information. No document was collected.",
+    };
+  }
+
   const result = await getServices().admin.decideApplication({
     actor: SAMPLE_STAFF,
     applicationId,
     decision: raw,
-    reason: String(formData.get("reason") ?? ""),
+    reason,
   });
   if (!result.ok) return { error: result.error };
 
@@ -137,11 +160,26 @@ export async function moderateListing(
     return { error: "That action was not recognised." };
   }
 
+  const reason = String(formData.get("reason") ?? "");
+  if (listingStore() === "backend") {
+    const result = await moderateLiveProperty({ listingId, action: raw, reason });
+    if (!result.ok) return { error: result.message };
+    revalidatePath("/admin");
+    revalidatePath("/admin/properties");
+    revalidatePath(`/admin/properties/${listingId}`);
+    return {
+      done:
+        raw === "unpublish"
+          ? `The listing is unpublished. The reason is stored. ${NOTIFICATION_RECORDED}`
+          : "Dismiss report is not a decided record. The listing was not changed by a successful takedown.",
+    };
+  }
+
   const result = await getServices().admin.moderateListing({
     actor: SAMPLE_STAFF,
     listingId,
     action: raw,
-    reason: String(formData.get("reason") ?? ""),
+    reason,
   });
   if (!result.ok) return { error: result.error };
 

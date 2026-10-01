@@ -5,7 +5,8 @@ import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
-import { getServices } from "@/lib/services";
+import { BackendKycQueue } from "@/components/admin/backend-kyc-queue";
+import { getServices, verificationStore } from "@/lib/services";
 
 export const metadata: Metadata = { title: "KYC queue", robots: { index: false } };
 
@@ -38,6 +39,10 @@ export default async function AdminKycQueuePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (verificationStore() === "backend") {
+    return <BackendKycQueue searchParams={searchParams} />;
+  }
+
   const raw = one((await searchParams).filter) || "pending";
   const filter =
     raw === "resubmitted" || raw === "ageing" || raw === "pending" ? raw : undefined;

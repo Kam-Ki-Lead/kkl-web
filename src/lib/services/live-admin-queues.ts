@@ -4,18 +4,22 @@ import { bearerMode } from "@/lib/services/backend/session";
 import {
   adminOperationsStore,
   getServices,
+  listingStore,
   notificationStore,
   supportStore,
+  verificationStore,
 } from "@/lib/services";
+import { kycCountTile, propertyCountTile } from "@/lib/services/backend/admin-queue-reading";
+import { loadKycCounts, loadPropertyCount } from "@/lib/services/backend/admin-queues";
 
 /**
  * Queue tiles the operations dashboard and the admin rail both read.
  *
  * The sample dashboard counts its own fixtures. Once a domain is served by
  * kkl-backend, that tile is counted from the same call the queue page uses.
- * KYC applications and moderated property review stay on the sample tiles:
- * those screens are still the sample queues, and zeroing the badge while the
- * page lists fixture rows would be a second disagreement.
+ * KYC applications follow `KKL_VERIFICATION`. Live property review follows
+ * `KKL_LISTINGS`. A failed count stays unavailable: it is not the sample
+ * figure and it is not zero.
  */
 export async function liveAdminQueues(): Promise<{
   queues: readonly QueueTile[];
@@ -55,6 +59,18 @@ export async function liveAdminQueues(): Promise<{
           }
         : queue,
     );
+  }
+
+  if (verificationStore() === "backend") {
+    const counts = await loadKycCounts();
+    const tile = kycCountTile(counts);
+    queues = queues.map((queue) => (queue.href === "/admin/kyc" ? tile : queue));
+  }
+
+  if (listingStore() === "backend") {
+    const counts = await loadPropertyCount();
+    const tile = propertyCountTile(counts);
+    queues = queues.map((queue) => (queue.href === "/admin/properties" ? tile : queue));
   }
 
   let alerts = [...dashboard.alerts];

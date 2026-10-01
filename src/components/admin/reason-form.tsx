@@ -29,6 +29,7 @@ export function ReasonForm({
   categories,
   hidden,
   cancel,
+  recordedNote = "An audit entry was written with your reason. Nothing here moved money or changed any real account.",
 }: {
   action: (state: AdminFormState, formData: FormData) => Promise<AdminFormState>;
   title: string;
@@ -39,6 +40,7 @@ export function ReasonForm({
   /** Fields naming the record and the decision. Never the actor. */
   hidden: Readonly<Record<string, string>>;
   cancel?: ReactNode;
+  recordedNote?: string;
 }) {
   const [state, formAction, pending] = useActionState<AdminFormState, FormData>(action, {});
 
@@ -47,10 +49,7 @@ export function ReasonForm({
       <Card className="border-[#BFE0CE] bg-chip-success-bg p-[18px]">
         <h3 className="t-card-title text-success">Recorded</h3>
         <p className="t-body mt-[6px] text-body">{state.done}</p>
-        <p className="t-caption mt-[8px] text-muted">
-          An audit entry was written with your reason. Nothing here moved money or changed any
-          real account.
-        </p>
+        <p className="t-caption mt-[8px] text-muted">{recordedNote}</p>
       </Card>
     );
   }
