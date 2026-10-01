@@ -1043,6 +1043,42 @@ collect a new amount. Publication (Q-3), a verification pass (Q-4), object
 storage (Q-8) and a routed builder enquiry remain open. The admin-queue
 slice stays closed at `8079ee0`.
 
+## Project range, billing, and separate account names, 1 October 2026
+
+Frontend `2dc98fc`. Backend implementation `a802bb4`, docs `d3aba31`,
+OpenAPI `1.0.0-phase3.o`, migration `020`. The review API on 4010 was
+process 32100, started after those files. The frontend on 3811 was process
+32676, built with `NEXT_PUBLIC_KKL_ENV=review` and
+`NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then started with `KKL_AUTH=backend`
+and the documented domain switches. No development-identity secret was set.
+Sign-in used the published form and one local OTP for the builder number.
+The code is not recorded here.
+
+| Screen | What the browser showed |
+| --- | --- |
+| Seller billing | Review Seller, number ending 0102. Saved and reloaded billing name, GSTIN, two address lines, invoice email and contact name. The status said no invoice or tax treatment was set. The contact name did not replace the account name. |
+| Account profile | On the same seller session, full name was saved as a distinct value and reloaded. The caption kept the account name. A restore was submitted before the session changed; that second write was not reloaded. |
+| Shortlist | The same session: zero saved, with the sentence that only a published property can be saved. |
+| Find my match | The URL requirement was stored. The page said nothing is scored and returned no property cards. |
+| Seller restricted | Verification is not reported from this profile. |
+| Builder profile, seller session | Refused, and the sample builder was not shown. |
+| Builder profile | Review Builder, number ending 0104. Company and email reloaded. Contact name stayed the account name. The typed RERA number was empty after reload. Alerts stayed unset and are described as not stored. Verification reads "Not on this profile" and subscription reads "None stored". |
+| Subscription and restrictions | The activate button is disabled. Restrictions say the account is active and do not mark verification or subscription as this account. |
+| Builder pricing | Draft `d48bd9ea-b31b-4a55-ae97-ed838b5def4f`. Lowest 5100000 and highest 9100000 reloaded, with 2 BHK and 3 BHK still selected. The page did not show a single listing price. |
+
+Contract tests `tests/account-forms-contract.test.mjs` and
+`tests/builder-seller-contract.test.mjs` passed, 12 of 12. `tsc --noEmit`
+and `next build` passed before the server start. Amenities are mapped in
+the specifications patch and were not reloaded in the browser.
+
+Still refused, and still not a completed journey: publication (Q-3), so the
+shortlist and the public catalogue have no published listing; a matching
+rule (`matching_not_decided`); a verification pass and documents (Q-4);
+subscription storage and any charge (Q-5, and no subscription field);
+per-configuration amounts, which the approved checkboxes do not collect;
+object storage (Q-8); a routed builder enquiry. The admin-queue slice stays
+closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
