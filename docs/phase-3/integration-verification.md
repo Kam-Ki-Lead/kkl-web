@@ -765,6 +765,65 @@ A populated builder inbox, builder pricing (`priceInr`), and the seller
 business, KYC and billing profile fields remain as recorded earlier. They
 do not block these two queues.
 
+## Capability flags and unread counts, 1 October 2026
+
+Frontend `3912c3d`, still against backend `3b4cbda` / OpenAPI
+`1.0.0-phase3.n`. The API process stayed 30804 on port 4010. The frontend
+was rebuilt with `NEXT_PUBLIC_KKL_ENV=review` and
+`NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then served on port 3811 (listener
+13956) with `KKL_ENV=review`, `KKL_DATA_SOURCE=sample`, `KKL_AUTH=backend`,
+`KKL_VERIFICATION=backend`, `KKL_LISTINGS=backend`, and
+`KKL_BACKEND_BASE_URL=http://127.0.0.1:4010`. Locations and lead requests
+use their own base URL, also `http://127.0.0.1:4010`. No development secret
+was set.
+
+A resubmitted or reported page is unavailable only when that response
+capability says so (`available: false` or `reachable: false`). When the
+flag is true, the page renders the returned rows or an empty state. A
+missing flag, a non-boolean flag, or a missing `code` or `message` is
+rejected as a contract error and does not become an empty queue. Documents,
+checks, approval, and publication use the same reading. A null tile or rail
+count stays “—”. Support and refund badges no longer turn a missing tile
+into zero. Owner-submission and verification-case counts are unchanged.
+
+### Review-server checks
+
+Review Staff. `VER-EC4FAE39` was not failed and was not asked to resubmit.
+No listing was published.
+
+| Check | Result |
+|---|---|
+| `filter=resubmitted` | “Resubmission is unavailable”, using the API sentence. Documents, checks, and approval each say unavailable and quote the API message. Approval is not a working action. |
+| `filter=ageing` | “None of the open cases are over 24 hours old.” The caption does not treat that as an approval rule or a promised response time. |
+| `filter=all` | “Open cases only.” The same one open case, `VER-EC4FAE39`. |
+| pending `offset=50` | “This page is past the end.” Previous and First page. |
+| Detail `VER-EC4FAE39` | Documents and checks unavailable. “Approval is not authorised.” Fail and ask-for-more-information are offered. No approve action. History unchanged. |
+| `filter=reported` | “Reporting is unavailable”, with the API sentence. Publication message says a listing cannot be created here. |
+| published | “No listing is published.” |
+| unpublished | “No listing has been taken down.” |
+| `filter=all` | “No live or taken-down listing is stored.” |
+| Owner draft `dce729f6-eeda-405c-a455-f0b628a3d907` | 404. |
+| Dashboard | KYC tile 1. Listings tile 0, with reports excluded from the count. Rail badge 1 for KYC and no property-review badge. |
+| No cookie | 307 to `/auth` for both queues. |
+| Review Seller | Applications API 403. Both pages say the session is a seller account. Sample applicant names are absent. |
+| Frontend pointed at closed port 4019 | `/admin/kyc` and `/admin/properties` say the account could not be read and do not open the sample queues. `/admin` shows the service error page because the dashboard’s support read fails before the tiles; it does not show sample rows or a zero KYC count. The API on 4010 was left running. The frontend was pointed back at 4010. |
+
+### Isolated tests
+
+`tests/admin-queues.test.mjs` passed, 15 of 15. Those fixtures are not
+`kkl_review` rows. Added coverage: an available resubmission with no rows
+is an empty page; a resubmitted filter without a capability flag is
+rejected; reporting available with no rows is an empty reported page; a
+property page without a reports flag is rejected; a null rail count stays
+“—” and a real zero stays hidden. `npx tsc --noEmit` passed. `next build`
+passed.
+
+An available resubmission and an available reports list were not returned
+by `3b4cbda`, so those empty states were not browser checks. A successful
+reject, resubmit, or unpublish was not run: no dedicated synthetic case or
+published listing was used, and `VER-EC4FAE39` was left open. Populated
+takedown remains an isolated-test fixture, not a browser check.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
