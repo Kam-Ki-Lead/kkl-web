@@ -1245,16 +1245,31 @@ Shared draft `d48bd9ea-b31b-4a55-ae97-ed838b5def4f` was not deleted.
 The review API was still process 28328 on `94fa614` / OpenAPI
 `1.0.0-phase3.p`. This frontend did not restart it. The frontend on 3811
 for this check is process 24476. No development-identity secret was set.
-No further OTP was used.
+The page-guard request used no OTP. The action check below used one.
 
-An unsigned request for
+An unsigned GET of
 `/builder/properties/00000000-0000-4000-8000-000000000099/delete` returned
-307 to `/auth?next=` that same path. The response did not say the draft was
-deleted. A 401 from the delete mapper is `sign-in`. A missing listing, a
-submitted listing, and an enquiry conflict stay refusals. A 200 that does
-not carry `deleted: true` is not treated as success.
+307 to `/auth?next=` that same path. That is the page guard. It does not
+show what the delete action does after a session ends.
 
-Contract tests passed 16 of 16. `tsc --noEmit` and `next build` passed.
+The action was checked separately on disposable draft
+`28e5da1d-bb8b-4a47-b888-45f302d49683`, titled `Disposable session expiry
+check`. Its confirmation page was open while the builder session was still
+signed in. That session was then ended from My account with Sign out, not
+Sign out of every session. The confirmation form was still on screen. Submitting
+it went to `/auth?next=` the same delete path, headed `Sign in or register`.
+The page did not say the draft was deleted. After signing in again, the
+properties list still showed that title and shared draft
+`d48bd9ea-b31b-4a55-ae97-ed838b5def4f`. One local OTP was used for the builder
+number ending 0104. The code is not recorded here.
+
+A 401 from the delete mapper is `sign-in`. A missing listing, a submitted
+listing, and an enquiry conflict stay refusals. A 200 that does not carry
+`deleted: true` is not treated as success.
+
+Contract tests passed 16 of 16 against this source. `tsc --noEmit` passed.
+`next build` was not repeated: no source file changed after the build that
+process 24476 is serving.
 
 The three alert choices remain an approved feature that this profile does
 not store. Publication (Q-3), matching, verification (Q-4), Q-1a through
