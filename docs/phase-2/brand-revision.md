@@ -92,3 +92,13 @@ The Builder console refused the staff session. A bad pricing amount was
 refused without storing a version. No remaining component uses the old
 brand blue or saffron as a rendered colour. Those values stay in comments
 and in `kkl-design` at `5bc3512`.
+
+A later check used the Tab key in Chrome on the homepage. The first Tab
+focused the “Kam Ki Lead” link, and that link matched `:focus-visible`.
+The ring was solid, 3px, `rgb(243, 148, 42)`, with a 2px offset and a 1px
+ink shadow `rgb(18, 24, 43)`. Signed in as Review Builder, number ending
+0104, `/builder` opened the Dashboard. The navigation was labelled
+“Builder console” and listed Dashboard, My properties, Enquiries,
+Subscription, Buy Leads, My leads, My purchases, Billing & credits,
+Support, and Profile. The rail background was `rgb(75, 41, 115)`. The
+staff-session refusal above is a different account.

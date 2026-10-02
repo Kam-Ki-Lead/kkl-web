@@ -1423,6 +1423,64 @@ The pricing tests and the purchase-quote test passed. `tsc --noEmit` and `next b
 
 Workbook rates were not loaded. Saving and previewing still do not change a lead. Applying the saved version is the write, and this pass had no lead that carried the inputs that write uses. Activation stays refused. Purchases stay refused until Q-1a is confirmed. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`. No new client reminder was sent.
 
+## Purchase confirmation, 2 October 2026
+
+Frontend `16afab5`. This section does not replace the published-repricing
+record above. Applying version 3 there updated 0 leads, left 0 unchanged,
+and left 0 unpriced, because no review lead carried a budget, a
+qualification level, a budget source, or a previous price configuration.
+That result is the empty path. It is not a populated reprice.
+
+The review API is backend `a6d6d4d`, OpenAPI `1.0.0-phase3.t`, migration
+`025_pricing_reprice.sql`. Process 30376 listened on `127.0.0.1:4010`. It
+started at 17:44 local, after that commit. The frontend on 3811 was rebuilt
+from `16afab5` and started with the documented domain switches. No
+development-identity secret was set on it.
+
+A lead with an applied pricing version is bought only when the confirmation
+sends `expectedPriceCredits` and `expectedConfigurationVersion` from the
+quote on the screen. A missing or different amount, or a different version
+at the same amount, returns `409 price_changed` and the current quote.
+Nothing is charged. The screen shows that amount and version and waits for
+a separate confirmation. It does not submit the returned quote on its own.
+That confirmation uses a new idempotency key. A retry of the same
+confirmation keeps the key, and a replay of a completed purchase returns
+the original order.
+
+The populated outcomes are synthetic fixtures in `kkl_test`, from
+`kkl-backend/tests/pricing-reprice.test.mjs`. They are not rows in
+`kkl_review`, and no verified account or saleable lead was created there.
+`kkl_test` was on migration `025_pricing_reprice.sql`. The test passed.
+An omitted price and version, a stale amount, and a version one step ahead
+of the applied version at the same 2,700 credits each returned
+`price_changed` and left no order for that buyer. Confirming the current
+quote returned 201 for 2,700 credits and one ledger debit of −2,700. The
+same key with a different payload returned `idempotency_key_reused`. The
+same key and the same payload, after the lead row’s price was changed,
+returned 200 with `duplicate: true`, the original 2,700, and one ledger
+row. A later application left that order at 2,700. A purchase waiting on
+the price lock, and a purchase during a partial matrix update, each
+returned `price_changed` with zero orders.
+
+`tests/purchase-quote.test.mjs` covers the request body, a same-amount
+version change, and the new key for a changed quote. The frontend suite
+passed 109 of 109. `tsc --noEmit` and `next build` passed before this
+frontend started.
+
+| Check | Result |
+| --- | --- |
+| Review marketplace | Review Seller, number ending 0102. Buy Leads said “No leads match these filters”. There was no lead link and no “Confirm and buy” button. No purchase was submitted. |
+| Keyboard focus | Chrome Tab on the homepage. The first Tab focused the “Kam Ki Lead” link. It matched `:focus-visible`. The ring was solid, 3px, `rgb(243, 148, 42)`, offset 2px, with a 1px ink shadow `rgb(18, 24, 43)`. |
+| Builder console | Review Builder, number ending 0104. `/builder` opened the Dashboard. The navigation was labelled “Builder console” and listed Dashboard, My properties, Enquiries, Subscription, Buy Leads, My leads, My purchases, Billing & credits, Support, and Profile. The rail background was `rgb(75, 41, 115)`. |
+
+Workbook rates were not loaded. Saving and previewing still do not change a
+lead. The empty version-3 application remains the review-browser result for
+repricing. Activation stays refused. Review purchases stay refused until
+verification (Q-4) can pass. Publication (Q-3), matching, Q-1a through
+Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain.
+Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
+No new client reminder was sent. Nothing was deployed or merged.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
