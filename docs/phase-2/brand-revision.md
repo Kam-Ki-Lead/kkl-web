@@ -40,3 +40,37 @@ admin pricing screen were opened. Seller and Builder consoles share the same
 rail, footer, button, and chip tokens.
 
 The homepage hero carries one gradient strip. Buttons and form controls do not.
+
+## Verification, 2 October 2026
+
+Frontend `eb665fc` is the follow-up to `af0579c`. The same review process was
+rebuilt and served on port 3811. The API on port 4010 was left running.
+
+The production stylesheet had dropped the focus shorthand, leaving
+`outline-style` and `outline-width` empty. `eb665fc` writes those longhands.
+The served rule is `outline-width: 3px`, `outline-style: solid`,
+`outline-color: var(--color-saffron)`, `outline-offset: 2px`, and a 1px ink
+box-shadow. A scripted `focus()` in this browser did not match
+`:focus-visible`, so the painted ring was not captured as a screenshot. The
+rule itself was read from the served stylesheet.
+
+Screens opened on that build:
+
+| Screen | What was checked |
+| --- | --- |
+| Public home, 1440 layout | Logo, purple “Lead”, one orange-to-yellow strip, purple search button. The capture window is narrower than the layout. |
+| Public home, 390 layout | Hamburger, the same logo and strip, purple hero. |
+| Sign-in | Mobile-number field and the purple “Send code” button. Footer blurb is `#EDE4F5` on `#4B2973`. Sign-in border is `#8A8E9C`. |
+| Buyer account | Signed-in account page, purple links. |
+| Seller | Purple rail and drawer. Active item is the brand purple with white text. |
+| Builder | The staff session is refused. The Builder rail is the same component as the Seller rail. |
+| Admin dashboard and orders | Ink rail, purple avatar and “All” filter, orange sample chip, order table. |
+| Pricing | Save, apply, and preview stay three separate sections. Version 3 was not changed. |
+
+There is no public dialog. The Seller navigation drawer is the overlay that
+was opened. No purchase was submitted.
+
+`node scripts/verify-contrast.mjs` reported 24 of 24 declared pairs meeting
+WCAG 2.2 AA. `node scripts/verify-design-tokens.mjs ../kkl-design` reported
+33 of 33 tokens and 48 of 48 component literals accounted for. The frozen
+baseline is still `kkl-design` at `5bc3512`.
