@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirectForAuth } from "@/lib/auth/recover";
 import { ServiceError } from "@/lib/services/contracts";
-import { previewPricing, savePricingConfiguration } from "@/lib/services/backend/provisional-pricing";
+import { applyPricingToUnsold, previewPricing, savePricingConfiguration } from "@/lib/services/backend/provisional-pricing";
 import {
   draftFromForm,
   explicitTrue,
   localSaveError,
   previewFromForm,
   pricingConfigurationBody,
+  type PricingApplicationView,
   type PricingDraft,
   type PricingPreviewView,
 } from "@/lib/services/backend/provisional-pricing-reading";
@@ -30,6 +31,11 @@ export type PricingPreviewState = {
   qualificationLevel?: string;
   demonstrate?: boolean;
   preview?: PricingPreviewView;
+};
+
+export type PricingApplicationState = {
+  error?: string;
+  application?: PricingApplicationView;
 };
 
 export async function saveProvisionalPricing(
@@ -69,6 +75,25 @@ export async function previewProvisionalPrice(
   } catch (error) {
     redirectForAuth(error, PRICING_PATH);
     if (error instanceof ServiceError) return { ...echo, error: error.message };
+    throw error;
+  }
+}
+
+export async function applyProvisionalPricing(
+  _previous: PricingApplicationState,
+  formData: FormData,
+): Promise<PricingApplicationState> {
+  const configurationId = String(formData.get("configurationId") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(configurationId)) {
+    return { error: "Save a provisional version before applying it. Nothing was changed." };
+  }
+  try {
+    const outcome = await applyPricingToUnsold(configurationId);
+    if (!outcome.applied) return { error: outcome.message };
+    return { application: outcome.result };
+  } catch (error) {
+    redirectForAuth(error, PRICING_PATH);
+    if (error instanceof ServiceError) return { error: `${error.message} No unsold lead was updated, and nothing was charged.` };
     throw error;
   }
 }

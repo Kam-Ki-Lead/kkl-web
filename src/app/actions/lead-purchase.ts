@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { purchaseQuoteRefusal } from "@/lib/domain/commerce-display";
 import { getServices } from "@/lib/services";
 import type { PurchaseOutcome } from "@/lib/services/contracts";
 
@@ -74,6 +75,11 @@ export async function purchaseLead(
       error: "This purchase could not be verified as a single attempt. Open the lead and try again.",
     };
   }
+
+  const quoted = String(formData.get("quotedCredits") ?? "");
+  const current = await marketFor(scope).get(leadId);
+  const refusal = purchaseQuoteRefusal(quoted, current?.priceCredits ?? null);
+  if (refusal) return { error: refusal };
 
   const outcome = await marketFor(scope).purchase({ leadId, idempotencyKey });
 

@@ -16,6 +16,7 @@ import {
   previewFromForm,
   pricingConfigurationBody,
   pricingFailure,
+  readApplication,
   readConfiguration,
   readOverview,
   readPreview,
@@ -340,3 +341,19 @@ function previewBody() {
     message: "This preview uses the recorded provisional configuration. It has not been written onto a lead and it cannot be bought.",
   };
 }
+
+test("an application result names the unsold scope and a preview is not one", () => {
+  const id = "11111111-1111-1111-1111-111111111111";
+  const applied = readApplication({
+    applied: true,
+    configurationId: id,
+    unsoldLeadsUpdated: 4,
+    purchasedOrdersLeftUnchanged: 2,
+    quotesAwaitingConfirmation: 1,
+  });
+  assert.equal(applied?.unsoldLeadsUpdated, 4);
+  assert.equal(applied?.purchasedOrdersLeftUnchanged, 2);
+  assert.equal(applied?.quotesAwaitingConfirmation, 1);
+  assert.equal(readApplication({ applied: true, configurationId: id, unsoldLeadsUpdated: 4 }), null);
+  assert.equal(readApplication(previewBody()), null);
+});

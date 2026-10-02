@@ -74,6 +74,28 @@ export function purchaseHold(input: {
 }
 
 /**
+ * A purchase may proceed only at the amount the confirmation screen showed.
+ *
+ * A matrix application can change an unsold lead's quote between the time the
+ * screen rendered and the time the button is pressed. The action re-reads the
+ * lead and refuses when the two amounts differ, so the wallet is not charged
+ * a different figure.
+ */
+export function purchaseQuoteRefusal(quoted: string, current: number | null): string | null {
+  if (!/^\d+$/.test(quoted)) {
+    return "This confirmation does not include the price that was shown. Open the lead again before buying. Nothing was charged.";
+  }
+  if (current === null) {
+    return "This lead no longer has a price. Nothing was charged.";
+  }
+  const shown = Number(quoted);
+  if (shown !== current) {
+    return `The price changed from ${shown.toLocaleString("en-IN")} credits to ${current.toLocaleString("en-IN")} credits. Nothing was charged. Confirm the new amount before buying.`;
+  }
+  return null;
+}
+
+/**
  * The contact line for a recipient's enquiry.
  *
  * Returns what to *render*, never a value to unmask. Under

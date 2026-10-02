@@ -6,11 +6,14 @@
 import { ServiceError } from "@/lib/services/contracts";
 import { callAs } from "./session";
 import {
+  PRICING_APPLICATION_PATH,
   pricingFailure,
+  readApplication,
   readConfiguration,
   readOverview,
   readPreview,
   readVersionPage,
+  type PricingApplicationView,
   type PricingConfigurationView,
   type PricingOverviewView,
   type PricingPreviewBody,
@@ -88,4 +91,43 @@ export async function previewPricing(body: PricingPreviewBody): Promise<PricingP
   const preview = readPreview(result.body);
   if (!preview) throw refused("The pricing service returned a response this screen does not show.");
   return preview;
+}
+
+export type PricingApplicationOutcome =
+  | { applied: false; message: string }
+  | { applied: true; result: PricingApplicationView };
+
+const UNCHANGED = "No unsold lead was updated, and nothing was charged.";
+
+/**
+ * Ask the review API to apply one saved version to unsold leads.
+ *
+ * This is not a save and not a preview. The published contract has no
+ * application route, so a 404 is reported as "not published" and no count is
+ * invented. A body that is not an explicit application result is not shown
+ * as a completed update.
+ */
+export async function applyPricingToUnsold(configurationId: string): Promise<PricingApplicationOutcome> {
+  const result = await callAs<Record<string, unknown>>("staff", PRICING_APPLICATION_PATH, {
+    method: "POST",
+    body: { configurationId },
+  });
+  if (result.status === 404) {
+    return {
+      applied: false,
+      message: `The review API has not published an application route. ${UNCHANGED}`,
+    };
+  }
+  if (result.status !== 200 && result.status !== 201) {
+    const problem = pricingFailure(result.status, result.body);
+    return { applied: false, message: `${problem.error} ${UNCHANGED}` };
+  }
+  const parsed = readApplication(result.body);
+  if (!parsed || parsed.configurationId !== configurationId) {
+    return {
+      applied: false,
+      message: `The pricing service returned a response this screen does not show. ${UNCHANGED}`,
+    };
+  }
+  return { applied: true, result: parsed };
 }

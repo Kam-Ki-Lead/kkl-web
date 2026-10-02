@@ -2,8 +2,10 @@
 
 import { useActionState, useState } from "react";
 import {
+  applyProvisionalPricing,
   previewProvisionalPrice,
   saveProvisionalPricing,
+  type PricingApplicationState,
   type PricingPreviewState,
   type PricingSaveState,
 } from "@/app/actions/provisional-pricing";
@@ -71,6 +73,7 @@ export function ProvisionalPricingEditor({
         <p className="t-caption text-muted">
           Amounts are rupees with at most two decimal places. The minimum is inclusive and the maximum is exclusive.
           Leave the maximum empty for one open-ended band, and make that band the highest. A gap is stored and is not filled.
+          Base prices stay blank until they are typed. No workbook rate is filled in as a starting price.
         </p>
         {bands.map((band, index) => (
           <div key={index} className="grid grid-cols-1 gap-[10px] md:grid-cols-[1.3fr_1fr_1fr_1fr_auto] md:items-end">
@@ -379,5 +382,55 @@ function PreviewResult({
       <p className="t-body text-body">{preview.message}</p>
       <p className="t-caption text-muted">{preview.purchaseMessage}</p>
     </div>
+  );
+}
+
+export function ApplyToUnsoldLeads({
+  configurationId,
+  version,
+  bands,
+  levels,
+}: {
+  configurationId: string | null;
+  version: number | null;
+  bands: number;
+  levels: number;
+}) {
+  const [state, action, pending] = useActionState<PricingApplicationState, FormData>(applyProvisionalPricing, {});
+
+  if (!configurationId || version === null) {
+    return (
+      <p className="t-body text-body">Save a provisional version before applying it to unsold leads.</p>
+    );
+  }
+
+  const applied = state.application;
+
+  return (
+    <form action={action} className="flex flex-col gap-[12px]">
+      <p className="t-body text-body">
+        This action is separate from saving a version and from previewing a calculation.
+        Applying version {version} is the step that updates unsold leads. It covers {bands} {bands === 1 ? "band" : "bands"} and {levels} {levels === 1 ? "level" : "levels"}.
+        Purchased orders stay as they were. A buyer who already saw a price is not charged a different amount unless they confirm the new one.
+      </p>
+      <input type="hidden" name="configurationId" value={configurationId} />
+      {state.error ? <p role="alert" className="t-body text-danger">{state.error}</p> : null}
+      {applied ? (
+        <div className="flex flex-col gap-[6px]" aria-live="polite">
+          <p className="t-body font-semibold text-ink">
+            Version {version} was applied. {applied.unsoldLeadsUpdated.toLocaleString("en-IN")} unsold {applied.unsoldLeadsUpdated === 1 ? "lead was" : "leads were"} updated.
+          </p>
+          <p className="t-body text-body">
+            {applied.purchasedOrdersLeftUnchanged.toLocaleString("en-IN")} purchased {applied.purchasedOrdersLeftUnchanged === 1 ? "order was" : "orders were"} left unchanged.
+            {applied.quotesAwaitingConfirmation.toLocaleString("en-IN")} open {applied.quotesAwaitingConfirmation === 1 ? "quote now needs" : "quotes now need"} a fresh confirmation before anyone is charged.
+          </p>
+        </div>
+      ) : null}
+      <div>
+        <Button type="submit" variant="secondary" disabled={pending}>
+          {pending ? "Applying…" : "Apply to unsold leads"}
+        </Button>
+      </div>
+    </form>
   );
 }

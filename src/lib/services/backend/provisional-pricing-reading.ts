@@ -3,9 +3,13 @@
  *
  * Money stays a decimal rupee string. A multiplier stays a decimal string or
  * a numerator and denominator. A question carries a prompt, not a level.
- * A preview level is supplied by the person using the screen. Nothing here
- * activates a price, writes a marketplace price, or maps a question to a level.
+ * A preview level is supplied by the person using the screen. Saving and
+ * previewing do not update a lead. Applying a version is a separate request.
+ * Nothing here activates a purchase price or maps a question to a level.
  */
+
+/** Separate from save and preview. The review API has not published this route. */
+export const PRICING_APPLICATION_PATH = "/v1/admin/pricing/application";
 
 export const PROVISIONAL_BANNER = "Provisional — not used for purchases";
 
@@ -703,5 +707,41 @@ export function readPreview(body: unknown): PricingPreviewView | null {
     purchaseMessage: purchase.message,
     creditsText: creditsExplanation(credits, withheld, demonstrated),
     purchasable: false,
+  };
+}
+
+export type PricingApplicationView = {
+  applied: true;
+  configurationId: string;
+  unsoldLeadsUpdated: number;
+  purchasedOrdersLeftUnchanged: number;
+  quotesAwaitingConfirmation: number;
+};
+
+/** A successful application names its scope. A save or a preview is not one. */
+export function readApplication(value: unknown): PricingApplicationView | null {
+  const row = record(value);
+  if (!row || row.applied !== true) return null;
+  const configurationId = typeof row.configurationId === "string" ? row.configurationId : "";
+  if (!/^[0-9a-f-]{36}$/i.test(configurationId)) return null;
+  const unsoldLeadsUpdated = integer(row.unsoldLeadsUpdated);
+  const purchasedOrdersLeftUnchanged = integer(row.purchasedOrdersLeftUnchanged);
+  const quotesAwaitingConfirmation = integer(row.quotesAwaitingConfirmation);
+  if (
+    unsoldLeadsUpdated === null
+    || purchasedOrdersLeftUnchanged === null
+    || quotesAwaitingConfirmation === null
+    || unsoldLeadsUpdated < 0
+    || purchasedOrdersLeftUnchanged < 0
+    || quotesAwaitingConfirmation < 0
+  ) {
+    return null;
+  }
+  return {
+    applied: true,
+    configurationId,
+    unsoldLeadsUpdated,
+    purchasedOrdersLeftUnchanged,
+    quotesAwaitingConfirmation,
   };
 }

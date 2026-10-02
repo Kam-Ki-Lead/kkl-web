@@ -111,9 +111,13 @@ export default async function PurchaseReviewPage({
           />
         </Card>
 
-        {blocked === null ? (
+        {blocked === null && lead.priceCredits !== null ? (
           <div className="mt-[18px]">
-            <PurchaseConfirmForm leadId={lead.id} idempotencyKey={token} />
+            <PurchaseConfirmForm
+              leadId={lead.id}
+              idempotencyKey={token}
+              quotedCredits={lead.priceCredits}
+            />
           </div>
         ) : null}
 

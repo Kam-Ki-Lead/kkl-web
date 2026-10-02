@@ -19,11 +19,14 @@ import { Button } from "@/components/ui/button";
 export function PurchaseConfirmForm({
   leadId,
   idempotencyKey,
+  quotedCredits,
   scope = "seller",
   cancelHref,
 }: {
   leadId: string;
   idempotencyKey: string;
+  /** The amount this screen showed. A later change refuses the purchase. */
+  quotedCredits: number;
   /** Which marketplace this buys from. The two are separate pools. */
   scope?: "seller" | "builder";
   cancelHref?: string;
@@ -34,6 +37,7 @@ export function PurchaseConfirmForm({
     <form action={action} className="flex flex-col gap-[12px]">
       <input type="hidden" name="leadId" value={leadId} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+      <input type="hidden" name="quotedCredits" value={String(quotedCredits)} />
       <input type="hidden" name="scope" value={scope} />
 
       {state.error ? (

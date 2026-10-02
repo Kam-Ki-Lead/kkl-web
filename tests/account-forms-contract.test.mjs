@@ -20,7 +20,7 @@ import { enquiryCountLabel, imageRecordLabel, ownerCountLine } from "../src/lib/
 import { describeLocation, withStoredAnswers } from "../src/lib/requirement.ts";
 import { builderProfilePatch } from "../src/lib/services/backend/alert-preferences.ts";
 import { builderProfileView } from "../src/lib/services/backend/builder-profile-reading.ts";
-import { purchaseHold } from "../src/lib/domain/commerce-display.ts";
+import { purchaseHold, purchaseQuoteRefusal } from "../src/lib/domain/commerce-display.ts";
 import { billingPatch } from "../src/lib/services/backend/seller-profile-reading.ts";
 
 test("the buyer full name is not copied into the account name", () => {
@@ -133,6 +133,16 @@ test("a purchase hold uses the lead blockers and not a sample verification", () 
     purchaseHold({ priceCredits: 100, balanceCredits: 100, blockers: [] }).kind,
     null,
   );
+});
+
+test("a changed purchase quote is refused and the shown amount is accepted", () => {
+  assert.match(purchaseQuoteRefusal("", 1000) ?? "", /does not include the price/);
+  assert.match(purchaseQuoteRefusal("1000", null) ?? "", /no longer has a price/);
+  const changed = purchaseQuoteRefusal("1000", 1200);
+  assert.match(changed ?? "", /1,000 credits/);
+  assert.match(changed ?? "", /1,200 credits/);
+  assert.match(changed ?? "", /Nothing was charged/);
+  assert.equal(purchaseQuoteRefusal("1000", 1000), null);
 });
 
 test("shortlist add and remove follow the published statuses", () => {

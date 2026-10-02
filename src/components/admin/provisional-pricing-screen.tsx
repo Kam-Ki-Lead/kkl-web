@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
+  ApplyToUnsoldLeads,
   ProvisionalPricePreview,
   ProvisionalPricingEditor,
 } from "@/components/admin/provisional-pricing-editor";
@@ -89,7 +90,8 @@ export async function ProvisionalPricingScreen({
           <h2 className="text-[20px] font-bold leading-snug text-warning">{PROVISIONAL_BANNER}</h2>
           <p className="t-body mt-[8px] text-body">{overview.purchaseMessage}</p>
           <p className="t-caption mt-[8px] text-muted">
-            This screen does not activate a price and does not change a lead or an order.
+            Saving stores a new provisional version and does not change a lead. A preview calculates one amount and does not change a lead.
+            Applying a saved version is a separate action. This screen does not activate a purchase price.
           </p>
         </Card>
 
@@ -118,6 +120,18 @@ export async function ProvisionalPricingScreen({
               versionNote={viewed
                 ? `Version ${viewed.version} is shown. Saving stores a new provisional version and leaves version ${viewed.version} unchanged.`
                 : "Nothing is stored yet. Saving stores the first provisional version."}
+            />
+          </div>
+        </Card>
+
+        <Card className="p-[18px]">
+          <h2 className="t-card-title text-ink">Apply to unsold leads</h2>
+          <div className="mt-[12px]">
+            <ApplyToUnsoldLeads
+              configurationId={viewed?.id ?? null}
+              version={viewed?.version ?? null}
+              bands={viewed?.bands.length ?? 0}
+              levels={viewed?.levels.length ?? 0}
             />
           </div>
         </Card>
