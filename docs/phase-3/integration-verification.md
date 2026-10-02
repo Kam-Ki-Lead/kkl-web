@@ -1276,6 +1276,34 @@ not store. Publication (Q-3), matching, verification (Q-4), Q-1a through
 Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain.
 Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
 
+## Alert preference storage, 2 October 2026
+
+Frontend `409ba40`. This section does not replace the `1de518a` results.
+
+The review API is process 42708, started at 12:54 local, command
+`node src/http/server.mjs`, on checkout `64cbc93` (implementation `3f19f01`,
+OpenAPI `1.0.0-phase3.q`). Migration `023_alert_preferences.sql` is the file
+that handoff names. This frontend did not restart the API, did not change
+that checkout, and did not query the migration table.
+
+The frontend on 3811 for this pass is process 34712, built with
+`NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then
+`next start` with the documented domain switches. No development-identity
+secret was set. One local OTP was used for the seller number ending 0102
+and one for the builder number ending 0104. The codes are not recorded here.
+
+| Check | Result |
+| --- | --- |
+| Seller save and reload | Review Seller, number ending 0102. “New leads match my areas” saved true and reloaded checked, then saved false and reloaded unchecked. The success sentence was “Your alert preferences are saved. Alert delivery is not available yet.” Contact name stayed Review Seller. Agency name stayed Review Agency Phase 3. |
+| Seller rejected save | Contact name `A` with that box checked showed “Enter the name support should use.” The box stayed checked and the name stayed `A`. The page did not say the preferences were saved. Reload restored Review Seller and an unchecked box. |
+| Builder save and reload | Review Builder, number ending 0104. “A buyer enquires about one of my listings” saved true and reloaded checked, then saved false and reloaded unchecked. Company name stayed Review Projects Phase 3. Email stayed `builder@example.invalid`. The same delivery sentence was shown, followed by the listing sentence for RERA. |
+| Other role | The builder session on the seller profile saw the three seller boxes disabled, with “These choices are unavailable for this account, and no alert is sent.” |
+| Missing session | An unsigned open of `/seller/profile` went to `/auth?next=/seller/profile`, headed “Sign in or register”. It did not say preferences were saved. |
+
+Contract tests cover an explicit false, an omitted key left out of the patch, the other role’s keys left out, consent keys left out, `delivery` left out, a null alerts object left unwritable, and the sentence that follows `delivery.available`. The suite passed 90 of 90. `tsc --noEmit` and `next build` passed before process 34712 started.
+
+Preference storage is integrated. Trigger evaluation and delivery remain dependent on the named rules and provider configuration. `delivery.available` was false. A true choice did not send an alert. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
