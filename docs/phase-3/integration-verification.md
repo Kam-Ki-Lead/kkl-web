@@ -1399,6 +1399,30 @@ The suite passed 103 of 103. `tsc --noEmit` and `next build` passed before proce
 
 Saving and previewing still do not change a lead. Applying a version is the separate step that would update unsold leads, and this API does not perform that write. A changed quote is not charged. Purchases stay refused. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`. No new client reminder was sent.
 
+## Published repricing, 2 October 2026
+
+Frontend `62d5388`. This section does not replace the `cb2eb41` results.
+The review API now publishes `POST /v1/admin/pricing/configurations/{id}/impact`
+and `POST /v1/admin/pricing/configurations/{id}/apply`, OpenAPI
+`1.0.0-phase3.s`, backend `f6bd666`. Process 31584 on port 4010, started at
+17:18 local, answered both. This frontend did not change that checkout.
+
+The frontend on 3811 for this pass was rebuilt from that frontend tree and
+started with the documented domain switches. No development-identity secret
+was set.
+
+| Check | Result |
+| --- | --- |
+| Edited versus applied | Review Staff, number ending 0101. The edit form said it was a draft of version 3. The apply section said it uses saved version 3, 2 bands and 2 levels, and ignores unsaved edits. |
+| Impact | Inspecting saved version 3 reported 0 leads would be updated, 0 would be left unchanged, and 0 would remain unpriced. The page said nothing had been written. No lead in the result was left without a price. Leads without a budget, a qualification level, a budget source, or a previous price configuration are outside that list. |
+| Apply | “Apply saved version 3” then reported 0 leads were updated, 0 were left unchanged, and 0 remain unpriced. Version 3 and its note were unchanged. Three versions stayed stored. |
+| Validation | A base price of `abc` was refused with “Enter each amount as rupees with at most two decimal places.” No fourth version was stored. |
+| Changed quote | The purchase confirmation says the purchase stops if the shown price changes, so the buyer can review the new amount, and that nothing is charged until the amounts match. The unit test still refuses a mismatched amount. No purchase was submitted. |
+
+The pricing tests and the purchase-quote test passed. `tsc --noEmit` and `next build` passed before this frontend started.
+
+Workbook rates were not loaded. Saving and previewing still do not change a lead. Applying the saved version is the write, and this pass had no lead that carried the inputs that write uses. Activation stays refused. Purchases stay refused until Q-1a is confirmed. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`. No new client reminder was sent.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
