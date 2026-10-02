@@ -17,6 +17,7 @@ import type {
   WalletSummary,
 } from "@/lib/domain/types";
 import type { UsageMonth } from "@/lib/services/contracts";
+import { readPriceChangedQuote, purchaseExpectedFields } from "@/lib/domain/commerce-display";
 import { callAs, type BackendRole } from "./session";
 
 /**
@@ -57,6 +58,8 @@ type BackendLead = {
   summary: string | null;
   consentStatus: string;
   priceCredits: number | null;
+  priceConfigurationId: string | null;
+  priceConfigurationVersion: number | null;
   available: boolean;
   eligible: boolean;
   contact: { state: "released_on_purchase"; label: string };
@@ -136,6 +139,11 @@ function toMarketplaceLead(lead: BackendLead): MarketplaceLead {
     // sends one.
     ageDays: 0,
     priceCredits: lead.priceCredits,
+    priceConfigurationId: typeof lead.priceConfigurationId === "string" ? lead.priceConfigurationId : null,
+    priceConfigurationVersion:
+      typeof lead.priceConfigurationVersion === "number" && Number.isSafeInteger(lead.priceConfigurationVersion)
+        ? lead.priceConfigurationVersion
+        : null,
     originalPriceCredits: null,
     // kkl-backend composes no mask: it has read no contact to mask.
     contactMask: null,
@@ -245,10 +253,18 @@ export function backendLeadMarket(role: BackendRole): LeadMarketService {
     },
 
     async purchase(input): Promise<PurchaseOutcome> {
-      const { status, body } = await callAs<BackendOrder & { error?: string; code?: string }>(
+      const expected = purchaseExpectedFields({
+        expectedPriceCredits: input.expectedPriceCredits ?? 0,
+        expectedConfigurationVersion: input.expectedConfigurationVersion ?? null,
+      });
+      const { status, body } = await callAs<BackendOrder & { error?: string; code?: string; quote?: unknown }>(
         role, "/v1/orders", {
           method: "POST",
-          body: { leadId: input.leadId, idempotencyKey: input.idempotencyKey },
+          body: {
+            leadId: input.leadId,
+            idempotencyKey: input.idempotencyKey,
+            ...(expected ?? {}),
+          },
         });
 
       if (status === 201 || status === 200) {
@@ -278,6 +294,14 @@ export function backendLeadMarket(role: BackendRole): LeadMarketService {
       }
       if (code === "lead_already_sold" || code === "lead_not_for_sale") return { kind: "already_sold" };
       if (code === "account_suspended") return { kind: "account_suspended" };
+      if (code === "price_changed") {
+        return {
+          kind: "price_changed",
+          message: (body as { error?: string }).error
+            ?? "Review the price and pricing version now on that lead. Nothing was charged.",
+          quote: readPriceChangedQuote(body),
+        };
+      }
       return {
         kind: "deduction_failed",
         message: (body as { error?: string }).error ?? "That purchase could not be completed.",

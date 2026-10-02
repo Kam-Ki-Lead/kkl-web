@@ -266,7 +266,8 @@ export function kycTimeline(): readonly KycTimelineEntry[] {
 
 type SeedLead = Omit<MarketplaceLeadDetail,
   'priceCredits' | 'contactMask' | 'qualification' | 'contactState' | 'blockers'
-  | 'purchasable' | 'intentBand' | 'intentScore'> & {
+  | 'purchasable' | 'intentBand' | 'intentScore'
+  | 'priceConfigurationId' | 'priceConfigurationVersion'> & {
   /**
    * Sample fixtures carry concrete values where the real service may have
    * none. That is what a fixture is for, and sample mode says so on every
@@ -440,6 +441,8 @@ function toMasked(seed: SeedLead): MarketplaceLead {
     priceCredits: seed.priceCredits,
     originalPriceCredits: seed.originalPriceCredits,
     contactMask: seed.contactMask,
+    priceConfigurationId: null,
+    priceConfigurationVersion: null,
     contactState: {
       state: 'masked_preview',
       label: 'Contact hidden until purchase',

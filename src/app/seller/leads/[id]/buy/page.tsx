@@ -99,6 +99,9 @@ export default async function PurchaseReviewPage({
             label="Price"
             value={lead.priceCredits === null ? UNPRICED_LABEL : formatExactInr(lead.priceCredits)}
           />
+          {lead.priceConfigurationVersion !== null ? (
+            <Row label="Pricing version" value={`Version ${lead.priceConfigurationVersion}`} />
+          ) : null}
           <Row label="Current balance" value={formatCreditBalance(wallet.balanceCredits)} />
           <Row
             label="Balance after purchase"
@@ -117,6 +120,7 @@ export default async function PurchaseReviewPage({
               leadId={lead.id}
               idempotencyKey={token}
               quotedCredits={lead.priceCredits}
+              quotedConfigurationVersion={lead.priceConfigurationVersion}
             />
           </div>
         ) : null}

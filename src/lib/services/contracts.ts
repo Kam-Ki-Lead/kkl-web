@@ -309,7 +309,18 @@ export type PurchaseOutcome =
   | { readonly kind: "already_sold" }
   | { readonly kind: "not_verified"; readonly kycStatus: KycStatus }
   | { readonly kind: "account_suspended" }
-  | { readonly kind: "deduction_failed"; readonly message: string };
+  | { readonly kind: "deduction_failed"; readonly message: string }
+  | {
+      readonly kind: "price_changed";
+      readonly message: string;
+      /** The current quote, when the response included one that can be confirmed. */
+      readonly quote: {
+        readonly leadId: string;
+        readonly priceCredits: number;
+        readonly configurationId: string | null;
+        readonly configurationVersion: number;
+      } | null;
+    };
 
 /**
  * The lead marketplace and purchase (S-07 to S-13).
@@ -328,7 +339,16 @@ export interface LeadMarketService {
   list(query: LeadMarketQuery): Promise<LeadMarketPage>;
   /** Masked view. Contact values are not in the response at all. */
   get(id: string): Promise<MarketplaceLeadDetail | null>;
-  purchase(input: { leadId: string; idempotencyKey: string }): Promise<PurchaseOutcome>;
+  purchase(input: {
+    leadId: string;
+    idempotencyKey: string;
+    /**
+     * Sent together, and only when the screen showed an applied pricing version.
+     * A lead with no version omits both, and is charged its row price.
+     */
+    expectedPriceCredits?: number;
+    expectedConfigurationVersion?: number;
+  }): Promise<PurchaseOutcome>;
   listPurchased(): Promise<readonly PurchasedLead[]>;
   getPurchased(id: string): Promise<PurchasedLead | null>;
   /**

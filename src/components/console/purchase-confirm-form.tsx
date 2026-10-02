@@ -20,6 +20,7 @@ export function PurchaseConfirmForm({
   leadId,
   idempotencyKey,
   quotedCredits,
+  quotedConfigurationVersion = null,
   scope = "seller",
   cancelHref,
 }: {
@@ -27,21 +28,30 @@ export function PurchaseConfirmForm({
   idempotencyKey: string;
   /** The amount this screen showed. A later change refuses the purchase. */
   quotedCredits: number;
+  /** The applied pricing version this screen showed, when the lead has one. */
+  quotedConfigurationVersion?: number | null;
   /** Which marketplace this buys from. The two are separate pools. */
   scope?: "seller" | "builder";
   cancelHref?: string;
 }) {
   const [state, action, pending] = useActionState<PurchaseFormState, FormData>(purchaseLead, {});
+  const confirmation = state.confirmation;
+  const key = confirmation?.idempotencyKey ?? idempotencyKey;
+  const credits = confirmation?.quotedCredits ?? quotedCredits;
+  const version = confirmation?.quotedConfigurationVersion ?? quotedConfigurationVersion;
 
   return (
     <form action={action} className="flex flex-col gap-[12px]">
       <input type="hidden" name="leadId" value={leadId} />
-      <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
-      <input type="hidden" name="quotedCredits" value={String(quotedCredits)} />
+      <input type="hidden" name="idempotencyKey" value={key} />
+      <input type="hidden" name="quotedCredits" value={String(credits)} />
+      <input type="hidden" name="quotedConfigurationVersion" value={version == null ? "" : String(version)} />
       <input type="hidden" name="scope" value={scope} />
 
       <p className="t-body text-body">
-        This confirmation is for the price shown above. If that price changes, the purchase stops so you can review the new amount. Nothing is charged until the amounts match.
+        {confirmation
+          ? `Nothing has been charged. Confirm ${confirmation.quotedCredits.toLocaleString("en-IN")} credits at pricing version ${confirmation.quotedConfigurationVersion} to buy at that quote.`
+          : "This confirmation is for the price and pricing version shown above. If either changes, the purchase stops and the current quote is shown here for a separate confirmation. Nothing is charged until that quote is confirmed."}
       </p>
       {state.error ? (
         <p
@@ -54,7 +64,11 @@ export function PurchaseConfirmForm({
 
       <div className="flex flex-wrap items-center gap-[16px]">
         <Button type="submit" size="lg" disabled={pending}>
-          {pending ? "Deducting credits…" : "Confirm and buy"}
+          {pending
+            ? "Deducting credits…"
+            : confirmation
+              ? `Confirm ${confirmation.quotedCredits.toLocaleString("en-IN")} credits, version ${confirmation.quotedConfigurationVersion}`
+              : "Confirm and buy"}
         </Button>
         <Link
           href={cancelHref ?? `/seller/leads/${leadId}`}

@@ -3,7 +3,12 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { purchaseQuoteRefusal } from "@/lib/domain/commerce-display";
+import {
+  nextPurchaseIdempotencyKey,
+  priceChangedMessage,
+  purchaseExpectedFields,
+  purchaseQuoteRefusal,
+} from "@/lib/domain/commerce-display";
 import { getServices } from "@/lib/services";
 import type { PurchaseOutcome } from "@/lib/services/contracts";
 
@@ -15,9 +20,11 @@ import type { PurchaseOutcome } from "@/lib/services/contracts";
  * The confirm screen mints a token and puts it in a hidden field. The service
  * treats it as an idempotency key, so a double-click, a retried request or a
  * reloaded POST resolves to the purchase already made instead of spending
- * credits twice. The token is per-visit to the confirm screen, not per-lead:
- * two deliberate attempts on the same lead are two different intentions, and the
- * second one is refused because the lead is sold, not because the key matched.
+ * credits twice. The token is per confirmed payload, not per lead: a retry of
+ * the same confirmation keeps the key, and a quote the buyer confirms after
+ * `price_changed` is a new payload with a new key. Two deliberate attempts on
+ * the same lead are two different intentions, and the second one is refused
+ * because the lead is sold, not because the key matched.
  *
  * What this is not
  * ----------------
@@ -53,8 +60,19 @@ function basePathFor(scope: MarketScope): string {
   return scope === "builder" ? "/builder/marketplace" : "/seller/leads";
 }
 
+export type PurchaseConfirmation = {
+  readonly idempotencyKey: string;
+  readonly quotedCredits: number;
+  readonly quotedConfigurationVersion: number;
+};
+
 export type PurchaseFormState = {
   readonly error?: string;
+  /**
+   * Set only after `price_changed`. The next submit must be a deliberate
+   * confirmation of this quote. Nothing here submits itself.
+   */
+  readonly confirmation?: PurchaseConfirmation;
 };
 
 export async function purchaseLead(
@@ -77,11 +95,72 @@ export async function purchaseLead(
   }
 
   const quoted = String(formData.get("quotedCredits") ?? "");
-  const current = await marketFor(scope).get(leadId);
-  const refusal = purchaseQuoteRefusal(quoted, current?.priceCredits ?? null);
-  if (refusal) return { error: refusal };
+  const versionRaw = String(formData.get("quotedConfigurationVersion") ?? "");
+  if (!/^\d+$/.test(quoted)) {
+    return {
+      error: "This confirmation does not include the price that was shown. Open the lead again before buying. Nothing was charged.",
+    };
+  }
+  const shownCredits = Number(quoted);
+  const shownVersion = versionRaw === "" ? null : Number(versionRaw);
+  if (shownVersion !== null && (!Number.isSafeInteger(shownVersion) || shownVersion < 1)) {
+    return {
+      error: "This confirmation does not include the pricing version that was shown. Open the lead again before buying. Nothing was charged.",
+    };
+  }
 
-  const outcome = await marketFor(scope).purchase({ leadId, idempotencyKey });
+  const expected = purchaseExpectedFields({
+    expectedPriceCredits: shownCredits,
+    expectedConfigurationVersion: shownVersion,
+  });
+  if (!expected) {
+    // No applied version was shown, so the service would charge the row price.
+    // Re-read it first. A version that appeared after the screen rendered is
+    // not charged by omitting the fields.
+    const current = await marketFor(scope).get(leadId);
+    if (current?.priceConfigurationVersion != null) {
+      return {
+        error: "This lead now has a pricing version. Open it again before buying. Nothing was charged.",
+      };
+    }
+    const refusal = purchaseQuoteRefusal(quoted, current?.priceCredits ?? null);
+    if (refusal) return { error: refusal };
+  }
+
+  const outcome = await marketFor(scope).purchase({
+    leadId,
+    idempotencyKey,
+    ...(expected ?? {}),
+  });
+
+  if (outcome.kind === "price_changed") {
+    const quote = outcome.quote;
+    if (!quote || quote.leadId !== leadId) {
+      return {
+        error: "The price or pricing version changed, and the current quote could not be read. Open the lead again before buying. Nothing was charged.",
+      };
+    }
+    return {
+      error: priceChangedMessage({
+        shownCredits,
+        shownVersion,
+        priceCredits: quote.priceCredits,
+        configurationVersion: quote.configurationVersion,
+      }),
+      confirmation: {
+        idempotencyKey: nextPurchaseIdempotencyKey({
+          previousKey: idempotencyKey,
+          sentCredits: shownCredits,
+          sentVersion: shownVersion,
+          quoteCredits: quote.priceCredits,
+          quoteVersion: quote.configurationVersion,
+          mint: randomUUID,
+        }),
+        quotedCredits: quote.priceCredits,
+        quotedConfigurationVersion: quote.configurationVersion,
+      },
+    };
+  }
 
   // The outcome is held in a short-lived httpOnly cookie rather than a query
   // string: it decides which of the designed result screens renders, and a URL

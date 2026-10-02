@@ -242,6 +242,15 @@ export type MarketplaceLead = {
    * and a made-up number would read as agreed.
    */
   readonly priceCredits: number | null;
+  /**
+   * The applied pricing configuration, when this lead has one.
+   *
+   * Null when the row has no applied version. A purchase of a versioned lead
+   * must send both the price and this version; a change in either one, including
+   * a new version at the same amount, is a different quote.
+   */
+  readonly priceConfigurationId: string | null;
+  readonly priceConfigurationVersion: number | null;
   /** Present only when the aging discount applies; the server computes it. */
   readonly originalPriceCredits: number | null;
   /**

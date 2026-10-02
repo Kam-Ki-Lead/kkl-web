@@ -74,12 +74,14 @@ export function purchaseHold(input: {
 }
 
 /**
- * A purchase may proceed only at the amount the confirmation screen showed.
+ * A purchase of a lead with no applied pricing version may proceed only at the
+ * amount the confirmation screen showed.
  *
- * A matrix application can change an unsold lead's quote between the time the
- * screen rendered and the time the button is pressed. The action re-reads the
- * lead and refuses when the two amounts differ, so the wallet is not charged
- * a different figure.
+ * That path omits the expected price and version, and the service then charges
+ * the row price. The action re-reads the lead and refuses when the two amounts
+ * differ, so the wallet is not charged a different figure. A lead that already
+ * has a version is not decided here: the service compares both the amount and
+ * the version and returns the current quote when either differs.
  */
 export function purchaseQuoteRefusal(quoted: string, current: number | null): string | null {
   if (!/^\d+$/.test(quoted)) {
@@ -93,6 +95,96 @@ export function purchaseQuoteRefusal(quoted: string, current: number | null): st
     return `The price changed from ${shown.toLocaleString("en-IN")} credits to ${current.toLocaleString("en-IN")} credits. Nothing was charged. Confirm the new amount before buying.`;
   }
   return null;
+}
+
+function positiveCreditCount(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1) return null;
+  return value;
+}
+
+/**
+ * The expected price and version, or nothing.
+ *
+ * Both travel together. A lead with no applied version omits them so the
+ * service charges the row price. A version without a positive price is not a
+ * quote this screen can send.
+ */
+export function purchaseExpectedFields(input: {
+  expectedPriceCredits: number;
+  expectedConfigurationVersion: number | null;
+}): { readonly expectedPriceCredits: number; readonly expectedConfigurationVersion: number } | null {
+  const version = input.expectedConfigurationVersion;
+  const credits = positiveCreditCount(input.expectedPriceCredits);
+  if (version === null || credits === null) return null;
+  if (!Number.isSafeInteger(version) || version < 1) return null;
+  return { expectedPriceCredits: credits, expectedConfigurationVersion: version };
+}
+
+export type PriceChangedQuote = {
+  readonly leadId: string;
+  readonly priceCredits: number;
+  readonly configurationId: string | null;
+  readonly configurationVersion: number;
+};
+
+/**
+ * The quote on a `price_changed` response, when it can be confirmed.
+ *
+ * A missing version, a missing amount, or any other shape is not turned into
+ * a quote. The screen then asks the buyer to open the lead again.
+ */
+export function readPriceChangedQuote(body: unknown): PriceChangedQuote | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as Record<string, unknown>;
+  if (record.code !== "price_changed") return null;
+  const quote = record.quote;
+  if (!quote || typeof quote !== "object") return null;
+  const row = quote as Record<string, unknown>;
+  const priceCredits = positiveCreditCount(row.priceCredits);
+  const configurationVersion = positiveCreditCount(row.configurationVersion);
+  if (typeof row.leadId !== "string" || priceCredits === null || configurationVersion === null) return null;
+  const configurationId = row.configurationId === null
+    ? null
+    : typeof row.configurationId === "string" ? row.configurationId : undefined;
+  if (configurationId === undefined) return null;
+  return { leadId: row.leadId, priceCredits, configurationId, configurationVersion };
+}
+
+/**
+ * A changed quote is a new purchase, so it needs a new idempotency key.
+ *
+ * A retry of the confirmation that was just submitted keeps the key it already
+ * used. Minting another one would make the service treat the retry as a
+ * different purchase.
+ */
+export function nextPurchaseIdempotencyKey(input: {
+  previousKey: string;
+  sentCredits: number;
+  sentVersion: number | null;
+  quoteCredits: number;
+  quoteVersion: number;
+  mint: () => string;
+}): string {
+  const samePayload = input.sentCredits === input.quoteCredits && input.sentVersion === input.quoteVersion;
+  return samePayload ? input.previousKey : input.mint();
+}
+
+/** What the confirmation screen says when the service returns a new quote. */
+export function priceChangedMessage(input: {
+  shownCredits: number;
+  shownVersion: number | null;
+  priceCredits: number;
+  configurationVersion: number;
+}): string {
+  const amount = input.priceCredits.toLocaleString("en-IN");
+  const version = input.configurationVersion.toLocaleString("en-IN");
+  const amountClause = input.priceCredits === input.shownCredits
+    ? `The price is still ${amount} credits`
+    : `The price is now ${amount} credits`;
+  const versionClause = input.shownVersion === input.configurationVersion
+    ? `the pricing version is still version ${version}`
+    : `the pricing version is now version ${version}`;
+  return `${amountClause}, and ${versionClause}. Nothing was charged. Confirm this quote before buying.`;
 }
 
 /**
