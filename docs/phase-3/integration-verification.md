@@ -1338,6 +1338,42 @@ Contract tests cover decimal strings, an omitted maximum stored as null, questio
 
 The stored matrix is provisional. It is not used for purchases. Activation stays refused. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Preference storage stays integrated, and trigger evaluation and delivery stay dependent on the named rules and provider configuration. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
 
+## Provisional credit preview, 2 October 2026
+
+Frontend `db90ccd`. This section does not replace the `20bc990` results.
+
+The review API is process 23140, started at 15:24 local, command
+`node src/http/server.mjs`, on checkout `d527835` (the matrix implementation
+that follows `7e229a2`, OpenAPI `1.0.0-phase3.r`). Migration
+`024_pricing_configuration.sql` is the file in that checkout. This frontend
+did not restart the API, did not change that checkout, and did not query the
+migration table. `GET /v1/admin/pricing` without a session returned 401.
+
+The save and the first previews on 3811 used process 20928, started at 16:29
+local. After the amount-validation wording and the demonstration checkbox
+were corrected, the same switches were started again as process 29296 at
+16:36 local. Both were built with `NEXT_PUBLIC_KKL_ENV=review` and
+`NEXT_PUBLIC_KKL_DATA_SOURCE=sample`, then `next start` with the documented
+domain switches, including `KKL_ADMIN_OPERATIONS=backend`. No
+development-identity secret was set. One local OTP was used for the staff
+number ending 0101. The code is not recorded here.
+
+| Check | Result |
+| --- | --- |
+| Save a new version | Review Staff, number ending 0101, on process 20928. Overlapping bands “Synthetic gap low” and “Synthetic gap high” were refused. The server sentence stayed on the page and the entered amounts stayed in the fields. Setting the high minimum to `2000000.00` saved version 3, note “Synthetic gap matrix for the handoff check”. Reload said 3 versions are stored and that the list shows the newest versions returned, at most 50. The gap read “No price is stored from ₹10,00,000.00 up to ₹20,00,000.00. A gap is not filled.” |
+| Earlier version | Version 1, `9d5ab64e-d0f5-4028-9c76-381bee39da5c`, still showed the note “Synthetic provisional matrix for review” and its original base prices. Saving version 3 had not changed it. |
+| Exact credits | Budget `500000.00` and qualification level 1, both supplied, used version 3. Exact calculation ₹1,000.00. No rounding demonstration was requested. The credit line was 1,000 credits at 1 rupee = 1 credit, and the preview cannot be bought. The page said the level was supplied and is not an AI qualification. The matched band’s edges were shown as the preview convention, and that convention was labelled not confirmed. |
+| Fractional credits | The same budget at qualification level 2. Exact calculation ₹1,333.30. The page stated no credit figure, because the exact amount is not a whole rupee and rounding is not confirmed. |
+| Demonstration rounding | With the nearest-₹100 box checked, the exact amount stayed ₹1,333.30 and a separate demonstrated ₹1,300.00 was labelled not confirmed. The credit line said the demonstrated figure is not the credit amount. On process 29296 the box stayed checked after that result. |
+| Local validation | On process 29296, base price `12.345` stayed in the field. The page said to enter each amount as rupees with at most two decimal places. The list still said 3 versions are stored. Reload restored the saved base price ₹1,000.00. |
+| Customer denial | Review Seller, on process 20928, saw “This session is a seller account. The operations console is for a staff account, and this screen does not open the sample queues.” The provisional matrix and the placeholder price table were absent. |
+| Missing session | After sign-out, `/admin/settings/pricing` went to `/auth?next=/admin/settings/pricing`, headed “Sign in or register”. The placeholder price table was absent. |
+| Service failure | Process 23956 on 3812 used the same switches with `KKL_BACKEND_BASE_URL` pointed at `127.0.0.1:9`, where nothing was listening. The staff session saw “The account could not be read. This screen does not open the sample queues.” The provisional matrix and the placeholder price table were absent. Process 23140 on 4010 and process 29296 on 3811 were left running. Process 23956 was stopped after this check. |
+
+Contract tests cover a returned page of 50 against a stored count of 80, a stored gap left unfilled, and a fractional-rupee preview whose credits are null while the nearest-₹100 demonstration is not used as the credit amount. The suite passed 101 of 101. `tsc --noEmit` and `next build` passed before process 29296 started.
+
+The stored matrix is provisional. It is not used for purchases. A whole-rupee exact amount returns integer credits at 1 rupee = 1 credit. A fractional-rupee amount returns no credit figure. The nearest-₹100 figure is a demonstration and is not the purchase or credit amount. Activation stays refused, and this screen does not reprice a lead or change a marketplace price. The configurations endpoint returns at most 50 versions; the caption uses the stored count from the overview. No screenshot price was seeded as a default. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Preference storage stays integrated, and trigger evaluation and delivery stay dependent on the named rules and provider configuration. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`. No new client reminder was sent.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
