@@ -9,6 +9,7 @@ import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
 import { qualificationStoreKind } from "@/lib/services/backend/config";
 import { listVoiceCalls } from "@/lib/services/backend/qualification";
+import { providerStatusLabel } from "@/lib/services/backend/qualification-reading";
 
 export const metadata: Metadata = { title: "Voice qualification", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -17,22 +18,92 @@ const OUTCOME: Record<string, ChipTone> = {
   qualified: "success",
   declined: "danger",
   no_answer: "muted",
+  completed: "success",
+  incomplete: "warning",
+  collecting: "warning",
+  failed: "danger",
+  opted_out: "muted",
 };
 
-/** A-24 — call volumes and outcomes. */
+const REVIEW: Record<string, ChipTone> = {
+  pending: "warning",
+  recorded: "success",
+  not_required: "muted",
+};
+
+/** A-24 — qualification runs on the voice channel. A run is not a lead. */
 export default async function AdminVoicePage() {
   if (qualificationStoreKind() === "backend") {
     const loaded = await listVoiceCalls();
+    if (!loaded.ok) {
+      return (
+        <AdminShell title="Voice qualification" subtitle="Qualification runs and call attempts">
+          <div className="flex max-w-[900px] flex-col gap-[16px]">
+            <IdentityBanner />
+            <StateMessage tone="error" title="Qualification runs could not be loaded">
+              {loaded.message} Sample volumes are not shown in their place.
+            </StateMessage>
+          </div>
+        </AdminShell>
+      );
+    }
+    const runs = loaded.value;
     return (
-      <AdminShell title="Voice qualification" subtitle="Call volumes and outcomes">
+      <AdminShell title="Voice qualification" subtitle="Qualification runs and call attempts">
         <div className="flex max-w-[900px] flex-col gap-[16px]">
           <IdentityBanner />
-          <StateMessage tone="error" title="Call records could not be loaded">
-            {loaded.message} No call is placed from this screen.
-          </StateMessage>
+          <p className="t-caption rounded-[8px] bg-tint px-[13px] py-[10px] text-body">
+            These rows are <strong className="text-ink">qualification runs</strong>, not leads.
+            providerVerified is false on every attempt — queued or not_configured is not a live
+            dial. Qualification level stays unset until mapping is supplied.
+          </p>
+          {runs.length === 0 ? (
+            <StateMessage title="No voice qualification runs">
+              No voice-channel runs are stored. Register a synthetic question set and calling window
+              on platform settings before starting a run against a review API.
+            </StateMessage>
+          ) : (
+            <Card className="overflow-hidden p-0">
+              <h2 className="t-card-title border-b border-line px-[18px] py-[15px] text-ink">
+                Voice runs
+              </h2>
+              {runs.map((run) => {
+                const call = run.calls[0];
+                return (
+                  <Link
+                    key={run.id}
+                    href={`/admin/voice/${encodeURIComponent(run.id)}`}
+                    className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[14px] transition-[background-color] duration-150 last:border-b-0 hover:bg-chip-neutral-bg"
+                  >
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-baseline gap-[10px]">
+                        <span className="t-mono text-[13px] text-ink">{run.reference}</span>
+                        <span className="t-mono text-[13px] text-body">
+                          {run.phoneMasked ?? "No masked number"}
+                        </span>
+                      </span>
+                      <span className="t-caption block text-muted">
+                        Set {run.questionSet.versionLabel}
+                        {run.questionSet.synthetic ? " · SYNTHETIC" : ""}
+                        {call
+                          ? ` · ${providerStatusLabel(call.status, false)}`
+                          : " · no call row"}
+                      </span>
+                    </span>
+                    <span className="flex flex-wrap items-center gap-[10px]">
+                      <Chip tone={OUTCOME[run.state] ?? "muted"}>{run.state.replace(/_/g, " ")}</Chip>
+                      <Chip tone={REVIEW[run.reviewStatus] ?? "muted"} size="sm">
+                        Review {run.reviewStatus.replace(/_/g, " ")}
+                      </Chip>
+                    </span>
+                  </Link>
+                );
+              })}
+            </Card>
+          )}
           <p className="t-caption text-muted">
-            Voice-bridge stubs on kkl-backend are for kkl-voice, not for this Admin list. Sample
-            volumes are not shown while <span className="t-mono">KKL_QUALIFICATION=backend</span>.
+            Lead inventory remains a separate staff contract (H4-1). No call is started from this
+            screen.
           </p>
         </div>
       </AdminShell>
@@ -45,9 +116,9 @@ export default async function AdminVoicePage() {
     <AdminShell title="Voice qualification" subtitle="Call volumes and outcomes">
       <div className="flex max-w-[900px] flex-col gap-[16px]">
         <FixtureNotice>
-          No call has been placed. kkl-voice is a separate service that is not connected to this
-          build; these volumes, transcripts and outcomes are fixtures. They are not live traffic,
-          and a completed fixture call is not sale eligibility.
+          No call has been placed. These volumes are fixtures. Set{" "}
+          <span className="t-mono">KKL_QUALIFICATION=backend</span> against OpenAPI 1.0.0-phase4.a
+          to read qualification runs. A fixture outcome is not sale eligibility.
         </FixtureNotice>
 
         <div className="grid grid-cols-4 gap-[14px] max-[1060px]:grid-cols-2">
@@ -90,12 +161,6 @@ export default async function AdminVoicePage() {
             </Link>
           ))}
         </Card>
-
-        <p className="t-caption text-muted">
-          Numbers are masked in the record. Calling hours, retry limits and the consent script are
-          operational rules that belong to kkl-voice and kkl-backend, and are not configurable from
-          this screen. No real call is started here.
-        </p>
       </div>
     </AdminShell>
   );

@@ -3,6 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { IdentityBanner } from "@/components/admin/identity-banner";
+import {
+  QualificationRecoveryForm,
+  QualificationReviewForm,
+} from "@/components/admin/qualification-forms";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
@@ -10,8 +14,13 @@ import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
 import { qualificationStoreKind } from "@/lib/services/backend/config";
 import { getVoiceCall } from "@/lib/services/backend/qualification";
+import {
+  intentDisplay,
+  levelDisplay,
+  providerStatusLabel,
+} from "@/lib/services/backend/qualification-reading";
 
-export const metadata: Metadata = { title: "Call", robots: { index: false } };
+export const metadata: Metadata = { title: "Qualification run", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const OUTCOME: Record<string, ChipTone> = {
@@ -21,32 +30,217 @@ const OUTCOME: Record<string, ChipTone> = {
 };
 
 /**
- * A-25 — transcript, summary and captured answers.
- *
- * There is no audio player, because there is no recording and no retention
- * rule for one. A transcript is shown as text with timestamps, which is what
- * the approved design shows, and the consent moment is the line that matters —
- * it is what the lead's eligibility rests on.
+ * A-25 — run detail: answers, summary, evidence, review and recovery.
+ * Route id is a run UUID when KKL_QUALIFICATION=backend.
  */
 export default async function AdminCallPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   if (qualificationStoreKind() === "backend") {
     const loaded = await getVoiceCall(id);
+    if (!loaded.ok) {
+      return (
+        <AdminShell title={`Run ${id}`} subtitle="Answers, evidence and review">
+          <div className="flex max-w-[860px] flex-col gap-[16px]">
+            <IdentityBanner />
+            <Link href="/admin/voice" className="t-caption text-brand underline underline-offset-2">
+              ← Voice qualification
+            </Link>
+            <StateMessage tone="error" title="This run could not be loaded">
+              {loaded.message}
+            </StateMessage>
+          </div>
+        </AdminShell>
+      );
+    }
+    if (!loaded.value) notFound();
+    const run = loaded.value;
+    const call = run.calls[0];
+    const canResume = run.state === "incomplete";
+    const canRetry = Boolean(
+      call && (call.status === "failed" || call.status === "not_configured") && call.attempts < 3,
+    );
+    const listHref = run.channel === "whatsapp" ? "/admin/whatsapp" : "/admin/voice";
+    const listLabel =
+      run.channel === "whatsapp" ? "← WhatsApp qualification" : "← Voice qualification";
+
     return (
-      <AdminShell title={`Call ${id}`} subtitle="Transcript, summary and captured answers">
+      <AdminShell title={run.reference} subtitle="Answers, evidence and review">
         <div className="flex max-w-[860px] flex-col gap-[16px]">
           <IdentityBanner />
-          <Link href="/admin/voice" className="t-caption text-brand underline underline-offset-2">
-            ← Voice qualification
+          <Link href={listHref} className="t-caption text-brand underline underline-offset-2">
+            {listLabel}
           </Link>
-          <StateMessage tone="error" title="This call could not be loaded">
-            {loaded.message} Fixture transcripts are not shown in their place.
-          </StateMessage>
-          <p className="t-caption text-muted">
-            A generated summary is not verified fact. No audio is offered. Nothing on this screen
-            places a call.
+
+          <p className="t-caption rounded-[8px] bg-tint px-[13px] py-[10px] text-body">
+            This is a <strong className="text-ink">qualification run</strong>, not a lead record.
+            Lead id <span className="t-mono">{run.leadId || "—"}</span> is a reference only.
+            {run.questionSet.synthetic
+              ? " Question set is SYNTHETIC — not the client questionnaire."
+              : null}
           </p>
+
+          <Card className="p-[20px]">
+            <div className="flex flex-wrap items-start justify-between gap-[12px]">
+              <div>
+                <p className="t-mono text-[13px] text-muted">{run.id}</p>
+                <h2 className="t-heading mt-[2px] text-ink">
+                  {run.phoneMasked ?? "Masked number unavailable"}
+                </h2>
+                <p className="t-body text-body">
+                  {run.channel} · {run.state.replace(/_/g, " ")} · review{" "}
+                  {run.reviewStatus.replace(/_/g, " ")}
+                </p>
+              </div>
+              <div className="flex flex-none flex-col items-end gap-[6px]">
+                <Chip tone={run.state === "completed" ? "success" : "muted"}>
+                  {run.state.replace(/_/g, " ")}
+                </Chip>
+                {call ? (
+                  <span className="t-caption text-muted">
+                    {providerStatusLabel(call.status, false)}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <dl className="mt-[14px] grid grid-cols-1 gap-[8px] border-t border-line pt-[12px]">
+              <div className="flex flex-wrap justify-between gap-[10px]">
+                <dt className="t-caption text-muted">Qualification level</dt>
+                <dd className="text-[15px] font-semibold text-ink">
+                  {levelDisplay(run.qualification)}
+                </dd>
+              </div>
+              <div className="flex flex-wrap justify-between gap-[10px]">
+                <dt className="t-caption text-muted">Model-reported intent</dt>
+                <dd className="text-[15px] text-body">{intentDisplay(run.qualification)}</dd>
+              </div>
+              <div className="flex flex-wrap justify-between gap-[10px]">
+                <dt className="t-caption text-muted">Marketplace consent</dt>
+                <dd className="text-[15px] font-semibold text-ink">
+                  {run.qualification.marketplaceConsent}
+                </dd>
+              </div>
+              <div className="flex flex-wrap justify-between gap-[10px]">
+                <dt className="t-caption text-muted">Question set</dt>
+                <dd className="text-[15px] text-body">
+                  {run.questionSet.versionLabel}
+                  {run.questionSet.synthetic ? " · SYNTHETIC" : ""}
+                </dd>
+              </div>
+            </dl>
+            {run.failureReason ? (
+              <p className="t-caption mt-[10px] text-danger">Failure: {run.failureReason}</p>
+            ) : null}
+          </Card>
+
+          {run.modelSummary ? (
+            <Card className="p-[18px]">
+              <h2 className="t-card-title text-ink">Model summary</h2>
+              <p className="t-body mt-[8px] text-body">{run.modelSummary}</p>
+              <p className="t-caption mt-[10px] text-muted">
+                Generated model output — not verified fact, and not a qualification level.
+              </p>
+            </Card>
+          ) : null}
+
+          <Card className="p-[18px]">
+            <h2 className="t-card-title text-ink">Recorded answers</h2>
+            <p className="t-caption mt-[2px] text-muted">
+              Question-set version {run.questionSet.versionLabel}. Answer counts do not assign a
+              level.
+            </p>
+            {run.answers.length === 0 ? (
+              <p className="t-body mt-[10px] text-body">No answers recorded on this run yet.</p>
+            ) : (
+              <dl className="mt-[10px] flex flex-col">
+                {run.answers.map((answer) => (
+                  <div
+                    key={answer.id}
+                    className="flex flex-wrap items-baseline justify-between gap-[10px] border-b border-line py-[9px] last:border-b-0"
+                  >
+                    <dt className="t-caption text-muted">
+                      {answer.questionKey}
+                      {answer.superseded ? " · superseded" : ""}
+                    </dt>
+                    <dd className="text-[15px] font-semibold text-ink">
+                      {answer.status === "answered"
+                        ? String(answer.value)
+                        : answer.status.replace(/_/g, " ")}
+                      {answer.recordedAt ? (
+                        <span className="t-mono ml-[8px] text-[12px] font-normal text-muted">
+                          {answer.recordedAt}
+                        </span>
+                      ) : null}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </Card>
+
+          {run.consentEvidence.length > 0 ? (
+            <Card className="p-[18px]">
+              <h2 className="t-card-title text-ink">Consent evidence</h2>
+              <ul className="mt-[10px] flex flex-col gap-[8px]">
+                {run.consentEvidence.map((item) => (
+                  <li key={item.id} className="text-[15px] text-body">
+                    <span className="font-semibold text-ink">{item.kind}</span>
+                    {item.disposition ? ` · ${item.disposition}` : ""}
+                    {item.note ? ` — ${item.note}` : ""}
+                  </li>
+                ))}
+              </ul>
+              <p className="t-caption mt-[10px] text-muted">
+                Evidence on a run does not by itself change marketplaceConsent.
+              </p>
+            </Card>
+          ) : null}
+
+          {run.messages.length > 0 ? (
+            <Card className="p-[18px]">
+              <h2 className="t-card-title text-ink">Messages on this run</h2>
+              <ul className="mt-[10px] flex flex-col gap-[8px]">
+                {run.messages.map((message) => (
+                  <li key={message.id} className="text-[15px] text-body">
+                    {message.direction} · {providerStatusLabel(message.status, false)}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+
+          <Card className="p-[18px]">
+            <h2 className="t-card-title text-ink">Human review</h2>
+            {run.reviews.length > 0 ? (
+              <ul className="mt-[10px] flex flex-col gap-[8px]">
+                {run.reviews.map((review) => (
+                  <li key={review.id} className="text-[15px] text-body">
+                    <span className="font-semibold text-ink">
+                      {review.decision.replace(/_/g, " ")}
+                    </span>
+                    {" — "}
+                    {review.reason}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="t-body mt-[8px] text-body">No review recorded yet.</p>
+            )}
+            {run.reviewStatus === "pending" ? <QualificationReviewForm runId={run.id} /> : null}
+          </Card>
+
+          <Card className="p-[18px]">
+            <h2 className="t-card-title text-ink">Recovery</h2>
+            <p className="t-body mt-[6px] text-body">
+              Resume only when incomplete. Retry only a failed or not_configured call under the
+              attempt limit. Suppression blocks both.
+            </p>
+            <QualificationRecoveryForm
+              runId={run.id}
+              canResume={canResume}
+              canRetry={canRetry}
+            />
+          </Card>
         </div>
       </AdminShell>
     );
@@ -61,13 +255,9 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
         <Link href="/admin/voice" className="t-caption text-brand underline underline-offset-2">
           ← Voice qualification
         </Link>
-
         <FixtureNotice>
-          This call did not happen. The transcript below is fixture text written to show the
-          layout and the consent moment. A fixture summary is not a verified fact, and a
-          qualified fixture outcome is not sale eligibility.
+          This call did not happen. Fixture transcript only. A fixture summary is not verified fact.
         </FixtureNotice>
-
         <Card className="p-[20px]">
           <div className="flex flex-wrap items-start justify-between gap-[12px]">
             <div>
@@ -82,12 +272,7 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
               <span className="t-caption text-muted">Consent {call.consentLabel.toLowerCase()}</span>
             </div>
           </div>
-          <p className="t-caption mt-[14px] border-t border-line pt-[12px] text-muted">
-            No audio is offered. Whether calls are recorded at all, for how long, and who may
-            listen are decisions nobody has taken, so there is no player here to imply one.
-          </p>
         </Card>
-
         {call.transcript.length === 0 ? (
           <StateMessage title="No transcript">
             This call produced no transcript — it was not answered, or it ended before the first
@@ -99,9 +284,7 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
             <ol className="mt-[12px] flex flex-col gap-[12px]">
               {call.transcript.map((line) => (
                 <li key={`${line.at}-${line.who}`} className="flex gap-[12px]">
-                  <span className="t-mono w-[44px] flex-none text-[13px] text-muted">
-                    {line.at}
-                  </span>
+                  <span className="t-mono w-[44px] flex-none text-[13px] text-muted">{line.at}</span>
                   <span className="min-w-0">
                     <span
                       className={`block text-[13px] font-bold ${line.automated ? "text-brand" : "text-success"}`}
@@ -115,7 +298,6 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
             </ol>
           </Card>
         )}
-
         {call.captured.length > 0 ? (
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">Captured answers</h2>
@@ -135,11 +317,6 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
                 </div>
               ))}
             </dl>
-            <p className="t-caption mt-[10px] text-muted">
-              Each answer carries the point in the call it came from, so a captured value can be
-              checked against what was actually said. Answer counts do not assign a qualification
-              level — mapping not configured.
-            </p>
           </Card>
         ) : null}
       </div>

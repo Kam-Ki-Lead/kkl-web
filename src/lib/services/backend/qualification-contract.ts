@@ -1,16 +1,14 @@
 /**
- * Phase 4 qualification contracts as published against OpenAPI
- * `1.0.0-phase3.t` (backend `a6d6d4d` on `claude/phase-3-backend`).
+ * Phase 4 qualification handoff map against OpenAPI 1.0.0-phase4.a
+ * (kkl-backend `a606665` on `claude/phase-4-qualification`).
  *
- * This module does not invent staff read paths. Voice-bridge routes are
- * published as `501 not_implemented` stubs for kkl-voice → kkl-backend.
- * They are not Admin screens and must not be called from kkl-web to fill
- * A-24 / A-25. Marketplace `GET /v1/leads` is Seller/Builder only and
- * carries no call transcript, WhatsApp thread or question-to-level map.
+ * Earlier preparation at dc2f275 consulted Phase 3 `1.0.0-phase3.t`. This
+ * file records what that API now supplies and what remains unpublished.
  */
 
-export const PHASE4_OPENAPI = "1.0.0-phase3.t" as const;
-export const PHASE4_BACKEND_REF = "a6d6d4d" as const;
+/** Keep in lockstep with PHASE4A_* in qualification-reading.ts. */
+export const PHASE4_OPENAPI = "1.0.0-phase4.a" as const;
+export const PHASE4_BACKEND_REF = "a606665" as const;
 
 /** Paths Phase 3 published for voice. Bodies are ignored; responses are 501. */
 export const VOICE_BRIDGE_STUBS = [
@@ -29,10 +27,6 @@ export const VOICE_BRIDGE_STUBS = [
   { method: "POST", path: "/v1/webhooks/exotel", summary: "Exotel callback — not implemented" },
 ] as const;
 
-/**
- * Domains already connected on other switches. Phase 4 must not duplicate
- * those Admin screens or invent a second copy of the same records.
- */
 export const PHASE4_ALREADY_CONNECTED = [
   {
     screens: ["A-10", "A-11"],
@@ -41,7 +35,7 @@ export const PHASE4_ALREADY_CONNECTED = [
       "GET /v1/leads/intake/batches",
       "GET /v1/leads/intake/batches/{batchRef}",
     ],
-    note: "Intake volumes and rejections. Not a qualification call.",
+    note: "Intake volumes and rejections. Not a qualification run.",
   },
   {
     screens: ["A-27"],
@@ -58,16 +52,6 @@ export const PHASE4_ALREADY_CONNECTED = [
     ],
     note: "Suppression list without addresses. Read-only for removal.",
   },
-  {
-    screens: ["A-14", "A-15-questions"],
-    switch: "KKL_ADMIN_OPERATIONS",
-    paths: [
-      "GET /v1/admin/pricing",
-      "GET /v1/admin/pricing/configurations",
-      "GET /v1/admin/pricing/configurations/{id}",
-    ],
-    note: "Pricing question prompts are definitions. questionMapping is not_configured.",
-  },
 ] as const;
 
 export type Phase4HandoffId =
@@ -80,107 +64,110 @@ export type Phase4HandoffId =
   | "H4-7"
   | "H4-8";
 
+export type Phase4HandoffStatus = "open" | "partial" | "satisfied";
+
 export type Phase4Handoff = {
   readonly id: Phase4HandoffId;
   readonly screens: readonly string[];
+  readonly status: Phase4HandoffStatus;
   readonly need: string;
   readonly mustNot: string;
+  readonly published?: string;
 };
 
-/**
- * Exact staff contracts Phase 4 Admin screens need. Until these are published
- * with request/response schemas, adapters refuse rather than guess.
- */
 export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-1",
     screens: ["A-12"],
+    status: "open",
     need:
       "Staff-paged lead inventory with lifecycle status (including incomplete "
       + "qualification and human-review), consent status, source, age, and "
-      + "stable lead references. Must authorise staff sessions.",
+      + "stable lead references.",
     mustNot:
-      "Do not reuse Seller/Builder GET /v1/leads as the Admin inventory. "
-      + "Do not invent Levels 1–10 from answer counts.",
+      "Do not treat GET /v1/admin/qualification/runs as the Admin lead list. "
+      + "A run is not a lead.",
   },
   {
     id: "H4-2",
     screens: ["A-13"],
+    status: "partial",
     need:
-      "Staff lead detail: captured Q&A with question version references, "
-      + "consent evidence pointer, eligibility lines, incomplete and "
-      + "human-review states, and links to call/conversation ids when present. "
-      + "Contact details remain absent.",
+      "Staff lead detail with Q&A, version references, incomplete / human-review. "
+      + "Run detail supplies Q&A for a run; a dedicated staff lead document is still missing.",
     mustNot:
-      "Do not treat a generated summary as verified facts. Do not assign a "
-      + "qualification level when questionMapping is not_configured.",
+      "Do not equate a run outcome with lead sale eligibility. "
+      + "marketplaceConsent stays unchanged.",
+    published: "GET /v1/admin/qualification/runs/{runId} (run-scoped answers)",
   },
   {
     id: "H4-3",
     screens: ["A-24"],
-    need:
-      "Staff call list with volumes, outcomes, consent labels, language, "
-      + "duration, masked numbers, quiet-hour holds, and pagination. "
-      + "Separate from voice-bridge stubs.",
+    status: "satisfied",
+    need: "Staff list of qualification runs / call attempts with provider status.",
     mustNot:
-      "Do not dial, schedule, or call POST /v1/voice-bridge/calls from Admin. "
-      + "Do not fill volumes from fixtures when the switch is on.",
+      "Do not dial from Admin. Do not call voice-bridge. "
+      + "providerVerified false is not a live call.",
+    published: "GET /v1/admin/qualification/runs (filter channel=voice in the UI)",
   },
   {
     id: "H4-4",
     screens: ["A-25"],
+    status: "satisfied",
     need:
-      "Staff call detail: transcript segments when permitted, captured answers "
-      + "with timestamps, summary when available and labelled as generated, "
-      + "consent outcome with evidence reference, and an explicit empty "
-      + "transcript state.",
+      "Staff run detail: answers with question-set version, model summary labelled "
+      + "as model output, consent evidence, review state.",
     mustNot:
-      "Do not offer audio unless retention and access are published. "
-      + "Do not equate a summary with verified answers.",
+      "Do not render modelReportedIntent as a level. qualification.level stays unset.",
+    published: "GET /v1/admin/qualification/runs/{runId}",
   },
   {
     id: "H4-5",
     screens: ["A-26"],
+    status: "satisfied",
     need:
-      "Staff WhatsApp journey progress and conversation list with per-step "
-      + "counts, template/provider status, and delivery states that distinguish "
-      + "queued, failed, delivered and completed.",
+      "Staff WhatsApp qualification runs with message statuses that distinguish "
+      + "queued, delivered, failed, not_configured.",
     mustNot:
-      "Do not equate queued with delivered, or conversation completion with "
-      + "sale eligibility. Do not start a conversation from Admin.",
+      "Do not equate queued with delivered, or conversation completion with sale eligibility.",
+    published: "GET /v1/admin/qualification/runs (channel=whatsapp)",
   },
   {
     id: "H4-6",
-    screens: ["A-15", "pricing questions"],
+    screens: ["A-15"],
+    status: "satisfied",
     need:
-      "Qualification question configuration using the backend's actual schema, "
-      + "including version identity and an explicit question→level mapping "
-      + "state. Pricing prompts already publish questionMapping: not_configured.",
+      "Qualification question sets with provenance. Synthetic prompts must say SYNTHETIC. "
+      + "Calling window and opt-out configuration.",
     mustNot:
-      "Do not map prompts onto Levels 1–10 in the frontend. Do not treat "
-      + "pricing question rows as an approved qualification matrix.",
+      "Do not use pricing prompts as the qualification questionnaire. "
+      + "Do not map questions onto Levels 1–10.",
+    published:
+      "GET/POST /v1/admin/qualification/question-sets, "
+      + "POST calling-window, POST opt-out",
   },
   {
     id: "H4-7",
-    screens: ["A-31"],
+    screens: ["A-31", "A-25"],
+    status: "satisfied",
     need:
-      "Provider failure records and authorised recovery actions for voice and "
-      + "WhatsApp (retry, hold, mark reviewed), with role checks. No credential "
-      + "fields on the page.",
+      "Authorised recovery: resume incomplete, retry failed call, process due retries. "
+      + "Suppression blocks recovery.",
     mustNot:
-      "Do not invent a retry that bypasses suppression or quiet hours. "
-      + "Do not initiate a real call or message from recovery UI.",
+      "Do not bypass suppression or quiet hours. Do not initiate a real provider call "
+      + "when credentials are absent (not_configured / dry_run).",
+    published:
+      "POST .../runs/{runId}/review, POST .../recover, POST .../retries/run",
   },
   {
     id: "H4-8",
     screens: ["kkl-voice"],
+    status: "partial",
     need:
-      "Frozen voice-bridge request/response schemas replacing the Phase 3 "
-      + "501 stubs, with auth, idempotency and evidence validation for "
-      + "consent/outcome writes.",
-    mustNot:
-      "Admin screens must not call voice-bridge even after it is implemented. "
-      + "That boundary stays kkl-voice → kkl-backend.",
+      "Voice-bridge remains the kkl-voice boundary. Admin uses /v1/admin/qualification. "
+      + "Schema freeze for voice-bridge is still outstanding beyond 501 stubs.",
+    mustNot: "Admin screens must not call /v1/voice-bridge.",
+    published: "Admin qualification routes; voice-bridge stubs still 501",
   },
 ] as const;
 
@@ -190,37 +177,35 @@ export function handoff(id: Phase4HandoffId): Phase4Handoff {
   return found;
 }
 
-/**
- * Sentence shown when KKL_QUALIFICATION=backend and the staff path is still
- * unpublished. Sample fixtures are not substituted.
- */
-export function unpublishedStaffMessage(id: Phase4HandoffId): string {
-  const item = handoff(id);
-  return (
-    `${item.need} OpenAPI ${PHASE4_OPENAPI} on backend ${PHASE4_BACKEND_REF} does not `
-    + `publish this staff read yet (${item.id}). Sample records are not shown in their place.`
-  );
-}
-
-/** Fail-closed load result when a staff Phase 4 path is not published. */
 export type UnpublishedStaffLoad = {
   readonly ok: false;
   readonly handoff: Phase4HandoffId;
   readonly message: string;
 };
 
+export function unpublishedStaffMessage(id: Phase4HandoffId): string {
+  const item = handoff(id);
+  return (
+    `${item.need} OpenAPI ${PHASE4_OPENAPI} on backend ${PHASE4_BACKEND_REF} does not `
+    + `publish this staff lead read yet (${item.id}). Sample records are not shown in their place. `
+    + `Qualification runs are on /admin/voice and /admin/whatsapp — a run is not a lead.`
+  );
+}
+
 export function unpublishedStaffLoad(id: Phase4HandoffId): UnpublishedStaffLoad {
   return { ok: false, handoff: id, message: unpublishedStaffMessage(id) };
 }
 
-/** Honesty rules the screens must keep even after contracts arrive. */
 export const PHASE4_HONESTY = [
   "Question definitions and qualification-level mapping are different.",
   "Do not assign Levels 1–10 from answer counts or model guesses.",
   "Show “mapping not configured” where the backend says so.",
+  "modelReportedIntent is model output, not a verified level.",
+  "marketplaceConsent stays unchanged on these records.",
+  "A run is not a lead.",
   "Queued messages are not delivery.",
-  "Conversation completion is not sale eligibility.",
-  "A generated summary is not verified fact.",
+  "providerVerified false is not a live call or delivered message.",
+  "Synthetic questions must stay visibly SYNTHETIC.",
 ] as const;
 
 export const MAPPING_NOT_CONFIGURED_LABEL = "mapping not configured";

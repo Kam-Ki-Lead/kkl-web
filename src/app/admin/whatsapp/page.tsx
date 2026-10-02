@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { IdentityBanner } from "@/components/admin/identity-banner";
 import { FixtureNotice } from "@/components/admin/sample-notice";
@@ -8,6 +9,7 @@ import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
 import { qualificationStoreKind } from "@/lib/services/backend/config";
 import { listWhatsAppJourney } from "@/lib/services/backend/qualification";
+import { providerStatusLabel } from "@/lib/services/backend/qualification-reading";
 
 export const metadata: Metadata = { title: "WhatsApp qualification", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -18,22 +20,77 @@ const STATE_TONE: Record<string, ChipTone> = {
   danger: "danger",
   warning: "warning",
   muted: "muted",
+  completed: "success",
+  incomplete: "warning",
+  collecting: "warning",
+  failed: "danger",
+  opted_out: "muted",
 };
 
-/** A-26 — journey progress and conversations. */
+/** A-26 — WhatsApp-channel qualification runs. Queued ≠ delivered. */
 export default async function AdminWhatsAppPage() {
   if (qualificationStoreKind() === "backend") {
     const loaded = await listWhatsAppJourney();
+    if (!loaded.ok) {
+      return (
+        <AdminShell title="WhatsApp qualification" subtitle="Qualification runs and message status">
+          <div className="flex max-w-[860px] flex-col gap-[16px]">
+            <IdentityBanner />
+            <StateMessage tone="error" title="WhatsApp runs could not be loaded">
+              {loaded.message}
+            </StateMessage>
+          </div>
+        </AdminShell>
+      );
+    }
+    const runs = loaded.value;
     return (
-      <AdminShell title="WhatsApp qualification" subtitle="Journey progress and conversations">
+      <AdminShell title="WhatsApp qualification" subtitle="Qualification runs and message status">
         <div className="flex max-w-[860px] flex-col gap-[16px]">
           <IdentityBanner />
-          <StateMessage tone="error" title="WhatsApp journey could not be loaded">
-            {loaded.message} Queued fixture rows are not delivery, and they are not shown here.
-          </StateMessage>
+          <p className="t-caption rounded-[8px] bg-tint px-[13px] py-[10px] text-body">
+            Rows are <strong className="text-ink">qualification runs</strong> on the WhatsApp
+            channel. Queued and not_configured are not delivery. Conversation completion is not
+            sale eligibility. marketplaceConsent stays unchanged.
+          </p>
+          {runs.length === 0 ? (
+            <StateMessage title="No WhatsApp qualification runs">
+              No WhatsApp-channel runs are stored yet.
+            </StateMessage>
+          ) : (
+            <Card className="overflow-hidden p-0">
+              <h2 className="t-card-title border-b border-line px-[18px] py-[15px] text-ink">
+                WhatsApp runs
+              </h2>
+              {runs.map((run) => {
+                const message = run.messages[0];
+                return (
+                  <Link
+                    key={run.id}
+                    href={`/admin/voice/${encodeURIComponent(run.id)}`}
+                    className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[13px] last:border-b-0 hover:bg-chip-neutral-bg"
+                  >
+                    <span className="min-w-0">
+                      <span className="t-mono block text-[13px] text-ink">{run.reference}</span>
+                      <span className="t-caption block text-muted">
+                        {run.phoneMasked ?? "Masked number unavailable"}
+                        {message
+                          ? ` · ${providerStatusLabel(message.status, false)}`
+                          : " · no message row"}
+                        {run.questionSet.synthetic ? " · SYNTHETIC" : ""}
+                      </span>
+                    </span>
+                    <Chip tone={STATE_TONE[run.state] ?? "muted"} size="sm">
+                      {run.state.replace(/_/g, " ")}
+                    </Chip>
+                  </Link>
+                );
+              })}
+            </Card>
+          )}
           <p className="t-caption text-muted">
-            A conversation cannot be started from this screen. Conversation completion is not sale
-            eligibility. Numbers on the suppression list are never messaged.
+            A conversation cannot be started from this screen. Numbers on the suppression list are
+            never messaged.
           </p>
         </div>
       </AdminShell>
@@ -47,11 +104,8 @@ export default async function AdminWhatsAppPage() {
     <AdminShell title="WhatsApp qualification" subtitle="Journey progress and conversations">
       <div className="flex max-w-[860px] flex-col gap-[16px]">
         <FixtureNotice>
-          No WhatsApp message has been sent. The journey, the drop-off and the stalled
-          conversation below are fixtures. A queued or stalled fixture row is not delivery, and a
-          completed fixture journey is not sale eligibility.
+          No WhatsApp message has been sent. Fixtures only. Queued is not delivery.
         </FixtureNotice>
-
         <Card className="p-[20px]">
           <h2 className="t-card-title text-ink">Journey</h2>
           <ul className="mt-[14px] flex flex-col gap-[12px]">
@@ -73,13 +127,7 @@ export default async function AdminWhatsAppPage() {
               </li>
             ))}
           </ul>
-          <p className="t-caption mt-[14px] text-muted">
-            The drop between &ldquo;budget captured&rdquo; and &ldquo;requirement captured&rdquo;
-            is the rejected template, not buyer behaviour — conversations stall at the question the
-            provider will not deliver.
-          </p>
         </Card>
-
         <Card className="overflow-hidden p-0">
           <h2 className="t-card-title border-b border-line px-[18px] py-[15px] text-ink">
             Recent conversations
@@ -90,9 +138,7 @@ export default async function AdminWhatsAppPage() {
               className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[13px] last:border-b-0"
             >
               <span className="min-w-0">
-                <span className="t-mono block text-[13px] text-ink">
-                  {conversation.maskedNumber}
-                </span>
+                <span className="t-mono block text-[13px] text-ink">{conversation.maskedNumber}</span>
                 <span className="t-caption block text-muted">
                   {conversation.step} · {conversation.when}
                 </span>
@@ -103,11 +149,6 @@ export default async function AdminWhatsAppPage() {
             </div>
           ))}
         </Card>
-
-        <p className="t-caption text-muted">
-          Message content is not shown. Numbers are masked in the record. A conversation cannot be
-          started from this screen, and a number on the suppression list is never messaged at all.
-        </p>
       </div>
     </AdminShell>
   );
