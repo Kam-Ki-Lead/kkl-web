@@ -8,7 +8,7 @@ and not client acceptance.
 
 | | |
 |---|---|
-| Frontend (this pass) | *(set at commit)* |
+| Frontend (this pass) | `16a5efb` |
 | Prior phase4.a wiring | `04b54ab` / `e765da3` |
 | Earlier Phase 4 prep | `dc2f275` / `6acfc2f` |
 | Frontend purchase confirmation | `16afab5` (frontend; not a backend commit) |
