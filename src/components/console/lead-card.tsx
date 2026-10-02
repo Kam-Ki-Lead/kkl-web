@@ -126,7 +126,7 @@ export function LeadRow({
   return (
     <Link
       href={`${basePath}/${lead.id}`}
-      className="flex items-center justify-between gap-[12px] rounded-[8px] bg-tint px-[14px] py-[12px] transition-[background-color] duration-150 hover:bg-[#EEF2FD]"
+      className="flex items-center justify-between gap-[12px] rounded-[8px] bg-tint px-[14px] py-[12px] transition-[background-color] duration-150 hover:bg-chip-neutral-bg"
     >
       <span className="min-w-0">
         <span className="block text-[15px] font-bold text-ink">{lead.requirement}</span>

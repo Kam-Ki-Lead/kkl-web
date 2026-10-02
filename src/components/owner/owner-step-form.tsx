@@ -354,7 +354,7 @@ function PhotoFields({
           type="file"
           accept={keepsPhotographNames ? "image/jpeg,image/png" : "image/jpeg,image/png,image/webp"}
           multiple
-          className="mt-[8px] block w-full cursor-pointer rounded-[8px] border border-dashed border-[#B9C3EC] bg-white px-[13px] py-[11px] text-[15px] text-body file:mr-[12px] file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-chip-neutral-bg file:px-[13px] file:py-[8px] file:text-[14px] file:font-semibold file:text-brand"
+          className="mt-[8px] block w-full cursor-pointer rounded-[8px] border border-dashed border-control-border bg-white px-[13px] py-[11px] text-[15px] text-body file:mr-[12px] file:cursor-pointer file:rounded-[6px] file:border-0 file:bg-chip-neutral-bg file:px-[13px] file:py-[8px] file:text-[14px] file:font-semibold file:text-brand"
           onChange={(event) => {
             const files = Array.from(event.target.files ?? []);
             setChosen(
@@ -411,7 +411,7 @@ function PhotoFields({
                 type="submit"
                 name="removePhotoId"
                 value={photo.id}
-                className="min-h-[44px] rounded-[8px] border border-line px-[13px] text-[14px] font-semibold text-body hover:border-[#B9C3EC]"
+                className="min-h-[44px] rounded-[8px] border border-line px-[13px] text-[14px] font-semibold text-body hover:border-brand-mist"
               >
                 Remove record
               </button>
@@ -438,7 +438,7 @@ function PhotoFields({
               </span>
               <button
                 type="button"
-                className="min-h-[44px] rounded-[8px] border border-line px-[13px] text-[14px] font-semibold text-body hover:border-[#B9C3EC]"
+                className="min-h-[44px] rounded-[8px] border border-line px-[13px] text-[14px] font-semibold text-body hover:border-brand-mist"
                 onClick={() => setChosen((prev) => prev.filter((_, at) => at !== i))}
               >
                 Remove

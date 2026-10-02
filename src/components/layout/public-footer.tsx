@@ -48,7 +48,7 @@ export function PublicFooter() {
         <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr_0.8fr] gap-[28px] max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
           <div>
             <Wordmark size="sm" onDark />
-            <p className="mt-[12px] max-w-[34ch] text-[15px] leading-[1.6] text-[#B9C3EC]">
+            <p className="mt-[12px] max-w-[34ch] text-[15px] leading-[1.6] text-on-brand">
               A property portal for Kolkata, and a lead marketplace for verified brokers and
               builders.
             </p>

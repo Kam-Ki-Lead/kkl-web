@@ -405,10 +405,13 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-saffron);
-    /* Restated so the shorthand's colour cannot fall back to currentColor.
+    /* Longhands, not the outline shorthand. The production CSS pass was
+       dropping the shorthand's width and style, which left the ring unpainted.
+       The colour is restated so it cannot fall back to currentColor.
        Controls must also keep outline-color out of their transition, or the
        ring fades in over 150ms — see the button and chip components. */
+    outline-style: solid;
+    outline-width: 3px;
     outline-color: var(--color-saffron);
     outline-offset: 2px;
     border-radius: 2px;

@@ -237,7 +237,7 @@ export function SearchSort() {
             onClick={() => choose(o.key)}
             className={`min-h-[44px] rounded-[8px] border-[1.5px] px-[14px] text-[14px] font-semibold ${
               on
-                ? "border-brand bg-[#EEF2FD] text-brand"
+                ? "border-brand bg-chip-neutral-bg text-brand"
                 : "border-control-border bg-white text-body"
             }`}
           >

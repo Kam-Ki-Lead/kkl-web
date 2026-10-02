@@ -122,7 +122,7 @@ export function PublicHeader({
           </Link>
           <Link
             href="/auth"
-            className="rounded-[6px] border-2 border-[#C6CCE0] px-[18px] py-[9px] text-[16px] font-semibold text-brand hover:border-brand"
+            className="rounded-[6px] border-2 border-control-border px-[18px] py-[9px] text-[16px] font-semibold text-brand hover:border-brand"
           >
             Sign in
           </Link>
@@ -178,7 +178,7 @@ export function PublicHeader({
             <Link
               href="/auth"
               onClick={() => setDrawerOpen(false)}
-              className="mt-[12px] flex min-h-[44px] items-center justify-center rounded-[6px] border-2 border-[#C6CCE0] text-[16px] font-semibold text-brand"
+              className="mt-[12px] flex min-h-[44px] items-center justify-center rounded-[6px] border-2 border-control-border text-[16px] font-semibold text-brand"
             >
               Sign in
             </Link>

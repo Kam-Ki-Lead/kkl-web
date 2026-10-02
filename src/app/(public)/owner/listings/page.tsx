@@ -62,7 +62,7 @@ export default async function OwnerListingsPage() {
             const state = OWNER_STATUS[l.status];
             return (
               <Link key={l.id} href={`/owner/listings/${l.id}`} className="block">
-                <Card className="p-[18px] transition-[border-color] duration-150 hover:border-[#B9C3EC]">
+                <Card className="p-[18px] transition-[border-color] duration-150 hover:border-brand-mist">
                   <div className="flex flex-wrap items-start justify-between gap-[12px]">
                     <div className="min-w-0">
                       <p className="t-caption text-muted">{l.reference}</p>
