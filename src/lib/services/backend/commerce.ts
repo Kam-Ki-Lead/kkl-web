@@ -1,5 +1,6 @@
 import type {
   CreditService,
+  LeadMarketQuery,
   LeadMarketService,
   PurchaseOutcome,
   RechargeOutcome,
@@ -10,6 +11,7 @@ import type {
   Invoice,
   InvoiceDetail,
   LeadOrder,
+  LeadOrderStatus,
   LedgerEntry,
   MarketplaceLead,
   MarketplaceLeadDetail,
@@ -17,7 +19,12 @@ import type {
   WalletSummary,
 } from "@/lib/domain/types";
 import type { UsageMonth } from "@/lib/services/contracts";
-import { readPriceChangedQuote, purchaseExpectedFields } from "@/lib/domain/commerce-display";
+import {
+  readPriceChangedQuote,
+  readWalletReconciliation,
+  purchaseExpectedFields,
+  type WalletReconciliation,
+} from "@/lib/domain/commerce-display";
 import { callAs, type BackendRole } from "./session";
 
 /**
@@ -159,13 +166,19 @@ const toDetail = (lead: BackendLead): MarketplaceLeadDetail => ({
   qualification: null,
 });
 
+function orderStatus(status: BackendOrder["status"]): LeadOrderStatus {
+  if (status === "completed") return "paid";
+  if (status === "pending") return "pending";
+  if (status === "cancelled") return "cancelled";
+  return "failed";
+}
+
 function toLeadOrder(order: BackendOrder): LeadOrder {
   return {
     reference: order.id,
-    // kkl-backend has four states; the approved order screens draw two.
-    // `pending` is drawn as failed-so-far rather than paid: nothing has been
-    // released while an order is pending, and "paid" would say otherwise.
-    status: order.status === "completed" ? "paid" : "failed",
+    // Contact is released only for a completed order. Pending stays pending:
+    // it is not paid, and it is not a failed charge.
+    status: orderStatus(order.status),
     placedAt: order.createdAt,
     leadId: order.status === "completed" ? order.leadId : null,
     itemLabel: order.lead?.summary ?? order.lead?.reference ?? order.leadReference ?? "Lead",
@@ -211,6 +224,49 @@ function toPurchasedLead(order: BackendOrder): PurchasedLead | null {
 }
 
 /**
+ * Filters the eligible page the API already returned.
+ *
+ * `onSaleOnly` keeps rows the service marked `on_sale`. Age is not used:
+ * Q-1b does not apply a discount, and a lead is not moved onto the Sale tab
+ * from a day count this client invents.
+ */
+function filterMarketplace(
+  leads: readonly MarketplaceLead[],
+  query: LeadMarketQuery,
+): MarketplaceLead[] {
+  let next = leads.filter((lead) => {
+    if (query.onSaleOnly && lead.status !== "on_sale") return false;
+    if (query.areaId && lead.locationPath[0] !== query.areaId) return false;
+    if (query.budgetBand && lead.budgetBand !== query.budgetBand) return false;
+    if (query.configuration && !lead.configuration.includes(query.configuration)) return false;
+    if (query.minScore !== undefined) {
+      if (lead.intentScore === null || lead.intentScore < query.minScore) return false;
+    }
+    return true;
+  });
+  if (query.sort === "price") {
+    next = [...next].sort((a, b) => (a.priceCredits ?? Number.MAX_SAFE_INTEGER) - (b.priceCredits ?? Number.MAX_SAFE_INTEGER));
+  }
+  if (query.sort === "score") {
+    next = [...next].sort((a, b) => (b.intentScore ?? -1) - (a.intentScore ?? -1));
+  }
+  return next;
+}
+
+export type { WalletReconciliation };
+
+/** The signed-in account's own ledger comparison. Staff use the admin reader. */
+export async function readOwnWalletReconciliation(role: BackendRole): Promise<WalletReconciliation> {
+  const { status, body } = await callAs<unknown>(role, "/v1/wallet/reconciliation");
+  if (status !== 200) raise(status, body as { error?: string; code?: string });
+  const parsed = readWalletReconciliation(body);
+  if (!parsed) {
+    throw new ServiceError("unavailable", "The wallet comparison could not be read.");
+  }
+  return parsed;
+}
+
+/**
  * The two marketplaces are two accounts, not one pool with a flag.
  *
  * A Seller and a Builder hold separate wallets, separate orders and separate
@@ -220,11 +276,12 @@ function toPurchasedLead(order: BackendOrder): PurchasedLead | null {
  */
 export function backendLeadMarket(role: BackendRole): LeadMarketService {
   return {
-    async list() {
+    async list(query: LeadMarketQuery) {
       const { status, body } = await callAs<{ leads: BackendLead[] }>(
         role, "/v1/leads?eligible=true");
       if (status !== 200) raise(status, body);
-      const leads = body.leads.map(toMarketplaceLead);
+      const mapped = body.leads.map(toMarketplaceLead);
+      const leads = filterMarketplace(mapped, query);
       return {
         leads,
         total: leads.length,

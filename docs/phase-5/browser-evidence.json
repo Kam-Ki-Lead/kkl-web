@@ -1,0 +1,171 @@
+{
+  "category": "review-browser",
+  "notSandbox": true,
+  "notLiveProvider": true,
+  "revisions": {
+    "web": "4568ce7",
+    "backend": "d980dda",
+    "voice": "c42e6a4"
+  },
+  "base": "http://127.0.0.1:3815",
+  "backend": "http://127.0.0.1:4012",
+  "voice": "http://127.0.0.1:4020",
+  "passed": 23,
+  "failed": 2,
+  "results": [
+    {
+      "name": "Phase 5 API is review, live flags off, secrets loader not integrated",
+      "pass": true,
+      "detail": "env=review loader=not_integrated"
+    },
+    {
+      "name": "Ports 4010 and 4011 still answer and are not this voice pair",
+      "pass": true,
+      "detail": "4010=review 4011=review 4011 live=false"
+    },
+    {
+      "name": "Voice on 4020 is simulated and not provider verified",
+      "pass": true,
+      "detail": "simulated=true"
+    },
+    {
+      "name": "Document responses set nosniff, deny framing, and no-store",
+      "pass": true,
+      "detail": "cache=private, no-store csp=frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
+    },
+    {
+      "name": "Missing staff session does not open the wallet console",
+      "pass": true,
+      "detail": "http://127.0.0.1:3815/auth?next=%2Fadmin%2Fwallets"
+    },
+    {
+      "name": "Auth mobile viewport keeps keyboard focus and does not overflow",
+      "pass": true,
+      "detail": "focused=BUTTON overflow=false"
+    },
+    {
+      "name": "Seller dashboard does not claim a 20% aging charge or a simulated sign-in",
+      "pass": true,
+      "detail": "REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead Dashboard Buy Leads My leads My purchases Lead requests Verification Billing & credits Support Profile Credit balance ₹0 credits Recharge Dashbo"
+    },
+    {
+      "name": "Sale tab does not render a discounted price",
+      "pass": true,
+      "detail": "ms=910 REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead Dashboard Buy Leads My leads My purchases Lead requests Verifica"
+    },
+    {
+      "name": "Seller billing shows the ledger comparison and not a delivered payment",
+      "pass": true,
+      "detail": "REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead Dashboard Buy Leads My leads My purchases Lead requests Verification Billing & credits Support Profile C"
+    },
+    {
+      "name": "Recharge fails closed and does not grant credits",
+      "pass": false,
+      "detail": "http://127.0.0.1:3815/seller/billing/recharge REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead Dashboard Buy Leads My leads My purchases Lead requests Verification Billing & credits Support Profile Credit balance ₹0 cre"
+    },
+    {
+      "name": "Recharge page still shows the balance that was already on billing",
+      "pass": true,
+      "detail": "balance text was present before the failed recharge"
+    },
+    {
+      "name": "Intake lead is not sold and does not show a phone",
+      "pass": true,
+      "detail": "url=http://127.0.0.1:3815/seller/leads/ec336642-0763-4b8e-ba21-1d9f6645ec74 REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead Dashboard Buy Leads My leads My purchases Lead requests Verification Billing & credits Support Profile Credit balance ₹0 cre"
+    },
+    {
+      "name": "Purchased-lead download does not return contact rows",
+      "pass": true,
+      "detail": "status=500 "
+    },
+    {
+      "name": "Support text is escaped and does not run",
+      "pass": true,
+      "detail": "dialogs=0 url=http://127.0.0.1:3815/seller/support/TK-4D9EA088"
+    },
+    {
+      "name": "Seller session is refused by the operations console",
+      "pass": true,
+      "detail": "REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Operations dashboard This session is a seller account. The operations consol"
+    },
+    {
+      "name": "Public search renders without a sample fallback error",
+      "pass": true,
+      "detail": "status=200 ms=1081"
+    },
+    {
+      "name": "Logout clears access and refresh cookies",
+      "pass": true,
+      "detail": "url=http://127.0.0.1:3815/auth access=absent refresh=absent"
+    },
+    {
+      "name": "Seller billing after logout does not keep the previous balance",
+      "pass": true,
+      "detail": "http://127.0.0.1:3815/auth?next=%2Fseller%2Fbilling"
+    },
+    {
+      "name": "Staff wallet screen shows the ledger comparison",
+      "pass": true,
+      "detail": "REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead INTERNAL OPERATIONS OVERVIEW Dashboard ACCOUNTS Users KYC queue Verification cases Subscriptions LISTING"
+    },
+    {
+      "name": "Session cookies are httpOnly",
+      "pass": true,
+      "detail": "kkl_access:httpOnly=true sameSite=Lax secure=true kkl_refresh:httpOnly=true sameSite=Lax secure=true"
+    },
+    {
+      "name": "Seeded qualification run is not a level or marketplace consent",
+      "pass": true,
+      "detail": "url=http://127.0.0.1:3815/admin/voice/cdc9689f-3d7b-4fe2-b142-21042ee63396 REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead INTERNAL OPERATIONS OVERVIEW Dashboard ACCOUNTS Users KYC queue Verification cases Subscriptions LISTING"
+    },
+    {
+      "name": "Staff intake queue renders from the Phase 5 API",
+      "pass": true,
+      "detail": "REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead INTERNAL OPERATIONS OVERVIEW Dashboard ACCOUNTS Users KYC queue "
+    },
+    {
+      "name": "Staff session does not show the seeded seller phone or the sample seller",
+      "pass": true,
+      "detail": "url=http://127.0.0.1:3815/seller REVIEWSign-in uses the configured API. Payments, live calls and live messages are not configured. A screen whose switch is off still uses labelled sample fixtures. Kam Ki Lead Dashboard Buy Leads My leads My purchases Lead requests Verifica"
+    },
+    {
+      "name": "Cleared cookies return to sign-in",
+      "pass": true,
+      "detail": "http://127.0.0.1:3815/auth?next=%2Fadmin%2Fwallets"
+    },
+    {
+      "name": "Browser script finished without an unexpected stop",
+      "pass": false,
+      "detail": "page.waitForSelector: Timeout 20000ms exceeded.\nCall log:\n  - waiting for locator('#auth-code') to be visible\n\n    at C:\\Users\\noora\\Downloads\\kaam-ki-lead\\kkl-web\\scripts\\verify-phase5.mjs:384:16"
+    }
+  ],
+  "firstRunNote": "23 passed and 2 failed. The recharge row looked for Continue to payment, which the unavailable page correctly does not render. The open-redirect row timed out waiting for a seller code because +919800005011 had already used its daily OTP allowance. Neither failure is a passed check.",
+  "retest": {
+    "category": "review-browser",
+    "at": "2026-10-02T21:15:53.257Z",
+    "phone": "+919800005010",
+    "reason": "One staff code after the 15-minute OTP window moved. The seller phone was left at its daily cap.",
+    "results": [
+      {
+        "name": "Protocol-relative next stays on this origin",
+        "pass": true,
+        "detail": "http://127.0.0.1:3815/account"
+      },
+      {
+        "name": "Recharge fails closed and does not grant credits",
+        "pass": true,
+        "detail": "Recharge is unavailable: no payment provider credentials are configured. No payment has been attempted and nothing has been charged."
+      },
+      {
+        "name": "Intake lead stays masked and is not offered as a completed purchase",
+        "pass": true,
+        "detail": "Buy control disabled. Price: Not priced yet. Balance ₹0. Visible hold: verification required, no case opened, Q-4. No order was submitted."
+      },
+      {
+        "name": "Purchased-lead download returns the refusal and no contact rows",
+        "pass": true,
+        "detail": "Authenticated and unauthenticated GET /seller/purchased/export.csv both returned 503 text/plain, cache-control private, no-store, and no phone."
+      }
+    ]
+  }
+}

@@ -6,12 +6,14 @@ import { ButtonLink } from "@/components/ui/button";
 import { Chip, MaskedValue } from "@/components/ui/chip";
 import { PendingRule } from "@/components/ui/states";
 import { DECISIONS } from "@/lib/config/business-rules";
+import { marketplaceStoreKind } from "@/lib/services/backend/config";
 import { formatAreaPath, formatCreditBalance, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
 import {
   NOT_SCORED_LABEL,
   NO_QUALIFICATION_DETAIL,
   UNPRICED_LABEL,
+  agingDiscountSentence,
   primaryBlocker,
 } from "@/lib/domain/commerce-display";
 
@@ -221,8 +223,8 @@ export default async function MaskedLeadPage({
             )}
 
             <p className="t-caption mt-[12px] text-muted">
-              <PendingRule>{DECISIONS["D-03"].pendingCopy}</PendingRule> The aging discount shown
-              on the Sale tab is 20%; no other discount rule is set.
+              <PendingRule>{DECISIONS["D-03"].pendingCopy}</PendingRule>{" "}
+              {agingDiscountSentence(marketplaceStoreKind() !== "backend")}
             </p>
           </Card>
         </aside>

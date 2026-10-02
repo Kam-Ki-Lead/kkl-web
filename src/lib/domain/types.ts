@@ -344,7 +344,11 @@ export type PurchasedLead = {
  * destination are undecided (D-14) and a status nobody has agreed to would be
  * read as a promise.
  */
-export type LeadOrderStatus = "paid" | "failed";
+/**
+ * `pending` and `cancelled` are not paid and are not a failed charge.
+ * Contact is released only when the status is `paid`.
+ */
+export type LeadOrderStatus = "paid" | "pending" | "cancelled" | "failed";
 
 /**
  * What paid for the order.

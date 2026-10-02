@@ -33,6 +33,10 @@ test("the return path stays on this site", () => {
   assert.equal(safeNext("//evil.example/auth"), "/account");
   assert.equal(safeNext("https://evil.example"), "/account");
   assert.equal(safeNext(""), "/account");
+  assert.equal(safeNext("/\\evil.example"), "/account");
+  assert.equal(safeNext("/%2f%2fevil.example"), "/account");
+  assert.equal(safeNext("/%5Cevil.example"), "/account");
+  assert.equal(safeNext("/auth\r\nLocation: https://evil.example"), "/account");
 });
 
 test("rate limit, suspension, a bad code and an outage stay distinct", () => {

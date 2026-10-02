@@ -6,6 +6,9 @@ import { ButtonLink } from "@/components/ui/button";
 import { formatCreditBalance, formatDate, formatSignedInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
 import { DECISIONS } from "@/lib/config/business-rules";
+import { marketplaceStoreKind } from "@/lib/services/backend/config";
+import { readOwnWalletReconciliation } from "@/lib/services/backend/commerce";
+import { WalletReconciliationNote } from "@/components/console/wallet-reconciliation";
 
 /**
  * Read per-account at request time: with a backend store selected this page
@@ -18,10 +21,12 @@ export const metadata: Metadata = { title: "Billing & credits" };
 /** B-22 — credits, usage and transactions under Builder access. */
 export default async function BillingPage() {
   const services = getServices();
-  const [wallet, usage, ledger] = await Promise.all([
+  const backendMarket = marketplaceStoreKind() === "backend";
+  const [wallet, usage, ledger, reconciliation] = await Promise.all([
     services.builder.credits.wallet(),
     services.builder.credits.usageByMonth(),
     services.builder.credits.ledger(),
+    backendMarket ? readOwnWalletReconciliation("builder") : Promise.resolve(null),
   ]);
 
   const spentThisMonth = usage[usage.length - 1]?.spentInr ?? 0;
@@ -38,6 +43,7 @@ export default async function BillingPage() {
             <p className="t-body mt-[6px] text-body">
               1 rupee = 1 credit. Credits are deducted when a lead purchase succeeds.
             </p>
+            {reconciliation ? <WalletReconciliationNote row={reconciliation} /> : null}
             <div className="mt-[16px] flex flex-wrap gap-[10px]">
               <ButtonLink href="/builder/billing/recharge">Recharge credits</ButtonLink>
               <ButtonLink href="/builder/billing/history" variant="secondary">

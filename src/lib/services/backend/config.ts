@@ -30,6 +30,30 @@ function read(name: string): string | undefined {
   return raw === undefined || raw.trim() === "" ? undefined : raw.trim();
 }
 
+const ORIGIN_VARS = [
+  "KKL_BACKEND_BASE_URL",
+  "KKL_LEAD_REQUESTS_BASE_URL",
+  "KKL_LOCATIONS_BASE_URL",
+] as const;
+
+/**
+ * Every enabled adapter must use one API. Two origins would mix sessions
+ * and records from different databases.
+ */
+export function assertSingleBackendOrigin(): void {
+  const origins = [...new Set(
+    ORIGIN_VARS
+      .map((name) => read(name)?.replace(/\/+$/, ""))
+      .filter((value): value is string => value !== undefined),
+  )];
+  if (origins.length > 1) {
+    throw new Error(
+      `Backend adapters point at more than one origin (${origins.join(", ")}). ` +
+        "kkl-web refuses to mix records from different APIs.",
+    );
+  }
+}
+
 export function leadRequestStoreKind(): LeadRequestStoreKind {
   return read("KKL_LEAD_REQUESTS") === "backend" ? "backend" : "sample";
 }
@@ -40,6 +64,7 @@ export function leadRequestStoreKind(): LeadRequestStoreKind {
  * say records are stored, which is the exact claim CR03 exists to stop.
  */
 export function leadRequestBackendConfig(): LeadRequestBackendConfig {
+  assertSingleBackendOrigin();
   const baseUrl = read("KKL_LEAD_REQUESTS_BASE_URL");
   if (baseUrl === undefined) {
     throw new Error(
@@ -97,6 +122,7 @@ export function locationStoreKind(): LocationStoreKind {
 }
 
 export function locationBackendConfig(): LocationBackendConfig {
+  assertSingleBackendOrigin();
   const baseUrl = read("KKL_LOCATIONS_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL");
   if (baseUrl === undefined) {
     throw new Error(
@@ -255,6 +281,7 @@ export function legacyReviewIdentityLabel(): string | null {
 }
 
 export function authBackendBaseUrl(): string {
+  assertSingleBackendOrigin();
   const baseUrl = read("KKL_BACKEND_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL");
   if (baseUrl === undefined) {
     throw new Error(

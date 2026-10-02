@@ -4,7 +4,8 @@ import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/states";
 import { formatAreaPath, formatDateTime, formatExactInr } from "@/lib/format";
-import type { LeadOrder } from "@/lib/domain/types";
+import type { LeadOrder, LeadOrderStatus } from "@/lib/domain/types";
+import type { ChipTone } from "@/components/ui/chip";
 
 /**
  * CR04 — order history and order detail, shared by both consoles.
@@ -38,6 +39,19 @@ export type OrderPaths = {
   /** The wallet ledger, where the deduction can be seen. */
   readonly ledgerHref: string;
 };
+
+function orderChip(status: LeadOrderStatus): { label: string; tone: ChipTone } {
+  switch (status) {
+    case "paid":
+      return { label: "Paid", tone: "success" };
+    case "pending":
+      return { label: "Pending", tone: "warning" };
+    case "cancelled":
+      return { label: "Cancelled", tone: "muted" };
+    case "failed":
+      return { label: "Failed", tone: "danger" };
+  }
+}
 
 export function OrderList({
   orders,
@@ -75,8 +89,8 @@ export function OrderList({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-[10px]">
                     <p className="t-mono text-[13px] text-muted">{order.reference}</p>
-                    <Chip tone={order.status === "paid" ? "success" : "danger"}>
-                      {order.status === "paid" ? "Paid" : "Failed"}
+                    <Chip tone={orderChip(order.status).tone}>
+                      {orderChip(order.status).label}
                     </Chip>
                   </div>
                   <h2 className="t-card-title mt-[3px] text-ink">
@@ -112,8 +126,8 @@ export function OrderDetail({ order, paths }: { order: LeadOrder; paths: OrderPa
     <div className="flex flex-col gap-[16px]">
       <div className="flex flex-wrap items-center gap-[12px]">
         <p className="t-mono text-[14px] text-muted">{order.reference}</p>
-        <Chip tone={order.status === "paid" ? "success" : "danger"}>
-          {order.status === "paid" ? "Paid" : "Failed"}
+        <Chip tone={orderChip(order.status).tone}>
+          {orderChip(order.status).label}
         </Chip>
         <Link href={paths.ordersHref} className="t-caption font-semibold text-brand">
           All orders

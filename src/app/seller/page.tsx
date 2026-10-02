@@ -8,6 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { formatCreditBalance, formatDate, formatExactInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
+import { marketplaceStoreKind } from "@/lib/services/backend/config";
 import { SellerSampleNotice } from "@/components/seller/sample-notice";
 
 /**
@@ -55,7 +56,9 @@ export default async function SellerDashboardPage() {
             {
               value: String(saleMarket.total),
               label: saleMarket.total === 1 ? "Sale-tab lead" : "Sale-tab leads",
-              note: "Aged, discounted 20%",
+              note: marketplaceStoreKind() === "backend"
+                ? "Aging discount is not applied"
+                : "Aged, discounted 20%",
             },
           ]}
         />

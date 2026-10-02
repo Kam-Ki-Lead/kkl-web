@@ -4,6 +4,7 @@ import type {
 import type { AccountRole, StaffRef } from "@/lib/domain/identity";
 import { ServiceError } from "@/lib/services/contracts";
 import { callAs } from "./session";
+import { readWalletReconciliation, type WalletReconciliation } from "@/lib/domain/commerce-display";
 
 /**
  * A-18, A-19 and A-28, served by kkl-backend.
@@ -92,6 +93,25 @@ export const backendAdminOperations = {
    * reach the beginning of the ledger, the oldest row's "balance after" is
    * still correct while the rows before it are simply not shown.
    */
+  async walletReconciliation(accountId: string): Promise<WalletReconciliation> {
+    const { status, body } = await callAs<unknown>(
+      "staff",
+      `/v1/wallet/reconciliation?accountId=${encodeURIComponent(accountId)}`,
+    );
+    if (status === 401) {
+      throw new ServiceError("unauthenticated", "Sign in again to compare this wallet.");
+    }
+    if (status === 403) {
+      throw new ServiceError("forbidden", "This session cannot compare that wallet.");
+    }
+    if (status !== 200) raise(status, body as { error?: string });
+    const parsed = readWalletReconciliation(body);
+    if (!parsed) {
+      throw new ServiceError("unavailable", "The wallet comparison could not be read.");
+    }
+    return parsed;
+  },
+
   async walletLedger(accountId: string): Promise<readonly AdminLedgerRow[]> {
     const { status, body } = await callAs<{ balanceCredits: number; entries: BackendEntry[] }>(
       "staff", `/v1/wallet?accountId=${encodeURIComponent(accountId)}`);

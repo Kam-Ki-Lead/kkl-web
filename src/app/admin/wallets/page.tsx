@@ -6,6 +6,9 @@ import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { formatExactInr, formatSignedInr } from "@/lib/format";
 import { adminOperationsStore, getServices } from "@/lib/services";
+import { adminOperationsStoreKind } from "@/lib/services/backend/config";
+import { backendAdminOperations } from "@/lib/services/backend/admin-operations";
+import { WalletReconciliationNote } from "@/components/console/wallet-reconciliation";
 
 export const metadata: Metadata = { title: "Wallets & credits", robots: { index: false } };
 
@@ -36,7 +39,10 @@ export default async function AdminWalletsPage({
   const admin = getServices().admin;
   const wallets = await admin.listWallets();
   const selected = one(params.account) || wallets[0]?.accountId || "";
-  const ledger = await admin.walletLedger(selected);
+  const ledger = selected ? await admin.walletLedger(selected) : [];
+  const reconciliation = adminOperationsStoreKind() === "backend" && selected
+    ? await backendAdminOperations.walletReconciliation(selected)
+    : null;
   const adjusted = one(params.adjusted);
   const current = wallets.find((w) => w.accountId === selected);
 
@@ -95,6 +101,11 @@ export default async function AdminWalletsPage({
               Adjust balance
             </ButtonLink>
           </div>
+          {reconciliation ? (
+            <div className="border-b border-line px-[18px] py-[12px]">
+              <WalletReconciliationNote row={reconciliation} />
+            </div>
+          ) : null}
 
           {ledger.length === 0 ? (
             <p className="t-body px-[18px] py-[20px] text-body">

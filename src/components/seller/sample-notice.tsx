@@ -36,7 +36,7 @@ export function SellerSampleNotice({ children }: { children?: React.ReactNode })
         </li>
         <li>
           {marketplaceStoreKind() === "backend"
-            ? "The balance is this account’s wallet. Buying a lead and adding credits still refuse, because no price and no payment provider are configured."
+            ? "The balance is this account’s wallet. A purchase succeeds only when the service accepts it. Recharge does not add credits while payment credentials are absent."
             : "No money moves. The balance is a number held in the server’s memory. No payment is taken, no gateway is contacted, and no invoice is issued to anyone."}
         </li>
         <li>
@@ -46,9 +46,9 @@ export function SellerSampleNotice({ children }: { children?: React.ReactNode })
         </li>
       </ul>
       <p className="t-caption mt-[10px] text-muted">
-        Authentication, KYC, lead ownership, credit deduction and payment capture are kkl-backend&rsquo;s
-        and are not implemented here. None of the controls on these screens should be read as
-        enforcing anything.
+        {authStoreKind() === "backend" && marketplaceStoreKind() === "backend"
+          ? "Sign-in, the wallet and a refused purchase are enforced by kkl-backend. Payment capture is not configured. This screen cannot award KYC."
+          : "Authentication, KYC, lead ownership, credit deduction and payment capture are kkl-backend’s and are not implemented here. None of the controls on these screens should be read as enforcing anything."}
       </p>
       {children}
     </Card>

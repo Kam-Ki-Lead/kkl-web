@@ -47,9 +47,18 @@ export function sessionRequestBody(
   return { challengeId, code };
 }
 
-/** Same-site paths only. A protocol-relative URL is not a path. */
+/**
+ * Same-site paths only.
+ *
+ * A protocol-relative URL, a backslash, a control character, or an encoded
+ * slash is not a path this app will redirect to.
+ */
 export function safeNext(raw: string): string {
+  if (raw.length === 0 || raw.length > 512) return "/account";
   if (!raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) return "/account";
+  if (raw.includes("\\") || raw.includes("\0")) return "/account";
+  if (/[\u0000-\u001F\u007F]/.test(raw)) return "/account";
+  if (/%(?:2f|5c)/i.test(raw)) return "/account";
   return raw;
 }
 

@@ -35,13 +35,37 @@ export function proxy(request: NextRequest) {
     // cached copy of a refusal would outlive the misconfiguration.
     return new NextResponse(reason, {
       status: 503,
-      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+      headers: {
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "no-store",
+        ...documentHeaders(),
+      },
     });
   }
 
   const forwarded = new Headers(request.headers);
   forwarded.set("x-kkl-path", `${request.nextUrl.pathname}${request.nextUrl.search}`);
-  return NextResponse.next({ request: { headers: forwarded } });
+  const response = NextResponse.next({ request: { headers: forwarded } });
+  for (const [name, value] of Object.entries(documentHeaders())) {
+    response.headers.set(name, value);
+  }
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
+}
+
+/**
+ * Document responses. Static build assets are outside the proxy matcher.
+ * A full script policy is not set here: Next serves its own scripts, and a
+ * nonce policy was not part of this pass.
+ */
+function documentHeaders(): Record<string, string> {
+  return {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Content-Security-Policy": "frame-ancestors 'none'; base-uri 'none'; object-src 'none'",
+  };
 }
 
 export const config = {

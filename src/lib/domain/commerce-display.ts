@@ -13,6 +13,43 @@ import type { MarketplaceLead, ContactAccessState } from "@/lib/domain/types";
  * same slot; it just says something true.
  */
 
+/**
+ * Sample fixtures still draw the proposal's 20% Sale figure and say so.
+ * A backend marketplace does not: Q-1b has not said which price the percent
+ * comes off, so the charged price stays the configured price.
+ */
+export type WalletReconciliation = {
+  readonly accountId: string;
+  readonly balanceCredits: number;
+  readonly ledgerSumCredits: number;
+  readonly entryCount: number;
+  readonly balanced: boolean;
+};
+
+/** GET /v1/wallet/reconciliation, or nothing if the body is not that shape. */
+export function readWalletReconciliation(body: unknown): WalletReconciliation | null {
+  if (body === null || typeof body !== "object") return null;
+  const row = body as Record<string, unknown>;
+  if (typeof row.accountId !== "string") return null;
+  if (typeof row.balanceCredits !== "number" || !Number.isFinite(row.balanceCredits)) return null;
+  if (typeof row.ledgerSumCredits !== "number" || !Number.isFinite(row.ledgerSumCredits)) return null;
+  if (typeof row.entryCount !== "number" || !Number.isSafeInteger(row.entryCount) || row.entryCount < 0) return null;
+  if (typeof row.balanced !== "boolean") return null;
+  return {
+    accountId: row.accountId,
+    balanceCredits: row.balanceCredits,
+    ledgerSumCredits: row.ledgerSumCredits,
+    entryCount: row.entryCount,
+    balanced: row.balanced,
+  };
+}
+
+export function agingDiscountSentence(discountRendered: boolean): string {
+  return discountRendered
+    ? "The aging discount shown on the Sale tab is 20%; no other discount rule is set."
+    : "A 20% window is stated for a lead that is 2–10 days old. That discount is not applied. The price charged is the configured price.";
+}
+
 export const UNPRICED_LABEL = "Not priced yet";
 export const UNPRICED_DETAIL =
   "No lead price is configured, so this lead cannot be bought. What a lead costs is "

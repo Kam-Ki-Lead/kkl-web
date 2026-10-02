@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServices } from "@/lib/services";
+import { serviceErrorResponse } from "@/lib/http/service-response";
 
 /**
  * CSV of the caller's own purchased leads (S-12, S-13).
@@ -13,13 +14,18 @@ import { getServices } from "@/lib/services";
  * `no-store`: a purchased-lead export must not sit in a shared cache.
  */
 export async function GET() {
-  const file = await getServices().leadMarket.exportPurchased({ format: "csv" });
-
-  return new NextResponse(file.body, {
-    headers: {
-      "content-type": file.contentType,
-      "content-disposition": `attachment; filename="${file.filename}"`,
-      "cache-control": "no-store",
-    },
-  });
+  try {
+    const file = await getServices().leadMarket.exportPurchased({ format: "csv" });
+    return new NextResponse(file.body, {
+      headers: {
+        "content-type": file.contentType,
+        "content-disposition": `attachment; filename="${file.filename}"`,
+        "cache-control": "no-store",
+      },
+    });
+  } catch (error) {
+    const refused = serviceErrorResponse(error);
+    if (refused) return refused;
+    throw error;
+  }
 }

@@ -6,6 +6,8 @@ import { LeadFilters } from "@/components/console/lead-filters";
 import { ButtonLink } from "@/components/ui/button";
 import { PendingRule, StateMessage } from "@/components/ui/states";
 import { DECISIONS } from "@/lib/config/business-rules";
+import { agingDiscountSentence } from "@/lib/domain/commerce-display";
+import { marketplaceStoreKind } from "@/lib/services/backend/config";
 import { getServices } from "@/lib/services";
 import type { LeadSort } from "@/lib/services/contracts";
 
@@ -98,6 +100,9 @@ export default async function BuilderMarketplacePage({
           <p className="t-caption mt-[6px]">
             <PendingRule>{DECISIONS["D-03"].pendingCopy}</PendingRule>
           </p>
+          {marketplaceStoreKind() === "backend" ? (
+            <p className="t-caption mt-[6px] text-muted">{agingDiscountSentence(false)}</p>
+          ) : null}
         </div>
 
         <form

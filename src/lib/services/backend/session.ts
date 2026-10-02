@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { ServiceError } from "@/lib/services/contracts";
 import { processState } from "@/lib/services/sample/process-state";
-import { bearerMode } from "./config";
+import { assertSingleBackendOrigin, bearerMode } from "./config";
 
 /**
  * How a server adapter identifies itself to kkl-backend.
@@ -62,6 +62,7 @@ function read(name: string): string | undefined {
  * so the lead-request variables are the fallback rather than a second copy.
  */
 export function backendAccess(): BackendAccess {
+  assertSingleBackendOrigin();
   const baseUrl = read("KKL_BACKEND_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL");
   if (baseUrl === undefined) {
     throw new Error(

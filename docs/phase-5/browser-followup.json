@@ -1,0 +1,26 @@
+{
+  "category": "review-browser",
+  "at": "2026-10-02T21:15:53.257Z",
+  "results": [
+    {
+      "name": "Protocol-relative next stays on this origin",
+      "pass": true,
+      "detail": "http://127.0.0.1:3815/account"
+    },
+    {
+      "name": "Recharge fails closed and does not grant credits",
+      "pass": true,
+      "detail": "Recharge is unavailable Recharge is unavailable: no payment provider credentials are configured. Razorpay is the selected provider (R-CR-05); its test keys are the outstanding dependency (Q-5). No payment has been attempted and nothing has been charged."
+    },
+    {
+      "name": "Intake lead stays masked and is not offered as a completed purchase",
+      "pass": true,
+      "detail": "buyLink=0 Lead price Not priced yet Your balance ₹0 credits Buy this lead Buying a lead spends credits and releases another person's contact details, so it requires verification. No case has been opened yet. No verification provider is selected, so no case can complete — see docs/phase-3/dependencies.md Q-4. Back to Buy Leads This costs more than your balance. The pur"
+    },
+    {
+      "name": "Purchased-lead download returns the refusal and no contact rows",
+      "pass": true,
+      "detail": "status=503 Exporting purchased leads is not available while the marketplace is served by kkl-backend. The records are on the orders screen."
+    }
+  ]
+}
