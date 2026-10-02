@@ -109,9 +109,11 @@ brief:
 ### Waiting on you — one item
 
 **CR06-b · The authoritative logo file.** The file was received on
-2 October 2026. Palette implementation and its verification are recorded in
-`brand-revision.md` and are not a resolution of any other open item. The
-paragraphs below are the waiting rule that applied until that file arrived.
+2 October 2026, and the instruction to use it supersedes the direction to
+retain the previous palette. Palette implementation is complete in
+`af0579c` and `eb665fc`, and the verification is in `brand-revision.md`.
+That completion does not resolve any other open item. The paragraphs below
+are the waiting rule that applied until the file arrived.
 
 Until then, and stated so nobody has to infer it:
 

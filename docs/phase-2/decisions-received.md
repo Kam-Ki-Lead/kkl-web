@@ -206,6 +206,14 @@ A-5, a decision.
 Type 1 is the **existing approved homepage**, already built. **No redesign
 required.** See A-6 above and `evidence/cr06/`.
 
+### CR06-b · Logo colours — **implementation complete, 2 October 2026**
+
+The instruction received with the logo supersedes the earlier direction to retain the blue and saffron palette. The supplied JPEG is the colour reference for the public portal, Buyer, Seller, Builder, and Admin screens. Colours in `docs/phase-2/brand-revision.md` are samples of that raster. They are not an official vector colour specification.
+
+The palette is applied in frontend `af0579c` and `eb665fc`. Verification on 2 October 2026 covered the public home, sign-in, Seller rail, Admin orders and pricing, a validation error, a disabled primary button, hover, and a forced `:focus-visible` ring. The Builder console refused the staff session. Its rail is the same component as the Seller rail. The frozen baseline stays `kkl-design` at `5bc3512`.
+
+Logo receipt is complete. This does not resolve any other open decision.
+
 ### CR06-b · Logo colours — **file received 2 October 2026**
 
 The logo JPEG was supplied with the instruction to use it as the visual reference for the whole site. Palette implementation is recorded separately in `docs/phase-2/brand-revision.md` and frontend `af0579c`. That instruction does not resolve any other open decision.

@@ -74,3 +74,21 @@ was opened. No purchase was submitted.
 WCAG 2.2 AA. `node scripts/verify-design-tokens.mjs ../kkl-design` reported
 33 of 33 tokens and 48 of 48 component literals accounted for. The frozen
 baseline is still `kkl-design` at `5bc3512`.
+
+## Implementation complete
+
+The 2 October instruction to take colours from the supplied logo supersedes
+the earlier direction to retain the blue and saffron palette. Logo receipt
+and this implementation are complete. No other client decision is closed
+by that.
+
+A later pass on the same build forced `:focus-visible` on the homepage
+search button. The painted ring was orange `rgb(243, 148, 42)`, about 3px,
+with a 2px offset and a 1px ink shadow. Hover on that button was
+`rgb(75, 41, 115)`. A disabled primary button was `rgb(197, 192, 204)` with
+white text. Inactive text is outside the WCAG 1.4.3 contrast requirement.
+The Seller rail was `rgb(75, 41, 115)` with item text `rgb(237, 228, 245)`.
+The Builder console refused the staff session. A bad pricing amount was
+refused without storing a version. No remaining component uses the old
+brand blue or saffron as a rendered colour. Those values stay in comments
+and in `kkl-design` at `5bc3512`.
