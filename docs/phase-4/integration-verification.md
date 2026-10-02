@@ -8,7 +8,7 @@ provider integration claim and not client acceptance.
 
 | | |
 |---|---|
-| Frontend (this pass) | *(this commit)* |
+| Frontend (this pass) | `2fe8c37` |
 | Prior phase4.b verification | `e91a2dc` / `16a5efb` |
 | Prior phase4.a wiring | `04b54ab` / `e765da3` |
 | Backend process | `e7ffdb6` on `http://127.0.0.1:4011` |
