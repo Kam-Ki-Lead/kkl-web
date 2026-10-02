@@ -5,28 +5,14 @@
  * It is not the profile full name, and this form does not send fullName.
  * Company name is companyName. Email is contactEmail.
  *
- * RERA registration is a listing field. The three alert toggles are not
- * whatsappOptIn or emailOptIn. Verification and subscription are not profile
- * fields. None of those are written from this form.
+ * RERA registration is a listing field. Alert choices are assembled with the
+ * names in the alert-preference helper, and only when this save includes
+ * them. They are not whatsappOptIn or emailOptIn. Verification and
+ * subscription are not profile fields.
  */
 
 export const RERA_NOT_ON_PROFILE =
   "Add the RERA registration number on the property listing. This profile does not store it.";
-
-export const ALERTS_NOT_ON_PROFILE =
-  "These choices are unavailable. This profile does not store them, and no alert is sent.";
-
-export function builderProfilePatch(input: {
-  contactName: string;
-  companyName: string;
-  email: string | null;
-}) {
-  return {
-    displayName: input.contactName,
-    companyName: input.companyName,
-    contactEmail: input.email,
-  };
-}
 
 export function builderProfileView(body: {
   accountId?: string;

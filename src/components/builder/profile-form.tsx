@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { Field, TextInput } from "@/components/ui/field";
+import { alertSavedMessage } from "@/lib/services/backend/alert-preferences";
 
 /**
  * B-24's form.
@@ -20,6 +21,8 @@ export function BuilderProfileForm({
   isSample,
   contractBound = false,
   profileFullName = null,
+  alertsWritable = false,
+  deliveryAvailable = false,
 }: {
   account: BuilderAccount;
   isSample: boolean;
@@ -27,6 +30,10 @@ export function BuilderProfileForm({
   contractBound?: boolean;
   /** The profile full name, which this form does not edit. */
   profileFullName?: string | null;
+  /** True when this account's profile carries the builder alert keys. */
+  alertsWritable?: boolean;
+  /** The delivery capability returned with the saved choices. */
+  deliveryAvailable?: boolean;
 }) {
   const [state, action, pending] = useActionState<BuilderProfileState, FormData>(
     saveBuilderProfile,
@@ -36,6 +43,9 @@ export function BuilderProfileForm({
   const current = state.status === "saved" && state.saved ? state.saved : account;
   const v = state.values ?? {};
   const err = state.errors ?? {};
+  const savedDelivery = state.status === "saved" ? state.deliveryAvailable === true : deliveryAvailable;
+  const choice = (key: "newEnquiry" | "siteVisitRequest" | "subscriptionReminders", fallback: boolean) =>
+    v[key] === "true" ? true : v[key] === "false" ? false : fallback;
 
   return (
     <Card className="p-[20px]">
@@ -48,8 +58,10 @@ export function BuilderProfileForm({
             }
           >
             {contractBound
-              ? "Company name, the account name and the contact email were saved. Add a RERA registration number on the property listing. This profile does not store it."
-              : `Your details were saved.${isSample ? " In sample mode this is kept in memory only." : ""}`}
+              ? `Company name, the account name and the contact email were saved. ${
+                  alertsWritable ? alertSavedMessage(savedDelivery) : ""
+                } Add a RERA registration number on the property listing. This profile does not store it.`
+              : `Your details were saved.${isSample ? " In sample mode this is kept in memory only." : ""} ${alertSavedMessage(false)}`}
           </p>
         ) : null}
 
@@ -135,27 +147,31 @@ export function BuilderProfileForm({
           )}
         </Field>
 
-        <fieldset className="flex flex-col gap-[10px]" disabled={contractBound} aria-describedby="alerts-note">
+        <fieldset className="flex flex-col gap-[10px]" disabled={contractBound && !alertsWritable} aria-describedby="alerts-note">
           <legend className="t-label mb-[4px] text-body">Alert me when</legend>
           <p id="alerts-note" className="t-caption text-muted">
-            {contractBound
-              ? "These choices are unavailable. This profile does not store them, and no alert is sent."
-              : "These record a preference. Delivery is kkl-backend’s and is not connected, so turning one on does not start sending anything."}
+            {contractBound && !alertsWritable
+              ? "These choices are unavailable for this account, and no alert is sent."
+              : contractBound
+                ? savedDelivery
+                  ? "These choices are saved on this profile. Saving a choice does not send an alert by itself."
+                  : "These choices are saved on this profile. Alert delivery is not available yet."
+                : "These record a preference. Delivery is kkl-backend’s and is not connected, so turning one on does not start sending anything."}
           </p>
           <Toggle
-            name={contractBound ? undefined : "newEnquiry"}
+            name={contractBound && !alertsWritable ? undefined : "newEnquiry"}
             label="A buyer enquires about one of my listings"
-            defaultChecked={contractBound ? false : current.alerts.newEnquiry}
+            checked={choice("newEnquiry", current.alerts.newEnquiry)}
           />
           <Toggle
-            name={contractBound ? undefined : "siteVisitRequest"}
+            name={contractBound && !alertsWritable ? undefined : "siteVisitRequest"}
             label="A buyer requests a site visit"
-            defaultChecked={contractBound ? false : current.alerts.siteVisitRequest}
+            checked={choice("siteVisitRequest", current.alerts.siteVisitRequest)}
           />
           <Toggle
-            name={contractBound ? undefined : "subscriptionReminders"}
+            name={contractBound && !alertsWritable ? undefined : "subscriptionReminders"}
             label="My subscription is due for renewal"
-            defaultChecked={contractBound ? false : current.alerts.subscriptionReminders}
+            checked={choice("subscriptionReminders", current.alerts.subscriptionReminders)}
           />
         </fieldset>
 
@@ -173,15 +189,16 @@ export function BuilderProfileForm({
 function Toggle({
   name,
   label,
-  defaultChecked,
+  checked,
 }: {
   name?: string;
   label: string;
-  defaultChecked: boolean;
+  checked: boolean;
 }) {
   return (
     <label className="flex min-h-[44px] items-center gap-[10px] rounded-[8px] border border-line px-[12px] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
-      <input type="checkbox" name={name} defaultChecked={defaultChecked} />
+      {name ? <input type="hidden" name={name} value="false" /> : null}
+      <input key={checked ? "on" : "off"} type="checkbox" name={name} value="true" defaultChecked={checked} />
       <span className="text-[15px] text-ink">{label}</span>
     </label>
   );

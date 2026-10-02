@@ -31,7 +31,7 @@ export function BuilderSampleNotice() {
         </li>
         <li>
           {authStoreKind() === "backend"
-            ? "Company name, the account name and the contact email on Profile are saved for this account. Add a RERA registration number on the property listing. This profile does not store it. Alert choices are unavailable on this profile. No subscription is stored, and the sample plan is not shown. No price has been set (D-01)."
+            ? "Company name, the account name, the contact email and the alert choices on Profile are saved for this account. Alert delivery is not available yet. Add a RERA registration number on the property listing. This profile does not store it. No subscription is stored, and the sample plan is not shown. No price has been set (D-01)."
             : "No subscription was paid for. No gateway is contacted and no price is charged — the price and billing cycle are not set (D-01)."}
         </li>
         <li>

@@ -18,10 +18,8 @@ import {
 } from "../src/lib/shortlist-label.ts";
 import { enquiryCountLabel, imageRecordLabel, ownerCountLine } from "../src/lib/listing-counts.ts";
 import { describeLocation, withStoredAnswers } from "../src/lib/requirement.ts";
-import {
-  builderProfilePatch,
-  builderProfileView,
-} from "../src/lib/services/backend/builder-profile-reading.ts";
+import { builderProfilePatch } from "../src/lib/services/backend/alert-preferences.ts";
+import { builderProfileView } from "../src/lib/services/backend/builder-profile-reading.ts";
 import { purchaseHold } from "../src/lib/domain/commerce-display.ts";
 import { billingPatch } from "../src/lib/services/backend/seller-profile-reading.ts";
 

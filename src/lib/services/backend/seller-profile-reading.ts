@@ -6,9 +6,10 @@
  * The form has no full-name control, so a stored fullName is left as it is.
  * Agency name is companyName. The sign-in phone is read and not patched.
  *
- * Alert toggles, business type, service areas, GSTIN, billing, PAN and
- * Aadhaar are not on this resource. They are not folded into companyName,
- * about, or an opt-in.
+ * Alert choices are assembled with the names in the alert-preference helper,
+ * and only when this save includes them. Business type, service areas, PAN
+ * and Aadhaar are not on this resource. Alerts are not whatsappOptIn or
+ * emailOptIn.
  */
 
 export const BUSINESS_NOT_ON_PROFILE =
@@ -65,13 +66,6 @@ export function billingView(body: {
 
 export const IDENTITY_NOT_ON_PROFILE =
   "A PAN number and identity documents are not fields on the profile. Nothing was stored.";
-
-export function sellerProfilePatch(input: { contactName: string; agencyName: string }) {
-  return {
-    displayName: input.contactName,
-    companyName: input.agencyName,
-  };
-}
 
 export function sellerProfileView(body: {
   fullName: string | null;

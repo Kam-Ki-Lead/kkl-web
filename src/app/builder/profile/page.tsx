@@ -38,12 +38,16 @@ export default async function BuilderProfilePage() {
   let account;
   let profileFullName: string | null = null;
   let accountStatus: "active" | "suspended" | null = null;
+  let alertsWritable = !contractBound;
+  let deliveryAvailable = false;
   if (contractBound) {
     try {
       const loaded = await readBuilderProfile();
       account = loaded.account;
       profileFullName = loaded.profileFullName;
       accountStatus = loaded.accountStatus;
+      alertsWritable = loaded.alertsWritable;
+      deliveryAvailable = loaded.deliveryAvailable;
     } catch (error) {
       if (error instanceof ServiceError) {
         return (
@@ -72,6 +76,8 @@ export default async function BuilderProfilePage() {
             isSample={runtimeConfig.isSampleMode}
             contractBound={contractBound}
             profileFullName={profileFullName}
+            alertsWritable={alertsWritable}
+            deliveryAvailable={deliveryAvailable}
           />
 
           <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">

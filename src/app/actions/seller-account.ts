@@ -6,7 +6,13 @@ import { getServices } from "@/lib/services";
 import { profileStoreKind } from "@/lib/services/backend/config";
 import { writeSellerBilling, writeSellerProfile } from "@/lib/services/backend/seller-profile";
 import { BUSINESS_NOT_ON_PROFILE } from "@/lib/services/backend/seller-profile-reading";
-import { ValidationError } from "@/lib/services/contracts";
+import {
+  SELLER_ALERT_KEYS,
+  alertFieldsSubmitted,
+  explicitBoolean,
+} from "@/lib/services/backend/alert-preferences";
+import { redirectForAuth } from "@/lib/auth/recover";
+import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import type { BillingDetails, SellerAccount } from "@/lib/domain/types";
 
 /**
@@ -153,7 +159,10 @@ export async function saveBilling(
   return { status: "saved", saved };
 }
 
-export type ProfileFormState = AccountFormState & { readonly saved?: SellerAccount };
+export type ProfileFormState = AccountFormState & {
+  readonly saved?: SellerAccount;
+  readonly deliveryAvailable?: boolean;
+};
 
 export async function saveSellerProfile(
   _previous: ProfileFormState,
@@ -164,32 +173,53 @@ export async function saveSellerProfile(
     agencyName: String(formData.get("agencyName") ?? ""),
   };
 
+  const alertsSubmitted = alertFieldsSubmitted(formData, SELLER_ALERT_KEYS);
+  const alerts = {
+    newLeadsInMyAreas: explicitBoolean(formData, "newLeadsInMyAreas"),
+    viewedLeadOnSale: explicitBoolean(formData, "viewedLeadOnSale"),
+    lowBalance: explicitBoolean(formData, "lowBalance"),
+  };
+  const values = {
+    ...raw,
+    newLeadsInMyAreas: String(alerts.newLeadsInMyAreas),
+    viewedLeadOnSale: String(alerts.viewedLeadOnSale),
+    lowBalance: String(alerts.lowBalance),
+  };
+
   const parsed = profileSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "idle", errors: fieldErrors(parsed.error), values: raw };
+    return { status: "idle", errors: fieldErrors(parsed.error), values };
   }
 
   if (profileStoreKind() === "backend") {
     try {
-      const saved = await writeSellerProfile(parsed.data);
+      const written = await writeSellerProfile({
+        ...parsed.data,
+        ...(alertsSubmitted ? { alerts } : {}),
+      });
       revalidatePath("/seller/profile");
-      return { status: "saved", saved };
+      return {
+        status: "saved",
+        saved: written.account,
+        deliveryAvailable: written.deliveryAvailable,
+      };
     } catch (error) {
+      redirectForAuth(error, "/seller/profile");
       if (error instanceof ValidationError) {
-        return { status: "idle", errors: error.fields, values: raw };
+        return { status: "idle", errors: error.fields, values };
       }
-      throw error;
+      const message =
+        error instanceof ServiceError
+          ? error.message
+          : "The details could not be saved. Please try again.";
+      return { status: "idle", errors: { form: message }, values };
     }
   }
 
   const saved = await getServices().sellerAccount.saveProfile({
     contactName: parsed.data.contactName,
     agencyName: parsed.data.agencyName,
-    alerts: {
-      newLeadsInMyAreas: formData.get("newLeadsInMyAreas") === "on",
-      viewedLeadOnSale: formData.get("viewedLeadOnSale") === "on",
-      lowBalance: formData.get("lowBalance") === "on",
-    },
+    alerts,
   });
 
   revalidatePath("/seller/profile");

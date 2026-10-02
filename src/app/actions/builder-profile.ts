@@ -5,6 +5,12 @@ import { z } from "zod";
 import { getServices } from "@/lib/services";
 import { profileStoreKind } from "@/lib/services/backend/config";
 import { writeBuilderProfile } from "@/lib/services/backend/builder-profile";
+import {
+  BUILDER_ALERT_KEYS,
+  alertFieldsSubmitted,
+  explicitBoolean,
+} from "@/lib/services/backend/alert-preferences";
+import { redirectForAuth } from "@/lib/auth/recover";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import type { BuilderAccount } from "@/lib/domain/types";
 
@@ -34,6 +40,7 @@ export type BuilderProfileState = {
   readonly errors?: Readonly<Record<string, string>>;
   readonly values?: Readonly<Record<string, string>>;
   readonly saved?: BuilderAccount;
+  readonly deliveryAvailable?: boolean;
 };
 
 export async function saveBuilderProfile(
@@ -47,6 +54,19 @@ export async function saveBuilderProfile(
     reraId: String(formData.get("reraId") ?? ""),
   };
 
+  const alertsSubmitted = alertFieldsSubmitted(formData, BUILDER_ALERT_KEYS);
+  const alerts = {
+    newEnquiry: explicitBoolean(formData, "newEnquiry"),
+    siteVisitRequest: explicitBoolean(formData, "siteVisitRequest"),
+    subscriptionReminders: explicitBoolean(formData, "subscriptionReminders"),
+  };
+  const values = {
+    ...raw,
+    newEnquiry: String(alerts.newEnquiry),
+    siteVisitRequest: String(alerts.siteVisitRequest),
+    subscriptionReminders: String(alerts.subscriptionReminders),
+  };
+
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     const errors: Record<string, string> = {};
@@ -54,7 +74,7 @@ export async function saveBuilderProfile(
       const key = issue.path[0];
       if (typeof key === "string" && !errors[key]) errors[key] = issue.message;
     }
-    return { status: "idle", errors, values: raw };
+    return { status: "idle", errors, values };
   }
 
   const email = parsed.data.email === "" ? null : parsed.data.email;
@@ -65,19 +85,25 @@ export async function saveBuilderProfile(
         companyName: parsed.data.companyName,
         contactName: parsed.data.contactName,
         email,
+        ...(alertsSubmitted ? { alerts } : {}),
       });
       revalidatePath("/builder/profile");
       revalidatePath("/builder");
-      return { status: "saved", saved: written.account };
+      return {
+        status: "saved",
+        saved: written.account,
+        deliveryAvailable: written.deliveryAvailable,
+      };
     } catch (error) {
+      redirectForAuth(error, "/builder/profile");
       if (error instanceof ValidationError) {
-        return { status: "idle", errors: error.fields, values: raw };
+        return { status: "idle", errors: error.fields, values };
       }
       const message =
         error instanceof ServiceError
           ? error.message
           : "The details could not be saved. Please try again.";
-      return { status: "idle", errors: { form: message }, values: raw };
+      return { status: "idle", errors: { form: message }, values };
     }
   }
 
@@ -88,11 +114,7 @@ export async function saveBuilderProfile(
     email,
     reraId: parsed.data.reraId === "" ? null : parsed.data.reraId,
   });
-  const saved = await services.saveAlerts({
-    newEnquiry: formData.get("newEnquiry") === "on",
-    siteVisitRequest: formData.get("siteVisitRequest") === "on",
-    subscriptionReminders: formData.get("subscriptionReminders") === "on",
-  });
+  const saved = await services.saveAlerts(alerts);
 
   revalidatePath("/builder/profile");
   revalidatePath("/builder");

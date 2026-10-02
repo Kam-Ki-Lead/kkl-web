@@ -1,14 +1,16 @@
 import type { BillingDetails, SellerAccount } from "@/lib/domain/types";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import { callAs } from "./session";
-import { billingPatch, billingView, sellerProfilePatch, sellerProfileView } from "./seller-profile-reading";
+import { readSellerAlerts, sellerProfilePatch } from "./alert-preferences";
+import { billingPatch, billingView, sellerProfileView } from "./seller-profile-reading";
 
 /**
  * The signed-in account's profile, for the seller profile screen.
  *
  * Contact name writes the account display name. Agency name writes
  * companyName. The profile full name is not sent. The phone is the sign-in
- * number and stays read-only. Alert preferences are not on this resource.
+ * number and stays read-only. Alert choices are the seller keys when the
+ * form submitted them. Consent opt-ins are not sent.
  */
 
 type BackendProfile = {
@@ -18,6 +20,12 @@ type BackendProfile = {
   companyName: string | null;
   signInPhone: string | null;
   status?: string | null;
+  alerts?: {
+    newLeadsInMyAreas?: boolean;
+    viewedLeadOnSale?: boolean;
+    lowBalance?: boolean;
+    delivery?: { available?: boolean } | null;
+  } | null;
   billing?: {
     billingName?: string | null;
     gstin?: string | null;
@@ -31,6 +39,7 @@ type BackendProfile = {
 
 function asAccount(body: BackendProfile): SellerAccount {
   const view = sellerProfileView(body);
+  const alerts = readSellerAlerts(body.alerts);
   return {
     id: body.accountId ?? "profile",
     contactName: view.contactName,
@@ -43,18 +52,20 @@ function asAccount(body: BackendProfile): SellerAccount {
     gstin: null,
     kycStatus: "not_submitted",
     accountStatus: view.accountStatus ?? "active",
-    alerts: {
-      newLeadsInMyAreas: false,
-      viewedLeadOnSale: false,
-      lowBalance: false,
-    },
+    alerts: alerts.choices,
   };
+}
+
+function alertReading(body: BackendProfile) {
+  return readSellerAlerts(body.alerts);
 }
 
 export async function readSellerProfile(): Promise<{
   account: SellerAccount;
   profileFullName: string | null;
   accountStatus: "active" | "suspended" | null;
+  alertsWritable: boolean;
+  deliveryAvailable: boolean;
 }> {
   const { status, body } = await callAs<BackendProfile>("seller", "/v1/me/profile");
   if (status === 401) throw new ServiceError("unauthenticated", "Sign in to read this profile.");
@@ -62,17 +73,25 @@ export async function readSellerProfile(): Promise<{
     throw new ServiceError("unavailable", body.error ?? `The profile service returned ${status}.`);
   }
   const view = sellerProfileView(body);
+  const alerts = alertReading(body);
   return {
     account: asAccount(body),
     profileFullName: view.profileFullName,
     accountStatus: view.accountStatus,
+    alertsWritable: alerts.writable,
+    deliveryAvailable: alerts.deliveryAvailable,
   };
 }
 
 export async function writeSellerProfile(input: {
   contactName: string;
   agencyName: string;
-}): Promise<SellerAccount> {
+  alerts?: {
+    newLeadsInMyAreas: boolean;
+    viewedLeadOnSale: boolean;
+    lowBalance: boolean;
+  };
+}): Promise<{ account: SellerAccount; deliveryAvailable: boolean }> {
   const { status, body } = await callAs<BackendProfile>("seller", "/v1/me/profile", {
     method: "PATCH",
     body: sellerProfilePatch(input),
@@ -90,7 +109,7 @@ export async function writeSellerProfile(input: {
   if (status !== 200) {
     throw new ServiceError("unavailable", body.error ?? `The profile service returned ${status}.`);
   }
-  return asAccount(body);
+  return { account: asAccount(body), deliveryAvailable: alertReading(body).deliveryAvailable };
 }
 
 export async function readSellerBilling(): Promise<BillingDetails> {

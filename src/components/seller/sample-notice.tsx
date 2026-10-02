@@ -31,7 +31,7 @@ export function SellerSampleNotice({ children }: { children?: React.ReactNode })
         </li>
         <li>
           {profileStoreKind() === "backend"
-            ? "Contact name is the account name support uses. Agency name is the profile’s company name. Billing name, GSTIN, address, invoice email and billing contact are stored on the profile and do not issue an invoice. The profile full name is not edited here. Alert preferences, business type, service areas and identity documents are not saved."
+            ? "Contact name is the account name support uses. Agency name is the profile’s company name. Alert preferences are saved on this profile. Alert delivery is not available yet. Billing name, GSTIN, address, invoice email and billing contact are stored on the profile and do not issue an invoice. The profile full name is not edited here. Business type, service areas and identity documents are not saved."
             : "Verification is not verification. KYC status is a value that can be switched for review; no document is checked and no administrator has approved anything."}
         </li>
         <li>

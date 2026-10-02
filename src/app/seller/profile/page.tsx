@@ -27,11 +27,15 @@ export default async function SellerProfilePage() {
   const profilesFromBackend = profileStoreKind() === "backend";
   let account;
   let profileFullName: string | null = null;
+  let alertsWritable = !profilesFromBackend;
+  let deliveryAvailable = false;
   if (profilesFromBackend) {
     try {
       const loaded = await readSellerProfile();
       account = loaded.account;
       profileFullName = loaded.profileFullName;
+      alertsWritable = loaded.alertsWritable;
+      deliveryAvailable = loaded.deliveryAvailable;
     } catch (error) {
       if (error instanceof ServiceError) {
         return (
@@ -56,8 +60,10 @@ export default async function SellerProfilePage() {
           <SellerProfileForm
             account={account}
             isSample={runtimeConfig.isSampleMode}
-            alertsStored={!profilesFromBackend}
+            alertsStored={alertsWritable}
             profileFullName={profileFullName}
+            contractBound={profilesFromBackend}
+            deliveryAvailable={deliveryAvailable}
           />
 
           {/* D-08 and the sign-in question, both open. No password field and no

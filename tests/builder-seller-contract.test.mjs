@@ -19,10 +19,8 @@ import {
   sectionSaveMessage,
   toBuilderDraft,
 } from "../src/lib/services/backend/builder-draft.ts";
-import {
-  sellerProfilePatch,
-  sellerProfileView,
-} from "../src/lib/services/backend/seller-profile-reading.ts";
+import { sellerProfilePatch } from "../src/lib/services/backend/alert-preferences.ts";
+import { sellerProfileView } from "../src/lib/services/backend/seller-profile-reading.ts";
 
 test("a price range is not written as priceInr or as a configuration price", () => {
   const patch = sectionPatch(

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, TextInput } from "@/components/ui/field";
 import { Chip } from "@/components/ui/chip";
+import { alertSavedMessage } from "@/lib/services/backend/alert-preferences";
 
 /**
  * S-25 profile form.
@@ -21,13 +22,19 @@ export function SellerProfileForm({
   isSample,
   alertsStored = true,
   profileFullName = null,
+  contractBound = false,
+  deliveryAvailable = false,
 }: {
   account: SellerAccount;
   isSample: boolean;
-  /** False when the profile resource does not carry the three alert toggles. */
+  /** False when this account cannot write alert choices. */
   alertsStored?: boolean;
   /** The profile full name, which this form does not edit. */
   profileFullName?: string | null;
+  /** True when the profile service stores this form. */
+  contractBound?: boolean;
+  /** The delivery capability returned with the saved choices. */
+  deliveryAvailable?: boolean;
 }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveSellerProfile, {
     status: "idle",
@@ -36,6 +43,9 @@ export function SellerProfileForm({
   const current = state.status === "saved" && state.saved ? state.saved : account;
   const v = state.values ?? {};
   const err = state.errors ?? {};
+  const savedDelivery = state.status === "saved" ? state.deliveryAvailable === true : deliveryAvailable;
+  const choice = (key: "newLeadsInMyAreas" | "viewedLeadOnSale" | "lowBalance", fallback: boolean) =>
+    v[key] === "true" ? true : v[key] === "false" ? false : fallback;
 
   return (
     <Card className="p-[20px]">
@@ -45,12 +55,17 @@ export function SellerProfileForm({
             role="status"
             className="rounded-[8px] bg-chip-success-bg px-[14px] py-[10px] text-[14px] font-semibold text-success"
           >
-            Your details were saved.
-            {alertsStored
-              ? isSample
-                ? " In sample mode this is kept in memory only."
-                : ""
-              : " Contact name was written to the account name. Agency name was written to the profile. The profile full name was not changed. Alert preferences were not stored."}
+            {contractBound
+              ? `Contact name and agency name were saved. ${
+                  alertsStored ? alertSavedMessage(savedDelivery) : "Alert preferences were not stored."
+                }`
+              : `Your details were saved.${isSample ? " In sample mode this is kept in memory only." : ""}`}
+          </p>
+        ) : null}
+
+        {err.form ? (
+          <p role="alert" className="rounded-[8px] bg-chip-danger-bg px-[14px] py-[10px] text-[14px] text-danger">
+            {err.form}
           </p>
         ) : null}
 
@@ -59,9 +74,9 @@ export function SellerProfileForm({
           label="Contact name"
           error={err.contactName}
           helper={
-            alertsStored
-              ? undefined
-              : "This is the name support uses. It is stored as the account name. The profile full name is a separate field, and saving does not change it."
+            contractBound
+              ? "This is the name support uses. It is stored as the account name. The profile full name is a separate field, and saving does not change it."
+              : undefined
           }
         >
           <TextInput
@@ -71,7 +86,7 @@ export function SellerProfileForm({
             defaultValue={v.contactName ?? current.contactName}
             invalid={Boolean(err.contactName)}
             aria-describedby={
-              err.contactName ? "contactName-error" : alertsStored ? undefined : "contactName-helper"
+              err.contactName ? "contactName-error" : contractBound ? "contactName-helper" : undefined
             }
           />
         </Field>
@@ -97,35 +112,41 @@ export function SellerProfileForm({
           <TextInput id="mobile" name="mobile" value={current.mobile} disabled readOnly />
         </Field>
 
-        <fieldset className="flex flex-col gap-[10px]">
+        <fieldset className="flex flex-col gap-[10px]" disabled={!alertsStored} aria-describedby="alerts-note">
           <legend className="t-label mb-[4px] text-body">Alert me when</legend>
-          <AlertToggle
-            name="newLeadsInMyAreas"
-            label="New leads match my areas"
-            defaultChecked={current.alerts.newLeadsInMyAreas}
-          />
-          <AlertToggle
-            name="viewedLeadOnSale"
-            label="A lead I viewed moves to the Sale tab"
-            defaultChecked={current.alerts.viewedLeadOnSale}
-          />
-          <AlertToggle
-            name="lowBalance"
-            label="My credit balance runs low"
-            defaultChecked={current.alerts.lowBalance}
-          />
-          <p className="t-caption text-muted">
+          <p id="alerts-note" className="t-caption text-muted">
             {alertsStored
-              ? "These record a preference. Delivery — by WhatsApp, email or push — is kkl-backend’s and is not connected, so turning one on does not start sending anything."
-              : "These switches are not fields on the profile. Saving does not store them, and it does not turn delivery on."}
+              ? contractBound
+                ? savedDelivery
+                  ? "These choices are saved on this profile. Saving a choice does not send an alert by itself."
+                  : "These choices are saved on this profile. Alert delivery is not available yet."
+                : "These record a preference. Delivery — by WhatsApp, email or push — is kkl-backend’s and is not connected, so turning one on does not start sending anything."
+              : "These choices are unavailable for this account, and no alert is sent."}
           </p>
+          <AlertToggle
+            name={alertsStored ? "newLeadsInMyAreas" : undefined}
+            label="New leads match my areas"
+            checked={choice("newLeadsInMyAreas", current.alerts.newLeadsInMyAreas)}
+          />
+          <AlertToggle
+            name={alertsStored ? "viewedLeadOnSale" : undefined}
+            label="A lead I viewed moves to the Sale tab"
+            checked={choice("viewedLeadOnSale", current.alerts.viewedLeadOnSale)}
+          />
+          <AlertToggle
+            name={alertsStored ? "lowBalance" : undefined}
+            label="My credit balance runs low"
+            checked={choice("lowBalance", current.alerts.lowBalance)}
+          />
         </fieldset>
 
         <div className="flex flex-wrap items-center gap-[14px]">
           <Button type="submit" disabled={pending}>
             {pending ? "Saving…" : "Save changes"}
           </Button>
-          {alertsStored && isSample ? <Chip tone="warning">Not connected to an account</Chip> : null}
+          {alertsStored && isSample && !contractBound ? (
+            <Chip tone="warning">Not connected to an account</Chip>
+          ) : null}
           {alertsStored ? null : <Chip tone="warning">Alerts are not stored</Chip>}
         </div>
       </form>
@@ -136,15 +157,16 @@ export function SellerProfileForm({
 function AlertToggle({
   name,
   label,
-  defaultChecked,
+  checked,
 }: {
-  name: string;
+  name?: string;
   label: string;
-  defaultChecked: boolean;
+  checked: boolean;
 }) {
   return (
-    <label className="flex min-h-[44px] cursor-pointer items-center gap-[10px] rounded-[8px] border border-line px-[12px]">
-      <input type="checkbox" name={name} defaultChecked={defaultChecked} />
+    <label className="flex min-h-[44px] items-center gap-[10px] rounded-[8px] border border-line px-[12px] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+      {name ? <input type="hidden" name={name} value="false" /> : null}
+      <input key={checked ? "on" : "off"} type="checkbox" name={name} value="true" defaultChecked={checked} />
       <span className="text-[15px] text-ink">{label}</span>
     </label>
   );
