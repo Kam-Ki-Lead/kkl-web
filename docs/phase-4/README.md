@@ -6,24 +6,24 @@ Start here for qualification, calling and WhatsApp Admin work on
 | Document | What it answers |
 |---|---|
 | **[screens.md](screens.md)** | Approved screens, H4-1…H4-8 status against OpenAPI `1.0.0-phase4.c` |
-| **[integration-verification.md](integration-verification.md)** | Checks for this frontend revision |
+| **[integration-verification.md](integration-verification.md)** | Checks for this frontend revision against **`d4c2532`** |
+| **[mutation-browser-evidence.json](mutation-browser-evidence.json)** | Before/after fixture states from browser verification |
 
 ## Contract in force
 
 | | |
 |---|---|
 | Backend branch | `claude/phase-4-qualification` |
-| Backend commit (process) | `e7ffdb6` |
-| Runtime handoff docs | `773dc96` (`docs/phase-4/review-runtime.md`, `handoff.md`) |
+| Backend commit (process) | **`d4c2532`** |
+| Voice | **`52abd00`** |
 | OpenAPI | `1.0.0-phase4.c` |
 | Migration | `026_qualification.sql` |
 | Review URL | `http://127.0.0.1:4011` (`kkl_phase4`) |
 | Phase 3 (unchanged) | `http://127.0.0.1:4010` (`kkl_review`) |
 
-## Frontend switches the handoff omitted
+Do not cite `e7ffdb6` as the revision for checks performed against this process.
 
-The backend review-runtime table omits auth and qualification. This frontend
-requires them explicitly, all on the **same** Phase 4 origin:
+## Frontend switches
 
 ```
 KKL_AUTH=backend
@@ -32,19 +32,13 @@ KKL_BACKEND_BASE_URL=http://127.0.0.1:4011
 KKL_LEAD_REQUESTS_BASE_URL=http://127.0.0.1:4011
 ```
 
-Do not mix Phase 3 tokens or data from port 4010 with Phase 4 requests.
-Do not set a development-identity fallback when `KKL_AUTH=backend`.
 Leave `KKL_ALLOW_LIVE_CALLS` and `KKL_ALLOW_LIVE_MESSAGING` unset.
 
 ## Rules
 
-- Staff inventory is `GET /v1/admin/qualification/leads` (`inventory: true`). Marketplace `GET /v1/leads` is not that inventory.
-- A run is not a lead (`inventory: false` on the runs list). A run outcome is not provider delivery when `providerVerified` is false.
-- `configured: false` means unset, not a client default. `staff_saved` is not client-approved.
-- Resume never dispatches. Retry follows returned `capabilities.retry` (offer only when allowed without provider dispatch on this host).
-- Start-run `effect` may be `adapter_invoked` or `recorded_only`; live acceptance is only `providerDispatch.dispatched`.
-- Pricing prompts are not qualification question sets.
-- `qualification.level` stays unset; `modelReportedIntent` is model output only.
-- `marketplaceConsent` stays `unchanged`.
-- Synthetic questions stay visibly SYNTHETIC.
+- Staff inventory is `GET /v1/admin/qualification/leads` (`inventory: true`).
+- `configured: false` means unset; `staff_saved` is not client-approved.
+- Resume never dispatches. Retry follows capabilities; **do not click retry** on the shared review host.
+- `providerDispatch.dispatched: true` cannot be undone by the frontend — report the returned result.
+- Keep `synthetic:true` / `providerVerified:false` visible where relevant.
 - No live calls/messages, merge, deployment or acceptance claim.

@@ -99,17 +99,17 @@ const sampleRun = {
   effect: "adapter_invoked",
 };
 
-test("OpenAPI phase4.c handoffs mark H4-1/H4-2 wired; H4-7 partial for mutations", () => {
+test("OpenAPI phase4.c handoffs mark H4-1…H4-7 verified against d4c2532", () => {
   assert.equal(PHASE4_OPENAPI, "1.0.0-phase4.c");
-  assert.equal(PHASE4_BACKEND_REF, "e7ffdb6");
+  assert.equal(PHASE4_BACKEND_REF, "d4c2532");
   const byId = Object.fromEntries(PHASE4_HANDOFFS.map((h) => [h.id, h]));
-  assert.equal(byId["H4-1"].status, "wired");
-  assert.equal(byId["H4-2"].status, "wired");
+  assert.equal(byId["H4-1"].status, "verified");
+  assert.equal(byId["H4-2"].status, "verified");
   assert.equal(byId["H4-3"].status, "verified");
   assert.equal(byId["H4-4"].status, "verified");
   assert.equal(byId["H4-5"].status, "verified");
   assert.equal(byId["H4-6"].status, "verified");
-  assert.equal(byId["H4-7"].status, "partial");
+  assert.equal(byId["H4-7"].status, "verified");
   assert.equal(byId["H4-8"].status, "partial");
   assert.match(byId["H4-1"].published ?? "", /admin\/qualification\/leads/);
   assert.ok(VOICE_BRIDGE_STUBS.length === 5);

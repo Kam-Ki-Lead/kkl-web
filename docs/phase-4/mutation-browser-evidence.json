@@ -1,0 +1,101 @@
+{
+  "backendProcess": "d4c2532",
+  "voice": "52abd00",
+  "openapi": "1.0.0-phase4.c",
+  "database": "kkl_phase4",
+  "migration": "026",
+  "staffBrowserPhone": "+919800004030",
+  "note": "Mutation fixtures were not reseeded. Retry was not clicked. e7ffdb6 is not the revision for these checks.",
+  "before": {
+    "completed": {
+      "id": "b876037e-758c-4db4-ba86-fa97017d0286",
+      "reference": "QUAL-69c430f2",
+      "state": "completed",
+      "reviewStatus": "pending",
+      "failureReason": null,
+      "suppressed": false,
+      "resume": { "allowed": false, "dispatchesProvider": false, "reason": "not_resumable" },
+      "retry": { "allowed": true, "dispatchesProvider": false, "reason": "exotel_not_configured" }
+    },
+    "incomplete": {
+      "id": "b4ee4402-e94a-4bf8-bafb-2fd6292a574d",
+      "reference": "QUAL-53e12f64",
+      "state": "incomplete",
+      "reviewStatus": "pending",
+      "failureReason": "partial_answers",
+      "suppressed": false,
+      "resume": { "allowed": true, "dispatchesProvider": false, "reason": "resume_does_not_place_a_call" },
+      "retry": { "allowed": true, "dispatchesProvider": false, "reason": "exotel_not_configured" }
+    },
+    "interrupted": {
+      "id": "4498f44b-1a19-453c-924a-3fb0722d4f75",
+      "reference": "QUAL-960ac12c",
+      "state": "incomplete",
+      "reviewStatus": "pending",
+      "failureReason": "interrupted",
+      "suppressed": false,
+      "resume": { "allowed": true, "dispatchesProvider": false, "reason": "resume_does_not_place_a_call" },
+      "retry": { "allowed": true, "dispatchesProvider": false, "reason": "exotel_not_configured" }
+    },
+    "suppressed": {
+      "id": "ee7883aa-61bd-49f2-9aad-8c002bd1189d",
+      "reference": "QUAL-8f50bc26",
+      "state": "opted_out",
+      "reviewStatus": "not_required",
+      "failureReason": "already_suppressed",
+      "suppressed": true,
+      "resume": { "allowed": false, "dispatchesProvider": false, "reason": "suppression_in_force" },
+      "retry": { "allowed": false, "dispatchesProvider": false, "reason": "suppression_in_force" }
+    }
+  },
+  "after": {
+    "completed": {
+      "state": "completed",
+      "reviewStatus": "recorded",
+      "decision": "facts_recorded",
+      "level": null,
+      "marketplaceConsent": "unchanged"
+    },
+    "incomplete": {
+      "state": "incomplete",
+      "reviewStatus": "recorded",
+      "failureReason": "partial_answers",
+      "decision": "needs_follow_up",
+      "level": null
+    },
+    "interrupted": {
+      "state": "collecting",
+      "reviewStatus": "pending",
+      "failureReason": null,
+      "resume": { "allowed": false, "reason": "not_resumable" },
+      "providerDispatch": null,
+      "note": "Browser resume click moved incomplete/interrupted → collecting; no providerDispatch.dispatched"
+    },
+    "suppressed": {
+      "recoverStatus": 409,
+      "code": "suppression_in_force",
+      "error": "That contact is suppressed. Resume and retry will not override it.",
+      "runUnchanged": {
+        "state": "opted_out",
+        "reviewStatus": "not_required",
+        "failureReason": "already_suppressed",
+        "suppressed": true
+      }
+    }
+  },
+  "inventory": {
+    "total": 5,
+    "filters": {
+      "incomplete": 2,
+      "completed": 1,
+      "opted_out": 1,
+      "collecting": 1,
+      "review_pending_before_mutations": 3
+    },
+    "pastEnd": { "offset": 20, "total": 5, "count": 0 }
+  },
+  "dispatchReporting": {
+    "change": "Removed post-response frontend throws that claimed to refuse dispatched:true. Pre-flight capability gates remain. Unexpected dispatched:true would be reported from the returned payload; frontend cannot undo server-accepted dispatch.",
+    "observedOnThisHost": "No dispatched:true responses during start/resume/review on this review host."
+  }
+}

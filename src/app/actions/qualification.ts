@@ -187,11 +187,21 @@ export async function resumeQualificationRun(
     revalidatePath(VOICE_PATH);
     revalidatePath("/admin/whatsapp");
     revalidatePath(SYSTEM_PATH);
-    const dispatchNote = run.providerDispatch
-      ? ` providerDispatch.dispatched=${run.providerDispatch.dispatched}`
-        + (run.providerDispatch.reason ? ` (${run.providerDispatch.reason})` : "")
+    const dispatch = run.providerDispatch;
+    const dispatchNote = dispatch
+      ? ` providerDispatch.dispatched=${dispatch.dispatched}`
+        + (dispatch.synthetic === true ? " synthetic=true" : "")
+        + ` providerVerified=${dispatch.providerVerified}`
+        + (dispatch.reason ? ` (${dispatch.reason})` : "")
         + "."
       : "";
+    if (dispatch?.dispatched === true) {
+      return {
+        notice:
+          `Resume response recorded. Run state is ${run.state}.${dispatchNote} `
+          + "The server accepted a provider dispatch; this console cannot undo it.",
+      };
+    }
     return {
       notice:
         `Resume applied. Run state is ${run.state}.${dispatchNote} `

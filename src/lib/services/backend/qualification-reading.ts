@@ -1,6 +1,6 @@
 /**
  * Pure readings of OpenAPI 1.0.0-phase4.c qualification payloads
- * (kkl-backend `e7ffdb6`). These functions do not call a server.
+ * (kkl-backend `d4c2532`). These functions do not call a server.
  *
  * A run is not a lead. Staff inventory is GET /v1/admin/qualification/leads
  * (`inventory: true`). Marketplace GET /v1/leads is not that inventory.
@@ -10,7 +10,7 @@
  */
 
 export const PHASE4A_OPENAPI = "1.0.0-phase4.c" as const;
-export const PHASE4A_BACKEND = "e7ffdb6" as const;
+export const PHASE4A_BACKEND = "d4c2532" as const;
 
 export const LEAD_PAGE_SIZE = 20;
 

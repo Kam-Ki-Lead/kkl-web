@@ -1,15 +1,16 @@
 /**
  * Phase 4 qualification handoff map against OpenAPI 1.0.0-phase4.c
- * (kkl-backend `e7ffdb6` on `claude/phase-4-qualification`).
+ * (kkl-backend `d4c2532` on `claude/phase-4-qualification`).
  *
  * Earlier preparation at dc2f275 consulted Phase 3 `1.0.0-phase3.t`. Wiring at
  * 04b54ab used `1.0.0-phase4.a`. phase4.b verification was `39d26fd` /
- * frontend `16a5efb`. This file records phase4.c status.
+ * frontend `16a5efb`. Staff inventory wiring against `e7ffdb6` was `2fe8c37`.
+ * This file records phase4.c status against the current review process.
  */
 
 /** Keep in lockstep with PHASE4A_* in qualification-reading.ts. */
 export const PHASE4_OPENAPI = "1.0.0-phase4.c" as const;
-export const PHASE4_BACKEND_REF = "e7ffdb6" as const;
+export const PHASE4_BACKEND_REF = "d4c2532" as const;
 
 /** Paths Phase 3 published for voice. Bodies are ignored; responses are 501. */
 export const VOICE_BRIDGE_STUBS = [
@@ -85,7 +86,7 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-1",
     screens: ["A-12"],
-    status: "wired",
+    status: "verified",
     need:
       "Staff-paged lead inventory with lifecycle status (including incomplete "
       + "qualification and human-review), consent status, source, age, and "
@@ -100,7 +101,7 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-2",
     screens: ["A-13"],
-    status: "wired",
+    status: "verified",
     need:
       "Staff lead detail with Q&A links via run paths, incomplete / human-review, "
       + "and capabilities on each run summary.",
@@ -160,16 +161,17 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-7",
     screens: ["A-31", "A-25"],
-    status: "partial",
+    status: "verified",
     need:
       "Authorised recovery from capabilities: resume never dispatches. "
       + "Review while pending. Retry only when allowed without provider dispatch "
       + "(or on an authorised simulated-provider host). Start-run describes "
-      + "effect (adapter_invoked|recorded_only) and providerDispatch.dispatched.",
+      + "effect (adapter_invoked|recorded_only) and providerDispatch.dispatched. "
+      + "Unexpected dispatched:true is reported as returned — not a frontend undo.",
     mustNot:
-      "Do not press retry merely because Exotel credentials are absent. "
+      "Do not press retry on the shared review host merely to increase coverage. "
       + "Do not bypass suppression or quiet hours. "
-      + "Do not claim mutation verification without backend synthetic outcomes.",
+      + "Do not claim a frontend refusal undid server-accepted dispatch.",
     published:
       "POST …/runs/{runId}/review, POST …/recover (resume/retry via capabilities), "
       + "start-run POST",
@@ -224,6 +226,7 @@ export const PHASE4_HONESTY = [
   "staff_saved is not client-approved.",
   "Resume never dispatches; retry follows capabilities.retry.",
   "effect adapter_invoked|recorded_only is not providerDispatch.dispatched.",
+  "dispatched:true cannot be undone by the frontend; report the returned result.",
   "Queued messages are not delivery.",
   "providerVerified false is not a live call or delivered message.",
   "Synthetic questions must stay visibly SYNTHETIC.",

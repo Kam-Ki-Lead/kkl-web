@@ -1,18 +1,19 @@
 # Phase 4 integration — verification record
 
 Continued **2 October 2026** on `kkl-web` `claude/phase-2-frontend` against
-the Phase 4 review runtime at OpenAPI `1.0.0-phase4.c`. This is not a live
+the Phase 4 review process **`d4c2532`** (not `e7ffdb6`). This is not a live
 provider integration claim and not client acceptance.
 
 ## Revisions
 
 | | |
 |---|---|
-| Frontend (this pass) | `2fe8c37` |
+| Frontend (this pass) | *(pending commit)* |
+| Prior staff inventory wiring | `2fe8c37` / `8f42855` (against `e7ffdb6` then) |
 | Prior phase4.b verification | `e91a2dc` / `16a5efb` |
-| Prior phase4.a wiring | `04b54ab` / `e765da3` |
-| Backend process | `e7ffdb6` on `http://127.0.0.1:4011` |
-| Runtime handoff docs | `773dc96` |
+| Backend process (these checks) | **`d4c2532`** on `http://127.0.0.1:4011` |
+| Voice | **`52abd00`** |
+| Runtime handoff docs | review-runtime / handoff on the same process |
 | OpenAPI | `1.0.0-phase4.c` |
 | Migration | `026_qualification.sql` on `kkl_phase4` |
 | Phase 3 | left on `4010` / `kkl_review` |
@@ -25,67 +26,47 @@ provider integration claim and not client acceptance.
 | `KKL_AUTH` | `backend` |
 | `KKL_QUALIFICATION` | `backend` |
 | `KKL_BACKEND_BASE_URL` | `http://127.0.0.1:4011` |
-| `KKL_LEAD_REQUESTS_BASE_URL` | `http://127.0.0.1:4011` |
-| `KKL_LOCATIONS_BASE_URL` | `http://127.0.0.1:4011` |
-| Domain switches from handoff | `backend` as listed |
-| `KKL_ALLOW_LIVE_CALLS` / messaging | unset |
+| Live calls / messaging | unset / disabled (`providerVerified` false) |
 
-Frontend served on **3812** (fresh `next build` + `next start` after this
-wiring). Phase 3 process on 4010 untouched.
+Frontend on **3812**. Staff browser identity: **`+919800004030`** (Phase 4
+browser staff). `+919800004010` remains daily OTP-limited; no OTP bypass.
 
-## What this revision wired
+## Mutation fixtures (already present — not reseeded)
 
-Against `e7ffdb6` / `1.0.0-phase4.c` / docs `773dc96`:
+| Key | UUID | Before → After |
+|---|---|---|
+| completed `QUAL-69c430f2` | `b876037e-758c-4db4-ba86-fa97017d0286` | completed/pending → completed/**recorded** (`facts_recorded`) |
+| incomplete `QUAL-53e12f64` | `b4ee4402-e94a-4bf8-bafb-2fd6292a574d` | incomplete/pending/`partial_answers` → incomplete/**recorded** (`needs_follow_up`) |
+| interrupted `QUAL-960ac12c` | `4498f44b-1a19-453c-924a-3fb0722d4f75` | incomplete/pending/`interrupted` → **collecting**/pending; resume `not_resumable`; **no** `providerDispatch.dispatched` |
+| suppressed `QUAL-8f50bc26` | `ee7883aa-61bd-49f2-9aad-8c002bd1189d` | opted_out unchanged; recover resume → **409** `suppression_in_force` |
 
-- **H4-1 / H4-2 (wired)** — Admin leads list/detail →
-  `GET /v1/admin/qualification/leads` (+`/{leadId}`) with
-  `qualification` / `review` filters, pagination, `latestRun.path` /
-  `run.path` → Admin UI. Marketplace `GET /v1/leads` is not used.
-  Failure does not fall back to samples.
-- Calling-window / opt-out: `configured: false` = unset; saved block vs
-  form defaults; `staff_saved` labelled as not client-approved
-  (reconciled with the `e7ffdb6` GET shape: `configured` /
-  `provenance` / `setAt`).
-- Start/resume/retry use returned `capabilities`. Resume never
-  dispatches. Retry offered only when `allowed && !dispatchesProvider`.
-- Start-run refuses `providerDispatch.dispatched === true` and surfaces
-  `effect` (`adapter_invoked` | `recorded_only`).
-- **H4-7 stays partial** — mutation presses need backend seed fixtures
-  (see request below). Prior phase4.b **14/14** browser evidence at
-  `16a5efb` is preserved; this pass does not re-claim those mutations.
+Evidence JSON: `docs/phase-4/mutation-browser-evidence.json`.
 
-## Fixture / access requests
-
-1. **Clear OTP daily rate-limit** for staff fixture `+919800004010` on
-   `kkl_phase4` (or provision a second staff phone). Full staff browser
-   re-run is blocked: `429` “This number has requested too many codes
-   today” (`retryAfterSeconds` ~21232 at check time).
-2. **Load mutation fixtures** on `kkl_phase4` with the published backend
-   command (do not ask the frontend to invent rows):
-   `npm run seed:phase4-mutations` from `kkl-backend` @ `e7ffdb6`
-   (`data/phase4-mutation-fixtures.json`). Expected runs:
-   - `QUAL-69c430f2` — completed / pending review
-   - `QUAL-53e12f64` — incomplete / pending / resume allowed
-   - `QUAL-960ac12c` — interrupted incomplete / resume allowed
-   - `QUAL-8f50bc26` — suppressed / `409 suppression_in_force`
-3. No live providers. Safe retry on this host remains only when
-   `capabilities.retry.dispatchesProvider === false`.
-
-## Browser / API evidence (this pass)
+## Browser / API evidence (this pass on `d4c2532`)
 
 | Check | Result |
 |---|---|
-| Missing session → `/auth` on `/admin/leads` | **PASS** (partial script) |
-| Seller denied staff lead inventory | **PASS** — admin shell staff-only; API `403 staff_only` “Only staff manage qualification.” |
-| Seller denied qualification runs | **PASS** |
-| 4011 ≠ 4010 health (`liveTelephony: false`) | **PASS** |
-| Staff OTP for `+919800004010` | **BLOCKED** — daily rate limit (documented) |
-| Staff lead inventory / detail / filters / past-end | **Code wired**; staff browser re-run awaiting OTP clear |
-| Prior phase4.b 14/14 (runs, settings, start-run, …) | **Preserved** at `16a5efb` / `e91a2dc` — not re-claimed as phase4.c mutation verification |
-| Review save / resume / suppressed / disallowed | **Awaiting** `seed:phase4-mutations` + staff OTP |
+| Staff inventory `inventory:true`, filters, past-end | **PASS** |
+| Staff lead detail → run path | **PASS** |
+| Completed-run review save + reload | **PASS** |
+| Incomplete-run review (`needs_follow_up`) | **PASS** |
+| Interrupted resume → collecting, no dispatch | **PASS** (API after-state; retry not clicked) |
+| Suppressed recovery refusal (UI + 409) | **PASS** |
+| Seller denied inventory | **PASS** |
+| Missing session → auth | **PASS** |
+| 4011 ≠ 4010; `liveTelephony`/`providerVerified` false | **PASS** |
+| Retry on shared host | **Not clicked** (isolated backend coverage only) |
 
-Partial script: `scripts/verify-phase4-partial.mjs` — **5/5**.
-Full script: `scripts/verify-phase4-qualification.mjs` — blocked on staff OTP.
+Scripts: `verify-phase4-mutations.mjs` (primary) +
+`verify-phase4-mutations-finish.mjs` (suppressed/seller/after-state).
+
+## Dispatch reporting fix
+
+Post-response throws that described `dispatched:true` as a frontend refusal
+were removed. Pre-flight capability gates remain. If the server returns
+`dispatched:true`, the returned payload is reported; the frontend cannot undo
+it. No `dispatched:true` was observed on this host. Keep `synthetic:true` /
+`providerVerified:false` visible when present.
 
 ## Checks run (offline)
 
@@ -94,19 +75,29 @@ Full script: `scripts/verify-phase4-qualification.mjs` — blocked on staff OTP.
 | `npm test` | **PASS** (117) |
 | `npx tsc --noEmit` | **PASS** |
 | `npx next build` | **PASS** |
-| `scripts/verify-phase4-partial.mjs` | **5/5** |
+| Mutation browser suite | **PASS** (primary + finish) |
 | Live Exotel / WhatsApp / Sarvam | **Not exercised** |
-| Review save / resume / suppressed | **Awaiting fixtures + staff OTP** |
 
-## H4 coverage (per operation)
+## H4 matrix (per operation)
 
-| Id | Status | Notes |
+| Id | Operation | Classification |
 |---|---|---|
-| H4-1 | **wired** | Staff inventory adapter + A-12 UI; seller denial checked; staff UI pending OTP |
-| H4-2 | **wired** | Staff detail adapter + A-13 UI; staff UI pending OTP |
-| H4-3…H4-6 | **verified** | Prior 14/14 + phase4.c reading/forms for provenance |
-| H4-7 | **partial** | Capabilities gating wired; mutations untested on this host |
-| H4-8 | **partial** | Admin does not call voice-bridge |
+| H4-1 | Staff lead inventory GET + filters/pagination | **browser-verified** on `d4c2532` |
+| H4-2 | Staff lead detail + run links | **browser-verified** |
+| H4-3 | Voice run list | **browser-verified** (prior + inventory honesty) |
+| H4-4 | Run detail / transcript / level unset | **browser-verified** |
+| H4-5 | WhatsApp run list honesty | **browser-verified** (prior; unchanged contract) |
+| H4-6 | Question sets / window / opt-out provenance | **browser-verified** (prior save/reload; GET `staff_saved` on this host) |
+| H4-7 | Review save | **browser-verified** (completed + incomplete fixtures) |
+| H4-7 | Resume | **browser-verified** (interrupted → collecting, no dispatch) |
+| H4-7 | Suppressed recover refusal | **browser-verified** |
+| H4-7 | Start-run effect / dispatch fields | **browser-verified** earlier; still accurate on this host |
+| H4-7 | Retry | **locally simulated integration** on backend only — **not** browser-clicked here |
+| H4-8 | Voice-bridge Admin boundary | **browser-verified** (Admin does not call); bridge schema freeze **awaiting** |
+| — | Client question set / Level 1–10 mapping | **awaiting client input** |
+| — | Client calling hours (not fixture `staff_saved`) | **awaiting client input** |
+| — | Live Exotel / Sarvam / WhatsApp | **awaiting live-provider verification** |
+| — | Meta Instant Form intake | **awaiting client input** (`pending_scope_authorisation`) |
 
 Synthetic fixtures and UI verification are not a completed live Phase 4
 provider integration.

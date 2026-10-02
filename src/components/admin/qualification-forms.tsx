@@ -165,7 +165,9 @@ export function StartQualificationRunForm({
         <span className="t-mono">{questionSetLabel}</span>. Creation may return{" "}
         <span className="t-mono">effect: adapter_invoked</span> or{" "}
         <span className="t-mono">recorded_only</span>. Live acceptance is only{" "}
-        <span className="t-mono">providerDispatch.dispatched</span> — refused when true.
+        <span className="t-mono">providerDispatch.dispatched</span>. If the server
+        returns dispatched true, that already happened — report it; the console
+        cannot undo it.
       </p>
       <Field id="channel" label="Channel" labelSize="sm">
         <Select id="channel" name="channel" defaultValue="voice">

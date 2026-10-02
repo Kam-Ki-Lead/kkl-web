@@ -1,6 +1,6 @@
 /**
  * Phase 4 Admin qualification adapters against OpenAPI 1.0.0-phase4.c
- * (kkl-backend `e7ffdb6`).
+ * (kkl-backend `d4c2532`).
  *
  * Staff routes under `/v1/admin/qualification/*`. Voice-bridge stays
  * kkl-voice → kkl-backend and is not called from Admin. Staff inventory is
@@ -264,7 +264,9 @@ export async function getQualificationRun(
 /**
  * Start a qualification run. Creation may invoke the adapter
  * (`effect: adapter_invoked`) or only record (`recorded_only`).
- * `providerDispatch.dispatched` is the live acceptance claim.
+ * `providerDispatch.dispatched` is the live acceptance claim: if the
+ * server returns dispatched true, that already happened — the frontend
+ * cannot undo it. Report the returned payload; do not auto-retry.
  */
 export async function startQualificationRun(input: {
   leadId: string;
@@ -282,12 +284,6 @@ export async function startQualificationRun(input: {
   if (!run) throw new ServiceError("unavailable", "The started run response was not readable.");
   if (run.qualification.level !== null) {
     throw new ServiceError("unavailable", "A started run must not return a qualification level.");
-  }
-  if (run.providerDispatch?.dispatched === true) {
-    throw new ServiceError(
-      "unavailable",
-      "Start-run reported providerDispatch.dispatched true. Live dispatch is not accepted here.",
-    );
   }
   return run;
 }
@@ -346,9 +342,10 @@ export async function reviewQualificationRun(input: {
 }
 
 /**
- * Resume never dispatches under this contract. Retry may only be used when
- * capabilities say it does not dispatch, unless a safe simulated-provider host
- * has authorised otherwise.
+ * Resume never dispatches under this contract. Retry may only be submitted
+ * when capabilities say it does not dispatch on this host — that is a
+ * pre-flight guard. If a response still carries dispatched true, report
+ * that result; the frontend cannot undo server-accepted dispatch.
  */
 export async function recoverQualificationRun(input: {
   runId: string;
@@ -384,12 +381,6 @@ export async function recoverQualificationRun(input: {
   if (status !== 200) raise(status, body);
   const run = readQualificationRun(body);
   if (!run) throw new ServiceError("unavailable", "The recovery response was not readable.");
-  if (run.providerDispatch?.dispatched === true) {
-    throw new ServiceError(
-      "unavailable",
-      "Recovery reported providerDispatch.dispatched true. Live dispatch is not accepted here.",
-    );
-  }
   return run;
 }
 

@@ -1,41 +1,37 @@
 # Phase 4 — screens and H4 map (OpenAPI 1.0.0-phase4.c)
 
-Backend process: `claude/phase-4-qualification` @ `e7ffdb6` on
-`http://127.0.0.1:4011`. Runtime handoff docs @ `773dc96`.
+Backend process: `claude/phase-4-qualification` @ **`d4c2532`** on
+`http://127.0.0.1:4011`. Voice **`52abd00`**. Live calls/messages off.
 
 ## H4-1 … H4-8
 
-| Id | Status | Published path | Frontend stance / evidence |
+| Id | Status | Classification | Evidence |
 |---|---|---|---|
-| H4-1 Staff lead inventory | **wired** | `GET …/leads` | A-12 loads staff inventory with qualification/review filters and pagination. Marketplace `/v1/leads` is not substituted. Seller denied. |
-| H4-2 Staff lead detail | **wired** | `GET …/leads/{leadId}` | A-13 shows lead snapshot, level unset, run paths via `run.path` → Admin UI. |
-| H4-3 Call / run list | **verified** | `GET …/runs` | Browser: staff list shows `QUAL-*`, `inventory: false`, SYNTHETIC, `not_configured` |
-| H4-4 Run detail | **verified** | `GET …/runs/{runId}` | Browser: level unset, marketplaceConsent unchanged, SYNTHETIC, capabilities shown |
-| H4-5 WhatsApp runs | **verified** | same list, channel filter | Browser: no delivery claim from fixtures |
-| H4-6 Question sets / window / opt-out | **verified** | GET/POST question-sets, calling-window, opt-out | Saved vs form; `configured`/`provenance`; `staff_saved` ≠ client-approved |
-| H4-7 Review + recovery + start-run | **partial** | review, recover, POST runs | Start-run exercised (effect / dispatched=false). Review save, resume, retry mutations await backend synthetic outcomes. |
-| H4-8 Voice-bridge | **partial** | Admin routes; bridge 503 here | Admin never calls `/v1/voice-bridge` |
+| H4-1 Staff lead inventory | **verified** | browser-verified | Filters, pagination, past-end, seller denial on `d4c2532` |
+| H4-2 Staff lead detail | **verified** | browser-verified | Level unset; run path → Admin UI |
+| H4-3 Call / run list | **verified** | browser-verified | `inventory: false`, SYNTHETIC, not_configured |
+| H4-4 Run detail | **verified** | browser-verified | Level unset; capabilities; review/resume UI |
+| H4-5 WhatsApp runs | **verified** | browser-verified | No delivery claim from fixtures |
+| H4-6 Question sets / window / opt-out | **verified** | browser-verified | Provenance; saved vs form |
+| H4-7 Review + resume | **verified** | browser-verified | Completed + incomplete review; interrupted resume; suppressed 409 |
+| H4-7 Retry | — | locally simulated (backend) | **Not** clicked on shared review host |
+| H4-8 Voice-bridge | **partial** | Admin boundary browser-verified; schema freeze awaiting | Admin never calls `/v1/voice-bridge` |
 
-## Switch
+Awaiting client input: real question set, Level 1–10 mapping, client calling hours, Meta intake scope.
+Awaiting live-provider verification: Exotel / Sarvam / WhatsApp.
 
-```
-KKL_QUALIFICATION=backend
-KKL_AUTH=backend
-KKL_BACKEND_BASE_URL=http://127.0.0.1:4011
-```
+## Staff phones
 
-No sample fallback. Login via `POST /v1/auth/code` then
-`GET /v1/dev/challenges/{id}/code` with `x-kkl-dev-secret`, then
-`POST /v1/auth/sessions`. Staff fixture `+919800004010`; seller
-`+919800004011` (403 on qualification).
+| Phone | Use |
+|---|---|
+| `+919800004010` | Primary staff fixture (may be OTP daily-limited) |
+| `+919800004030` | Phase 4 browser staff (used for this verification) |
+| `+919800004011` | Seller denial |
 
 ## Honesty
 
-- Level: mapping not configured / null
-- Intent: model-reported, not a level
-- marketplaceConsent: unchanged
-- Synthetic sets labelled SYNTHETIC
-- Phone: masked only (`phoneMasked`)
-- `configured: false` = unset
-- Resume never dispatches; retry gated by capabilities
-- Retry invokes dial when `dispatchesProvider` — not pressed on this review host
+- Level unset / mapping not configured
+- `marketplaceConsent` unchanged
+- Resume never dispatches under this contract
+- `dispatched:true` is reported, not “refused” by the frontend after the fact
+- Retry not pressed on this host
