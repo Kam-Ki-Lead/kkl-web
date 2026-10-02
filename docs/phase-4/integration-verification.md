@@ -8,7 +8,7 @@ provider integration claim and not client acceptance.
 
 | | |
 |---|---|
-| Frontend (this pass) | *(pending commit)* |
+| Frontend (this pass) | `4473dd2` |
 | Prior staff inventory wiring | `2fe8c37` / `8f42855` (against `e7ffdb6` then) |
 | Prior phase4.b verification | `e91a2dc` / `16a5efb` |
 | Backend process (these checks) | **`d4c2532`** on `http://127.0.0.1:4011` |
