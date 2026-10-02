@@ -1,14 +1,14 @@
 /**
- * Phase 4 qualification handoff map against OpenAPI 1.0.0-phase4.a
- * (kkl-backend `a606665` on `claude/phase-4-qualification`).
+ * Phase 4 qualification handoff map against OpenAPI 1.0.0-phase4.b
+ * (kkl-backend `39d26fd` on `claude/phase-4-qualification`).
  *
- * Earlier preparation at dc2f275 consulted Phase 3 `1.0.0-phase3.t`. This
- * file records what that API now supplies and what remains unpublished.
+ * Earlier preparation at dc2f275 consulted Phase 3 `1.0.0-phase3.t`. Wiring at
+ * 04b54ab used `1.0.0-phase4.a`. This file records phase4.b status.
  */
 
 /** Keep in lockstep with PHASE4A_* in qualification-reading.ts. */
-export const PHASE4_OPENAPI = "1.0.0-phase4.a" as const;
-export const PHASE4_BACKEND_REF = "a606665" as const;
+export const PHASE4_OPENAPI = "1.0.0-phase4.b" as const;
+export const PHASE4_BACKEND_REF = "39d26fd" as const;
 
 /** Paths Phase 3 published for voice. Bodies are ignored; responses are 501. */
 export const VOICE_BRIDGE_STUBS = [
@@ -64,7 +64,7 @@ export type Phase4HandoffId =
   | "H4-7"
   | "H4-8";
 
-export type Phase4HandoffStatus = "open" | "partial" | "satisfied";
+export type Phase4HandoffStatus = "open" | "partial" | "wired" | "verified" | "satisfied";
 
 export type Phase4Handoff = {
   readonly id: Phase4HandoffId;
@@ -86,7 +86,7 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
       + "stable lead references.",
     mustNot:
       "Do not treat GET /v1/admin/qualification/runs as the Admin lead list. "
-      + "A run is not a lead.",
+      + "inventory: false. GET /v1/leads?eligible=false is not a staff-only inventory.",
   },
   {
     id: "H4-2",
@@ -103,20 +103,20 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-3",
     screens: ["A-24"],
-    status: "satisfied",
+    status: "verified",
     need: "Staff list of qualification runs / call attempts with provider status.",
     mustNot:
       "Do not dial from Admin. Do not call voice-bridge. "
-      + "providerVerified false is not a live call.",
+      + "providerVerified false is not a live call. Runs are not the lead inventory.",
     published: "GET /v1/admin/qualification/runs (filter channel=voice in the UI)",
   },
   {
     id: "H4-4",
     screens: ["A-25"],
-    status: "satisfied",
+    status: "verified",
     need:
-      "Staff run detail: answers with question-set version, model summary labelled "
-      + "as model output, consent evidence, review state.",
+      "Staff run detail: answers with question-set version, transcript text, model summary "
+      + "labelled as model output, consent evidence, review state.",
     mustNot:
       "Do not render modelReportedIntent as a level. qualification.level stays unset.",
     published: "GET /v1/admin/qualification/runs/{runId}",
@@ -124,7 +124,7 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-5",
     screens: ["A-26"],
-    status: "satisfied",
+    status: "verified",
     need:
       "Staff WhatsApp qualification runs with message statuses that distinguish "
       + "queued, delivered, failed, not_configured.",
@@ -135,29 +135,29 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-6",
     screens: ["A-15"],
-    status: "satisfied",
+    status: "verified",
     need:
       "Qualification question sets with provenance. Synthetic prompts must say SYNTHETIC. "
-      + "Calling window and opt-out configuration.",
+      + "Calling window and opt-out configuration with GET reload of saved values.",
     mustNot:
       "Do not use pricing prompts as the qualification questionnaire. "
       + "Do not map questions onto Levels 1–10.",
     published:
       "GET/POST /v1/admin/qualification/question-sets, "
-      + "POST calling-window, POST opt-out",
+      + "GET/POST calling-window, GET/POST opt-out",
   },
   {
     id: "H4-7",
     screens: ["A-31", "A-25"],
-    status: "satisfied",
+    status: "verified",
     need:
-      "Authorised recovery: resume incomplete, retry failed call, process due retries. "
-      + "Suppression blocks recovery.",
+      "Authorised recovery: resume incomplete (no dial). Review while pending. "
+      + "Retry / due-retries invoke dial and stay gated. Start-run without live dispatch.",
     mustNot:
-      "Do not bypass suppression or quiet hours. Do not initiate a real provider call "
-      + "when credentials are absent (not_configured / dry_run).",
+      "Do not press retry merely because Exotel credentials are absent. "
+      + "Do not bypass suppression or quiet hours.",
     published:
-      "POST .../runs/{runId}/review, POST .../recover, POST .../retries/run",
+      "POST .../runs/{runId}/review, POST .../recover (resume), start-run POST",
   },
   {
     id: "H4-8",
@@ -167,7 +167,7 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
       "Voice-bridge remains the kkl-voice boundary. Admin uses /v1/admin/qualification. "
       + "Schema freeze for voice-bridge is still outstanding beyond 501 stubs.",
     mustNot: "Admin screens must not call /v1/voice-bridge.",
-    published: "Admin qualification routes; voice-bridge stubs still 501",
+    published: "Admin qualification routes; voice-bridge stubs still 501 / not configured",
   },
 ] as const;
 

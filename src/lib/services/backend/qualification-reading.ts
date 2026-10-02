@@ -1,14 +1,14 @@
 /**
- * Pure readings of OpenAPI 1.0.0-phase4.a qualification payloads
- * (kkl-backend `a606665`). These functions do not call a server.
+ * Pure readings of OpenAPI 1.0.0-phase4.b qualification payloads
+ * (kkl-backend `39d26fd`). These functions do not call a server.
  *
  * A run is not a lead. A call/message status is not provider delivery when
  * `providerVerified` is false. `modelReportedIntent` is not a qualification
  * level. `marketplaceConsent` stays unchanged on these records.
  */
 
-export const PHASE4A_OPENAPI = "1.0.0-phase4.a" as const;
-export const PHASE4A_BACKEND = "a606665" as const;
+export const PHASE4A_OPENAPI = "1.0.0-phase4.b" as const;
+export const PHASE4A_BACKEND = "39d26fd" as const;
 
 export const RUN_STATES = [
   "collecting",
@@ -101,6 +101,18 @@ export type QualificationReview = {
   readonly at: string | null;
 };
 
+export type TranscriptLine = {
+  readonly speaker: string;
+  readonly sequence: number;
+  readonly text: string;
+  readonly at: string | null;
+};
+
+export type ProviderDispatch = {
+  readonly dispatched: boolean;
+  readonly reason: string | null;
+};
+
 export type QualificationSnapshot = {
   readonly level: null;
   readonly pricingApplied: false;
@@ -109,6 +121,17 @@ export type QualificationSnapshot = {
   readonly reason: string;
   readonly modelReportedIntent: number | null;
   readonly modelReportedIntentIsNotALevel: true;
+};
+
+export type CallingWindow = {
+  readonly timeZone: string;
+  readonly start: string;
+  readonly end: string;
+};
+
+export type OptOutSignals = {
+  readonly dtmf: string | null;
+  readonly keywords: readonly string[];
 };
 
 export type QualificationRun = {
@@ -138,6 +161,7 @@ export type QualificationRun = {
   readonly messages: readonly QualificationMessage[];
   readonly consentEvidence: readonly ConsentEvidence[];
   readonly reviews: readonly QualificationReview[];
+  readonly transcript: readonly TranscriptLine[];
   readonly modelSummary: string | null;
   readonly qualification: QualificationSnapshot;
   readonly suppressed: boolean;
@@ -146,7 +170,14 @@ export type QualificationRun = {
   readonly updatedAt: string | null;
   readonly completedAt: string | null;
   readonly providerVerified: false;
+  readonly providerDispatch: ProviderDispatch | null;
   readonly duplicate?: boolean;
+};
+
+export type QualificationRunPage = {
+  readonly runs: readonly QualificationRun[];
+  readonly inventory: false;
+  readonly leadInventoryPath: string | null;
 };
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -271,6 +302,28 @@ function readReview(value: unknown): QualificationReview | null {
   };
 }
 
+function readTranscriptLine(value: unknown): TranscriptLine | null {
+  const row = record(value);
+  if (!row || typeof row.text !== "string") return null;
+  return {
+    speaker: text(row.speaker) ?? "",
+    sequence: integer(row.sequence) ?? 0,
+    text: row.text,
+    at: text(row.at) ?? text(row.time) ?? text(row.recordedAt),
+  };
+}
+
+function readProviderDispatch(value: unknown): ProviderDispatch | null {
+  const row = record(value);
+  if (!row) return null;
+  const dispatched = bool(row.dispatched);
+  if (dispatched === null) return null;
+  return {
+    dispatched,
+    reason: text(row.reason),
+  };
+}
+
 function readQualification(value: unknown): QualificationSnapshot {
   const row = record(value);
   const intent = row ? integer(row.modelReportedIntent) : null;
@@ -336,6 +389,15 @@ export function readQualificationRun(body: unknown): QualificationRun | null {
     }
   }
 
+  const transcript: TranscriptLine[] = [];
+  if (Array.isArray(row.transcript)) {
+    for (const item of row.transcript) {
+      const line = readTranscriptLine(item);
+      if (!line) return null;
+      transcript.push(line);
+    }
+  }
+
   let nextQuestion: QualificationRun["nextQuestion"] = null;
   const next = record(row.nextQuestion);
   if (next && typeof next.key === "string") {
@@ -370,6 +432,7 @@ export function readQualificationRun(body: unknown): QualificationRun | null {
     messages,
     consentEvidence,
     reviews,
+    transcript,
     modelSummary: text(row.modelSummary),
     qualification: readQualification(row.qualification),
     suppressed: bool(row.suppressed) === true,
@@ -378,11 +441,12 @@ export function readQualificationRun(body: unknown): QualificationRun | null {
     updatedAt: text(row.updatedAt),
     completedAt: text(row.completedAt),
     providerVerified: false,
+    providerDispatch: readProviderDispatch(row.providerDispatch),
     duplicate: bool(row.duplicate) === true ? true : undefined,
   };
 }
 
-export function readQualificationRunPage(body: unknown): { runs: QualificationRun[] } | null {
+export function readQualificationRunPage(body: unknown): QualificationRunPage | null {
   const row = record(body);
   if (!row || !Array.isArray(row.runs)) return null;
   const runs: QualificationRun[] = [];
@@ -391,17 +455,18 @@ export function readQualificationRunPage(body: unknown): { runs: QualificationRu
     if (!run) return null;
     runs.push(run);
   }
-  return { runs };
+  return {
+    runs,
+    inventory: false,
+    leadInventoryPath: text(row.leadInventoryPath),
+  };
 }
 
-export function readCallingWindow(body: unknown): {
-  timeZone: string;
-  start: string;
-  end: string;
-} | null {
+export function readCallingWindow(body: unknown): CallingWindow | null {
   const row = record(body);
-  const window = record(row?.callingWindow) ?? row;
-  if (!window) return null;
+  if (!row) return null;
+  if (row.callingWindow === null) return null;
+  const window = record(row.callingWindow) ?? row;
   const timeZone = text(window.timeZone);
   const start = text(window.start);
   const end = text(window.end);
@@ -409,12 +474,29 @@ export function readCallingWindow(body: unknown): {
   return { timeZone, start, end };
 }
 
-export function readOptOutSignals(body: unknown): {
-  dtmf: string | null;
-  keywords: readonly string[];
-} | null {
+/** Distinguishes “not saved” from an unreadable payload. */
+export function readCallingWindowResponse(body: unknown): {
+  ok: true;
+  window: CallingWindow | null;
+} | { ok: false } {
   const row = record(body);
-  const signals = record(row?.optOut) ?? record(row?.qualificationOptOut) ?? row;
+  if (!row) return { ok: false };
+  if (Object.prototype.hasOwnProperty.call(row, "callingWindow") && row.callingWindow === null) {
+    return { ok: true, window: null };
+  }
+  const window = readCallingWindow(body);
+  if (!window && Object.prototype.hasOwnProperty.call(row, "callingWindow")) {
+    return { ok: false };
+  }
+  if (!window && !("timeZone" in row) && !("callingWindow" in row)) return { ok: false };
+  return { ok: true, window };
+}
+
+export function readOptOutSignals(body: unknown): OptOutSignals | null {
+  const row = record(body);
+  if (!row) return null;
+  if (row.optOut === null) return null;
+  const signals = record(row.optOut) ?? record(row.qualificationOptOut) ?? row;
   if (!signals || !Array.isArray(signals.keywords)) return null;
   const keywords = signals.keywords.filter((word): word is string => typeof word === "string");
   if (keywords.length === 0) return null;
@@ -424,14 +506,34 @@ export function readOptOutSignals(body: unknown): {
   };
 }
 
+export function readOptOutResponse(body: unknown): {
+  ok: true;
+  signals: OptOutSignals | null;
+} | { ok: false } {
+  const row = record(body);
+  if (!row) return { ok: false };
+  if (Object.prototype.hasOwnProperty.call(row, "optOut") && row.optOut === null) {
+    return { ok: true, signals: null };
+  }
+  const signals = readOptOutSignals(body);
+  if (!signals && Object.prototype.hasOwnProperty.call(row, "optOut")) return { ok: false };
+  if (!signals && !("keywords" in row) && !("optOut" in row)) return { ok: false };
+  return { ok: true, signals };
+}
+
 export function readRetryBatch(body: unknown): {
   retried: readonly string[];
   providerVerified: false;
+  providerDispatched: boolean | null;
 } | null {
   const row = record(body);
   if (!row || !Array.isArray(row.retried)) return null;
   const retried = row.retried.filter((id): id is string => typeof id === "string");
-  return { retried, providerVerified: false };
+  return {
+    retried,
+    providerVerified: false,
+    providerDispatched: bool(row.providerDispatched),
+  };
 }
 
 /** Status labels that must not be read as live provider delivery. */

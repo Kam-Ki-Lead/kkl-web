@@ -3,10 +3,10 @@
 import { useActionState } from "react";
 import {
   registerSyntheticQuestions,
-  runDueQualificationRetries,
+  resumeQualificationRun,
   saveCallingWindow,
   saveOptOutSignals,
-  submitQualificationRecovery,
+  startQualificationRunAction,
   submitQualificationReview,
   type QualificationActionState,
 } from "@/app/actions/qualification";
@@ -25,44 +25,81 @@ function Notice({ state }: { state: QualificationActionState }) {
   return null;
 }
 
-export function CallingWindowForm() {
+export function CallingWindowForm({
+  saved,
+}: {
+  saved: { timeZone: string; start: string; end: string } | null;
+}) {
   const [state, action, pending] = useActionState(saveCallingWindow, initial);
   return (
-    <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
-      <Field id="timeZone" label="Time zone" labelSize="sm" error={state.field === "timeZone" ? state.error : undefined}>
-        <TextInput id="timeZone" name="timeZone" defaultValue="Asia/Kolkata" invalid={state.field === "timeZone"} />
-      </Field>
-      <div className="grid grid-cols-2 gap-[12px]">
-        <Field id="start" label="Start (HH:MM)" labelSize="sm" error={state.field === "start" ? state.error : undefined}>
-          <TextInput id="start" name="start" defaultValue="10:00" invalid={state.field === "start"} />
-        </Field>
-        <Field id="end" label="End (HH:MM)" labelSize="sm" error={state.field === "end" ? state.error : undefined}>
-          <TextInput id="end" name="end" defaultValue="19:00" invalid={state.field === "end"} />
-        </Field>
+    <div className="mt-[12px]">
+      <div className="rounded-[8px] border border-line bg-tint px-[13px] py-[10px]">
+        <p className="t-caption text-muted">Saved configuration</p>
+        <p className="t-body mt-[4px] text-body">
+          {saved
+            ? `${saved.timeZone} ${saved.start}–${saved.end}`
+            : "No calling window is saved yet."}
+        </p>
+        <p className="t-caption mt-[4px] text-muted">
+          The fixture review window is not the client&apos;s calling hours.
+        </p>
       </div>
-      <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Saving…" : "Save calling window"}
-      </Button>
-      <Notice state={state} />
-    </form>
+      <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
+        <Field id="timeZone" label="Time zone" labelSize="sm" error={state.field === "timeZone" ? state.error : undefined}>
+          <TextInput id="timeZone" name="timeZone" defaultValue={saved?.timeZone ?? "Asia/Kolkata"} invalid={state.field === "timeZone"} />
+        </Field>
+        <div className="grid grid-cols-2 gap-[12px]">
+          <Field id="start" label="Start (HH:MM)" labelSize="sm" error={state.field === "start" ? state.error : undefined}>
+            <TextInput id="start" name="start" defaultValue={saved?.start ?? "10:00"} invalid={state.field === "start"} />
+          </Field>
+          <Field id="end" label="End (HH:MM)" labelSize="sm" error={state.field === "end" ? state.error : undefined}>
+            <TextInput id="end" name="end" defaultValue={saved?.end ?? "19:00"} invalid={state.field === "end"} />
+          </Field>
+        </div>
+        <Button type="submit" size="sm" disabled={pending}>
+          {pending ? "Saving…" : "Save calling window"}
+        </Button>
+        <Notice state={state} />
+      </form>
+    </div>
   );
 }
 
-export function OptOutSignalsForm() {
+export function OptOutSignalsForm({
+  saved,
+}: {
+  saved: { dtmf: string | null; keywords: readonly string[] } | null;
+}) {
   const [state, action, pending] = useActionState(saveOptOutSignals, initial);
   return (
-    <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
-      <Field id="keywords" label="Keywords" labelSize="sm" helper="Comma or newline separated. None are assumed." error={state.field === "keywords" ? state.error : undefined}>
-        <TextArea id="keywords" name="keywords" rows={3} defaultValue={"stop\nunsubscribe"} invalid={state.field === "keywords"} />
-      </Field>
-      <Field id="dtmf" label="DTMF digit (optional)" labelSize="sm">
-        <TextInput id="dtmf" name="dtmf" defaultValue="9" />
-      </Field>
-      <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Saving…" : "Save opt-out signals"}
-      </Button>
-      <Notice state={state} />
-    </form>
+    <div className="mt-[12px]">
+      <div className="rounded-[8px] border border-line bg-tint px-[13px] py-[10px]">
+        <p className="t-caption text-muted">Saved configuration</p>
+        <p className="t-body mt-[4px] text-body">
+          {saved
+            ? `${saved.keywords.join(", ")}${saved.dtmf ? ` · DTMF ${saved.dtmf}` : ""}`
+            : "No opt-out signals are saved yet."}
+        </p>
+      </div>
+      <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
+        <Field id="keywords" label="Keywords" labelSize="sm" helper="Comma or newline separated. None are assumed." error={state.field === "keywords" ? state.error : undefined}>
+          <TextArea
+            id="keywords"
+            name="keywords"
+            rows={3}
+            defaultValue={saved?.keywords.join("\n") ?? "stop\nunsubscribe"}
+            invalid={state.field === "keywords"}
+          />
+        </Field>
+        <Field id="dtmf" label="DTMF digit (optional)" labelSize="sm">
+          <TextInput id="dtmf" name="dtmf" defaultValue={saved?.dtmf ?? "9"} />
+        </Field>
+        <Button type="submit" size="sm" disabled={pending}>
+          {pending ? "Saving…" : "Save opt-out signals"}
+        </Button>
+        <Notice state={state} />
+      </form>
+    </div>
   );
 }
 
@@ -75,6 +112,39 @@ export function SyntheticQuestionSetForm() {
       </Field>
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Registering…" : "Register synthetic question set"}
+      </Button>
+      <Notice state={state} />
+    </form>
+  );
+}
+
+export function StartQualificationRunForm({
+  leadId,
+  questionSetId,
+  questionSetLabel,
+}: {
+  leadId: string;
+  questionSetId: string;
+  questionSetLabel: string;
+}) {
+  const [state, action, pending] = useActionState(startQualificationRunAction, initial);
+  return (
+    <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
+      <input type="hidden" name="leadId" value={leadId} />
+      <input type="hidden" name="questionSetId" value={questionSetId} />
+      <p className="t-caption text-muted">
+        Starts a run against the synthetic fixture lead and set{" "}
+        <span className="t-mono">{questionSetLabel}</span>. Without Exotel this stays{" "}
+        <span className="t-mono">not_configured</span> — not a live dial.
+      </p>
+      <Field id="channel" label="Channel" labelSize="sm">
+        <Select id="channel" name="channel" defaultValue="voice">
+          <option value="voice">Voice</option>
+          <option value="whatsapp">WhatsApp</option>
+        </Select>
+      </Field>
+      <Button type="submit" size="sm" disabled={pending}>
+        {pending ? "Starting…" : "Start non-dispatched run"}
       </Button>
       <Notice state={state} />
     </form>
@@ -109,43 +179,37 @@ export function QualificationReviewForm({ runId }: { runId: string }) {
 export function QualificationRecoveryForm({
   runId,
   canResume,
-  canRetry,
 }: {
   runId: string;
   canResume: boolean;
-  canRetry: boolean;
 }) {
-  const [state, action, pending] = useActionState(submitQualificationRecovery, initial);
-  if (!canResume && !canRetry) return null;
+  const [state, action, pending] = useActionState(resumeQualificationRun, initial);
   return (
-    <form action={action} className="mt-[12px] flex flex-wrap gap-[10px]">
-      <input type="hidden" name="runId" value={runId} />
+    <div className="mt-[12px] flex flex-col gap-[10px]">
+      <p className="t-caption text-muted">
+        Resume does not place a call. Retry and due-retries invoke dial() and are not offered
+        here — missing Exotel credentials are not authorisation to retry.
+      </p>
       {canResume ? (
-        <Button type="submit" name="action" value="resume" size="sm" variant="secondary" disabled={pending}>
-          Resume incomplete run
-        </Button>
-      ) : null}
-      {canRetry ? (
-        <Button type="submit" name="action" value="retry" size="sm" variant="secondary" disabled={pending}>
-          Retry failed call
-        </Button>
-      ) : null}
-      <Notice state={state} />
-    </form>
+        <form action={action} className="flex flex-wrap gap-[10px]">
+          <input type="hidden" name="runId" value={runId} />
+          <Button type="submit" size="sm" variant="secondary" disabled={pending}>
+            {pending ? "Resuming…" : "Resume incomplete run"}
+          </Button>
+          <Notice state={state} />
+        </form>
+      ) : (
+        <p className="t-body text-body">Resume is available only when the run state is incomplete.</p>
+      )}
+    </div>
   );
 }
 
-export function DueRetriesForm() {
-  const [state, action, pending] = useActionState(runDueQualificationRetries, initial);
+export function DueRetriesNotice() {
   return (
-    <form action={action} className="mt-[12px]">
-      <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Running…" : "Process due provider retries"}
-      </Button>
-      <p className="t-caption mt-[8px] text-muted">
-        Suppression is checked again. Results stay providerVerified false — not a live dial claim.
-      </p>
-      <Notice state={state} />
-    </form>
+    <p className="t-body mt-[10px] text-body">
+      Due provider retries call dial(). This console does not submit that request. Use an
+      isolated simulated-provider environment when dispatch behaviour must be exercised.
+    </p>
   );
 }

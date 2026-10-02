@@ -293,9 +293,9 @@ export function intakeStoreKind(): "sample" | "backend" {
 //
 // A-12, A-13, A-24, A-25, A-26 and the voice/WhatsApp half of A-31. When this
 // switch is on, those screens call the Phase 4 adapters and never fall back
-// to fixtures. OpenAPI 1.0.0-phase3.t does not yet publish the staff reads
-// those screens need (voice-bridge stubs are kkl-voice → kkl-backend only),
-// so the adapters refuse with the named handoff rather than inventing a path.
+// to fixtures. OpenAPI 1.0.0-phase4.b publishes the admin qualification routes
+// on the same origin as auth. Staff lead inventory (H4-1) remains unpublished;
+// runs report inventory: false and must not be shown as the lead list.
 //
 // Intake (KKL_INTAKE), suppressions (KKL_ADMIN_OPERATIONS) and delivery
 // attempts (KKL_NOTIFICATIONS) stay on their own switches. Question prompts

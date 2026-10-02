@@ -12,7 +12,11 @@ import { Chip } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { MAPPING_NOT_CONFIGURED_LABEL } from "@/lib/domain/commerce-display";
 import { qualificationStoreKind } from "@/lib/services/backend/config";
-import { listQuestionSets } from "@/lib/services/backend/qualification";
+import {
+  getCallingWindow,
+  getOptOutSignals,
+  listQuestionSets,
+} from "@/lib/services/backend/qualification";
 
 export const metadata: Metadata = { title: "Platform settings", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -32,6 +36,8 @@ const TAXONOMY = [
 export default async function AdminSettingsPage() {
   const qualificationBackend = qualificationStoreKind() === "backend";
   const questionSets = qualificationBackend ? await listQuestionSets() : null;
+  const callingWindow = qualificationBackend ? await getCallingWindow() : null;
+  const optOut = qualificationBackend ? await getOptOutSignals() : null;
 
   return (
     <AdminShell title="Platform settings" subtitle="Taxonomy, calling hours and qualification questions">
@@ -77,7 +83,7 @@ export default async function AdminSettingsPage() {
           {!qualificationBackend ? (
             <p className="t-body mt-[10px] text-body">
               Set <span className="t-mono">KKL_QUALIFICATION=backend</span> against OpenAPI
-              1.0.0-phase4.a to load and register sets. Synthetic prompts must say SYNTHETIC.
+              1.0.0-phase4.b to load and register sets. Synthetic prompts must say SYNTHETIC.
             </p>
           ) : null}
           {questionSets && !questionSets.ok ? (
@@ -125,7 +131,13 @@ export default async function AdminSettingsPage() {
                 Hours are not assumed. Without a window, scheduling returns{" "}
                 <span className="t-mono">calling_window_not_configured</span>.
               </p>
-              <CallingWindowForm />
+              {callingWindow && !callingWindow.ok ? (
+                <StateMessage tone="error" title="Calling window could not be loaded">
+                  {callingWindow.message}
+                </StateMessage>
+              ) : (
+                <CallingWindowForm saved={callingWindow?.ok ? callingWindow.value : null} />
+              )}
             </Card>
             <Card className="p-[18px]">
               <h2 className="t-card-title text-ink">Opt-out signals</h2>
@@ -133,7 +145,13 @@ export default async function AdminSettingsPage() {
                 A match suppresses voice and WhatsApp together. It does not grant marketplace
                 consent.
               </p>
-              <OptOutSignalsForm />
+              {optOut && !optOut.ok ? (
+                <StateMessage tone="error" title="Opt-out signals could not be loaded">
+                  {optOut.message}
+                </StateMessage>
+              ) : (
+                <OptOutSignalsForm saved={optOut?.ok ? optOut.value : null} />
+              )}
             </Card>
           </>
         ) : (

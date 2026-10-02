@@ -1,6 +1,6 @@
 /**
- * Phase 4 Admin qualification adapters against OpenAPI 1.0.0-phase4.a
- * (kkl-backend `a606665`).
+ * Phase 4 Admin qualification adapters against OpenAPI 1.0.0-phase4.b
+ * (kkl-backend `39d26fd`).
  *
  * Staff routes under `/v1/admin/qualification/*`. Voice-bridge stubs stay
  * kkl-voice → kkl-backend and are not called from Admin. A run is not a lead.
@@ -14,13 +14,17 @@ import {
   PHASE4A_BACKEND,
   PHASE4A_OPENAPI,
   readCallingWindow,
+  readCallingWindowResponse,
+  readOptOutResponse,
   readOptOutSignals,
   readQualificationRun,
   readQualificationRunPage,
   readQuestionSetPage,
   readRegisteredQuestionSet,
-  readRetryBatch,
+  type CallingWindow,
+  type OptOutSignals,
   type QualificationRun,
+  type QualificationRunPage,
   type QuestionSetSummary,
 } from "./qualification-reading";
 import { SYNTHETIC_QUESTION_SET } from "./qualification-synthetic";
@@ -111,11 +115,26 @@ export async function registerSyntheticQuestionSet(versionLabel: string): Promis
   return registered;
 }
 
+export async function getCallingWindow(): Promise<QualificationLoad<CallingWindow | null>> {
+  try {
+    const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
+      "staff",
+      "/v1/admin/qualification/calling-window",
+    );
+    if (status !== 200) return refused(status, body.error, "The calling window could not be loaded.");
+    const read = readCallingWindowResponse(body);
+    if (!read.ok) return { ok: false, message: "The calling window response was not readable." };
+    return { ok: true, value: read.window };
+  } catch (error) {
+    return fail(error, "The calling window could not be loaded.");
+  }
+}
+
 export async function setCallingWindow(input: {
   timeZone: string;
   start: string;
   end: string;
-}): Promise<{ timeZone: string; start: string; end: string }> {
+}): Promise<CallingWindow> {
   const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
     "staff",
     "/v1/admin/qualification/calling-window",
@@ -127,10 +146,25 @@ export async function setCallingWindow(input: {
   return window;
 }
 
+export async function getOptOutSignals(): Promise<QualificationLoad<OptOutSignals | null>> {
+  try {
+    const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
+      "staff",
+      "/v1/admin/qualification/opt-out",
+    );
+    if (status !== 200) return refused(status, body.error, "Opt-out signals could not be loaded.");
+    const read = readOptOutResponse(body);
+    if (!read.ok) return { ok: false, message: "The opt-out response was not readable." };
+    return { ok: true, value: read.signals };
+  } catch (error) {
+    return fail(error, "Opt-out signals could not be loaded.");
+  }
+}
+
 export async function setOptOutSignals(input: {
   dtmf: string | null;
   keywords: readonly string[];
-}): Promise<{ dtmf: string | null; keywords: readonly string[] }> {
+}): Promise<OptOutSignals> {
   const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
     "staff",
     "/v1/admin/qualification/opt-out",
@@ -145,7 +179,7 @@ export async function setOptOutSignals(input: {
 export async function listQualificationRuns(options?: {
   state?: string;
   limit?: number;
-}): Promise<QualificationLoad<readonly QualificationRun[]>> {
+}): Promise<QualificationLoad<QualificationRunPage>> {
   try {
     const query = new URLSearchParams();
     if (options?.state) query.set("state", options.state);
@@ -157,7 +191,7 @@ export async function listQualificationRuns(options?: {
     if (status !== 200) return refused(status, body.error, "Qualification runs could not be loaded.");
     const page = readQualificationRunPage(body);
     if (!page) return { ok: false, message: "The run list did not match the published schema." };
-    return { ok: true, value: page.runs };
+    return { ok: true, value: page };
   } catch (error) {
     return fail(error, "Qualification runs could not be loaded.");
   }
@@ -181,21 +215,57 @@ export async function getQualificationRun(
   }
 }
 
+/**
+ * Start a qualification run. On the review host without Exotel / WhatsApp
+ * credentials the attempt is `not_configured` — not a live dial or message.
+ */
+export async function startQualificationRun(input: {
+  leadId: string;
+  questionSetId: string;
+  channel: "voice" | "whatsapp";
+  idempotencyKey: string;
+}): Promise<QualificationRun> {
+  const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
+    "staff",
+    "/v1/admin/qualification/runs",
+    { method: "POST", body: input },
+  );
+  if (status !== 201) raise(status, body);
+  const run = readQualificationRun(body);
+  if (!run) throw new ServiceError("unavailable", "The started run response was not readable.");
+  if (run.qualification.level !== null) {
+    throw new ServiceError("unavailable", "A started run must not return a qualification level.");
+  }
+  return run;
+}
+
 /** Voice overview uses runs; a run is not a call volume fixture. */
-export async function listVoiceCalls(): Promise<QualificationLoad<readonly QualificationRun[]>> {
+export async function listVoiceCalls(): Promise<QualificationLoad<QualificationRunPage>> {
   const loaded = await listQualificationRuns({ limit: 50 });
   if (!loaded.ok) return loaded;
-  return { ok: true, value: loaded.value.filter((run) => run.channel === "voice") };
+  return {
+    ok: true,
+    value: {
+      ...loaded.value,
+      runs: loaded.value.runs.filter((run) => run.channel === "voice"),
+    },
+  };
 }
 
 export async function getVoiceCall(runId: string): Promise<QualificationLoad<QualificationRun | null>> {
   return getQualificationRun(runId);
 }
 
-export async function listWhatsAppJourney(): Promise<QualificationLoad<readonly QualificationRun[]>> {
+export async function listWhatsAppJourney(): Promise<QualificationLoad<QualificationRunPage>> {
   const loaded = await listQualificationRuns({ limit: 50 });
   if (!loaded.ok) return loaded;
-  return { ok: true, value: loaded.value.filter((run) => run.channel === "whatsapp") };
+  return {
+    ok: true,
+    value: {
+      ...loaded.value,
+      runs: loaded.value.runs.filter((run) => run.channel === "whatsapp"),
+    },
+  };
 }
 
 export async function reviewQualificationRun(input: {
@@ -223,10 +293,22 @@ export async function reviewQualificationRun(input: {
   return run;
 }
 
+/**
+ * Resume does not place a call. Retry invokes dial() and is not offered from
+ * Admin UI without isolated simulated-provider authorisation.
+ */
 export async function recoverQualificationRun(input: {
   runId: string;
   action: "resume" | "retry";
 }): Promise<QualificationRun> {
+  if (input.action === "retry") {
+    throw new ServiceError(
+      "unavailable",
+      "Retry invokes the calling adapter (dial). It is not offered from this console "
+        + "without isolated simulated-provider authorisation. Absence of Exotel credentials "
+        + "is not permission to press retry.",
+    );
+  }
   const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
     "staff",
     `/v1/admin/qualification/runs/${encodeURIComponent(input.runId)}/recover`,
@@ -235,6 +317,12 @@ export async function recoverQualificationRun(input: {
   if (status !== 200) raise(status, body);
   const run = readQualificationRun(body);
   if (!run) throw new ServiceError("unavailable", "The recovery response was not readable.");
+  if (run.providerDispatch?.dispatched === true) {
+    throw new ServiceError(
+      "unavailable",
+      "Recovery reported providerDispatch.dispatched true. Live dispatch is not accepted here.",
+    );
+  }
   return run;
 }
 
@@ -242,15 +330,11 @@ export async function processDueRetries(): Promise<{
   retried: readonly string[];
   providerVerified: false;
 }> {
-  const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
-    "staff",
-    "/v1/admin/qualification/retries/run",
-    { method: "POST", body: {} },
+  throw new ServiceError(
+    "unavailable",
+    "Due retries invoke dial(). They are not run from this console without isolated "
+      + "simulated-provider authorisation.",
   );
-  if (status !== 200) raise(status, body);
-  const batch = readRetryBatch(body);
-  if (!batch) throw new ServiceError("unavailable", "The retry batch response was not readable.");
-  return batch;
 }
 
 export function adminMayCallVoiceBridge(): false {

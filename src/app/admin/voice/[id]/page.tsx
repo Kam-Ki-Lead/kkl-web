@@ -57,9 +57,6 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
     const run = loaded.value;
     const call = run.calls[0];
     const canResume = run.state === "incomplete";
-    const canRetry = Boolean(
-      call && (call.status === "failed" || call.status === "not_configured") && call.attempts < 3,
-    );
     const listHref = run.channel === "whatsapp" ? "/admin/whatsapp" : "/admin/voice";
     const listLabel =
       run.channel === "whatsapp" ? "← WhatsApp qualification" : "← Voice qualification";
@@ -142,6 +139,26 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
               </p>
             </Card>
           ) : null}
+
+          <Card className="p-[18px]">
+            <h2 className="t-card-title text-ink">Transcript</h2>
+            <p className="t-caption mt-[2px] text-muted">
+              Stored text only. There is no audio download on this contract.
+            </p>
+            {run.transcript.length === 0 ? (
+              <p className="t-body mt-[10px] text-body">No transcript segments on this run yet.</p>
+            ) : (
+              <ol className="mt-[10px] flex flex-col gap-[10px]">
+                {run.transcript.map((line) => (
+                  <li key={`${line.sequence}-${line.speaker}`} className="text-[15px] text-body">
+                    <span className="font-semibold text-ink">{line.speaker || "speaker"}</span>
+                    {line.at ? <span className="t-mono ml-[8px] text-[12px] text-muted">{line.at}</span> : null}
+                    <span className="mt-[2px] block">{line.text}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
 
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">Recorded answers</h2>
@@ -232,14 +249,10 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">Recovery</h2>
             <p className="t-body mt-[6px] text-body">
-              Resume only when incomplete. Retry only a failed or not_configured call under the
-              attempt limit. Suppression blocks both.
+              Resume only when incomplete. Retry is not offered from this console — it invokes
+              dial(). Suppression blocks recovery.
             </p>
-            <QualificationRecoveryForm
-              runId={run.id}
-              canResume={canResume}
-              canRetry={canRetry}
-            />
+            <QualificationRecoveryForm runId={run.id} canResume={canResume} />
           </Card>
         </div>
       </AdminShell>

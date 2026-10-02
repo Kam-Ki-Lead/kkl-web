@@ -1,5 +1,5 @@
 /**
- * Phase 4.a qualification readings and handoff map.
+ * Phase 4.b qualification readings and handoff map.
  * Does not call kkl-backend and does not place a call or message.
  */
 import { test } from "node:test";
@@ -15,6 +15,8 @@ import {
   intentDisplay,
   levelDisplay,
   providerStatusLabel,
+  readCallingWindowResponse,
+  readOptOutResponse,
   readQualificationRun,
   readQualificationRunPage,
   readQuestionSetPage,
@@ -61,6 +63,7 @@ const sampleRun = {
   messages: [],
   consentEvidence: [],
   reviews: [],
+  transcript: [{ speaker: "agent", sequence: 1, text: "SYNTHETIC hello", at: "2026-10-02T12:00:01.000Z" }],
   modelSummary: "Synthetic summary only.",
   qualification: {
     level: null,
@@ -77,18 +80,19 @@ const sampleRun = {
   updatedAt: "2026-10-02T12:05:00.000Z",
   completedAt: null,
   providerVerified: false,
+  providerDispatch: null,
 };
 
-test("OpenAPI phase4.a handoffs mark runs satisfied and leads still open", () => {
-  assert.equal(PHASE4_OPENAPI, "1.0.0-phase4.a");
+test("OpenAPI phase4.b handoffs mark H4-3…H4-7 verified and leads still open", () => {
+  assert.equal(PHASE4_OPENAPI, "1.0.0-phase4.b");
   const byId = Object.fromEntries(PHASE4_HANDOFFS.map((h) => [h.id, h]));
   assert.equal(byId["H4-1"].status, "open");
   assert.equal(byId["H4-2"].status, "partial");
-  assert.equal(byId["H4-3"].status, "satisfied");
-  assert.equal(byId["H4-4"].status, "satisfied");
-  assert.equal(byId["H4-5"].status, "satisfied");
-  assert.equal(byId["H4-6"].status, "satisfied");
-  assert.equal(byId["H4-7"].status, "satisfied");
+  assert.equal(byId["H4-3"].status, "verified");
+  assert.equal(byId["H4-4"].status, "verified");
+  assert.equal(byId["H4-5"].status, "verified");
+  assert.equal(byId["H4-6"].status, "verified");
+  assert.equal(byId["H4-7"].status, "verified");
   assert.equal(byId["H4-8"].status, "partial");
   assert.ok(VOICE_BRIDGE_STUBS.length === 5);
 });
@@ -101,21 +105,22 @@ test("a run keeps level unset and intent labelled as model output", () => {
   assert.equal(run.qualification.modelReportedIntentIsNotALevel, true);
   assert.equal(run.providerVerified, false);
   assert.equal(run.questionSet.synthetic, true);
+  assert.equal(run.transcript.length, 1);
   assert.equal(levelDisplay(run.qualification), MAPPING_NOT_CONFIGURED_LABEL);
   assert.match(intentDisplay(run.qualification), /not a qualification level/);
   assert.match(providerStatusLabel("not_configured", false), /not called/i);
   assert.match(providerStatusLabel("queued", false), /not delivered/i);
 });
 
-test("run list reader rejects a payload that invents a level", () => {
+test("run list marks inventory false", () => {
   const page = readQualificationRunPage({
-    runs: [{
-      ...sampleRun,
-      qualification: { ...sampleRun.qualification, level: 3 },
-    }],
+    runs: [sampleRun],
+    inventory: false,
+    leadInventoryPath: "/v1/leads?eligible=false",
   });
-  // level is forced null by the reader — a numeric level in the payload is ignored
   assert.ok(page);
+  assert.equal(page.inventory, false);
+  assert.equal(page.leadInventoryPath, "/v1/leads?eligible=false");
   assert.equal(page.runs[0].qualification.level, null);
 });
 
@@ -135,6 +140,23 @@ test("question sets mark synthetic provenance", () => {
   assert.equal(page.questionSets[0].synthetic, true);
   assert.ok(SYNTHETIC_QUESTION_SET.questions.every((q) => q.prompt.includes("SYNTHETIC")));
   assert.ok(SYNTHETIC_QUESTION_SET.questions.every((q) => !("qualificationLevel" in q)));
+});
+
+test("calling window and opt-out GETs distinguish null from values", () => {
+  const emptyWindow = readCallingWindowResponse({ callingWindow: null });
+  assert.equal(emptyWindow.ok, true);
+  if (emptyWindow.ok) assert.equal(emptyWindow.window, null);
+  const savedWindow = readCallingWindowResponse({
+    callingWindow: { timeZone: "Asia/Kolkata", start: "00:00", end: "23:59" },
+  });
+  assert.equal(savedWindow.ok, true);
+  if (savedWindow.ok) assert.equal(savedWindow.window?.start, "00:00");
+  const emptyOpt = readOptOutResponse({ optOut: null });
+  assert.equal(emptyOpt.ok, true);
+  if (emptyOpt.ok) assert.equal(emptyOpt.signals, null);
+  const savedOpt = readOptOutResponse({ optOut: { dtmf: "9", keywords: ["stop"] } });
+  assert.equal(savedOpt.ok, true);
+  if (savedOpt.ok) assert.deepEqual(savedOpt.signals?.keywords, ["stop"]);
 });
 
 test("retry batch stays providerVerified false", () => {

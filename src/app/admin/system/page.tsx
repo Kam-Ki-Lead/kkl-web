@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { IdentityBanner } from "@/components/admin/identity-banner";
-import { DueRetriesForm } from "@/components/admin/qualification-forms";
+import { DueRetriesNotice } from "@/components/admin/qualification-forms";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
@@ -33,11 +33,10 @@ export default async function AdminSystemPage() {
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">Qualification recovery</h2>
             <p className="t-body mt-[6px] text-body">
-              Process due provider retries for failed voice attempts. Suppression is re-checked.
-              Results report <span className="t-mono">providerVerified: false</span> — not a live
-              dial claim. Per-run resume/retry is on the run detail screen.
+              Per-run resume is on the run detail screen and does not dial. Retry and due-retries
+              invoke dial() and are not submitted from this console.
             </p>
-            <DueRetriesForm />
+            <DueRetriesNotice />
           </Card>
         ) : (
           <FixtureNotice>

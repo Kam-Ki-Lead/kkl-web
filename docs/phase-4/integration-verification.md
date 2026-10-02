@@ -1,83 +1,96 @@
 # Phase 4 integration — verification record
 
 Continued **2 October 2026** on `kkl-web` `claude/phase-2-frontend` against
-published OpenAPI `1.0.0-phase4.a`. This is not a live provider integration
-claim and not client acceptance.
+the Phase 4 review runtime. This is not a live provider integration claim
+and not client acceptance.
 
 ## Revisions
 
 | | |
 |---|---|
-| Frontend (this wiring) | `04b54ab` |
+| Frontend (this pass) | *(set at commit)* |
+| Prior phase4.a wiring | `04b54ab` / `e765da3` |
 | Earlier Phase 4 prep | `dc2f275` / `6acfc2f` |
-| Frontend purchase confirmation | `16afab5` (frontend commit; earlier record wrongly called this a backend commit) |
-| Frontend checkpoint before Phase 4 | `02687ea` |
-| Backend | `a606665` on `claude/phase-4-qualification` |
-| OpenAPI | `1.0.0-phase4.a` |
-| Migration | `026_qualification.sql` |
+| Frontend purchase confirmation | `16afab5` (frontend; not a backend commit) |
+| Backend process | `39d26fd` on `http://127.0.0.1:4011` |
+| Runtime handoff docs | `9dcd1a1` |
+| OpenAPI | `1.0.0-phase4.b` |
+| Migration | `026_qualification.sql` on `kkl_phase4` |
+| Phase 3 | left on `4010` / `kkl_review` |
 | Geometry | `docs/phase-2/visual/geometry-1440.json` left unstaged |
 
-## Provenance correction
+## Configuration (handoff correction)
 
-`16afab5` is a **frontend** commit (“Confirm a purchase at the displayed price
-and pricing version”). The matching backend purchase work is `a6d6d4d`
-(OpenAPI `1.0.0-phase3.t`). The Phase 4 prep record had labelled `16afab5` as
-backend; that was wrong and is corrected here.
+Backend `review-runtime.md` listed domain switches but omitted auth and
+qualification. Readers in `src/lib/services/backend/config.ts` require:
 
-## What this revision wired
+| Name | Value |
+|---|---|
+| `KKL_AUTH` | `backend` (browser session; no development-identity fallback) |
+| `KKL_QUALIFICATION` | `backend` |
+| `KKL_BACKEND_BASE_URL` | `http://127.0.0.1:4011` |
+| `KKL_LEAD_REQUESTS_BASE_URL` | `http://127.0.0.1:4011` |
+| `KKL_LOCATIONS_BASE_URL` | `http://127.0.0.1:4011` |
+| Domain switches from handoff | `backend` as listed |
+| `KKL_ALLOW_LIVE_CALLS` / messaging | unset |
+| `KKL_LEAD_REQUESTS_DEV_SECRET` on frontend | unset (challenge code read is verification-only) |
 
-Against `a606665` / `1.0.0-phase4.a`:
+Frontend served on **3812** (production build). Phase 3 process on 4010
+untouched. Login used the documented challenge-code endpoint with the local
+credential file — secret not committed.
 
-- Question sets (list + synthetic register) on A-15 — not pricing prompts
-- Calling window and opt-out configuration on A-15
-- Qualification run list/detail on A-24 / A-25 (voice channel)
-- WhatsApp-channel runs on A-26 with message status labels
-- Human review (`facts_recorded` / `needs_follow_up`) and recover (`resume` / `retry`)
-- Due retries on A-31
-- Honesty: level unset, model intent labelled, marketplaceConsent unchanged,
-  synthetic labelled, providerVerified false not shown as live delivery
-- H4-1 / lead-centric H4-2 remain open (a run is not a lead)
+## What this revision wired / verified
 
-## Runtime handoff (browser checks deferred)
+Against `39d26fd` / `1.0.0-phase4.b`:
 
-The backend has not supplied a running Phase 4 review environment for this
-frontend window. Adapter and UI work proceeds against the published contract.
-**Do not** probe the old Phase 3 API and conclude these routes are absent.
+- GET calling-window and opt-out; saved configuration shown separately from the edit form
+- Admin start-run (`POST …/runs`) — side-effect on this host is `not_configured`, not a live dial
+- Run list/detail honesty: `inventory: false`, level unset, SYNTHETIC provenance, masked phone
+- Transcript section on run detail
+- Retry and due-retries **not offered** in UI (invoke dial); resume only when incomplete
+- Browser script: `scripts/verify-phase4-qualification.mjs` — **14/14** plus unavailable-service on 3813
 
-When the backend runtime handoff arrives, exercise with:
+## Browser evidence (exact)
 
-```
-KKL_QUALIFICATION=backend
-KKL_AUTH=backend
-KKL_BACKEND_BASE_URL=<phase-4 review base>
-```
-
-Use only synthetic question sets (`provenance: synthetic_test`), with live
-dispatch disabled / `providerVerified: false`. Verify save/reload of window and
-opt-out, role denial (seller 403), session handling, empty lists, and service
-failures without sample fallback.
+| Check | Result |
+|---|---|
+| Missing session → `/auth` | PASS |
+| Staff run list (`inventory: false`, SYNTHETIC, not_configured) | PASS |
+| Staff run detail (level unset, consent unchanged) | PASS |
+| Review form gated when `reviewStatus` ≠ pending | PASS |
+| Retry control absent | PASS |
+| WhatsApp page no delivery claim | PASS |
+| Settings reload of fixture window/opt-out | PASS |
+| Calling-window save/reload | PASS |
+| Opt-out save | PASS |
+| A-12 leads refuse (not run list) | PASS |
+| Due-retries not submitted from A-31 | PASS |
+| Start-run → not_configured | PASS (`10ebf32c-…`) |
+| Seller 403 / staff-only message | PASS |
+| 4011 ≠ 4010 health | PASS |
+| Unavailable backend (3813 → port 9) | PASS — “account could not be read”; no sample runs |
 
 ## Checks run (offline)
 
 | Check | Result |
 |---|---|
-| `npm test` | PASS (see commit) |
+| `npm test` | PASS |
 | `npx tsc --noEmit` | PASS |
 | `npx next build` | PASS |
-| Authenticated browser on Phase 4 review API | **Deferred** — awaiting backend runtime handoff |
+| `scripts/verify-phase4-qualification.mjs` | **14/14** |
 | Live Exotel / WhatsApp / Sarvam | **Not exercised** |
+| Retry / due-retries | **Not pressed** (dial path) |
 
 ## Remaining gaps
 
 | Gap | Notes |
 |---|---|
-| H4-1 staff lead inventory | Still unpublished; do not use runs as leads |
+| H4-1 staff lead inventory | Still open; do not use runs or `eligible=false` leads as the staff inventory |
 | H4-2 staff lead document | Run detail covers Q&A; lead-centric Admin page still open |
-| H4-8 voice-bridge schema freeze | Admin uses qualification routes; bridge stubs remain for kkl-voice |
-| Calling-window / opt-out GET | OpenAPI publishes POST only — save returns the stored value; page reload cannot re-hydrate the form from a read |
-| Start-run UI | `POST /v1/admin/qualification/runs` is published; no approved Admin start-run screen in this pass |
-| Browser verification | Needs Phase 4 review process from backend handoff |
-| Live provider journeys | Untested by design in this pass |
+| H4-8 voice-bridge | Bridge not configured on this host; Admin does not call it |
+| Review **save** while pending | Seeded runs are `not_required`; form correctly gated. Pending review save awaits an incomplete/pending fixture from voice-bridge outcomes |
+| Resume while incomplete | Same — resume UI present only for `incomplete`; seeded run is `collecting` |
+| Simulated-provider retry | Requires isolated simulated providers; not this review host |
 
-Synthetic fixtures and unit readings are not a completed live Phase 4
-integration.
+Synthetic fixtures and UI verification are not a completed live Phase 4
+provider integration.

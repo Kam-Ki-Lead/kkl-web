@@ -43,14 +43,18 @@ export default async function AdminWhatsAppPage() {
         </AdminShell>
       );
     }
-    const runs = loaded.value;
+    const runs = loaded.value.runs;
     return (
       <AdminShell title="WhatsApp qualification" subtitle="Qualification runs and message status">
         <div className="flex max-w-[860px] flex-col gap-[16px]">
           <IdentityBanner />
           <p className="t-caption rounded-[8px] bg-tint px-[13px] py-[10px] text-body">
             Rows are <strong className="text-ink">qualification runs</strong> on the WhatsApp
-            channel. Queued and not_configured are not delivery. Conversation completion is not
+            channel (<span className="t-mono">inventory: false</span>
+            {loaded.value.leadInventoryPath
+              ? ` · ${loaded.value.leadInventoryPath}`
+              : ""}
+            ). Queued and not_configured are not delivery. Conversation completion is not
             sale eligibility. marketplaceConsent stays unchanged.
           </p>
           {runs.length === 0 ? (

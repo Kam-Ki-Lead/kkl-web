@@ -1,19 +1,22 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { redirectForAuth } from "@/lib/auth/recover";
 import { ServiceError } from "@/lib/services/contracts";
 import {
-  processDueRetries,
   recoverQualificationRun,
   registerSyntheticQuestionSet,
   reviewQualificationRun,
   setCallingWindow,
   setOptOutSignals,
+  startQualificationRun,
 } from "@/lib/services/backend/qualification";
 
 const SETTINGS_PATH = "/admin/settings";
 const SYSTEM_PATH = "/admin/system";
+const VOICE_PATH = "/admin/voice";
 
 function runPath(runId: string): string {
   return `/admin/voice/${encodeURIComponent(runId)}`;
@@ -100,6 +103,36 @@ export async function registerSyntheticQuestions(
   }
 }
 
+export async function startQualificationRunAction(
+  _previous: QualificationActionState,
+  formData: FormData,
+): Promise<QualificationActionState> {
+  const leadId = String(formData.get("leadId") ?? "").trim();
+  const questionSetId = String(formData.get("questionSetId") ?? "").trim();
+  const channel = String(formData.get("channel") ?? "").trim();
+  if (!leadId || !questionSetId) {
+    return { error: "A synthetic lead and question set are required." };
+  }
+  if (channel !== "voice" && channel !== "whatsapp") {
+    return { error: "Choose voice or whatsapp.", field: "channel" };
+  }
+  try {
+    const run = await startQualificationRun({
+      leadId,
+      questionSetId,
+      channel,
+      idempotencyKey: `web-start-${randomUUID()}`,
+    });
+    revalidatePath(VOICE_PATH);
+    revalidatePath("/admin/whatsapp");
+    redirect(runPath(run.id));
+  } catch (error) {
+    redirectForAuth(error, VOICE_PATH);
+    if (error instanceof ServiceError) return { error: error.message };
+    throw error;
+  }
+}
+
 export async function submitQualificationReview(
   _previous: QualificationActionState,
   formData: FormData,
@@ -118,7 +151,7 @@ export async function submitQualificationReview(
       reason,
     });
     revalidatePath(runPath(runId));
-    revalidatePath("/admin/voice");
+    revalidatePath(VOICE_PATH);
     revalidatePath("/admin/whatsapp");
     return {
       notice:
@@ -132,49 +165,29 @@ export async function submitQualificationReview(
   }
 }
 
-export async function submitQualificationRecovery(
+export async function resumeQualificationRun(
   _previous: QualificationActionState,
   formData: FormData,
 ): Promise<QualificationActionState> {
   const runId = String(formData.get("runId") ?? "").trim();
-  const action = String(formData.get("action") ?? "").trim();
-  if (action !== "resume" && action !== "retry") {
-    return { error: "Choose resume or retry.", field: "action" };
-  }
   try {
-    const run = await recoverQualificationRun({ runId, action });
+    const run = await recoverQualificationRun({ runId, action: "resume" });
     revalidatePath(runPath(runId));
-    revalidatePath("/admin/voice");
+    revalidatePath(VOICE_PATH);
     revalidatePath("/admin/whatsapp");
     revalidatePath(SYSTEM_PATH);
+    const dispatchNote = run.providerDispatch
+      ? ` providerDispatch.dispatched=${run.providerDispatch.dispatched}`
+        + (run.providerDispatch.reason ? ` (${run.providerDispatch.reason})` : "")
+        + "."
+      : "";
     return {
       notice:
-        `Recovery ${action} applied. Run state is ${run.state}. `
-        + "providerVerified remains false — this is not proof of a live dial.",
+        `Resume applied. Run state is ${run.state}.${dispatchNote} `
+        + "Resume does not place a call.",
     };
   } catch (error) {
     redirectForAuth(error, runPath(runId));
-    if (error instanceof ServiceError) return { error: error.message };
-    throw error;
-  }
-}
-
-export async function runDueQualificationRetries(
-  _previous: QualificationActionState,
-  _formData: FormData,
-): Promise<QualificationActionState> {
-  try {
-    const batch = await processDueRetries();
-    revalidatePath(SYSTEM_PATH);
-    revalidatePath("/admin/voice");
-    return {
-      notice:
-        batch.retried.length === 0
-          ? "No due retries. providerVerified is false — nothing here is a live provider call."
-          : `${batch.retried.length} run(s) marked for retry. providerVerified is false.`,
-    };
-  } catch (error) {
-    redirectForAuth(error, SYSTEM_PATH);
     if (error instanceof ServiceError) return { error: error.message };
     throw error;
   }
