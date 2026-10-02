@@ -1304,6 +1304,40 @@ Contract tests cover an explicit false, an omitted key left out of the patch, th
 
 Preference storage is integrated. Trigger evaluation and delivery remain dependent on the named rules and provider configuration. `delivery.available` was false. A true choice did not send an alert. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
 
+## Provisional pricing editor, 2 October 2026
+
+Frontend `20bc990`. This section does not replace the `409ba40` results.
+
+The review API is process 23140, started at 15:24 local, command
+`node src/http/server.mjs`, on checkout `d527835` (OpenAPI `1.0.0-phase3.r`).
+Migration `024_pricing_configuration.sql` is the file in that checkout. This
+frontend did not restart the API, did not change that checkout, and did not
+query the migration table. A preview of a whole-rupee amount returned an
+integer credit count under R-CR-01, which is the response that checkout
+publishes.
+
+The frontend on 3811 for this pass is process 12048, started at 15:36 local,
+built with `NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`,
+then `next start` with the documented domain switches, including
+`KKL_ADMIN_OPERATIONS=backend`. No development-identity secret was set. One
+local OTP was used for the staff number ending 0101 and one for the seller
+number ending 0102. The codes are not recorded here.
+
+| Check | Result |
+| --- | --- |
+| Empty editor | Review Staff, number ending 0101. The page headed “Provisional — not used for purchases” and repeated the purchase refusal. It said no version had been saved, and the preview said to save a configuration first. The placeholder full-price and sale-price table was absent. There was no activation control. |
+| Local validation | Base price `12.345` stayed in the field. The page said to enter rupees with at most two decimal places. It did not say a version was saved. |
+| Server validation | Overlapping bands “Synthetic mid” and “Synthetic open” showed the server sentence about the overlap. Both amounts stayed on the form. The version list still said nothing had been saved. |
+| Save and reload | A synthetic matrix saved as version 1: bands ₹0.00–₹75,00,000.00 at base ₹1,500.00 and ₹75,00,000.00 with no upper bound at base ₹2,500.00, level 1 multiplier 1.35, and one question prompt. Reload showed that version, the returned unresolved assumptions, and that no question-to-level mapping is configured. A second save stored version 2. Opening version 1 again showed the original note, “Synthetic provisional matrix for review”, and the same base prices. |
+| Exact preview | Budget `7500000.00` and qualification level 1, both supplied on the form, used version 1. The page said the level was supplied for this preview and is not an AI qualification. Exact calculation ₹3,375.00. It said no rounding demonstration was requested. The credit line was 3,375 credits at 1 rupee = 1 credit, and that the preview cannot be bought. |
+| Demonstration rounding | The same inputs with the nearest-₹100 box checked showed exact ₹3,375.00 and a separate demonstrated ₹3,400.00, labelled not confirmed, with the spreadsheet rule. The credit line stayed 3,375. |
+| Customer denial | Review Seller, number ending 0102, on `/admin/settings/pricing` saw “This session is a seller account. The operations console is for a staff account, and this screen does not open the sample queues.” The provisional matrix and the placeholder price table were absent. |
+| Service failure | A second frontend on 3812 used the same switches with `KKL_BACKEND_BASE_URL` pointed at `127.0.0.1:9`, where nothing was listening. The staff session saw “The account could not be read. This screen does not open the sample queues.” The placeholder price table was absent. Process 23140 on 4010 was left running. Process 16848 on 3812 was stopped after this check. |
+
+Contract tests cover decimal strings, an omitted maximum stored as null, questions without a level, a preview body with a supplied integer level and no demonstration unless requested, a failed response that carries no configuration, and a payload that would be purchasable or would present an inferred level being left unshown. The suite passed 99 of 99. `tsc --noEmit` and `next build` passed before process 12048 started.
+
+The stored matrix is provisional. It is not used for purchases. Activation stays refused. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Preference storage stays integrated, and trigger evaluation and delivery stay dependent on the named rules and provider configuration. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name
