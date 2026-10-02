@@ -88,9 +88,9 @@ export async function applyProvisionalPricing(
     return { error: "Save a provisional version before applying it. Nothing was changed." };
   }
   try {
-    const outcome = await applyPricingToUnsold(configurationId);
-    if (!outcome.applied) return { error: outcome.message };
-    return { application: outcome.result };
+    const application = await applyPricingToUnsold(configurationId);
+    revalidatePath(PRICING_PATH);
+    return { application };
   } catch (error) {
     redirectForAuth(error, PRICING_PATH);
     if (error instanceof ServiceError) return { error: `${error.message} No unsold lead was updated, and nothing was charged.` };

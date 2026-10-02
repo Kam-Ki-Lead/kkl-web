@@ -40,6 +40,9 @@ export function PurchaseConfirmForm({
       <input type="hidden" name="quotedCredits" value={String(quotedCredits)} />
       <input type="hidden" name="scope" value={scope} />
 
+      <p className="t-body text-body">
+        This confirmation is for the price shown above. If that price changes, the purchase stops so you can review the new amount. Nothing is charged until the amounts match.
+      </p>
       {state.error ? (
         <p
           role="alert"

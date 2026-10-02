@@ -14,8 +14,11 @@ import { Field, Select, TextArea, TextInput } from "@/components/ui/field";
 import {
   blankPricingDraft,
   formatProvisionalInr,
+  repriceReasonText,
+  type PricingApplicationView,
   type PricingDraft,
   type PricingLevelView,
+  type PricingRepriceRecord,
 } from "@/lib/services/backend/provisional-pricing-reading";
 
 function replaceBand(draft: PricingDraft, index: number, patch: Partial<PricingDraft["bands"][number]>): PricingDraft {
@@ -385,16 +388,94 @@ function PreviewResult({
   );
 }
 
+function leadLabel(record: PricingRepriceRecord): string {
+  return record.reference ?? record.leadId;
+}
+
+function RepriceScope({
+  scope,
+  written,
+}: {
+  scope: PricingApplicationView;
+  written: boolean;
+}) {
+  const unpriced = scope.records.filter((record) => record.newPriceCredits === null);
+  const updated = scope.records.filter((record) => record.outcome === "updated");
+  const shownUnpriced = unpriced.slice(0, 20);
+  const shownUpdated = updated.slice(0, 20);
+
+  return (
+    <div className="flex flex-col gap-[8px]" aria-live="polite">
+      <p className="t-body font-semibold text-ink">
+        {written ? "Saved version" : "Inspecting saved version"} {scope.configurationVersion}.
+        {" "}
+        {scope.affected.toLocaleString("en-IN")} {scope.affected === 1 ? "lead" : "leads"} {written ? "were updated" : "would be updated"}.
+        {" "}
+        {scope.skipped.toLocaleString("en-IN")} {written ? "were" : "would be"} left unchanged.
+        {" "}
+        {scope.failed.toLocaleString("en-IN")} {written ? "remain" : "would remain"} unpriced.
+      </p>
+      <p className="t-body text-body">
+        {written
+          ? "Purchased orders and pending orders were not changed. A buyer who already saw a different price is asked to review it before buying."
+          : "Nothing has been written. Purchased orders and pending orders would stay as they are."}
+      </p>
+      <p className="t-caption text-muted">
+        A lead with none of a budget, a qualification level, a budget source, or a previous price configuration is not in this list and is not updated.
+      </p>
+      {shownUpdated.length > 0 ? (
+        <ul className="flex flex-col gap-[4px]">
+          {shownUpdated.map((record) => (
+            <li key={record.leadId} className="t-body text-body">
+              {leadLabel(record)}: {record.oldPriceCredits === null ? "no price" : `${record.oldPriceCredits.toLocaleString("en-IN")} credits`} to {record.newPriceCredits?.toLocaleString("en-IN")} credits. {repriceReasonText(record.reason)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {updated.length > shownUpdated.length ? (
+        <p className="t-caption text-muted">
+          {updated.length - shownUpdated.length} more updated {updated.length - shownUpdated.length === 1 ? "lead is" : "leads are"} in the service result.
+        </p>
+      ) : null}
+      {shownUnpriced.length > 0 ? (
+        <>
+          <p className="t-body font-semibold text-ink">Leads with no price</p>
+          <ul className="flex flex-col gap-[4px]">
+            {shownUnpriced.map((record) => (
+              <li key={record.leadId} className="t-body text-body">
+                {leadLabel(record)}. {repriceReasonText(record.reason)}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="t-body text-body">No lead in this result is left without a price.</p>
+      )}
+      {unpriced.length > shownUnpriced.length ? (
+        <p className="t-caption text-muted">
+          {unpriced.length - shownUnpriced.length} more unpriced {unpriced.length - shownUnpriced.length === 1 ? "lead is" : "leads are"} in the service result.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function ApplyToUnsoldLeads({
   configurationId,
   version,
   bands,
   levels,
+  older,
+  impact,
+  impactProblem,
 }: {
   configurationId: string | null;
   version: number | null;
   bands: number;
   levels: number;
+  older: boolean;
+  impact: PricingApplicationView | null;
+  impactProblem: string | null;
 }) {
   const [state, action, pending] = useActionState<PricingApplicationState, FormData>(applyProvisionalPricing, {});
 
@@ -404,31 +485,23 @@ export function ApplyToUnsoldLeads({
     );
   }
 
-  const applied = state.application;
+  const written = state.application ?? null;
 
   return (
     <form action={action} className="flex flex-col gap-[12px]">
       <p className="t-body text-body">
-        This action is separate from saving a version and from previewing a calculation.
-        Applying version {version} is the step that updates unsold leads. It covers {bands} {bands === 1 ? "band" : "bands"} and {levels} {levels === 1 ? "level" : "levels"}.
-        Purchased orders stay as they were. A buyer who already saw a price is not charged a different amount unless they confirm the new one.
+        The form above is a draft of version {version}. Saving it stores a new version and does not change a lead.
+        Applying uses saved version {version}, with {bands} {bands === 1 ? "band" : "bands"} and {levels} {levels === 1 ? "level" : "levels"}, and ignores unsaved edits.
+        {older ? " This is not the newest stored version." : ""}
       </p>
       <input type="hidden" name="configurationId" value={configurationId} />
+      {impactProblem ? <p role="alert" className="t-body text-danger">{impactProblem} Nothing was written.</p> : null}
       {state.error ? <p role="alert" className="t-body text-danger">{state.error}</p> : null}
-      {applied ? (
-        <div className="flex flex-col gap-[6px]" aria-live="polite">
-          <p className="t-body font-semibold text-ink">
-            Version {version} was applied. {applied.unsoldLeadsUpdated.toLocaleString("en-IN")} unsold {applied.unsoldLeadsUpdated === 1 ? "lead was" : "leads were"} updated.
-          </p>
-          <p className="t-body text-body">
-            {applied.purchasedOrdersLeftUnchanged.toLocaleString("en-IN")} purchased {applied.purchasedOrdersLeftUnchanged === 1 ? "order was" : "orders were"} left unchanged.
-            {applied.quotesAwaitingConfirmation.toLocaleString("en-IN")} open {applied.quotesAwaitingConfirmation === 1 ? "quote now needs" : "quotes now need"} a fresh confirmation before anyone is charged.
-          </p>
-        </div>
-      ) : null}
+      {written ? <RepriceScope scope={written} written /> : null}
+      {!written && impact ? <RepriceScope scope={impact} written={false} /> : null}
       <div>
-        <Button type="submit" variant="secondary" disabled={pending}>
-          {pending ? "Applying…" : "Apply to unsold leads"}
+        <Button type="submit" variant="secondary" disabled={pending || Boolean(impactProblem)}>
+          {pending ? "Applying…" : `Apply saved version ${version}`}
         </Button>
       </div>
     </form>

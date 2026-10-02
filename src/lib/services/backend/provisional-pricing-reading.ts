@@ -1,15 +1,25 @@
 /**
- * Provisional lead-price matrix, OpenAPI 1.0.0-phase3.r.
+ * Provisional lead-price matrix, OpenAPI 1.0.0-phase3.s.
  *
  * Money stays a decimal rupee string. A multiplier stays a decimal string or
  * a numerator and denominator. A question carries a prompt, not a level.
  * A preview level is supplied by the person using the screen. Saving and
- * previewing do not update a lead. Applying a version is a separate request.
- * Nothing here activates a purchase price or maps a question to a level.
+ * previewing do not update a lead. Impact reads what an application would
+ * change. Applying a saved version is a separate request. Nothing here
+ * activates a purchase price or maps a question to a level.
  */
 
-/** Separate from save and preview. The review API has not published this route. */
-export const PRICING_APPLICATION_PATH = "/v1/admin/pricing/application";
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Read-only. Writes no price. */
+export function pricingImpactPath(configurationId: string): string {
+  return `/v1/admin/pricing/configurations/${configurationId}/impact`;
+}
+
+/** Writes prices on unsold, unreserved leads. An empty body uses the exact quote. */
+export function pricingApplyPath(configurationId: string): string {
+  return `/v1/admin/pricing/configurations/${configurationId}/apply`;
+}
 
 export const PROVISIONAL_BANNER = "Provisional — not used for purchases";
 
@@ -710,38 +720,125 @@ export function readPreview(body: unknown): PricingPreviewView | null {
   };
 }
 
-export type PricingApplicationView = {
-  applied: true;
-  configurationId: string;
-  unsoldLeadsUpdated: number;
-  purchasedOrdersLeftUnchanged: number;
-  quotesAwaitingConfirmation: number;
+export type PricingRepriceRecord = {
+  leadId: string;
+  reference: string | null;
+  outcome: "updated" | "skipped" | "failed";
+  reason: string;
+  oldPriceCredits: number | null;
+  newPriceCredits: number | null;
 };
 
-/** A successful application names its scope. A save or a preview is not one. */
+/** Impact has `applied: false`. A completed application has `applied: true`. */
+export type PricingApplicationView = {
+  applicationId: string | null;
+  configurationId: string;
+  configurationVersion: number;
+  applied: boolean;
+  changesMarketplacePrices: boolean;
+  affected: number;
+  skipped: number;
+  failed: number;
+  records: PricingRepriceRecord[];
+};
+
+const REPRICE_REASONS: Record<string, string> = {
+  repriced: "Updated to the exact whole-rupee amount. One rupee is one credit.",
+  sold: "Sold, or a completed order. Left unchanged.",
+  disqualified: "Disqualified. Left unchanged.",
+  pending_order: "A pending order is open. The lead price and that order were left unchanged.",
+  not_unsold: "Not an unsold lead. Left unchanged.",
+  unchanged: "Already priced from this version at the same amount.",
+  budget_missing: "No budget is stored, so no price is stored.",
+  qualification_missing: "No qualification level is stored, so no price is stored.",
+  campaign_budget_not_confirmed: "The budget is a campaign claim, so no price is stored.",
+  budget_source_missing: "No confirmed budget source is stored, so no price is stored.",
+  configuration_missing: "This version has no band, so no price is stored.",
+  budget_below_configured_minimum: "The budget is below every band, so no price is stored.",
+  budget_band_unmatched: "The budget is in a gap or above this matrix, so no price is stored.",
+  qualification_level_not_in_configuration: "The qualification level is not in this version, so no price is stored.",
+  not_a_whole_rupee: "The exact amount is not a whole number of rupees, so no credit price is stored.",
+};
+
+export function repriceReasonText(reason: string): string {
+  return REPRICE_REASONS[reason] ?? `The service reported ${reason.slice(0, 80)}.`;
+}
+
+function creditCount(value: unknown): number | null | undefined {
+  if (value === null) return null;
+  if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return value;
+  return undefined;
+}
+
+/**
+ * An impact or an application result. A save or a preview is not one.
+ * The counts have to match the records, so a total is never invented.
+ */
 export function readApplication(value: unknown): PricingApplicationView | null {
   const row = record(value);
-  if (!row || row.applied !== true) return null;
+  if (!row || (row.applied !== true && row.applied !== false)) return null;
   const configurationId = typeof row.configurationId === "string" ? row.configurationId : "";
-  if (!/^[0-9a-f-]{36}$/i.test(configurationId)) return null;
-  const unsoldLeadsUpdated = integer(row.unsoldLeadsUpdated);
-  const purchasedOrdersLeftUnchanged = integer(row.purchasedOrdersLeftUnchanged);
-  const quotesAwaitingConfirmation = integer(row.quotesAwaitingConfirmation);
+  if (!UUID.test(configurationId)) return null;
+  const configurationVersion = integer(row.configurationVersion);
+  const affected = integer(row.affected);
+  const skipped = integer(row.skipped);
+  const failed = integer(row.failed);
   if (
-    unsoldLeadsUpdated === null
-    || purchasedOrdersLeftUnchanged === null
-    || quotesAwaitingConfirmation === null
-    || unsoldLeadsUpdated < 0
-    || purchasedOrdersLeftUnchanged < 0
-    || quotesAwaitingConfirmation < 0
+    configurationVersion === null
+    || configurationVersion < 1
+    || affected === null
+    || skipped === null
+    || failed === null
+    || affected < 0
+    || skipped < 0
+    || failed < 0
   ) {
     return null;
   }
+  if (row.applied === true) {
+    if (row.changesMarketplacePrices !== true) return null;
+    if (typeof row.applicationId !== "string" || !UUID.test(row.applicationId)) return null;
+  } else if (row.changesMarketplacePrices !== false || (row.applicationId !== null && row.applicationId !== undefined)) {
+    return null;
+  }
+  if (!Array.isArray(row.records)) return null;
+  const records: PricingRepriceRecord[] = [];
+  let updated = 0;
+  let skippedCount = 0;
+  let failedCount = 0;
+  for (const item of row.records) {
+    const rec = record(item);
+    if (!rec || typeof rec.leadId !== "string" || !UUID.test(rec.leadId)) return null;
+    if (rec.outcome !== "updated" && rec.outcome !== "skipped" && rec.outcome !== "failed") return null;
+    if (typeof rec.reason !== "string" || rec.reason.length === 0) return null;
+    if (rec.reference !== undefined && rec.reference !== null && typeof rec.reference !== "string") return null;
+    const oldPriceCredits = creditCount(rec.oldPriceCredits);
+    const newPriceCredits = creditCount(rec.newPriceCredits);
+    if (oldPriceCredits === undefined || newPriceCredits === undefined) return null;
+    if (rec.outcome === "updated" && (newPriceCredits === null || newPriceCredits < 1)) return null;
+    if (rec.outcome === "failed" && newPriceCredits !== null) return null;
+    records.push({
+      leadId: rec.leadId,
+      reference: typeof rec.reference === "string" ? rec.reference : null,
+      outcome: rec.outcome,
+      reason: rec.reason,
+      oldPriceCredits,
+      newPriceCredits,
+    });
+    if (rec.outcome === "updated") updated += 1;
+    else if (rec.outcome === "skipped") skippedCount += 1;
+    else failedCount += 1;
+  }
+  if (updated !== affected || skippedCount !== skipped || failedCount !== failed) return null;
   return {
-    applied: true,
+    applicationId: row.applied === true ? String(row.applicationId) : null,
     configurationId,
-    unsoldLeadsUpdated,
-    purchasedOrdersLeftUnchanged,
-    quotesAwaitingConfirmation,
+    configurationVersion,
+    applied: row.applied,
+    changesMarketplacePrices: row.applied === true,
+    affected,
+    skipped,
+    failed,
+    records,
   };
 }

@@ -17,6 +17,7 @@ import {
   pricingConfigurationBody,
   pricingFailure,
   readApplication,
+  repriceReasonText,
   readConfiguration,
   readOverview,
   readPreview,
@@ -344,16 +345,73 @@ function previewBody() {
 
 test("an application result names the unsold scope and a preview is not one", () => {
   const id = "11111111-1111-1111-1111-111111111111";
+  const lead = "22222222-2222-2222-2222-222222222222";
+  const unpriced = "33333333-3333-4333-8333-333333333333";
+  const impact = readApplication({
+    applicationId: null,
+    configurationId: id,
+    configurationVersion: 3,
+    applied: false,
+    changesMarketplacePrices: false,
+    affected: 1,
+    skipped: 0,
+    failed: 1,
+    records: [
+      {
+        leadId: lead,
+        reference: "LD-1",
+        outcome: "updated",
+        reason: "repriced",
+        oldPriceCredits: null,
+        newPriceCredits: 1000,
+      },
+      {
+        leadId: unpriced,
+        reference: "LD-2",
+        outcome: "failed",
+        reason: "budget_band_unmatched",
+        oldPriceCredits: null,
+        newPriceCredits: null,
+      },
+    ],
+  });
+  assert.equal(impact?.applied, false);
+  assert.equal(impact?.affected, 1);
+  assert.equal(impact?.failed, 1);
+  assert.equal(impact?.records[1]?.newPriceCredits, null);
+  assert.match(repriceReasonText("budget_band_unmatched"), /no price is stored/);
   const applied = readApplication({
+    applicationId: "44444444-4444-4444-8444-444444444444",
+    configurationId: id,
+    configurationVersion: 3,
+    applied: true,
+    changesMarketplacePrices: true,
+    affected: 1,
+    skipped: 0,
+    failed: 0,
+    records: [
+      {
+        leadId: lead,
+        reference: "LD-1",
+        outcome: "updated",
+        reason: "repriced",
+        oldPriceCredits: null,
+        newPriceCredits: 1000,
+      },
+    ],
+  });
+  assert.equal(applied?.applied, true);
+  assert.equal(applied?.applicationId, "44444444-4444-4444-8444-444444444444");
+  assert.equal(readApplication({
     applied: true,
     configurationId: id,
     unsoldLeadsUpdated: 4,
     purchasedOrdersLeftUnchanged: 2,
     quotesAwaitingConfirmation: 1,
-  });
-  assert.equal(applied?.unsoldLeadsUpdated, 4);
-  assert.equal(applied?.purchasedOrdersLeftUnchanged, 2);
-  assert.equal(applied?.quotesAwaitingConfirmation, 1);
-  assert.equal(readApplication({ applied: true, configurationId: id, unsoldLeadsUpdated: 4 }), null);
+  }), null);
+  assert.equal(readApplication({
+    ...impact,
+    affected: 9,
+  }), null);
   assert.equal(readApplication(previewBody()), null);
 });

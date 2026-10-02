@@ -14,6 +14,7 @@ import { redirectForAuth } from "@/lib/auth/recover";
 import {
   listPricingVersions,
   readPricingConfiguration,
+  readPricingImpact,
   readPricingOverview,
 } from "@/lib/services/backend/provisional-pricing";
 import {
@@ -22,6 +23,7 @@ import {
   draftFromConfiguration,
   formatProvisionalInr,
   versionListCaption,
+  type PricingApplicationView,
   type PricingConfigurationView,
   type PricingVersionSummary,
 } from "@/lib/services/backend/provisional-pricing-reading";
@@ -82,6 +84,17 @@ export async function ProvisionalPricingScreen({
 
   const seed = viewed ? draftFromConfiguration(viewed) : blankPricingDraft();
   const viewingOlder = Boolean(viewed && overview.configuration && viewed.id !== overview.configuration.id);
+  let impact: PricingApplicationView | null = null;
+  let impactProblem: string | null = null;
+  if (viewed) {
+    try {
+      impact = await readPricingImpact(viewed.id);
+    } catch (error) {
+      redirectForAuth(error, "/admin/settings/pricing");
+      if (error instanceof ServiceError) impactProblem = error.message;
+      else throw error;
+    }
+  }
 
   return (
     <AdminShell title="Pricing & aging" subtitle="Provisional lead-price matrix">
@@ -132,6 +145,9 @@ export async function ProvisionalPricingScreen({
               version={viewed?.version ?? null}
               bands={viewed?.bands.length ?? 0}
               levels={viewed?.levels.length ?? 0}
+              older={viewingOlder}
+              impact={impact}
+              impactProblem={impactProblem}
             />
           </div>
         </Card>
