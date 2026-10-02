@@ -1374,6 +1374,31 @@ Contract tests cover a returned page of 50 against a stored count of 80, a store
 
 The stored matrix is provisional. It is not used for purchases. A whole-rupee exact amount returns integer credits at 1 rupee = 1 credit. A fractional-rupee amount returns no credit figure. The nearest-₹100 figure is a demonstration and is not the purchase or credit amount. Activation stays refused, and this screen does not reprice a lead or change a marketplace price. The configurations endpoint returns at most 50 versions; the caption uses the stored count from the overview. No screenshot price was seeded as a default. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Preference storage stays integrated, and trigger evaluation and delivery stay dependent on the named rules and provider configuration. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`. No new client reminder was sent.
 
+## Unsold-lead application, 2 October 2026
+
+Frontend `cb2eb41`. This section does not replace the `db90ccd` results.
+
+The review API is still process 23140, started at 15:24 local, checkout
+`d527835`, OpenAPI `1.0.0-phase3.r`. It publishes save, preview, and a
+refused activation. It does not publish an application route. This frontend
+did not change that checkout.
+
+The frontend on 3811 for this pass is process 31536, started at 17:17 local,
+built with `NEXT_PUBLIC_KKL_ENV=review` and `NEXT_PUBLIC_KKL_DATA_SOURCE=sample`,
+then `next start` with the documented domain switches. No development-identity
+secret was set.
+
+| Check | Result |
+| --- | --- |
+| Three actions | Review Staff, number ending 0101. Version 3 still showed the synthetic gap matrix. The page had separate sections for saving a version, applying it to unsold leads, and previewing a calculation. The banner still read “Provisional — not used for purchases”. |
+| Application refused | “Apply to unsold leads” for version 3, 2 bands and 2 levels, returned “The review API has not published an application route. No unsold lead was updated, and nothing was charged.” The list still said 3 versions are stored. The note stayed “Synthetic gap matrix for the handoff check”. |
+| Workbook | `KKL MATRIX.xlsx` was read as a reference. Its budget-range labels and level columns were not loaded into the form and were not saved. |
+| Changed quote | A unit test refuses a confirmation whose shown credit amount differs from the lead’s current amount, and it accepts an unchanged amount. No purchase was submitted in the browser. Buying a lead still refuses until Q-1a is confirmed. |
+
+The suite passed 103 of 103. `tsc --noEmit` and `next build` passed before process 31536 started.
+
+Saving and previewing still do not change a lead. Applying a version is the separate step that would update unsold leads, and this API does not perform that write. A changed quote is not charged. Purchases stay refused. Publication (Q-3), matching, verification (Q-4), Q-1a through Q-1e, Q-2a, Q-2b, Q-5, Q-6, Q-7, Q-8, and a routed builder enquiry remain. Phase 3 is not complete. The admin-queue slice stays closed at `8079ee0`. No new client reminder was sent.
+
 ## Older records
 
 `kkl-backend/docs/phase-3/verification-slice-*.md` and `checklist.md` name

@@ -191,6 +191,14 @@ A-5, a decision.
 
 ---
 
+### A-7 · Provisional prices, credits, and unsold leads — 2 October 2026
+
+- **Source:** project owner, written instruction, 2 October 2026.
+- **Answer:** Base prices remain configurable. No final starting rates are supplied. ₹1 = 1 wallet credit. Applying a pricing-matrix change must update unsold leads.
+- **Authorizes, exactly:** staff type base prices; the editor does not fill in a workbook or a screenshot as a default; one rupee is one credit when an exact amount is a whole number of rupees; an application to unsold leads is a different action from saving a draft and from previewing a calculation; a buyer who already saw a price is not charged a different amount.
+- **Does not authorize:** activating a purchase price, treating the workbook’s rates as the starting matrix, repricing a purchased order, or closing Q-1a. The review API at `d527835` has not published the application write, so the screen reports that and does not invent a count of updated leads.
+- **Implemented in:** `/admin/settings/pricing`, and the purchase confirmation on `/seller/leads/[id]/buy` and `/builder/marketplace/[id]/buy`.
+
 ## CR06, as two separate items
 
 ### CR06-a · Type 1 reference — **complete, 28 September 2026**
