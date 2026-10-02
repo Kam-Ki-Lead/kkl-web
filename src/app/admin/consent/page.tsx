@@ -57,7 +57,7 @@ export default async function AdminConsentPage() {
             {suppression.map((entry, index) => (
               <li
                 key={entry.maskedNumber ?? `${entry.when}-${index}`}
-                className="border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0"
+                className="border-b border-line px-[18px] py-[14px] last:border-b-0"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
                   {/* No mask where there is nothing to mask. The stored value

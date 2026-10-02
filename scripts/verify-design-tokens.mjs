@@ -57,6 +57,18 @@ const DERIVED = {
   '#2a4199': 'Footer link hover on the deep-blue footer. Not specified in the baseline.',
   '#aeb6ce': 'Disabled primary-button fill. The baseline shows a disabled button but declares no fill for it.',
   '#9aa2b8': 'Placeholder text in form controls. Not specified in the baseline.',
+  '#643681': 'Authorised brand revision, 2 Oct 2026. Mid-purple face sampled from the supplied logo JPEG. Not an official hex guide. Baseline #1B3BB3 stays in kkl-design.',
+  '#4b2973': 'Authorised brand revision. Dark-purple face sampled from the same logo, used for rails and primary hover.',
+  '#f3942a': 'Authorised brand revision. Orange sampled from the logo ribbon. Fill and focus accent, not text on white.',
+  '#ede4f5': 'Light text on the purple rail and footer. 9.13:1 on #4B2973.',
+  '#2a1544': 'Homepage wash, darker than the sampled purple face.',
+  '#e4d8ef': 'Light purple row and group line. It does not identify a control.',
+  '#ef6729': 'Darker orange sampled from the logo ribbon, used for accent hover and one end of the highlight gradient.',
+  '#f8d424': 'Yellow stop sampled from the logo. Used only inside .brand-highlight. Not a text colour.',
+  '#c5c0cc': 'Disabled primary fill, shifted off the old blue-gray so a disabled control is not a brand colour.',
+  '#d4c4e4': 'Rail group label for the revised purple rail. 6.88:1 on #4B2973.',
+  '#f6f1fb': 'Neutral chip surface for the revised brand. Brand text on it is 7.92:1.',
+  '#bfe0c8': 'Success edge on the owner confirmation card. It groups a success panel and is not a new brand colour.',
   // The same accessibility correction as --color-control-border above, caught
   // again here because the token declaration is itself a literal in the CSS.
   '#8a8e9c': 'Control border, corrected for WCAG 2.2 AA 1.4.11. See --color-control-border in EXPLAINED. Awaiting design sign-off as E-P2b.',
@@ -75,6 +87,26 @@ const EXPLAINED = {
     'Corrected for contrast. The approved #C6CCE0 is 1.60:1 on white and 1.48:1 on the page surface, against the 3:1 that WCAG 2.2 AA 1.4.11 requires of the border identifying a control. #8A8E9C is the smallest same-hue darkening that clears it: 3.27:1 on white, 3.02:1 on the page surface. Awaiting design sign-off as E-P2b. The approved value is kept as --color-control-border-baseline so the change stays legible.',
   'control-border-baseline':
     'The approved #C6CCE0, retained unused so the correction above can be read as a correction and reverted in one line if the design prefers a different remedy.',
+  brand:
+    'Authorised brand revision, 2 Oct 2026, from the supplied logo. #643681 is a sampled purple face. The frozen baseline #1B3BB3 remains in kkl-design and is not overwritten.',
+  'brand-deep':
+    'Authorised brand revision. #4B2973 is the darker purple face sampled from the same logo. The frozen baseline #0F2478 remains in kkl-design.',
+  saffron:
+    'Authorised brand revision. #F3942A is the sampled orange accent. It is a fill and the focus ring, with the ink companion retained because the orange is 2.31:1 on white. The frozen baseline #F2A20C remains in kkl-design.',
+  'chip-neutral-bg':
+    'Light purple surface for the revised brand. Brand text on #F6F1FB stays above 4.5:1.',
+  'chip-neutral-fg':
+    'The revised brand purple, so a neutral chip uses the same colour as a brand link.',
+  'rail-seller-label':
+    'Lavender group label, 6.88:1 on the revised purple rail. The baseline blue #8A9AD8 remains in kkl-design.',
+  'rail-seller-item':
+    'Light text on the revised purple rail, 9.13:1 on #4B2973.',
+  'on-brand':
+    'Text on purple surfaces. Same value as the rail item colour.',
+  'brand-wash':
+    'Homepage panel behind the search card on a narrow screen. Darker than the sampled face.',
+  'brand-mist':
+    'Light purple line for a selected or grouped row. It is not the border that identifies a text field.',
 };
 
 const results = [];

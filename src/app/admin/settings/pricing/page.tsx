@@ -64,7 +64,7 @@ async function PlaceholderPricing() {
           {bands.map((band) => (
             <div
               key={band.band}
-              className="grid grid-cols-3 items-center gap-[10px] border-t border-[#EDEFF6] px-[18px] py-[13px]"
+              className="grid grid-cols-3 items-center gap-[10px] border-t border-line px-[18px] py-[13px]"
             >
               <span className="text-[15px] font-semibold text-ink">{band.band}</span>
               <input
@@ -72,14 +72,14 @@ async function PlaceholderPricing() {
                 defaultValue={formatExactInr(band.priceInr)}
                 disabled
                 aria-label={`Full price for ${band.band} — not editable`}
-                className="min-h-[40px] rounded-[8px] border-[1.5px] border-line bg-[#F6F8FD] px-[11px] text-[15px] text-muted"
+                className="min-h-[40px] rounded-[8px] border-[1.5px] border-line bg-chip-neutral-bg px-[11px] text-[15px] text-muted"
               />
               <input
                 type="text"
                 defaultValue={formatExactInr(band.saleInr)}
                 disabled
                 aria-label={`Sale price for ${band.band} — not editable`}
-                className="min-h-[40px] rounded-[8px] border-[1.5px] border-line bg-[#F6F8FD] px-[11px] text-[15px] text-muted"
+                className="min-h-[40px] rounded-[8px] border-[1.5px] border-line bg-chip-neutral-bg px-[11px] text-[15px] text-muted"
               />
             </div>
           ))}

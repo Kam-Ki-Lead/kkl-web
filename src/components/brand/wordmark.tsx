@@ -1,62 +1,38 @@
 /**
- * The approved logo treatment. Values measured from the rendered baseline package
- * (commit 5bc3512): a blue rounded tile carrying an Archivo "K" with a saffron rule
- * across its foot, then "Kam Ki" in Archivo 500 and "Lead" in Archivo 800 blue,
- * underlined in saffron.
+ * The logo supplied on 2 October 2026, shown beside the name.
  *
- * Saffron appears here as a rule only — never as a surface, never carrying text.
+ * The file is a JPEG with a white background. It is not a vector and it is
+ * not transparent, so on a dark rail the white rectangle is the file's own
+ * background. The image is not cropped or redrawn. Its box uses the file's
+ * own 2440×2373 proportion.
  */
 export function Wordmark({
   size = "md",
   onDark = false,
 }: {
   /**
-   * md = public header (33px tile, 20px text), sm = public footer (30px, 19px),
-   * rail = the console rails (28px tile with a 5px radius, 17px text).
-   *
-   * The rail size is not a smaller `sm`: the approved consoles declare their
-   * own treatment — `width:28px; height:28px; border-radius:5px` with the
-   * wordmark at 17px — and the rails were rendering the 20px header size,
-   * which is what a measured comparison of S-06 and B-07 showed.
+   * md = public header, sm = public footer, rail = the console rails.
+   * The heights differ by role. The width follows the file, so the mark is
+   * not stretched.
    */
   size?: "md" | "sm" | "rail";
   onDark?: boolean;
 }) {
-  const tile = size === "md" ? 33 : size === "sm" ? 30 : 28;
-  const glyph = size === "md" ? 21 : size === "sm" ? 19 : 18;
+  const height = size === "md" ? 44 : size === "sm" ? 36 : 32;
+  const width = Math.round((height * 2440) / 2373);
   const text = size === "md" ? 20 : size === "sm" ? 19 : 17;
-  const tileRadius = size === "rail" ? 5 : 6;
 
   return (
     <span className="inline-flex flex-none items-center gap-[10px] whitespace-nowrap">
-      <span
-        aria-hidden="true"
-        className="relative flex flex-none items-center justify-center"
-        style={{
-          width: tile,
-          height: tile,
-          borderRadius: tileRadius,
-          background: onDark ? "#ffffff" : "#1B3BB3",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: glyph,
-            fontWeight: 800,
-            letterSpacing: "-0.02em",
-            lineHeight: 1,
-            color: onDark ? "#0F2478" : "#ffffff",
-          }}
-        >
-          K
-        </span>
-        <span
-          className="absolute bg-saffron"
-          style={{ left: 6, right: 6, bottom: 5, height: 2.5 }}
-        />
-      </span>
-
+      <img
+        src="/brand/kkl-logo.jpg"
+        alt=""
+        width={2440}
+        height={2373}
+        draggable={false}
+        className="flex-none bg-white object-contain"
+        style={{ width, height }}
+      />
       <span className="flex items-baseline gap-[5px]">
         <span
           style={{
@@ -64,23 +40,21 @@ export function Wordmark({
             fontSize: text,
             fontWeight: 500,
             letterSpacing: "-0.03em",
-            color: onDark ? "#D7DDF6" : "#12182B",
+            color: onDark ? "var(--color-on-brand)" : "var(--color-ink)",
           }}
         >
           Kam Ki
         </span>
         <span
-          className="relative pb-[4px]"
           style={{
             fontFamily: "var(--font-heading)",
             fontSize: text,
             fontWeight: 800,
             letterSpacing: "-0.035em",
-            color: onDark ? "#ffffff" : "#1B3BB3",
+            color: onDark ? "#ffffff" : "var(--color-brand)",
           }}
         >
           Lead
-          <span className="absolute inset-x-0 bottom-0 bg-saffron" style={{ height: 2.5 }} />
         </span>
       </span>
     </span>

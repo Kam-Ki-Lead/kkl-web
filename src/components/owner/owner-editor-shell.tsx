@@ -80,7 +80,7 @@ export function OwnerEditorShell({
                   aria-current={active ? "step" : undefined}
                   className={`flex min-h-[44px] items-center gap-[8px] rounded-[8px] border px-[13px] py-[8px] text-[14px] font-semibold ${
                     active
-                      ? "border-brand bg-[#F6F8FD] text-brand"
+                      ? "border-brand bg-chip-neutral-bg text-brand"
                       : "border-line bg-white text-body hover:border-[#B9C3EC]"
                   }`}
                 >

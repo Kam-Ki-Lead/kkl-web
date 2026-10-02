@@ -83,7 +83,7 @@ const PAIRS = [
   // Rail foregrounds. C-03 claims inactive items clear 7:1 on their rail.
   { what: 'Rail item on rail', fg: tokens['rail-seller-item'], bg: tokens['brand-deep'], need: 4.5, note: 'inactive rail item' },
   { what: 'Rail label on rail', fg: tokens['rail-seller-label'], bg: tokens['brand-deep'], need: 4.5, note: 'rail group heading, 12px' },
-  { what: 'Admin rail item on rail', fg: tokens['rail-admin-item'], bg: tokens['brand-deep'], need: 4.5, note: 'inactive Admin rail item' },
+  { what: 'Admin rail item on rail', fg: tokens['rail-admin-item'], bg: tokens.ink, need: 4.5, note: 'inactive Admin rail item on the ink rail' },
   { what: 'White on rail active', fg: WHITE, bg: tokens.brand, need: 4.5, note: 'active rail item' },
 
   { what: 'Ink on saffron', fg: tokens.ink, bg: tokens.saffron, need: 4.5, note: 'count badge, 12px bold' },
@@ -117,7 +117,7 @@ const DESIGN_FINDINGS = [
       'globals.css :focus-visible — applies to EVERY focusable element',
       'every button, link, input, select, textarea, chip and table-row control',
       'on white cards, dialogs and table rows, and on the page surface',
-      'NOT the dark rails: saffron on brand-deep is 6.44:1 and on brand 4.28:1, both pass',
+      'NOT the dark rails: the sampled orange on brand-deep is 4.87:1 and on brand is 3.80:1, both pass',
     ],
     why: 'The focus indicator must be distinguishable from what surrounds it. Matching the approved baseline does not close this — the baseline declares the value that fails.',
     remedy: 'Smallest correction that keeps saffron exactly: keep the 3px saffron outline and add a 1px ink #12182B box-shadow immediately inside it. The indicator then presents a 17.63:1 edge against white and 16.30:1 against the page surface, and saffron reads 8.35:1 against its own companion, so the ring still reads as saffron. Alternative, if a single colour is required: darken to #C1810A, which clears 3:1 on both light surfaces (3.03:1 page, 3.28:1 white) at the same hue — but that changes a declared brand token.',

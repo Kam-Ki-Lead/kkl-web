@@ -58,7 +58,7 @@ export default function AdminSettingsPage() {
               <li
                 key={item.label}
                 className={`flex items-center justify-between gap-[12px] rounded-[8px] border px-[14px] py-[11px] ${
-                  item.on ? "border-[#D4DBF3] bg-tint" : "border-line bg-white"
+                  item.on ? "border-brand-mist bg-tint" : "border-line bg-white"
                 }`}
               >
                 <span className="min-w-0">
@@ -95,7 +95,7 @@ export default function AdminSettingsPage() {
           {TEMPLATES.map((template) => (
             <div
               key={template.name}
-              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-[#EDEFF6] px-[18px] py-[13px] last:border-b-0"
+              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[13px] last:border-b-0"
             >
               <span className="min-w-0">
                 <span className="block text-[15px] font-semibold text-ink">{template.name}</span>

@@ -82,7 +82,7 @@ export function OwnerListingReplyForm({ listingId }: { listingId: string }) {
           aria-pressed={!internal}
           onClick={() => setInternal(false)}
           className={`min-h-[44px] rounded-[8px] border px-[14px] text-[14px] font-semibold ${
-            internal ? "border-line bg-white text-body" : "border-brand bg-[#F6F8FD] text-brand"
+            internal ? "border-line bg-white text-body" : "border-brand bg-chip-neutral-bg text-brand"
           }`}
         >
           Message the owner
@@ -92,7 +92,7 @@ export function OwnerListingReplyForm({ listingId }: { listingId: string }) {
           aria-pressed={internal}
           onClick={() => setInternal(true)}
           className={`min-h-[44px] rounded-[8px] border px-[14px] text-[14px] font-semibold ${
-            internal ? "border-brand bg-[#F6F8FD] text-brand" : "border-line bg-white text-body"
+            internal ? "border-brand bg-chip-neutral-bg text-brand" : "border-line bg-white text-body"
           }`}
         >
           Internal note

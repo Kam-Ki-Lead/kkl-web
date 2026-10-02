@@ -203,7 +203,7 @@ export default async function AdminKycReviewPage({
                     data-check={check.key}
                     aria-pressed={check.done}
                     className={`flex w-full items-center gap-[11px] rounded-[8px] border px-[14px] py-[11px] text-left text-[14px] disabled:cursor-not-allowed ${
-                      check.done ? "border-[#D4DBF3] bg-tint" : "border-line bg-white"
+                      check.done ? "border-brand-mist bg-tint" : "border-line bg-white"
                     }`}
                   >
                     <span

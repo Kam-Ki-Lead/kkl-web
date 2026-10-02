@@ -71,7 +71,7 @@ export default async function AdminOwnerListingsPage({
               href={`/admin/owner-listings?status=${f.value}`}
               aria-current={active ? "true" : undefined}
               className={`flex min-h-[44px] items-center rounded-[8px] border px-[14px] text-[14px] font-semibold ${
-                active ? "border-brand bg-[#F6F8FD] text-brand" : "border-line bg-white text-body"
+                active ? "border-brand bg-chip-neutral-bg text-brand" : "border-line bg-white text-body"
               }`}
             >
               {f.label}

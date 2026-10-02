@@ -150,7 +150,7 @@ export default async function AdminOwnerListingPage({
           )}
         </Card>
 
-        <Card className="border-[#D4DBF3] bg-tint p-[22px]">
+        <Card className="border-brand-mist bg-tint p-[22px]">
           <SectionHeader title="Internal notes" subtitle="Staff only — never shown to the owner" />
           {listing.internalNotes.length === 0 ? (
             <p className="t-body text-muted">Nothing yet.</p>

@@ -67,7 +67,7 @@ export default async function AdminIntakeRunPage({
           </Card>
           <OutcomeCard title="Accepted" empty="No accepted rows.">
             {batch.accepted.map((item, index) => (
-              <li key={`accepted-${item.index ?? index}`} className="border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0">
+              <li key={`accepted-${item.index ?? index}`} className="border-b border-line px-[18px] py-[14px] last:border-b-0">
                 <p className="t-mono text-[13px] text-muted">row {item.index ?? "—"}</p>
                 <p className="text-[15px] font-semibold text-ink">{item.reference ?? "Reference not recorded"}</p>
                 <p className="t-body-sm text-body">Consent: {item.consentStatus ?? "not recorded"}</p>
@@ -76,7 +76,7 @@ export default async function AdminIntakeRunPage({
           </OutcomeCard>
           <OutcomeCard title="Duplicates" empty="No duplicate rows.">
             {batch.duplicates.map((item, index) => (
-              <li key={`duplicate-${item.index ?? index}`} className="border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0">
+              <li key={`duplicate-${item.index ?? index}`} className="border-b border-line px-[18px] py-[14px] last:border-b-0">
                 <p className="t-mono text-[13px] text-muted">row {item.index ?? "—"}</p>
                 <p className="text-[15px] text-ink">Existing lead {item.existingReference ?? "reference not recorded"}</p>
               </li>
@@ -84,7 +84,7 @@ export default async function AdminIntakeRunPage({
           </OutcomeCard>
           <OutcomeCard title="Rejected rows" empty="No rejected rows.">
             {batch.rejected.map((item, index) => (
-              <li key={`rejected-${item.index ?? index}`} className="border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0">
+              <li key={`rejected-${item.index ?? index}`} className="border-b border-line px-[18px] py-[14px] last:border-b-0">
                 <p className="t-mono text-[13px] text-muted">row {item.index ?? "—"}</p>
                 {item.problems.length === 0 ? (
                   <p className="t-body-sm mt-[3px] text-body">No problem fields were returned for this row.</p>
@@ -102,7 +102,7 @@ export default async function AdminIntakeRunPage({
           </OutcomeCard>
           <OutcomeCard title="Skipped" empty="No skipped rows.">
             {batch.skipped.map((item, index) => (
-              <li key={`skipped-${item.index ?? index}`} className="border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0">
+              <li key={`skipped-${item.index ?? index}`} className="border-b border-line px-[18px] py-[14px] last:border-b-0">
                 <p className="t-mono text-[13px] text-muted">row {item.index ?? "—"}</p>
                 <p className="text-[15px] font-semibold text-ink">{item.reasonCode ?? "Reason code not recorded"}</p>
                 <p className="t-body-sm text-body">{item.reason ?? "Reason not recorded"}</p>
@@ -164,7 +164,7 @@ export default async function AdminIntakeRunPage({
             {rejections.map((rejection) => (
               <li
                 key={rejection.row}
-                className="border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0"
+                className="border-b border-line px-[18px] py-[14px] last:border-b-0"
               >
                 <div className="flex flex-wrap items-baseline gap-[12px]">
                   <span className="t-mono text-[13px] text-muted">row {rejection.row}</span>

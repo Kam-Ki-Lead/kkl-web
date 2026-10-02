@@ -386,7 +386,7 @@ function MediaFields({ listing, contractBound }: { listing: ListingDraft; contra
             picker. */}
         <label
           htmlFor="photos"
-          className="inline-flex cursor-pointer items-center rounded-[8px] border-[2px] border-dashed border-[#A9B2CE] bg-white px-[22px] py-[15px] text-[15px] font-bold text-brand transition-[background-color,border-color] duration-150 hover:border-brand hover:bg-[#F6F8FD]"
+          className="inline-flex cursor-pointer items-center rounded-[8px] border-[2px] border-dashed border-control-border bg-white px-[22px] py-[15px] text-[15px] font-bold text-brand transition-[background-color,border-color] duration-150 hover:border-brand hover:bg-chip-neutral-bg"
         >
           Add photographs
         </label>

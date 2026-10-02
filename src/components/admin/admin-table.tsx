@@ -150,7 +150,7 @@ export function AdminTable({
               </>
             );
             const className =
-              "grid w-full items-center gap-[10px] border-t border-[#EDEFF6] px-[16px] py-[14px] text-left text-[15px] text-body";
+              "grid w-full items-center gap-[10px] border-t border-line px-[16px] py-[14px] text-left text-[15px] text-body";
             const style = { gridTemplateColumns: tracks } as const;
             const narrowStyle = { ["--narrow" as string]: narrowTracks };
 
@@ -158,7 +158,7 @@ export function AdminTable({
               <Link
                 key={row.key}
                 href={row.href}
-                className={`${className} transition-[background-color] duration-150 hover:bg-[#F6F8FD] max-[1060px]:!grid-cols-[var(--narrow)]`}
+                className={`${className} transition-[background-color] duration-150 hover:bg-chip-neutral-bg max-[1060px]:!grid-cols-[var(--narrow)]`}
                 style={{ ...style, ...narrowStyle }}
               >
                 {content}

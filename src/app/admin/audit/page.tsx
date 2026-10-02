@@ -78,9 +78,9 @@ export default async function AdminAuditPage({
             {entries.map((entry) => (
               <details
                 key={entry.id}
-                className="border-b border-[#EDEFF6] last:border-b-0 [&[open]>summary]:bg-[#F6F8FD]"
+                className="border-b border-line last:border-b-0 [&[open]>summary]:bg-chip-neutral-bg"
               >
-                <summary className="cursor-pointer list-none px-[18px] py-[14px] transition-[background-color] duration-150 hover:bg-[#F6F8FD]">
+                <summary className="cursor-pointer list-none px-[18px] py-[14px] transition-[background-color] duration-150 hover:bg-chip-neutral-bg">
                   <span className="flex flex-wrap items-baseline justify-between gap-[10px]">
                     <span className="min-w-0">
                       <span className="block text-[15px] text-body">{entry.action}</span>
@@ -96,7 +96,7 @@ export default async function AdminAuditPage({
                   </span>
                 </summary>
 
-                <div className="border-t border-[#EDEFF6] bg-[#F6F8FD] px-[18px] py-[16px]">
+                <div className="border-t border-line bg-chip-neutral-bg px-[18px] py-[16px]">
                   <dl className="grid grid-cols-2 gap-x-[18px] gap-y-[9px] max-[700px]:grid-cols-1">
                     <Row label="Actor">
                       {entry.actor.name} · staff ID {entry.actor.staffId} · {entry.actor.team}

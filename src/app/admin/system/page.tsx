@@ -63,7 +63,7 @@ export default async function AdminSystemPage() {
           {failures.map((failure) => (
             <div
               key={failure.job}
-              className="flex flex-wrap items-center justify-between gap-[14px] border-b border-[#EDEFF6] px-[18px] py-[14px] last:border-b-0"
+              className="flex flex-wrap items-center justify-between gap-[14px] border-b border-line px-[18px] py-[14px] last:border-b-0"
             >
               <span className="min-w-0">
                 <span className="block text-[15px] font-semibold text-ink">{failure.job}</span>

@@ -150,7 +150,8 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
     .join(" · ");
 
   return (
-    <section className="relative h-[380px] overflow-hidden rounded-[10px] border border-line max-[900px]:h-auto max-[900px]:border-0 max-[900px]:bg-[#0A1230]">
+    <section className="relative h-[380px] overflow-hidden rounded-[10px] border border-line max-[900px]:h-auto max-[900px]:border-0 max-[900px]:bg-brand-wash">
+      <div aria-hidden="true" className="brand-highlight absolute inset-x-0 top-0 z-[1] h-[4px]" />
       {/* The photograph and its gradient are a desktop treatment. On mobile the
           approved design drops to a compact dark panel — the image would push the
           search card, which is the page's primary action, below the fold. */}

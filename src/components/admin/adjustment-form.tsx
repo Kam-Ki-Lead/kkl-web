@@ -88,7 +88,7 @@ export function AdjustmentForm({
                   value={option.key}
                   checked={active}
                   onChange={() => setDirection(option.key)}
-                  className="mt-[4px] h-[16px] w-[16px] flex-none accent-[#1B3BB3]"
+                  className="mt-[4px] h-[16px] w-[16px] flex-none accent-brand"
                 />
                 <span className="min-w-0">
                   <span

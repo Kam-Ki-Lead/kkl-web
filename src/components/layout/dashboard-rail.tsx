@@ -218,7 +218,7 @@ function RailFooterCard({ footer }: { footer: RailFooter }) {
         /* Saffron on a surface is used sparingly, per C-01. The approved rail is
            one of the two places it appears filled — the other is the homepage
            hero — and it carries a short label in ink, not body text. */
-        className="mt-[12px] flex min-h-[44px] items-center justify-center rounded-[8px] bg-saffron px-[14px] text-[14px] font-bold text-ink transition-[background-color] duration-150 hover:bg-[#DE9309]"
+        className="mt-[12px] flex min-h-[44px] items-center justify-center rounded-[8px] bg-saffron px-[14px] text-[14px] font-bold text-ink transition-[background-color] duration-150 hover:bg-[#EF6729]"
       >
         {footer.actionLabel}
       </Link>

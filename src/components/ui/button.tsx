@@ -70,7 +70,7 @@ const quietSizes: Record<ButtonSize, string> = {
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "font-bold bg-brand text-white hover:bg-brand-deep disabled:bg-[#AEB6CE] disabled:text-white",
+    "font-bold bg-brand text-white hover:bg-brand-deep disabled:bg-[#C5C0CC] disabled:text-white",
   secondary:
     "font-bold bg-white text-ink border-[1.5px] border-line hover:border-[#C6CCE0] disabled:text-muted",
   /* The portal's outline call to action: white surface, brand border and
@@ -132,7 +132,7 @@ export function AccentButtonLink({
   return (
     <Link
       {...props}
-      className={`${base} ${sizes.md} font-bold bg-saffron text-ink hover:bg-[#DE9309] ${className}`}
+      className={`${base} ${sizes.md} font-bold bg-saffron text-ink hover:bg-[#EF6729] ${className}`}
     />
   );
 }

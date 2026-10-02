@@ -82,7 +82,7 @@ export async function SellerShell({
               border — visible down to 480px. Not a status chip. */}
           <Link
             href="/seller/billing"
-            className="flex items-center gap-[8px] whitespace-nowrap rounded-full border-[1.5px] border-[#D4DBF3] bg-[#F6F8FD] px-[14px] py-[9px] text-[15px] font-bold text-ink max-[479px]:hidden"
+            className="flex items-center gap-[8px] whitespace-nowrap rounded-full border-[1.5px] border-brand-mist bg-chip-neutral-bg px-[14px] py-[9px] text-[15px] font-bold text-ink max-[479px]:hidden"
           >
             <span aria-hidden="true" className="text-brand">
               ◈

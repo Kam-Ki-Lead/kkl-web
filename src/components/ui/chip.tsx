@@ -60,7 +60,7 @@ export function FilterChip({
   onRemove: () => void;
 }) {
   return (
-    <span className="inline-flex items-center gap-[7px] rounded-full border-[1.5px] border-[#D4DBF3] bg-[#F6F8FD] py-[5px] pl-[13px] pr-[5px] text-[14px] font-semibold text-brand">
+    <span className="inline-flex items-center gap-[7px] rounded-full border-[1.5px] border-brand-mist bg-chip-neutral-bg py-[5px] pl-[13px] pr-[5px] text-[14px] font-semibold text-brand">
       {label}
       <button
         type="button"

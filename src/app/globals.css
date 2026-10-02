@@ -4,14 +4,32 @@
  * Design tokens — C-01 (colour) and C-02 (typography) of the approved
  * "KKL Component and State Library", baseline commit 5bc3512.
  *
- * Hex values and the role of each colour are taken verbatim from C-01. Saffron is
- * an accent only: it underlines the wordmark, marks focus, and badges a count. It
- * is never a large surface and never carries body text.
+ * The frozen baseline values from C-01 stay recorded here and in kkl-design
+ * at 5bc3512. They are not the colours rendered after the 2 October 2026
+ * brand revision.
+ *
+ * Authorised brand revision, 2 October 2026. The supplied logo is a JPEG.
+ * These hex values were sampled from that file; they are not an official
+ * hex-code brand guide. Deep purple is the main colour. Orange is the accent
+ * and is not used for text on a light surface. Yellow appears only inside
+ * the logo and one highlight gradient.
+ *
+ * Baseline, retained as a record: brand #1B3BB3, brand-deep #0F2478,
+ * saffron #F2A20C.
  */
 @theme {
-  --color-brand: #1b3bb3;
-  --color-brand-deep: #0f2478;
-  --color-saffron: #f2a20c;
+  /* Sampled mid-purple face. White text on it is 8.80:1. */
+  --color-brand: #643681;
+  /* Sampled dark-purple face. White text on it is 11.27:1. */
+  --color-brand-deep: #4b2973;
+  /* Sampled orange. Ink text on it is 7.62:1. On white it is 2.31:1, so it is not a text colour. */
+  --color-saffron: #f3942a;
+  /* Light lavender for text on the purple rail and footer. 9.13:1 on brand-deep. */
+  --color-on-brand: #ede4f5;
+  /* Darker than the sampled face, for the homepage wash only. */
+  --color-brand-wash: #2a1544;
+  /* Light purple line for selected and grouped rows. Not a control identifier. */
+  --color-brand-mist: #e4d8ef;
   --color-ink: #12182b;
   --color-body: #2a3250;
   --color-muted: #5a6480;
@@ -49,11 +67,11 @@
   --color-danger: #b3261e;
 
   /* Rail foregrounds — C-03. Inactive items sit above 7:1 on their rail. */
-  --color-rail-seller-label: #8a9ad8;
+  --color-rail-seller-label: #d4c4e4;
   /* A-02's rail is ink with a dimmer muted text than the other two consoles.
      5.41:1 on #12182B, so it clears AA for body text. */
   --color-rail-admin-muted: #9aa3be;
-  --color-rail-seller-item: #b9c3ec;
+  --color-rail-seller-item: #ede4f5;
   --color-rail-admin-label: #9aa3be;
   --color-rail-admin-item: #9aa3be;
 
@@ -67,8 +85,8 @@
    * see. That check now compares them mechanically, and it also scans every
    * hex literal written into a component, which found nine more.
    */
-  --color-chip-neutral-bg: #eef2fd;
-  --color-chip-neutral-fg: #1b3bb3;
+  --color-chip-neutral-bg: #f6f1fb;
+  --color-chip-neutral-fg: #643681;
   --color-chip-warning-bg: #fff4e2;
   --color-chip-warning-fg: #8a4a08;
   --color-chip-success-bg: #e3f3ea;
@@ -304,6 +322,15 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
+
+  /*
+   * One brand highlight. The stops are sampled from the logo ribbon
+   * (#EF6729, #F3942A, #F8D424). It is a strip, not a control fill, and the
+   * yellow stop never carries text.
+   */
+  .brand-highlight {
+    background-image: linear-gradient(90deg, #ef6729 0%, #f3942a 46%, #f8d424 100%);
+  }
 }
 
 @layer base {
@@ -338,9 +365,9 @@
    *
    * C-04 specifies a 3px saffron ring at 2px offset and C-01 names the focus
    * ring as one of saffron's three permitted uses, so the colour stays. But
-   * saffron #F2A20C is 2.11:1 on white and 1.95:1 on the page surface, and
-   * WCAG 2.2 AA 1.4.11 Non-text Contrast needs 3:1. The baseline declaring
-   * the value does not close the failure.
+   * The logo orange #F3942A is 2.31:1 on white and 2.14:1 on the page surface,
+   * and WCAG 2.2 AA 1.4.11 Non-text Contrast needs 3:1. The accent stays
+   * orange. The companion edge is what clears the threshold.
    *
    * The correction is additive: a 1px ink companion immediately inside the
    * saffron ring. The indicator then presents a 17.63:1 edge against white
@@ -351,7 +378,7 @@
    *
    * box-shadow rather than a second outline: it paints inside the offset gap
    * without taking layout, so nothing shifts and nothing clips. On the dark
-   * rails saffron already passes (6.44:1 on #0F2478), and the companion is
+   * rails the orange already passes (4.87:1 on #4B2973), and the companion is
    * harmless there because it sits against the ring, not the surface.
    */
   /*

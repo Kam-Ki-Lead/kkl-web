@@ -70,7 +70,7 @@ export default async function PurchaseResultPage({
           {outcome.duplicate ? (
             <p
               role="status"
-              className="t-body mt-[12px] rounded-[8px] border border-[#D4DBF3] bg-tint px-[14px] py-[11px] text-body"
+              className="t-body mt-[12px] rounded-[8px] border border-brand-mist bg-tint px-[14px] py-[11px] text-body"
             >
               <strong className="text-ink">This is the purchase you already made.</strong> The
               submission was a repeat — a double press, a reloaded form or a retried request — and it

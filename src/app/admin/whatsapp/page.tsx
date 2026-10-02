@@ -63,7 +63,7 @@ export default async function AdminWhatsAppPage() {
           {conversations.map((conversation) => (
             <div
               key={conversation.maskedNumber}
-              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-[#EDEFF6] px-[18px] py-[13px] last:border-b-0"
+              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[13px] last:border-b-0"
             >
               <span className="min-w-0">
                 <span className="t-mono block text-[13px] text-ink">

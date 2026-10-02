@@ -85,7 +85,7 @@ function DocumentSlot({ spec }: { readonly spec: DocSpec }) {
           onChange={(event) =>
             setFileChosen(Boolean(event.target.files?.length))
           }
-          className="block w-full cursor-pointer text-[14px] text-muted file:mr-[12px] file:cursor-pointer file:rounded-[8px] file:border-2 file:border-dashed file:border-[#A9B2CE] file:bg-white file:px-[20px] file:py-[14px] file:text-[15px] file:font-bold file:text-brand hover:file:border-brand hover:file:bg-[#F6F8FD]"
+          className="block w-full cursor-pointer text-[14px] text-muted file:mr-[12px] file:cursor-pointer file:rounded-[8px] file:border-2 file:border-dashed file:border-control-border file:bg-white file:px-[20px] file:py-[14px] file:text-[15px] file:font-bold file:text-brand hover:file:border-brand hover:file:bg-chip-neutral-bg"
         />
       </div>
     </div>

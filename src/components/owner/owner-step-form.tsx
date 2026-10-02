@@ -152,7 +152,7 @@ function BasicsFields({ listing, errors }: { listing: OwnerListing; errors: Erro
           ).map((o) => (
             <label
               key={o.value}
-              className="flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[8px] border-[1.5px] border-control-border bg-white px-[14px] text-[15px] text-ink has-[:checked]:border-brand has-[:checked]:bg-[#F6F8FD]"
+              className="flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[8px] border-[1.5px] border-control-border bg-white px-[14px] text-[15px] text-ink has-[:checked]:border-brand has-[:checked]:bg-chip-neutral-bg"
             >
               <input
                 type="radio"
@@ -340,7 +340,7 @@ function PhotoFields({
       <Card className="bg-tint p-[18px]">
         <label
           htmlFor={inputId}
-          className="inline-flex min-h-[44px] cursor-pointer items-center rounded-[8px] border-[2px] border-dashed border-[#A9B2CE] bg-white px-[22px] py-[12px] text-[15px] font-bold text-brand hover:border-brand hover:bg-[#F6F8FD]"
+          className="inline-flex min-h-[44px] cursor-pointer items-center rounded-[8px] border-[2px] border-dashed border-control-border bg-white px-[22px] py-[12px] text-[15px] font-bold text-brand hover:border-brand hover:bg-chip-neutral-bg"
         >
           Choose photographs
         </label>
@@ -513,7 +513,7 @@ function ContactFields({ listing, errors }: { listing: OwnerListing; errors: Err
           ).map((o) => (
             <label
               key={o.value}
-              className="flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[8px] border-[1.5px] border-control-border bg-white px-[14px] text-[15px] text-ink has-[:checked]:border-brand has-[:checked]:bg-[#F6F8FD]"
+              className="flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[8px] border-[1.5px] border-control-border bg-white px-[14px] text-[15px] text-ink has-[:checked]:border-brand has-[:checked]:bg-chip-neutral-bg"
             >
               <input
                 type="radio"

@@ -100,7 +100,7 @@ export default async function AdminIntakePage({
               <Link
                 key={run.batchRef}
                 href={`/admin/leads/intake/${encodeURIComponent(run.batchRef)}`}
-                className="flex flex-wrap items-center justify-between gap-[12px] border-b border-[#EDEFF6] px-[18px] py-[14px] transition-[background-color] duration-150 last:border-b-0 hover:bg-[#F6F8FD]"
+                className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[14px] transition-[background-color] duration-150 last:border-b-0 hover:bg-chip-neutral-bg"
               >
                 <span className="min-w-0">
                   <span className="t-mono block text-[13px] text-ink">{run.batchRef}</span>
@@ -156,7 +156,7 @@ export default async function AdminIntakePage({
             <Link
               key={run.id}
               href={`/admin/leads/intake/${run.id}`}
-              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-[#EDEFF6] px-[18px] py-[14px] transition-[background-color] duration-150 last:border-b-0 hover:bg-[#F6F8FD]"
+              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[14px] transition-[background-color] duration-150 last:border-b-0 hover:bg-chip-neutral-bg"
             >
               <span className="min-w-0">
                 <span className="t-mono block text-[13px] text-ink">{run.id}</span>

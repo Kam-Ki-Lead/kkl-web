@@ -95,7 +95,7 @@ export default async function AdminTicketPage({
                       ? "border-[#C6CCE0] bg-[#EFF1F7]"
                       : message.fromUser
                         ? "border-line bg-white"
-                        : "border-[#D4DBF3] bg-tint"
+                        : "border-brand-mist bg-tint"
                   }`}
                 >
                   <p

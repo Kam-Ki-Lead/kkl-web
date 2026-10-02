@@ -47,7 +47,7 @@ export default async function AdminVoicePage() {
             <Link
               key={call.id}
               href={`/admin/voice/${call.id}`}
-              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-[#EDEFF6] px-[18px] py-[14px] transition-[background-color] duration-150 last:border-b-0 hover:bg-[#F6F8FD]"
+              className="flex flex-wrap items-center justify-between gap-[12px] border-b border-line px-[18px] py-[14px] transition-[background-color] duration-150 last:border-b-0 hover:bg-chip-neutral-bg"
             >
               <span className="min-w-0">
                 <span className="flex flex-wrap items-baseline gap-[10px]">

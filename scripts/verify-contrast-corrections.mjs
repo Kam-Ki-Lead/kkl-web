@@ -14,7 +14,7 @@ const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3811';
 
 const CORRECTED_BORDER = 'rgb(138, 142, 156)'; // #8A8E9C
 const INK = 'rgb(18, 24, 43)';                 // #12182B companion
-const SAFFRON = 'rgb(242, 162, 12)';           // #F2A20C ring
+const SAFFRON = 'rgb(243, 148, 42)';           // #F3942A ring, sampled logo orange. Baseline #F2A20C stays in kkl-design.
 
 function luminance(rgb) {
   const [r, g, b] = rgb.match(/\d+/g).slice(0, 3).map((n) => {
