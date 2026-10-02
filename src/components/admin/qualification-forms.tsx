@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import {
   registerSyntheticQuestions,
   resumeQualificationRun,
+  retryQualificationRun,
   saveCallingWindow,
   saveOptOutSignals,
   startQualificationRunAction,
@@ -12,6 +13,11 @@ import {
 } from "@/app/actions/qualification";
 import { Button } from "@/components/ui/button";
 import { Field, Select, TextInput, TextArea } from "@/components/ui/field";
+import type {
+  ActionCapability,
+  CallingWindowConfig,
+  OptOutConfig,
+} from "@/lib/services/backend/qualification-reading";
 
 const initial: QualificationActionState = {};
 
@@ -25,35 +31,53 @@ function Notice({ state }: { state: QualificationActionState }) {
   return null;
 }
 
-export function CallingWindowForm({
-  saved,
-}: {
-  saved: { timeZone: string; start: string; end: string } | null;
-}) {
+export function CallingWindowForm({ saved }: { saved: CallingWindowConfig | null }) {
   const [state, action, pending] = useActionState(saveCallingWindow, initial);
+  const window = saved?.window ?? null;
+  const configured = saved?.configured === true;
   return (
     <div className="mt-[12px]">
       <div className="rounded-[8px] border border-line bg-tint px-[13px] py-[10px]">
         <p className="t-caption text-muted">Saved configuration</p>
         <p className="t-body mt-[4px] text-body">
-          {saved
-            ? `${saved.timeZone} ${saved.start}–${saved.end}`
-            : "No calling window is saved yet."}
+          {configured && window
+            ? `${window.timeZone} ${window.start}–${window.end}`
+            : "No calling window is saved yet (configured: false — unset, not a default)."}
         </p>
         <p className="t-caption mt-[4px] text-muted">
-          The fixture review window is not the client&apos;s calling hours.
+          Provenance: {saved?.provenance ?? "unset"}
+          {saved?.setAt ? ` · set ${saved.setAt}` : ""}. staff_saved is not client approval.
+          Form defaults below are for editing only — they are not the saved hours.
         </p>
       </div>
       <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
         <Field id="timeZone" label="Time zone" labelSize="sm" error={state.field === "timeZone" ? state.error : undefined}>
-          <TextInput id="timeZone" name="timeZone" defaultValue={saved?.timeZone ?? "Asia/Kolkata"} invalid={state.field === "timeZone"} />
+          <TextInput
+            id="timeZone"
+            name="timeZone"
+            defaultValue={window?.timeZone ?? ""}
+            placeholder="Asia/Kolkata"
+            invalid={state.field === "timeZone"}
+          />
         </Field>
         <div className="grid grid-cols-2 gap-[12px]">
           <Field id="start" label="Start (HH:MM)" labelSize="sm" error={state.field === "start" ? state.error : undefined}>
-            <TextInput id="start" name="start" defaultValue={saved?.start ?? "10:00"} invalid={state.field === "start"} />
+            <TextInput
+              id="start"
+              name="start"
+              defaultValue={window?.start ?? ""}
+              placeholder="10:00"
+              invalid={state.field === "start"}
+            />
           </Field>
           <Field id="end" label="End (HH:MM)" labelSize="sm" error={state.field === "end" ? state.error : undefined}>
-            <TextInput id="end" name="end" defaultValue={saved?.end ?? "19:00"} invalid={state.field === "end"} />
+            <TextInput
+              id="end"
+              name="end"
+              defaultValue={window?.end ?? ""}
+              placeholder="19:00"
+              invalid={state.field === "end"}
+            />
           </Field>
         </div>
         <Button type="submit" size="sm" disabled={pending}>
@@ -65,20 +89,23 @@ export function CallingWindowForm({
   );
 }
 
-export function OptOutSignalsForm({
-  saved,
-}: {
-  saved: { dtmf: string | null; keywords: readonly string[] } | null;
-}) {
+export function OptOutSignalsForm({ saved }: { saved: OptOutConfig | null }) {
   const [state, action, pending] = useActionState(saveOptOutSignals, initial);
+  const signals = saved?.signals ?? null;
+  const configured = saved?.configured === true;
   return (
     <div className="mt-[12px]">
       <div className="rounded-[8px] border border-line bg-tint px-[13px] py-[10px]">
         <p className="t-caption text-muted">Saved configuration</p>
         <p className="t-body mt-[4px] text-body">
-          {saved
-            ? `${saved.keywords.join(", ")}${saved.dtmf ? ` · DTMF ${saved.dtmf}` : ""}`
-            : "No opt-out signals are saved yet."}
+          {configured && signals
+            ? `${signals.keywords.join(", ")}${signals.dtmf ? ` · DTMF ${signals.dtmf}` : ""}`
+            : "No opt-out signals are saved yet (configured: false — unset, not a default)."}
+        </p>
+        <p className="t-caption mt-[4px] text-muted">
+          Provenance: {saved?.provenance ?? "unset"}
+          {saved?.setAt ? ` · set ${saved.setAt}` : ""}. staff_saved is not client approval.
+          Form defaults below are for editing only.
         </p>
       </div>
       <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
@@ -87,12 +114,13 @@ export function OptOutSignalsForm({
             id="keywords"
             name="keywords"
             rows={3}
-            defaultValue={saved?.keywords.join("\n") ?? "stop\nunsubscribe"}
+            defaultValue={signals?.keywords.join("\n") ?? ""}
+            placeholder={"stop\nunsubscribe"}
             invalid={state.field === "keywords"}
           />
         </Field>
         <Field id="dtmf" label="DTMF digit (optional)" labelSize="sm">
-          <TextInput id="dtmf" name="dtmf" defaultValue={saved?.dtmf ?? "9"} />
+          <TextInput id="dtmf" name="dtmf" defaultValue={signals?.dtmf ?? ""} placeholder="9" />
         </Field>
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Saving…" : "Save opt-out signals"}
@@ -134,8 +162,10 @@ export function StartQualificationRunForm({
       <input type="hidden" name="questionSetId" value={questionSetId} />
       <p className="t-caption text-muted">
         Starts a run against the synthetic fixture lead and set{" "}
-        <span className="t-mono">{questionSetLabel}</span>. Without Exotel this stays{" "}
-        <span className="t-mono">not_configured</span> — not a live dial.
+        <span className="t-mono">{questionSetLabel}</span>. Creation may return{" "}
+        <span className="t-mono">effect: adapter_invoked</span> or{" "}
+        <span className="t-mono">recorded_only</span>. Live acceptance is only{" "}
+        <span className="t-mono">providerDispatch.dispatched</span> — refused when true.
       </p>
       <Field id="channel" label="Channel" labelSize="sm">
         <Select id="channel" name="channel" defaultValue="voice">
@@ -176,30 +206,64 @@ export function QualificationReviewForm({ runId }: { runId: string }) {
   );
 }
 
+function capabilityLine(label: string, capability: ActionCapability | null | undefined): string {
+  if (!capability) return `${label}: capabilities not returned`;
+  if (!capability.allowed) {
+    return `${label}: not allowed${capability.reason ? ` (${capability.reason})` : ""}`;
+  }
+  return (
+    `${label}: allowed`
+    + (capability.dispatchesProvider ? " and would dispatch — gated" : " without provider dispatch")
+    + (capability.reason ? ` (${capability.reason})` : "")
+  );
+}
+
 export function QualificationRecoveryForm({
   runId,
-  canResume,
+  resume,
+  retry,
 }: {
   runId: string;
-  canResume: boolean;
+  resume: ActionCapability | null;
+  retry: ActionCapability | null;
 }) {
-  const [state, action, pending] = useActionState(resumeQualificationRun, initial);
+  const [resumeState, resumeAction, resumePending] = useActionState(resumeQualificationRun, initial);
+  const [retryState, retryAction, retryPending] = useActionState(retryQualificationRun, initial);
+  const canResume = resume?.allowed === true;
+  // Retry may dispatch; only offer the control when allowed AND not dispatching.
+  const canRetrySafely = retry?.allowed === true && retry.dispatchesProvider === false;
+
   return (
     <div className="mt-[12px] flex flex-col gap-[10px]">
+      <p className="t-caption text-muted">{capabilityLine("Resume", resume)}</p>
+      <p className="t-caption text-muted">{capabilityLine("Retry", retry)}</p>
       <p className="t-caption text-muted">
-        Resume does not place a call. Retry and due-retries invoke dial() and are not offered
-        here — missing Exotel credentials are not authorisation to retry.
+        Resume never dispatches under this contract. Retry is offered only when
+        capabilities say it does not dispatch. Due-retries stay off this console.
       </p>
       {canResume ? (
-        <form action={action} className="flex flex-wrap gap-[10px]">
+        <form action={resumeAction} className="flex flex-wrap gap-[10px]">
           <input type="hidden" name="runId" value={runId} />
-          <Button type="submit" size="sm" variant="secondary" disabled={pending}>
-            {pending ? "Resuming…" : "Resume incomplete run"}
+          <Button type="submit" size="sm" variant="secondary" disabled={resumePending}>
+            {resumePending ? "Resuming…" : "Resume incomplete run"}
           </Button>
-          <Notice state={state} />
+          <Notice state={resumeState} />
+        </form>
+      ) : null}
+      {canRetrySafely ? (
+        <form action={retryAction} className="flex flex-wrap gap-[10px]">
+          <input type="hidden" name="runId" value={runId} />
+          <Button type="submit" size="sm" variant="secondary" disabled={retryPending}>
+            {retryPending ? "Retrying…" : "Retry without provider dispatch"}
+          </Button>
+          <Notice state={retryState} />
         </form>
       ) : (
-        <p className="t-body text-body">Resume is available only when the run state is incomplete.</p>
+        <p className="t-body text-body">
+          {retry?.dispatchesProvider
+            ? "Retry would dispatch to a provider — not offered on this host."
+            : "Safe retry is not available for this run."}
+        </p>
       )}
     </div>
   );

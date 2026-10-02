@@ -1,14 +1,31 @@
 /**
- * Pure readings of OpenAPI 1.0.0-phase4.b qualification payloads
- * (kkl-backend `39d26fd`). These functions do not call a server.
+ * Pure readings of OpenAPI 1.0.0-phase4.c qualification payloads
+ * (kkl-backend `e7ffdb6`). These functions do not call a server.
  *
- * A run is not a lead. A call/message status is not provider delivery when
- * `providerVerified` is false. `modelReportedIntent` is not a qualification
- * level. `marketplaceConsent` stays unchanged on these records.
+ * A run is not a lead. Staff inventory is GET /v1/admin/qualification/leads
+ * (`inventory: true`). Marketplace GET /v1/leads is not that inventory.
+ * `modelReportedIntent` is not a qualification level. `marketplaceConsent`
+ * stays unchanged. `configured: false` means unset, not a client default.
+ * `staff_saved` is not client-approved.
  */
 
-export const PHASE4A_OPENAPI = "1.0.0-phase4.b" as const;
-export const PHASE4A_BACKEND = "39d26fd" as const;
+export const PHASE4A_OPENAPI = "1.0.0-phase4.c" as const;
+export const PHASE4A_BACKEND = "e7ffdb6" as const;
+
+export const LEAD_PAGE_SIZE = 20;
+
+export const QUALIFICATION_FILTERS = [
+  "none",
+  "collecting",
+  "completed",
+  "incomplete",
+  "failed",
+  "opted_out",
+] as const;
+export type QualificationFilter = (typeof QUALIFICATION_FILTERS)[number];
+
+export const REVIEW_FILTERS = ["none", "pending", "recorded", "not_required"] as const;
+export type ReviewFilter = (typeof REVIEW_FILTERS)[number];
 
 export const RUN_STATES = [
   "collecting",
@@ -109,8 +126,22 @@ export type TranscriptLine = {
 };
 
 export type ProviderDispatch = {
+  readonly attempted: boolean | null;
   readonly dispatched: boolean;
+  readonly providerVerified: false;
   readonly reason: string | null;
+  readonly synthetic: boolean | null;
+};
+
+export type ActionCapability = {
+  readonly allowed: boolean;
+  readonly dispatchesProvider: boolean;
+  readonly reason: string | null;
+};
+
+export type RunCapabilities = {
+  readonly resume: ActionCapability;
+  readonly retry: ActionCapability;
 };
 
 export type QualificationSnapshot = {
@@ -132,6 +163,82 @@ export type CallingWindow = {
 export type OptOutSignals = {
   readonly dtmf: string | null;
   readonly keywords: readonly string[];
+};
+
+export type ConfigProvenance = {
+  readonly configured: boolean;
+  readonly provenance: "unset" | "staff_saved" | string;
+  readonly setAt: string | null;
+};
+
+export type CallingWindowConfig = ConfigProvenance & {
+  readonly window: CallingWindow | null;
+};
+
+export type OptOutConfig = ConfigProvenance & {
+  readonly signals: OptOutSignals | null;
+};
+
+export type StaffLeadRunSummary = {
+  readonly id: string;
+  readonly reference: string;
+  readonly channel: string;
+  readonly state: string;
+  readonly reviewStatus: string;
+  readonly failureReason: string | null;
+  readonly path: string;
+  readonly capabilities: RunCapabilities | null;
+};
+
+export type StaffLeadSummary = {
+  readonly id: string;
+  readonly reference: string;
+  readonly status: string;
+  readonly locationId: string | null;
+  readonly locationName: string | null;
+  readonly consentStatus: string;
+  readonly contactState: string | null;
+  readonly contactLabel: string | null;
+  readonly runCount: number;
+  readonly latestRun: {
+    readonly id: string;
+    readonly reference: string;
+    readonly channel: string;
+    readonly state: string;
+    readonly reviewStatus: string;
+    readonly path: string;
+  } | null;
+};
+
+export type StaffLeadDetail = {
+  readonly id: string;
+  readonly reference: string;
+  readonly status: string;
+  readonly locationId: string | null;
+  readonly locationName: string | null;
+  readonly propertyType: string | null;
+  readonly budgetBand: string | null;
+  readonly configurations: readonly string[];
+  readonly timing: string | null;
+  readonly summary: string | null;
+  readonly consentStatus: string;
+  readonly priceCredits: number | null;
+  readonly contactState: string | null;
+  readonly contactLabel: string | null;
+  readonly suppressed: boolean;
+  readonly qualification: QualificationSnapshot;
+  readonly runs: readonly StaffLeadRunSummary[];
+};
+
+export type StaffLeadPage = {
+  readonly inventory: true;
+  readonly audience: "staff";
+  readonly marketplacePath: string | null;
+  readonly note: string | null;
+  readonly total: number;
+  readonly offset: number;
+  readonly limit: number;
+  readonly leads: readonly StaffLeadSummary[];
 };
 
 export type QualificationRun = {
@@ -171,6 +278,8 @@ export type QualificationRun = {
   readonly completedAt: string | null;
   readonly providerVerified: false;
   readonly providerDispatch: ProviderDispatch | null;
+  readonly capabilities: RunCapabilities | null;
+  readonly effect: "adapter_invoked" | "recorded_only" | string | null;
   readonly duplicate?: boolean;
 };
 
@@ -319,9 +428,34 @@ function readProviderDispatch(value: unknown): ProviderDispatch | null {
   const dispatched = bool(row.dispatched);
   if (dispatched === null) return null;
   return {
+    attempted: bool(row.attempted),
     dispatched,
+    providerVerified: false,
+    reason: text(row.reason),
+    synthetic: bool(row.synthetic),
+  };
+}
+
+function readActionCapability(value: unknown): ActionCapability | null {
+  const row = record(value);
+  if (!row) return null;
+  const allowed = bool(row.allowed);
+  const dispatchesProvider = bool(row.dispatchesProvider);
+  if (allowed === null || dispatchesProvider === null) return null;
+  return {
+    allowed,
+    dispatchesProvider,
     reason: text(row.reason),
   };
+}
+
+function readCapabilities(value: unknown): RunCapabilities | null {
+  const row = record(value);
+  if (!row) return null;
+  const resume = readActionCapability(row.resume);
+  const retry = readActionCapability(row.retry);
+  if (!resume || !retry) return null;
+  return { resume, retry };
 }
 
 function readQualification(value: unknown): QualificationSnapshot {
@@ -442,6 +576,8 @@ export function readQualificationRun(body: unknown): QualificationRun | null {
     completedAt: text(row.completedAt),
     providerVerified: false,
     providerDispatch: readProviderDispatch(row.providerDispatch),
+    capabilities: readCapabilities(row.capabilities),
+    effect: text(row.effect),
     duplicate: bool(row.duplicate) === true ? true : undefined,
   };
 }
@@ -474,22 +610,37 @@ export function readCallingWindow(body: unknown): CallingWindow | null {
   return { timeZone, start, end };
 }
 
-/** Distinguishes “not saved” from an unreadable payload. */
+/** Distinguishes unset (`configured: false`) from a staff-saved window. */
 export function readCallingWindowResponse(body: unknown): {
   ok: true;
-  window: CallingWindow | null;
+  config: CallingWindowConfig;
 } | { ok: false } {
   const row = record(body);
   if (!row) return { ok: false };
-  if (Object.prototype.hasOwnProperty.call(row, "callingWindow") && row.callingWindow === null) {
-    return { ok: true, window: null };
+  const configured = bool(row.configured);
+  const provenance = text(row.provenance) ?? (configured === false ? "unset" : "");
+  if (configured === false || row.callingWindow === null) {
+    return {
+      ok: true,
+      config: {
+        configured: false,
+        provenance: provenance || "unset",
+        setAt: text(row.setAt),
+        window: null,
+      },
+    };
   }
   const window = readCallingWindow(body);
-  if (!window && Object.prototype.hasOwnProperty.call(row, "callingWindow")) {
-    return { ok: false };
-  }
-  if (!window && !("timeZone" in row) && !("callingWindow" in row)) return { ok: false };
-  return { ok: true, window };
+  if (!window) return { ok: false };
+  return {
+    ok: true,
+    config: {
+      configured: true,
+      provenance: provenance || "staff_saved",
+      setAt: text(row.setAt),
+      window,
+    },
+  };
 }
 
 export function readOptOutSignals(body: unknown): OptOutSignals | null {
@@ -508,17 +659,147 @@ export function readOptOutSignals(body: unknown): OptOutSignals | null {
 
 export function readOptOutResponse(body: unknown): {
   ok: true;
-  signals: OptOutSignals | null;
+  config: OptOutConfig;
 } | { ok: false } {
   const row = record(body);
   if (!row) return { ok: false };
-  if (Object.prototype.hasOwnProperty.call(row, "optOut") && row.optOut === null) {
-    return { ok: true, signals: null };
+  const configured = bool(row.configured);
+  const provenance = text(row.provenance) ?? (configured === false ? "unset" : "");
+  if (configured === false || row.optOut === null) {
+    return {
+      ok: true,
+      config: {
+        configured: false,
+        provenance: provenance || "unset",
+        setAt: text(row.setAt),
+        signals: null,
+      },
+    };
   }
   const signals = readOptOutSignals(body);
-  if (!signals && Object.prototype.hasOwnProperty.call(row, "optOut")) return { ok: false };
-  if (!signals && !("keywords" in row) && !("optOut" in row)) return { ok: false };
-  return { ok: true, signals };
+  if (!signals) return { ok: false };
+  return {
+    ok: true,
+    config: {
+      configured: true,
+      provenance: provenance || "staff_saved",
+      setAt: text(row.setAt),
+      signals,
+    },
+  };
+}
+
+function readStaffLeadSummary(value: unknown): StaffLeadSummary | null {
+  const row = record(value);
+  if (!row || typeof row.id !== "string") return null;
+  const contact = record(row.contact);
+  const latest = record(row.latestRun);
+  return {
+    id: row.id,
+    reference: text(row.reference) ?? row.id,
+    status: text(row.status) ?? "",
+    locationId: text(row.locationId),
+    locationName: text(row.locationName),
+    consentStatus: text(row.consentStatus) ?? "",
+    contactState: text(contact?.state),
+    contactLabel: text(contact?.label),
+    runCount: integer(row.runCount) ?? 0,
+    latestRun: latest && typeof latest.id === "string"
+      ? {
+        id: latest.id,
+        reference: text(latest.reference) ?? latest.id,
+        channel: text(latest.channel) ?? "",
+        state: text(latest.state) ?? "",
+        reviewStatus: text(latest.reviewStatus) ?? "",
+        path: text(latest.path) ?? `/v1/admin/qualification/runs/${latest.id}`,
+      }
+      : null,
+  };
+}
+
+function readStaffLeadRunSummary(value: unknown): StaffLeadRunSummary | null {
+  const row = record(value);
+  if (!row || typeof row.id !== "string") return null;
+  return {
+    id: row.id,
+    reference: text(row.reference) ?? row.id,
+    channel: text(row.channel) ?? "",
+    state: text(row.state) ?? "",
+    reviewStatus: text(row.reviewStatus) ?? "",
+    failureReason: text(row.failureReason),
+    path: text(row.path) ?? `/v1/admin/qualification/runs/${row.id}`,
+    capabilities: readCapabilities(row.capabilities),
+  };
+}
+
+export function readStaffLeadPage(body: unknown): StaffLeadPage | null {
+  const row = record(body);
+  if (!row || !Array.isArray(row.leads)) return null;
+  const total = integer(row.total);
+  const offset = integer(row.offset);
+  const limit = integer(row.limit);
+  if (total === null || offset === null || limit === null) return null;
+  if (bool(row.inventory) !== true) return null;
+  if (text(row.audience) !== "staff") return null;
+  const leads: StaffLeadSummary[] = [];
+  for (const item of row.leads) {
+    const lead = readStaffLeadSummary(item);
+    if (!lead) return null;
+    leads.push(lead);
+  }
+  return {
+    inventory: true,
+    audience: "staff",
+    marketplacePath: text(row.marketplacePath),
+    note: text(row.note),
+    total,
+    offset,
+    limit,
+    leads,
+  };
+}
+
+export function readStaffLeadDetail(body: unknown): StaffLeadDetail | null {
+  const row = record(body);
+  if (!row || typeof row.id !== "string") return null;
+  const contact = record(row.contact);
+  const runs: StaffLeadRunSummary[] = [];
+  if (Array.isArray(row.runs)) {
+    for (const item of row.runs) {
+      const run = readStaffLeadRunSummary(item);
+      if (!run) return null;
+      runs.push(run);
+    }
+  }
+  const configurations = Array.isArray(row.configurations)
+    ? row.configurations.filter((item): item is string => typeof item === "string")
+    : [];
+  return {
+    id: row.id,
+    reference: text(row.reference) ?? row.id,
+    status: text(row.status) ?? "",
+    locationId: text(row.locationId),
+    locationName: text(row.locationName),
+    propertyType: text(row.propertyType),
+    budgetBand: text(row.budgetBand),
+    configurations,
+    timing: text(row.timing),
+    summary: text(row.summary),
+    consentStatus: text(row.consentStatus) ?? "",
+    priceCredits: integer(row.priceCredits),
+    contactState: text(contact?.state),
+    contactLabel: text(contact?.label),
+    suppressed: bool(row.suppressed) === true,
+    qualification: readQualification(row.qualification),
+    runs,
+  };
+}
+
+/** Map an admin qualification run API path to the Admin UI route. */
+export function runUiPath(apiPath: string): string {
+  const match = apiPath.match(/\/v1\/admin\/qualification\/runs\/([0-9a-f-]{36})$/i);
+  if (match) return `/admin/voice/${match[1]}`;
+  return "/admin/voice";
 }
 
 export function readRetryBatch(body: unknown): {

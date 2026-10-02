@@ -1,14 +1,15 @@
 /**
- * Phase 4 qualification handoff map against OpenAPI 1.0.0-phase4.b
- * (kkl-backend `39d26fd` on `claude/phase-4-qualification`).
+ * Phase 4 qualification handoff map against OpenAPI 1.0.0-phase4.c
+ * (kkl-backend `e7ffdb6` on `claude/phase-4-qualification`).
  *
  * Earlier preparation at dc2f275 consulted Phase 3 `1.0.0-phase3.t`. Wiring at
- * 04b54ab used `1.0.0-phase4.a`. This file records phase4.b status.
+ * 04b54ab used `1.0.0-phase4.a`. phase4.b verification was `39d26fd` /
+ * frontend `16a5efb`. This file records phase4.c status.
  */
 
 /** Keep in lockstep with PHASE4A_* in qualification-reading.ts. */
-export const PHASE4_OPENAPI = "1.0.0-phase4.b" as const;
-export const PHASE4_BACKEND_REF = "39d26fd" as const;
+export const PHASE4_OPENAPI = "1.0.0-phase4.c" as const;
+export const PHASE4_BACKEND_REF = "e7ffdb6" as const;
 
 /** Paths Phase 3 published for voice. Bodies are ignored; responses are 501. */
 export const VOICE_BRIDGE_STUBS = [
@@ -75,30 +76,38 @@ export type Phase4Handoff = {
   readonly published?: string;
 };
 
+/**
+ * Per-operation coverage notes (mutations may stay partial while reads are
+ * verified). Do not mark H4-7 verified for review/resume/retry until those
+ * mutations are exercised against backend-created synthetic outcomes.
+ */
 export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-1",
     screens: ["A-12"],
-    status: "open",
+    status: "wired",
     need:
       "Staff-paged lead inventory with lifecycle status (including incomplete "
       + "qualification and human-review), consent status, source, age, and "
       + "stable lead references.",
     mustNot:
       "Do not treat GET /v1/admin/qualification/runs as the Admin lead list. "
-      + "inventory: false. GET /v1/leads?eligible=false is not a staff-only inventory.",
+      + "inventory: false. GET /v1/leads is not the operational staff inventory.",
+    published:
+      "GET /v1/admin/qualification/leads "
+      + "(qualification/review filters, pagination, latestRun.path)",
   },
   {
     id: "H4-2",
     screens: ["A-13"],
-    status: "partial",
+    status: "wired",
     need:
-      "Staff lead detail with Q&A, version references, incomplete / human-review. "
-      + "Run detail supplies Q&A for a run; a dedicated staff lead document is still missing.",
+      "Staff lead detail with Q&A links via run paths, incomplete / human-review, "
+      + "and capabilities on each run summary.",
     mustNot:
       "Do not equate a run outcome with lead sale eligibility. "
       + "marketplaceConsent stays unchanged.",
-    published: "GET /v1/admin/qualification/runs/{runId} (run-scoped answers)",
+    published: "GET /v1/admin/qualification/leads/{leadId}",
   },
   {
     id: "H4-3",
@@ -116,7 +125,7 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
     status: "verified",
     need:
       "Staff run detail: answers with question-set version, transcript text, model summary "
-      + "labelled as model output, consent evidence, review state.",
+      + "labelled as model output, consent evidence, review state, capabilities.",
     mustNot:
       "Do not render modelReportedIntent as a level. qualification.level stays unset.",
     published: "GET /v1/admin/qualification/runs/{runId}",
@@ -138,10 +147,12 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
     status: "verified",
     need:
       "Qualification question sets with provenance. Synthetic prompts must say SYNTHETIC. "
-      + "Calling window and opt-out configuration with GET reload of saved values.",
+      + "Calling window and opt-out with configured/provenance; GET reload of saved values. "
+      + "configured:false is unset; staff_saved is not client-approved.",
     mustNot:
       "Do not use pricing prompts as the qualification questionnaire. "
-      + "Do not map questions onto Levels 1–10.",
+      + "Do not map questions onto Levels 1–10. "
+      + "Do not treat form defaults as saved configuration.",
     published:
       "GET/POST /v1/admin/qualification/question-sets, "
       + "GET/POST calling-window, GET/POST opt-out",
@@ -149,15 +160,19 @@ export const PHASE4_HANDOFFS: readonly Phase4Handoff[] = [
   {
     id: "H4-7",
     screens: ["A-31", "A-25"],
-    status: "verified",
+    status: "partial",
     need:
-      "Authorised recovery: resume incomplete (no dial). Review while pending. "
-      + "Retry / due-retries invoke dial and stay gated. Start-run without live dispatch.",
+      "Authorised recovery from capabilities: resume never dispatches. "
+      + "Review while pending. Retry only when allowed without provider dispatch "
+      + "(or on an authorised simulated-provider host). Start-run describes "
+      + "effect (adapter_invoked|recorded_only) and providerDispatch.dispatched.",
     mustNot:
       "Do not press retry merely because Exotel credentials are absent. "
-      + "Do not bypass suppression or quiet hours.",
+      + "Do not bypass suppression or quiet hours. "
+      + "Do not claim mutation verification without backend synthetic outcomes.",
     published:
-      "POST .../runs/{runId}/review, POST .../recover (resume), start-run POST",
+      "POST …/runs/{runId}/review, POST …/recover (resume/retry via capabilities), "
+      + "start-run POST",
   },
   {
     id: "H4-8",
@@ -203,6 +218,12 @@ export const PHASE4_HONESTY = [
   "modelReportedIntent is model output, not a verified level.",
   "marketplaceConsent stays unchanged on these records.",
   "A run is not a lead.",
+  "Staff inventory is GET /v1/admin/qualification/leads (inventory: true).",
+  "Marketplace GET /v1/leads is not the operational staff inventory.",
+  "configured: false means unset, not a client default.",
+  "staff_saved is not client-approved.",
+  "Resume never dispatches; retry follows capabilities.retry.",
+  "effect adapter_invoked|recorded_only is not providerDispatch.dispatched.",
   "Queued messages are not delivery.",
   "providerVerified false is not a live call or delivered message.",
   "Synthetic questions must stay visibly SYNTHETIC.",

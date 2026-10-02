@@ -56,10 +56,11 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
     if (!loaded.value) notFound();
     const run = loaded.value;
     const call = run.calls[0];
-    const canResume = run.state === "incomplete";
     const listHref = run.channel === "whatsapp" ? "/admin/whatsapp" : "/admin/voice";
     const listLabel =
       run.channel === "whatsapp" ? "← WhatsApp qualification" : "← Voice qualification";
+    const dispatch = run.providerDispatch;
+    const effect = run.effect;
 
     return (
       <AdminShell title={run.reference} subtitle="Answers, evidence and review">
@@ -68,6 +69,12 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
           <Link href={listHref} className="t-caption text-brand underline underline-offset-2">
             {listLabel}
           </Link>
+          <Link
+            href={`/admin/leads/${encodeURIComponent(run.leadId)}`}
+            className="t-caption text-brand underline underline-offset-2"
+          >
+            Open staff lead
+          </Link>
 
           <p className="t-caption rounded-[8px] bg-tint px-[13px] py-[10px] text-body">
             This is a <strong className="text-ink">qualification run</strong>, not a lead record.
@@ -75,6 +82,15 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
             {run.questionSet.synthetic
               ? " Question set is SYNTHETIC — not the client questionnaire."
               : null}
+            {effect
+              ? ` Start effect: ${effect}.`
+              : null}
+            {dispatch
+              ? ` providerDispatch.dispatched=${dispatch.dispatched}`
+                + (dispatch.reason ? ` (${dispatch.reason})` : "")
+                + "."
+              : null}
+            {run.suppressed ? " Run is suppressed — recovery stays restricted." : null}
           </p>
 
           <Card className="p-[20px]">
@@ -249,10 +265,14 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
           <Card className="p-[18px]">
             <h2 className="t-card-title text-ink">Recovery</h2>
             <p className="t-body mt-[6px] text-body">
-              Resume only when incomplete. Retry is not offered from this console — it invokes
-              dial(). Suppression blocks recovery.
+              Actions follow returned capabilities. Resume never dispatches. Retry is offered
+              only when allowed without provider dispatch. Suppression blocks recovery.
             </p>
-            <QualificationRecoveryForm runId={run.id} canResume={canResume} />
+            <QualificationRecoveryForm
+              runId={run.id}
+              resume={run.capabilities?.resume ?? null}
+              retry={run.capabilities?.retry ?? null}
+            />
           </Card>
         </div>
       </AdminShell>

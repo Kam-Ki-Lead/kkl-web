@@ -1,31 +1,36 @@
 /**
- * Phase 4 Admin qualification adapters against OpenAPI 1.0.0-phase4.b
- * (kkl-backend `39d26fd`).
+ * Phase 4 Admin qualification adapters against OpenAPI 1.0.0-phase4.c
+ * (kkl-backend `e7ffdb6`).
  *
- * Staff routes under `/v1/admin/qualification/*`. Voice-bridge stubs stay
- * kkl-voice → kkl-backend and are not called from Admin. A run is not a lead.
- * Sample fixtures are never substituted when `KKL_QUALIFICATION=backend`.
+ * Staff routes under `/v1/admin/qualification/*`. Voice-bridge stays
+ * kkl-voice → kkl-backend and is not called from Admin. Staff inventory is
+ * `/v1/admin/qualification/leads`, not marketplace `/v1/leads`. Sample
+ * fixtures are never substituted when `KKL_QUALIFICATION=backend`.
  */
 
 import { ServiceError } from "@/lib/services/contracts";
 import { isFrameworkSignal, callAs, bearerMode } from "./session";
-import { unpublishedStaffLoad, type UnpublishedStaffLoad } from "./qualification-contract";
 import {
   PHASE4A_BACKEND,
   PHASE4A_OPENAPI,
-  readCallingWindow,
+  LEAD_PAGE_SIZE,
   readCallingWindowResponse,
   readOptOutResponse,
-  readOptOutSignals,
   readQualificationRun,
   readQualificationRunPage,
   readQuestionSetPage,
   readRegisteredQuestionSet,
-  type CallingWindow,
-  type OptOutSignals,
+  readStaffLeadDetail,
+  readStaffLeadPage,
+  type CallingWindowConfig,
+  type OptOutConfig,
+  type QualificationFilter,
   type QualificationRun,
   type QualificationRunPage,
   type QuestionSetSummary,
+  type ReviewFilter,
+  type StaffLeadDetail,
+  type StaffLeadPage,
 } from "./qualification-reading";
 import { SYNTHETIC_QUESTION_SET } from "./qualification-synthetic";
 import { staffRefusal } from "./staff-views";
@@ -59,14 +64,51 @@ function raise(status: number, body: { error?: string; code?: string }): never {
   throw new ServiceError("unavailable", message);
 }
 
-/** H4-1 — staff lead inventory is still not published. Runs are not leads. */
-export async function listQualificationLeads(): Promise<UnpublishedStaffLoad> {
-  return unpublishedStaffLoad("H4-1");
+/** H4-1 — staff operational lead inventory. */
+export async function listQualificationLeads(options?: {
+  qualification?: QualificationFilter | "";
+  review?: ReviewFilter | "";
+  offset?: number;
+  limit?: number;
+}): Promise<QualificationLoad<StaffLeadPage>> {
+  try {
+    const query = new URLSearchParams();
+    if (options?.qualification) query.set("qualification", options.qualification);
+    if (options?.review) query.set("review", options.review);
+    query.set("limit", String(options?.limit ?? LEAD_PAGE_SIZE));
+    query.set("offset", String(options?.offset ?? 0));
+    const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
+      "staff",
+      `/v1/admin/qualification/leads?${query.toString()}`,
+    );
+    if (status !== 200) return refused(status, body.error, "Staff leads could not be loaded.");
+    const page = readStaffLeadPage(body);
+    if (!page) {
+      return { ok: false, message: "The staff lead inventory did not match the published schema." };
+    }
+    return { ok: true, value: page };
+  } catch (error) {
+    return fail(error, "Staff leads could not be loaded.");
+  }
 }
 
-/** H4-2 — staff lead detail is still not published. Use run detail for Q&A. */
-export async function getQualificationLead(_leadId: string): Promise<UnpublishedStaffLoad> {
-  return unpublishedStaffLoad("H4-2");
+/** H4-2 — staff operational lead detail with run paths and capabilities. */
+export async function getQualificationLead(
+  leadId: string,
+): Promise<QualificationLoad<StaffLeadDetail | null>> {
+  try {
+    const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
+      "staff",
+      `/v1/admin/qualification/leads/${encodeURIComponent(leadId)}`,
+    );
+    if (status === 404) return { ok: true, value: null };
+    if (status !== 200) return refused(status, body.error, "That staff lead could not be loaded.");
+    const lead = readStaffLeadDetail(body);
+    if (!lead) return { ok: false, message: "That staff lead response did not match the published schema." };
+    return { ok: true, value: lead };
+  } catch (error) {
+    return fail(error, "That staff lead could not be loaded.");
+  }
 }
 
 export async function listQuestionSets(): Promise<QualificationLoad<readonly QuestionSetSummary[]>> {
@@ -115,7 +157,7 @@ export async function registerSyntheticQuestionSet(versionLabel: string): Promis
   return registered;
 }
 
-export async function getCallingWindow(): Promise<QualificationLoad<CallingWindow | null>> {
+export async function getCallingWindow(): Promise<QualificationLoad<CallingWindowConfig>> {
   try {
     const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
       "staff",
@@ -124,7 +166,7 @@ export async function getCallingWindow(): Promise<QualificationLoad<CallingWindo
     if (status !== 200) return refused(status, body.error, "The calling window could not be loaded.");
     const read = readCallingWindowResponse(body);
     if (!read.ok) return { ok: false, message: "The calling window response was not readable." };
-    return { ok: true, value: read.window };
+    return { ok: true, value: read.config };
   } catch (error) {
     return fail(error, "The calling window could not be loaded.");
   }
@@ -134,19 +176,21 @@ export async function setCallingWindow(input: {
   timeZone: string;
   start: string;
   end: string;
-}): Promise<CallingWindow> {
+}): Promise<CallingWindowConfig> {
   const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
     "staff",
     "/v1/admin/qualification/calling-window",
     { method: "POST", body: input },
   );
   if (status !== 200) raise(status, body);
-  const window = readCallingWindow(body);
-  if (!window) throw new ServiceError("unavailable", "The calling window response was not readable.");
-  return window;
+  const read = readCallingWindowResponse(body);
+  if (!read.ok || !read.config.window) {
+    throw new ServiceError("unavailable", "The calling window response was not readable.");
+  }
+  return read.config;
 }
 
-export async function getOptOutSignals(): Promise<QualificationLoad<OptOutSignals | null>> {
+export async function getOptOutSignals(): Promise<QualificationLoad<OptOutConfig>> {
   try {
     const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
       "staff",
@@ -155,7 +199,7 @@ export async function getOptOutSignals(): Promise<QualificationLoad<OptOutSignal
     if (status !== 200) return refused(status, body.error, "Opt-out signals could not be loaded.");
     const read = readOptOutResponse(body);
     if (!read.ok) return { ok: false, message: "The opt-out response was not readable." };
-    return { ok: true, value: read.signals };
+    return { ok: true, value: read.config };
   } catch (error) {
     return fail(error, "Opt-out signals could not be loaded.");
   }
@@ -164,16 +208,18 @@ export async function getOptOutSignals(): Promise<QualificationLoad<OptOutSignal
 export async function setOptOutSignals(input: {
   dtmf: string | null;
   keywords: readonly string[];
-}): Promise<OptOutSignals> {
+}): Promise<OptOutConfig> {
   const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
     "staff",
     "/v1/admin/qualification/opt-out",
     { method: "POST", body: input },
   );
   if (status !== 200) raise(status, body);
-  const signals = readOptOutSignals(body);
-  if (!signals) throw new ServiceError("unavailable", "The opt-out response was not readable.");
-  return signals;
+  const read = readOptOutResponse(body);
+  if (!read.ok || !read.config.signals) {
+    throw new ServiceError("unavailable", "The opt-out response was not readable.");
+  }
+  return read.config;
 }
 
 export async function listQualificationRuns(options?: {
@@ -216,8 +262,9 @@ export async function getQualificationRun(
 }
 
 /**
- * Start a qualification run. On the review host without Exotel / WhatsApp
- * credentials the attempt is `not_configured` — not a live dial or message.
+ * Start a qualification run. Creation may invoke the adapter
+ * (`effect: adapter_invoked`) or only record (`recorded_only`).
+ * `providerDispatch.dispatched` is the live acceptance claim.
  */
 export async function startQualificationRun(input: {
   leadId: string;
@@ -236,10 +283,15 @@ export async function startQualificationRun(input: {
   if (run.qualification.level !== null) {
     throw new ServiceError("unavailable", "A started run must not return a qualification level.");
   }
+  if (run.providerDispatch?.dispatched === true) {
+    throw new ServiceError(
+      "unavailable",
+      "Start-run reported providerDispatch.dispatched true. Live dispatch is not accepted here.",
+    );
+  }
   return run;
 }
 
-/** Voice overview uses runs; a run is not a call volume fixture. */
 export async function listVoiceCalls(): Promise<QualificationLoad<QualificationRunPage>> {
   const loaded = await listQualificationRuns({ limit: 50 });
   if (!loaded.ok) return loaded;
@@ -294,20 +346,35 @@ export async function reviewQualificationRun(input: {
 }
 
 /**
- * Resume does not place a call. Retry invokes dial() and is not offered from
- * Admin UI without isolated simulated-provider authorisation.
+ * Resume never dispatches under this contract. Retry may only be used when
+ * capabilities say it does not dispatch, unless a safe simulated-provider host
+ * has authorised otherwise.
  */
 export async function recoverQualificationRun(input: {
   runId: string;
   action: "resume" | "retry";
 }): Promise<QualificationRun> {
   if (input.action === "retry") {
-    throw new ServiceError(
-      "unavailable",
-      "Retry invokes the calling adapter (dial). It is not offered from this console "
-        + "without isolated simulated-provider authorisation. Absence of Exotel credentials "
-        + "is not permission to press retry.",
-    );
+    const current = await getQualificationRun(input.runId);
+    if (!current.ok || !current.value) {
+      throw new ServiceError("unavailable", current.ok ? "That run was not found." : current.message);
+    }
+    const retry = current.value.capabilities?.retry;
+    if (!retry?.allowed) {
+      throw new ServiceError(
+        "validation",
+        retry?.reason
+          ? `Retry is not allowed (${retry.reason}).`
+          : "Retry is not allowed for this run.",
+      );
+    }
+    if (retry.dispatchesProvider) {
+      throw new ServiceError(
+        "unavailable",
+        "Retry would dispatch to a provider. It needs an isolated simulated-provider host "
+          + "with explicit live-test authorisation. Missing Exotel credentials alone is not enough.",
+      );
+    }
   }
   const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
     "staff",

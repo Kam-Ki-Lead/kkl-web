@@ -30,8 +30,9 @@ const TAXONOMY = [
 
 /**
  * A-15 — taxonomy remains read-only (D-09). Qualification question sets,
- * calling window and opt-out use OpenAPI 1.0.0-phase4.a when
+ * calling window and opt-out use OpenAPI 1.0.0-phase4.c when
  * KKL_QUALIFICATION=backend. Pricing prompts are a different catalogue.
+ * configured:false means unset; staff_saved is not client approval.
  */
 export default async function AdminSettingsPage() {
   const qualificationBackend = qualificationStoreKind() === "backend";
@@ -83,7 +84,7 @@ export default async function AdminSettingsPage() {
           {!qualificationBackend ? (
             <p className="t-body mt-[10px] text-body">
               Set <span className="t-mono">KKL_QUALIFICATION=backend</span> against OpenAPI
-              1.0.0-phase4.b to load and register sets. Synthetic prompts must say SYNTHETIC.
+              1.0.0-phase4.c to load and register sets. Synthetic prompts must say SYNTHETIC.
             </p>
           ) : null}
           {questionSets && !questionSets.ok ? (
@@ -128,7 +129,8 @@ export default async function AdminSettingsPage() {
             <Card className="p-[18px]">
               <h2 className="t-card-title text-ink">Calling window</h2>
               <p className="t-body mt-[6px] text-body">
-                Hours are not assumed. Without a window, scheduling returns{" "}
+                Hours are not assumed. <span className="t-mono">configured: false</span> means
+                unset — not a client default. Without a window, scheduling returns{" "}
                 <span className="t-mono">calling_window_not_configured</span>.
               </p>
               {callingWindow && !callingWindow.ok ? (

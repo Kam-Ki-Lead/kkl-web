@@ -1,19 +1,19 @@
-# Phase 4 — screens and H4 map (OpenAPI 1.0.0-phase4.b)
+# Phase 4 — screens and H4 map (OpenAPI 1.0.0-phase4.c)
 
-Backend process: `claude/phase-4-qualification` @ `39d26fd` on
-`http://127.0.0.1:4011`. Runtime handoff docs @ `9dcd1a1`.
+Backend process: `claude/phase-4-qualification` @ `e7ffdb6` on
+`http://127.0.0.1:4011`. Runtime handoff docs @ `773dc96`.
 
 ## H4-1 … H4-8
 
 | Id | Status | Published path | Frontend stance / evidence |
 |---|---|---|---|
-| H4-1 Staff lead inventory | **open** | — | A-12 refuses under `KKL_QUALIFICATION`. Runs (`inventory: false`) are not substituted. `GET /v1/leads?eligible=false` is not a staff-only inventory. |
-| H4-2 Staff lead detail | **partial** | Run detail has Q&A | A-13 still refuses as a lead document; Q&A on `/admin/voice/[runId]` |
+| H4-1 Staff lead inventory | **wired** | `GET …/leads` | A-12 loads staff inventory with qualification/review filters and pagination. Marketplace `/v1/leads` is not substituted. Seller denied. |
+| H4-2 Staff lead detail | **wired** | `GET …/leads/{leadId}` | A-13 shows lead snapshot, level unset, run paths via `run.path` → Admin UI. |
 | H4-3 Call / run list | **verified** | `GET …/runs` | Browser: staff list shows `QUAL-*`, `inventory: false`, SYNTHETIC, `not_configured` |
-| H4-4 Run detail | **verified** | `GET …/runs/{runId}` | Browser: level unset, marketplaceConsent unchanged, SYNTHETIC, not_configured |
+| H4-4 Run detail | **verified** | `GET …/runs/{runId}` | Browser: level unset, marketplaceConsent unchanged, SYNTHETIC, capabilities shown |
 | H4-5 WhatsApp runs | **verified** | same list, channel filter | Browser: no delivery claim from fixtures |
-| H4-6 Question sets / window / opt-out | **verified** | GET/POST question-sets, calling-window, opt-out | Browser: saved window/opt-out reload; SYNTHETIC set listed |
-| H4-7 Review + recovery + start-run | **verified** | review, recover(resume), POST runs | Browser: review form gated when not pending; retry/due-retries not offered; start-run → `not_configured` |
+| H4-6 Question sets / window / opt-out | **verified** | GET/POST question-sets, calling-window, opt-out | Saved vs form; `configured`/`provenance`; `staff_saved` ≠ client-approved |
+| H4-7 Review + recovery + start-run | **partial** | review, recover, POST runs | Start-run exercised (effect / dispatched=false). Review save, resume, retry mutations await backend synthetic outcomes. |
 | H4-8 Voice-bridge | **partial** | Admin routes; bridge 503 here | Admin never calls `/v1/voice-bridge` |
 
 ## Switch
@@ -36,4 +36,6 @@ No sample fallback. Login via `POST /v1/auth/code` then
 - marketplaceConsent: unchanged
 - Synthetic sets labelled SYNTHETIC
 - Phone: masked only (`phoneMasked`)
-- Retry invokes dial — gated in Admin UI
+- `configured: false` = unset
+- Resume never dispatches; retry gated by capabilities
+- Retry invokes dial when `dispatchesProvider` — not pressed on this review host

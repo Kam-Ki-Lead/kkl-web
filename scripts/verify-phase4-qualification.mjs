@@ -1,29 +1,32 @@
 /**
- * Phase 4.b browser checks against the review runtime on 4011.
+ * Phase 4.c browser checks against the review runtime on 4011.
  *
- * Does not press retry or due-retries (those invoke dial()).
- * Does not place a live call or message.
+ * Does not press retry when capabilities.retry.dispatchesProvider is true.
+ * Does not place a live call or message. Mutation coverage stays partial
+ * until backend-created synthetic outcomes (pending review / incomplete) exist.
  *
  *   BASE_URL=http://127.0.0.1:3812 BACKEND_URL=http://127.0.0.1:4011 \
  *     node scripts/verify-phase4-qualification.mjs
  *
  * Loads KKL_DEV_AUTH_SECRET from %LOCALAPPDATA%/kkl-postgres/local.env when unset.
  */
+import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
 
 const playwrightSpec = process.env.PLAYWRIGHT ?? "playwright";
-const playwrightHref = /^[a-zA-Z]:[\\/]/.test(playwrightSpec)
-  ? pathToFileURL(playwrightSpec).href
-  : playwrightSpec;
-const { chromium } = await import(playwrightHref);
+const require = createRequire(import.meta.url);
+const playwrightPackage = /^[a-zA-Z]:[\\/]/.test(playwrightSpec)
+  ? require(join(playwrightSpec.replace(/[\\/]+$/, ""), "index.js"))
+  : require(playwrightSpec);
+const chromium = playwrightPackage.chromium;
+if (!chromium) throw new Error("playwright chromium export missing");
 
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3812";
 const BACKEND = process.env.BACKEND_URL ?? "http://127.0.0.1:4011";
-const STAFF = "9800004010";
-const SELLER = "9800004011";
-const SEEDED_RUN = "3fb48762-2428-4e38-b05c-dc68c8effc4a";
+const STAFF = process.env.STAFF_PHONE ?? "9800004010";
+const SELLER = process.env.SELLER_PHONE ?? "9800004011";
+const SEEDED_RUN = process.env.SEEDED_RUN ?? "3fb48762-2428-4e38-b05c-dc68c8effc4a";
 
 function loadSecret() {
   if (process.env.KKL_DEV_AUTH_SECRET) return process.env.KKL_DEV_AUTH_SECRET;
@@ -122,9 +125,10 @@ try {
       /Record review/.test(body) ? "form unexpectedly present" : "form absent as expected",
     );
     ok(
-      "Retry control not offered",
-      !/Retry failed call/i.test(body) && /Resume does not place a call|not offered/i.test(body),
-      "retry button absent",
+      "Retry control follows capabilities (no dispatching retry offered)",
+      !/Retry failed call/i.test(body)
+        && (/Resume never dispatches|capabilities|would dispatch|not offered|Safe retry/i.test(body)),
+      "dispatching retry absent",
     );
 
     await page.goto(`${BASE}/admin/whatsapp`, { waitUntil: "networkidle" });
@@ -139,12 +143,13 @@ try {
     await page.goto(`${BASE}/admin/settings`, { waitUntil: "networkidle" });
     body = await page.locator("body").innerText();
     ok(
-      "Settings reloads saved calling window and opt-out",
+      "Settings reloads saved calling window and opt-out with provenance",
       /Asia\/Kolkata/i.test(body)
         && /00:00/i.test(body)
         && /23:59/i.test(body)
         && /\bstop\b/i.test(body)
         && /Saved configuration/i.test(body)
+        && /staff_saved|provenance/i.test(body)
         && /SYNTHETIC|synthetic-v1/i.test(body),
       body.replace(/\s+/g, " ").slice(0, 400),
     );
@@ -159,7 +164,8 @@ try {
     body = await page.locator("body").innerText();
     ok(
       "Calling window save/reload",
-      /Asia\/Kolkata\s+00:00[–-]23:59/i.test(body),
+      /Asia\/Kolkata\s+00:00[–-]23:59/i.test(body)
+        && /staff_saved|provenance/i.test(body),
       "saved block still present after reload",
     );
 
@@ -172,11 +178,34 @@ try {
     await page.goto(`${BASE}/admin/leads`, { waitUntil: "networkidle" });
     body = await page.locator("body").innerText();
     ok(
-      "Leads page refuses as staff inventory (not run list)",
-      /could not be loaded|does not publish|run is not a lead/i.test(body)
-        && !/QUAL-27c19c4c/i.test(body),
-      body.replace(/\s+/g, " ").slice(0, 300),
+      "Staff lead inventory loads (inventory:true, not marketplace)",
+      /inventory:\s*true/i.test(body)
+        && /admin\/qualification\/leads/i.test(body)
+        && /Not marketplace|not marketplace/i.test(body)
+        && !/Seller marketplace rows are not substituted/i.test(body),
+      body.replace(/\s+/g, " ").slice(0, 400),
     );
+
+    // Open first lead detail if any row is linked.
+    const leadLink = page.locator('a[href^="/admin/leads/"]').first();
+    if (await leadLink.count()) {
+      await leadLink.click();
+      await page.waitForURL(/\/admin\/leads\/[0-9a-f-]{36}/i, { timeout: 15000 });
+      body = await page.locator("body").innerText();
+      ok(
+        "Staff lead detail keeps level unset and links runs",
+        /mapping not configured|marketplaceConsent|unchanged/i.test(body)
+          && /Qualification runs|Open run/i.test(body)
+          && !/Level\s*[1-9]/i.test(body),
+        body.replace(/\s+/g, " ").slice(0, 400),
+      );
+    } else {
+      ok(
+        "Staff lead detail keeps level unset and links runs",
+        /No leads match|Past the end|Showing 0 of/i.test(body),
+        "empty inventory — detail deferred; list honesty still checked",
+      );
+    }
 
     await page.goto(`${BASE}/admin/system`, { waitUntil: "networkidle" });
     body = await page.locator("body").innerText();
@@ -196,7 +225,8 @@ try {
       "Start-run creates not_configured attempt without live dial claim",
       /not_configured|Not configured/i.test(body)
         && /mapping not configured/i.test(body)
-        && /unchanged/i.test(body),
+        && /unchanged/i.test(body)
+        && !/providerDispatch\.dispatched=true/i.test(body),
       page.url(),
     );
 
@@ -216,13 +246,20 @@ try {
         && !/QUAL-27c19c4c/i.test(body),
       body.replace(/\s+/g, " ").slice(0, 300),
     );
+
+    await page.goto(`${BASE}/admin/leads`, { waitUntil: "networkidle" });
+    const leadsBody = await page.locator("body").innerText();
+    ok(
+      "Seller cannot open staff lead inventory",
+      /could not be loaded|staff|cannot|forbidden|403|not authorised|not authorized/i.test(leadsBody)
+        && !/inventory:\s*true/i.test(leadsBody),
+      leadsBody.replace(/\s+/g, " ").slice(0, 300),
+    );
     await context.close();
   }
 
-  // --- unavailable service (closed port) ---
+  // --- origin separation ---
   {
-    // Documented as a separate frontend process in Phase 3; here we API-check
-    // that 4011 is still the live Phase 4 origin and 4010 remains Phase 3.
     const p4 = await fetch(`${BACKEND}/health`);
     const p3 = await fetch("http://127.0.0.1:4010/health");
     const h4 = await p4.json();

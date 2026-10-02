@@ -39,10 +39,15 @@ export async function saveCallingWindow(
   if (!/^\d{2}:\d{2}$/.test(start)) return { error: "Use HH:MM for the start.", field: "start" };
   if (!/^\d{2}:\d{2}$/.test(end)) return { error: "Use HH:MM for the end.", field: "end" };
   try {
-    const window = await setCallingWindow({ timeZone, start, end });
+    const config = await setCallingWindow({ timeZone, start, end });
+    const saved = config.window;
+    if (!saved) return { error: "The calling window was not returned after save." };
     revalidatePath(SETTINGS_PATH);
     return {
-      notice: `Calling window saved: ${window.timeZone} ${window.start}–${window.end}. Hours are not assumed elsewhere.`,
+      notice:
+        `Calling window saved: ${saved.timeZone} ${saved.start}–${saved.end}`
+        + ` (provenance ${config.provenance}). Hours are not assumed elsewhere.`
+        + " staff_saved is not client approval.",
     };
   } catch (error) {
     redirectForAuth(error, SETTINGS_PATH);
@@ -66,12 +71,16 @@ export async function saveOptOutSignals(
     return { error: "Provide the opt-out keywords. None are assumed.", field: "keywords" };
   }
   try {
-    const signals = await setOptOutSignals({ dtmf, keywords });
+    const config = await setOptOutSignals({ dtmf, keywords });
+    const signals = config.signals;
+    if (!signals) return { error: "Opt-out signals were not returned after save." };
     revalidatePath(SETTINGS_PATH);
     return {
       notice:
         `Opt-out signals saved (${signals.keywords.join(", ")}`
-        + `${signals.dtmf ? `, DTMF ${signals.dtmf}` : ""}). A match suppresses voice and WhatsApp; it does not grant consent.`,
+        + `${signals.dtmf ? `, DTMF ${signals.dtmf}` : ""}`
+        + `; provenance ${config.provenance}). A match suppresses voice and WhatsApp; `
+        + "it does not grant consent. staff_saved is not client approval.",
     };
   } catch (error) {
     redirectForAuth(error, SETTINGS_PATH);
@@ -125,6 +134,8 @@ export async function startQualificationRunAction(
     });
     revalidatePath(VOICE_PATH);
     revalidatePath("/admin/whatsapp");
+    revalidatePath("/admin/leads");
+    // Redirect carries effect/dispatch on the detail page; do not claim live dial.
     redirect(runPath(run.id));
   } catch (error) {
     redirectForAuth(error, VOICE_PATH);
@@ -184,7 +195,36 @@ export async function resumeQualificationRun(
     return {
       notice:
         `Resume applied. Run state is ${run.state}.${dispatchNote} `
-        + "Resume does not place a call.",
+        + "Resume never dispatches under this contract.",
+    };
+  } catch (error) {
+    redirectForAuth(error, runPath(runId));
+    if (error instanceof ServiceError) return { error: error.message };
+    throw error;
+  }
+}
+
+export async function retryQualificationRun(
+  _previous: QualificationActionState,
+  formData: FormData,
+): Promise<QualificationActionState> {
+  const runId = String(formData.get("runId") ?? "").trim();
+  try {
+    const run = await recoverQualificationRun({ runId, action: "retry" });
+    revalidatePath(runPath(runId));
+    revalidatePath(VOICE_PATH);
+    revalidatePath("/admin/whatsapp");
+    revalidatePath(SYSTEM_PATH);
+    const dispatchNote = run.providerDispatch
+      ? ` providerDispatch.dispatched=${run.providerDispatch.dispatched}`
+        + (run.providerDispatch.reason ? ` (${run.providerDispatch.reason})` : "")
+        + "."
+      : "";
+    return {
+      notice:
+        `Retry applied. Run state is ${run.state}.${dispatchNote} `
+        + "Retry only proceeds when capabilities.retry.dispatchesProvider is false "
+        + "on this host.",
     };
   } catch (error) {
     redirectForAuth(error, runPath(runId));
