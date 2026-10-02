@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ProvisionalPricingScreen } from "@/components/admin/provisional-pricing-screen";
 import { Card } from "@/components/ui/card";
 import { formatExactInr } from "@/lib/format";
 import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
+import { adminOperationsStoreKind } from "@/lib/services/backend/config";
 
 export const metadata: Metadata = { title: "Pricing & aging", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const OPEN_QUESTIONS = [
   "The price list itself — every figure below is a placeholder.",
@@ -23,7 +26,18 @@ const OPEN_QUESTIONS = [
  * then be quoted back as agreed. The screen shows the shape of the decision and
  * lists what is still open.
  */
-export default async function AdminPricingPage() {
+export default async function AdminPricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  if (adminOperationsStoreKind() === "backend") {
+    return <ProvisionalPricingScreen searchParams={searchParams} />;
+  }
+  return <PlaceholderPricing />;
+}
+
+async function PlaceholderPricing() {
   const bands = await getServices().admin.priceBands();
 
   return (
