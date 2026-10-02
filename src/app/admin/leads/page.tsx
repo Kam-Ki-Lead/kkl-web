@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminTable, Mono, Primary } from "@/components/admin/admin-table";
+import { IdentityBanner } from "@/components/admin/identity-banner";
 import { Chip, type ChipTone } from "@/components/ui/chip";
+import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
 import type { AdminLead } from "@/lib/domain/admin";
+import { qualificationStoreKind } from "@/lib/services/backend/config";
+import { listQualificationLeads } from "@/lib/services/backend/qualification";
 
 export const metadata: Metadata = { title: "Leads", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const FILTERS = [
   { label: "All", value: "all" },
@@ -36,6 +41,24 @@ export default async function AdminLeadsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (qualificationStoreKind() === "backend") {
+    const loaded = await listQualificationLeads();
+    return (
+      <AdminShell title="Leads" subtitle="Every lead and its lifecycle state">
+        <div className="flex max-w-[900px] flex-col gap-[16px]">
+          <IdentityBanner />
+          <StateMessage tone="error" title="Leads could not be loaded">
+            {loaded.message} Seller marketplace rows are not substituted for this staff list.
+          </StateMessage>
+          <p className="t-caption text-muted">
+            Incomplete qualification and human-review states will appear here once the staff
+            inventory is published. Levels 1–10 are not assigned from answer counts.
+          </p>
+        </div>
+      </AdminShell>
+    );
+  }
+
   const params = await searchParams;
   const filter = one(params.filter) || "all";
   const query = one(params.q).trim().toLowerCase();
@@ -59,7 +82,7 @@ export default async function AdminLeadsPage({
         countLabel={`${rows.length} of ${all.length} leads`}
         emptyTitle="No leads in this state"
         emptyBody="Nothing matches this filter and search right now."
-        footnote="A lead reaches the marketplace only after qualification and a recorded consent outcome — the two disqualified and qualifying rows here show what that gate refuses. Buyer contact details are not on this screen at all: staff see the requirement, not the number."
+        footnote="A lead reaches the marketplace only after qualification and a recorded consent outcome — the two disqualified and qualifying rows here show what that gate refuses. Buyer contact details are not on this screen at all: staff see the requirement, not the number. These rows are fixtures until a staff lead inventory is published."
         columns={[
           { header: "REF", width: "0.9fr" },
           { header: "REQUIREMENT", width: "1.6fr" },

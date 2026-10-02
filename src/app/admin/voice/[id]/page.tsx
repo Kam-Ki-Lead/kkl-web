@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { IdentityBanner } from "@/components/admin/identity-banner";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
+import { qualificationStoreKind } from "@/lib/services/backend/config";
+import { getVoiceCall } from "@/lib/services/backend/qualification";
 
 export const metadata: Metadata = { title: "Call", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const OUTCOME: Record<string, ChipTone> = {
   qualified: "success",
@@ -26,6 +30,28 @@ const OUTCOME: Record<string, ChipTone> = {
  */
 export default async function AdminCallPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  if (qualificationStoreKind() === "backend") {
+    const loaded = await getVoiceCall(id);
+    return (
+      <AdminShell title={`Call ${id}`} subtitle="Transcript, summary and captured answers">
+        <div className="flex max-w-[860px] flex-col gap-[16px]">
+          <IdentityBanner />
+          <Link href="/admin/voice" className="t-caption text-brand underline underline-offset-2">
+            ← Voice qualification
+          </Link>
+          <StateMessage tone="error" title="This call could not be loaded">
+            {loaded.message} Fixture transcripts are not shown in their place.
+          </StateMessage>
+          <p className="t-caption text-muted">
+            A generated summary is not verified fact. No audio is offered. Nothing on this screen
+            places a call.
+          </p>
+        </div>
+      </AdminShell>
+    );
+  }
+
   const call = await getServices().admin.getCall(id);
   if (!call) notFound();
 
@@ -38,7 +64,8 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
 
         <FixtureNotice>
           This call did not happen. The transcript below is fixture text written to show the
-          layout and the consent moment.
+          layout and the consent moment. A fixture summary is not a verified fact, and a
+          qualified fixture outcome is not sale eligibility.
         </FixtureNotice>
 
         <Card className="p-[20px]">
@@ -81,8 +108,6 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
                     >
                       {line.who}
                     </span>
-                    {/* The approved transcript runs at 15px, under the 16px
-                        body step. */}
                     <span className="t-body-sm block text-body">{line.text}</span>
                   </span>
                 </li>
@@ -112,7 +137,8 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
             </dl>
             <p className="t-caption mt-[10px] text-muted">
               Each answer carries the point in the call it came from, so a captured value can be
-              checked against what was actually said.
+              checked against what was actually said. Answer counts do not assign a qualification
+              level — mapping not configured.
             </p>
           </Card>
         ) : null}

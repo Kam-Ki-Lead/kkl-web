@@ -1,5 +1,5 @@
 import { runtimeConfig } from "@/lib/config/runtime";
-import { authStoreKind } from "@/lib/services/backend/config";
+import { authStoreKind, qualificationStoreKind } from "@/lib/services/backend/config";
 import {
   adminOperationsStore,
   listingStore,
@@ -24,6 +24,7 @@ export function AdminSampleNotice() {
   const signedIn = authStoreKind() === "backend";
   const operations = adminOperationsStore() === "backend";
   const connectedQueues = supportStore() === "backend" || notificationStore() === "backend";
+  const qualificationBackend = qualificationStoreKind() === "backend";
 
   return (
     <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
@@ -76,7 +77,14 @@ export function AdminSampleNotice() {
           )}
         </li>
         <li>
-          {connectedQueues ? (
+          {qualificationBackend ? (
+            <>
+              <strong className="text-ink">Qualification staff reads refuse without a published contract.</strong>{" "}
+              With <span className="t-mono">KKL_QUALIFICATION=backend</span>, voice, WhatsApp and
+              staff lead-qualification screens do not fall back to fixtures. Intake, suppressions
+              and delivery attempts stay on their own switches.
+            </>
+          ) : connectedQueues ? (
             <>
               <strong className="text-ink">Support and delivery attempts are stored.</strong> A
               queued or unconfigured delivery was not sent.{" "}
@@ -86,7 +94,8 @@ export function AdminSampleNotice() {
               {listingStore() === "backend"
                 ? "Live property review is read from kkl-backend. Drafts stay on owner submissions."
                 : "Property review on this console is still a fixture."}{" "}
-              Voice, WhatsApp and today&rsquo;s volume figures are fixtures.
+              Voice, WhatsApp and staff lead-qualification volumes are fixtures until their staff
+              contracts are published.
             </>
           ) : (
             <>

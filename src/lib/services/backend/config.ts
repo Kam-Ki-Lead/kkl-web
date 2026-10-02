@@ -287,3 +287,22 @@ export function staffOrdersStoreKind(): "sample" | "backend" {
 export function intakeStoreKind(): "sample" | "backend" {
   return read("KKL_INTAKE") === "backend" ? "backend" : "sample";
 }
+
+// ---------------------------------------------------------------------------
+// KKL_QUALIFICATION — Phase 4 staff qualification, calling and WhatsApp.
+//
+// A-12, A-13, A-24, A-25, A-26 and the voice/WhatsApp half of A-31. When this
+// switch is on, those screens call the Phase 4 adapters and never fall back
+// to fixtures. OpenAPI 1.0.0-phase3.t does not yet publish the staff reads
+// those screens need (voice-bridge stubs are kkl-voice → kkl-backend only),
+// so the adapters refuse with the named handoff rather than inventing a path.
+//
+// Intake (KKL_INTAKE), suppressions (KKL_ADMIN_OPERATIONS) and delivery
+// attempts (KKL_NOTIFICATIONS) stay on their own switches. Question prompts
+// already published on the pricing configuration are read through
+// KKL_ADMIN_OPERATIONS, with questionMapping kept as not_configured.
+// ---------------------------------------------------------------------------
+
+export function qualificationStoreKind(): "sample" | "backend" {
+  return read("KKL_QUALIFICATION") === "backend" ? "backend" : "sample";
+}

@@ -2,13 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { IdentityBanner } from "@/components/admin/identity-banner";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
+import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
 import type { AdminLead } from "@/lib/domain/admin";
+import { MAPPING_NOT_CONFIGURED_DETAIL } from "@/lib/domain/commerce-display";
+import { qualificationStoreKind } from "@/lib/services/backend/config";
+import { getQualificationLead } from "@/lib/services/backend/qualification";
 
 export const metadata: Metadata = { title: "Lead", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const STATE: Record<AdminLead["state"], { label: string; tone: ChipTone }> = {
   qualifying: { label: "Qualifying", tone: "warning" },
@@ -34,6 +40,25 @@ const STATE: Record<AdminLead["state"], { label: string; tone: ChipTone }> = {
  */
 export default async function AdminLeadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  if (qualificationStoreKind() === "backend") {
+    const loaded = await getQualificationLead(id);
+    return (
+      <AdminShell title={`Lead ${id}`} subtitle="Qualification, consent and lifecycle history">
+        <div className="flex max-w-[900px] flex-col gap-[16px]">
+          <IdentityBanner />
+          <Link href="/admin/leads" className="t-caption text-brand underline underline-offset-2">
+            ← Leads
+          </Link>
+          <StateMessage tone="error" title="This lead could not be loaded">
+            {loaded.message} Fixture answers and summaries are not shown in their place.
+          </StateMessage>
+          <p className="t-caption text-muted">{MAPPING_NOT_CONFIGURED_DETAIL}</p>
+        </div>
+      </AdminShell>
+    );
+  }
+
   const lead = await getServices().admin.getLead(id);
   if (!lead) notFound();
 
@@ -64,7 +89,8 @@ export default async function AdminLeadPage({ params }: { params: Promise<{ id: 
           </div>
           <p className="t-caption mt-[14px] border-t border-line pt-[12px] text-muted">
             Contact details are not on this screen. Staff see the requirement and whether it may
-            be sold; who the buyer is, is a separate question with a separate answer.
+            be sold; who the buyer is, is a separate question with a separate answer. These fields
+            are fixtures until the staff lead detail contract is published.
           </p>
         </Card>
 
@@ -88,14 +114,16 @@ export default async function AdminLeadPage({ params }: { params: Promise<{ id: 
             <p className="t-body mt-[12px] border-t border-line pt-[12px] text-body">
               {lead.summary}
             </p>
+            <p className="t-caption mt-[10px] text-muted">
+              A generated summary is not verified fact. Answer counts do not assign Levels 1–10 —
+              mapping not configured.
+            </p>
           </Card>
 
           <div className="flex flex-col gap-[16px]">
             <Card
               className={`p-[18px] ${lead.consent.given ? "border-[#BFE0CE]" : "border-[#F3C4BF]"}`}
             >
-              {/* The approved card carries the consent state in the heading's
-                  colour, and the verdict at 16px. */}
               <h2
                 className={`t-card-title ${lead.consent.given ? "text-success" : "text-danger"}`}
               >
@@ -148,8 +176,6 @@ export default async function AdminLeadPage({ params }: { params: Promise<{ id: 
                   }`}
                 />
                 <span className="min-w-0">
-                  {/* The approved timeline does not dim future steps; the dot
-                      alone carries done versus not-done. */}
                   <span className="block text-[15px] font-semibold text-ink">{step.label}</span>
                   <span className="block text-[14px] text-muted">{step.note}</span>
                 </span>
@@ -174,7 +200,7 @@ export default async function AdminLeadPage({ params }: { params: Promise<{ id: 
           <Link href="/admin/settings/pricing" className="text-brand underline underline-offset-2">
             pricing &amp; aging
           </Link>
-          .
+          . {MAPPING_NOT_CONFIGURED_DETAIL}
         </p>
       </div>
     </AdminShell>

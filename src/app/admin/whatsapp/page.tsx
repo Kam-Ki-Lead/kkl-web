@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { IdentityBanner } from "@/components/admin/identity-banner";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
+import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
+import { qualificationStoreKind } from "@/lib/services/backend/config";
+import { listWhatsAppJourney } from "@/lib/services/backend/qualification";
 
 export const metadata: Metadata = { title: "WhatsApp qualification", robots: { index: false } };
+export const dynamic = "force-dynamic";
 
 const BAR_TONE = { brand: "bg-brand", warning: "bg-warning", success: "bg-success" } as const;
 const STATE_TONE: Record<string, ChipTone> = {
@@ -17,6 +22,24 @@ const STATE_TONE: Record<string, ChipTone> = {
 
 /** A-26 — journey progress and conversations. */
 export default async function AdminWhatsAppPage() {
+  if (qualificationStoreKind() === "backend") {
+    const loaded = await listWhatsAppJourney();
+    return (
+      <AdminShell title="WhatsApp qualification" subtitle="Journey progress and conversations">
+        <div className="flex max-w-[860px] flex-col gap-[16px]">
+          <IdentityBanner />
+          <StateMessage tone="error" title="WhatsApp journey could not be loaded">
+            {loaded.message} Queued fixture rows are not delivery, and they are not shown here.
+          </StateMessage>
+          <p className="t-caption text-muted">
+            A conversation cannot be started from this screen. Conversation completion is not sale
+            eligibility. Numbers on the suppression list are never messaged.
+          </p>
+        </div>
+      </AdminShell>
+    );
+  }
+
   const { funnel, conversations } = await getServices().admin.whatsapp();
   const top = funnel[0]?.count ?? 1;
 
@@ -25,7 +48,8 @@ export default async function AdminWhatsAppPage() {
       <div className="flex max-w-[860px] flex-col gap-[16px]">
         <FixtureNotice>
           No WhatsApp message has been sent. The journey, the drop-off and the stalled
-          conversation below are fixtures.
+          conversation below are fixtures. A queued or stalled fixture row is not delivery, and a
+          completed fixture journey is not sale eligibility.
         </FixtureNotice>
 
         <Card className="p-[20px]">

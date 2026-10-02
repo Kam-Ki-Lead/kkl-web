@@ -25,6 +25,12 @@ export const NO_QUALIFICATION_DETAIL =
 
 export const NOT_SCORED_LABEL = "Not scored";
 
+/** Pricing / qualification question prompts without an approved level map. */
+export const MAPPING_NOT_CONFIGURED_LABEL = "mapping not configured";
+export const MAPPING_NOT_CONFIGURED_DETAIL =
+  "Question definitions and qualification-level mapping are different. Levels 1–10 "
+  + "are not assigned from answer counts or model guesses while the mapping is not configured.";
+
 /** A price, or the sentence that says why there is none. */
 export function priceLabel(credits: number | null, format: (n: number) => string): string {
   return credits === null ? UNPRICED_LABEL : format(credits);
