@@ -8,7 +8,7 @@ claim and not client acceptance.
 
 | | |
 |---|---|
-| Frontend (this wiring) | *(set at commit)* |
+| Frontend (this wiring) | `04b54ab` |
 | Earlier Phase 4 prep | `dc2f275` / `6acfc2f` |
 | Frontend purchase confirmation | `16afab5` (frontend commit; earlier record wrongly called this a backend commit) |
 | Frontend checkpoint before Phase 4 | `02687ea` |
