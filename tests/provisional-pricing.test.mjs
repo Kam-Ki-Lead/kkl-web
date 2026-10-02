@@ -6,6 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   PROVISIONAL_BANNER,
+  bandBoundaryText,
   blankPricingDraft,
   creditsExplanation,
   draftFromForm,
@@ -18,8 +19,10 @@ import {
   readConfiguration,
   readOverview,
   readPreview,
+  readVersionPage,
   roundingDemonstrationText,
   saveBodyStaysInsideContract,
+  versionListCaption,
 } from "../src/lib/services/backend/provisional-pricing-reading.ts";
 
 function form(entries) {
@@ -221,6 +224,66 @@ test("a provisional payload shows the returned assumption and keeps the figures 
     versions: 0,
     purchase: { purchaseUsesFramework: true, code: "lead_price_not_configured", message: "Ready." },
   }), null);
+});
+
+test("the version page length is not labelled as the number stored", () => {
+  const configurations = Array.from({ length: 50 }, (_, index) => ({
+    id: `version-${index}`,
+    version: 80 - index,
+    status: "provisional",
+    bands: 2,
+    levels: 1,
+    questions: 0,
+    createdAt: "2026-10-02T09:00:00.000Z",
+    purchasable: false,
+  }));
+  const page = readVersionPage({ configurations });
+  assert.equal(page.length, 50);
+  const caption = versionListCaption(80, page.length);
+  assert.match(caption, /80 versions are stored/);
+  assert.equal(caption.includes("50 versions are stored"), false);
+  assert.match(caption, /at most 50/);
+  assert.equal(versionListCaption(0, 0), "No version has been saved.");
+});
+
+test("a stored gap is reported and a fractional rupee withholds credits", () => {
+  const configuration = readConfiguration({
+    ...configurationBody(),
+    gaps: [{ afterInr: "1000000.00", beforeInr: "2000000.00" }],
+  });
+  assert.deepEqual(configuration.gaps, [{ afterInr: "1000000.00", beforeInr: "2000000.00" }]);
+  const preview = readPreview({
+    ...previewBody(),
+    credits: null,
+    creditsWithheldBecause: "not_a_whole_rupee",
+    basePriceInr: "1000.00",
+    budgetInr: "500000.00",
+    exact: { paiseNumerator: "133330", paiseDenominator: "1", inr: "1333.30", paiseRemainder: "0" },
+    band: {
+      id: "22222222-2222-2222-2222-222222222222",
+      label: "Synthetic gap low",
+      minInr: "0.00",
+      maxInr: "1000000.00",
+      basePriceInr: "1000.00",
+    },
+    rounding: {
+      requested: "nearest_100_inr",
+      confirmed: false,
+      demonstratedInr: "1300.00",
+      rule: "spreadsheet ROUND half away from zero, to the nearest 100 rupees. Demonstrated, not confirmed.",
+    },
+  });
+  assert.match(preview.exactText, /₹1,333\.30/);
+  assert.match(preview.creditsText, /No credit figure is stated/);
+  assert.match(preview.creditsText, /not the credit amount/);
+  assert.equal(preview.creditsText.includes("1,300"), false);
+  assert.match(preview.roundingText, /₹1,300\.00/);
+  assert.match(preview.boundaryText, /₹0\.00 inclusive to ₹10,00,000\.00 exclusive/);
+  assert.match(preview.boundaryText, /not confirmed/);
+  assert.match(
+    bandBoundaryText({ label: null, minInr: null, maxInr: null }),
+    /That convention is not confirmed/,
+  );
 });
 
 function configurationBody() {

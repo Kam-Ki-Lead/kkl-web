@@ -9,6 +9,9 @@
 
 export const PROVISIONAL_BANNER = "Provisional — not used for purchases";
 
+/** GET /v1/admin/pricing/configurations returns at most this many versions. */
+export const PRICING_VERSION_PAGE_LIMIT = 50;
+
 const MONEY = /^\d{1,12}(\.\d{1,2})?$/;
 const DECIMAL_MULTIPLIER = /^\d{1,6}(?:\.\d{1,4})?$/;
 const RATIO = /^(\d+)\/(\d+)$/;
@@ -129,6 +132,7 @@ export type PricingPreviewView = {
   budgetInr: string;
   basePriceInr: string;
   bandLabel: string | null;
+  boundaryText: string;
   qualificationLevel: number;
   levelStatement: string;
   questionStatement: string;
@@ -235,7 +239,7 @@ export function localSaveError(draft: PricingDraft): { field: string; error: str
     if (!MONEY.test(band.minInr) || !MONEY.test(band.basePriceInr) || (band.maxInr !== "" && !MONEY.test(band.maxInr))) {
       return {
         field: "bands",
-        error: "Enter each amount as rupees with at most two decimal places, such as 1500.00.",
+        error: "Enter each amount as rupees with at most two decimal places.",
       };
     }
   }
@@ -408,14 +412,45 @@ export function roundingDemonstrationText(rounding: {
   return `Demonstrated nearest ₹100: ${formatProvisionalInr(rounding.demonstratedInr)}. This demonstration is not confirmed.${rule}`;
 }
 
-export function creditsExplanation(credits: number | null, withheld: string | null): string {
-  if (typeof credits === "number") {
-    return `${credits.toLocaleString("en-IN")} credits follow the settled unit of 1 rupee = 1 credit. This preview cannot be bought.`;
-  }
-  if (withheld === "not_a_whole_rupee") {
-    return "No credit figure is stated, because the exact amount is not a whole rupee and rounding is not confirmed. This preview cannot be bought.";
-  }
-  return "No credit figure is stated. This preview cannot be bought.";
+export function creditsExplanation(
+  credits: number | null,
+  withheld: string | null,
+  demonstratedInr: string | null = null,
+): string {
+  const figure = typeof credits === "number"
+    ? `${credits.toLocaleString("en-IN")} credits follow the settled unit of 1 rupee = 1 credit.`
+    : withheld === "not_a_whole_rupee"
+      ? "No credit figure is stated, because the exact amount is not a whole rupee and rounding is not confirmed."
+      : "No credit figure is stated.";
+  const demonstration = demonstratedInr
+    ? " The demonstrated figure is not the credit amount."
+    : "";
+  return `${figure}${demonstration} This preview cannot be bought.`;
+}
+
+/**
+ * `storedCount` is the overview total. `returnedCount` is the page, at most 50.
+ * The sentence names the stored total from the overview, never the page length.
+ */
+export function versionListCaption(storedCount: number, returnedCount: number): string {
+  if (storedCount === 0) return "No version has been saved.";
+  const shown = returnedCount === 0
+    ? "The newest versions were not in this response."
+    : `The list shows the newest versions returned, at most ${PRICING_VERSION_PAGE_LIMIT}.`;
+  return `${storedCount} versions are stored. ${shown}`;
+}
+
+export function bandBoundaryText(band: {
+  label: string | null;
+  minInr: string | null;
+  maxInr: string | null;
+}): string {
+  const edges = band.minInr
+    ? `${band.label ? `${band.label}: ` : ""}${formatProvisionalInr(band.minInr)} inclusive${
+      band.maxInr ? ` to ${formatProvisionalInr(band.maxInr)} exclusive` : ", with no upper bound"
+    }. `
+    : "";
+  return `${edges}Band boundaries use a minimum-inclusive, maximum-exclusive edge for this preview. That convention is not confirmed.`;
 }
 
 export function pricingFailure(
@@ -626,6 +661,12 @@ export function readPreview(body: unknown): PricingPreviewView | null {
     : row.creditsWithheldBecause;
   if (withheld !== null && typeof withheld !== "string") return null;
   const band = record(row.band);
+  const bandMinInr = band ? (band.minInr === null ? null : rupeeString(band.minInr)) : null;
+  const bandMaxInr = band
+    ? (band.maxInr === null || band.maxInr === undefined ? null : rupeeString(band.maxInr))
+    : null;
+  if (band && band.minInr != null && bandMinInr === null) return null;
+  if (band && band.maxInr != null && bandMaxInr === null) return null;
   const demonstrated = rounding.demonstratedInr === null ? null : rupeeString(rounding.demonstratedInr);
   if (rounding.demonstratedInr !== null && demonstrated === null) return null;
   if (rounding.requested !== null && rounding.requested !== "nearest_100_inr") return null;
@@ -637,6 +678,11 @@ export function readPreview(body: unknown): PricingPreviewView | null {
     budgetInr,
     basePriceInr,
     bandLabel: band && typeof band.label === "string" ? band.label : null,
+    boundaryText: bandBoundaryText({
+      label: band && typeof band.label === "string" ? band.label : null,
+      minInr: bandMinInr,
+      maxInr: bandMaxInr,
+    }),
     qualificationLevel,
     levelStatement: `Qualification level ${qualificationLevel} was supplied for this preview. It is not an AI qualification.`,
     questionStatement: "No question-to-level mapping is configured. The questions do not select this level.",
@@ -655,7 +701,7 @@ export function readPreview(body: unknown): PricingPreviewView | null {
     roundingRequested: requested === "nearest_100_inr" ? "nearest_100_inr" : null,
     message: row.message,
     purchaseMessage: purchase.message,
-    creditsText: creditsExplanation(credits, withheld),
+    creditsText: creditsExplanation(credits, withheld, demonstrated),
     purchasable: false,
   };
 }

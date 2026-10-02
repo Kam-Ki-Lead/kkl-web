@@ -69,7 +69,7 @@ export function ProvisionalPricingEditor({
       <div className="flex flex-col gap-[12px]">
         <h3 className="t-card-title text-ink">Budget bands and base prices</h3>
         <p className="t-caption text-muted">
-          Amounts are rupees, such as 1500.00. The minimum is inclusive and the maximum is exclusive.
+          Amounts are rupees with at most two decimal places. The minimum is inclusive and the maximum is exclusive.
           Leave the maximum empty for one open-ended band, and make that band the highest. A gap is stored and is not filled.
         </p>
         {bands.map((band, index) => (
@@ -203,7 +203,7 @@ export function ProvisionalPricingEditor({
       <div className="flex flex-col gap-[12px]">
         <h3 className="t-card-title text-ink">Question definitions</h3>
         <p className="t-caption text-muted">
-          A prompt is stored with this version. It is not tied to a qualification level.
+          A prompt is stored with this version. It is a definition only, and it is not an approved mapping onto a qualification level.
         </p>
         {draft.questions.map((question, index) => (
           <div key={index} className="grid grid-cols-1 gap-[10px] md:grid-cols-[1fr_auto] md:items-end">
@@ -265,14 +265,14 @@ export function ProvisionalPricePreview({
   const [state, action, pending] = useActionState<PricingPreviewState, FormData>(previewProvisionalPrice, {});
   const [budgetInr, setBudgetInr] = useState("");
   const [qualificationLevel, setQualificationLevel] = useState("");
-  const [demonstrate, setDemonstrate] = useState(false);
+  const [roundingKey, setRoundingKey] = useState(0);
   const echoed = state.budgetInr !== undefined || state.qualificationLevel !== undefined;
   const [seenEcho, setSeenEcho] = useState<PricingPreviewState | undefined>(undefined);
   if (echoed && state !== seenEcho) {
     setSeenEcho(state);
+    setRoundingKey((value) => value + 1);
     if (state.budgetInr !== undefined) setBudgetInr(state.budgetInr);
     if (state.qualificationLevel !== undefined) setQualificationLevel(state.qualificationLevel);
-    if (typeof state.demonstrate === "boolean") setDemonstrate(state.demonstrate);
   }
 
   if (!configurationId || version === null) {
@@ -296,7 +296,7 @@ export function ProvisionalPricePreview({
         <Field
           id="preview-budget"
           label="Budget for this preview"
-          helper="Rupees, such as 7500000.00. This is a prospect-stated amount used only for the calculation."
+          helper="Rupees with at most two decimal places, typed for this calculation."
           error={state.field === "budgetInr" ? state.error : undefined}
         >
           <TextInput
@@ -333,12 +333,12 @@ export function ProvisionalPricePreview({
       <label className="flex items-start gap-[10px] text-[14px] text-body" htmlFor="preview-rounding">
         <input type="hidden" name="demonstrateRounding" value="false" />
         <input
+          key={roundingKey}
           id="preview-rounding"
           name="demonstrateRounding"
           type="checkbox"
           value="true"
-          checked={demonstrate}
-          onChange={(event) => setDemonstrate(event.target.checked)}
+          defaultChecked={state.demonstrate === true}
           className="mt-[3px] h-[18px] w-[18px]"
         />
         <span>
@@ -369,8 +369,8 @@ function PreviewResult({
         Version {preview.configurationVersion}. {preview.levelStatement}
       </p>
       <p className="t-body text-body">{preview.questionStatement}</p>
+      <p className="t-body text-body">{preview.boundaryText}</p>
       <p className="t-body text-body">
-        {preview.bandLabel ? `${preview.bandLabel}. ` : ""}
         Base price {formatProvisionalInr(preview.basePriceInr)} × {preview.multiplierText}, for a budget of {formatProvisionalInr(preview.budgetInr)}.
       </p>
       <p className="t-body font-semibold text-ink">{preview.exactText}</p>

@@ -20,6 +20,7 @@ import {
   blankPricingDraft,
   draftFromConfiguration,
   formatProvisionalInr,
+  versionListCaption,
   type PricingConfigurationView,
   type PricingVersionSummary,
 } from "@/lib/services/backend/provisional-pricing-reading";
@@ -92,7 +93,12 @@ export async function ProvisionalPricingScreen({
           </p>
         </Card>
 
-        <VersionList versions={versions} viewedId={viewed?.id ?? null} problem={versionProblem} />
+        <VersionList
+          versions={versions}
+          storedCount={overview.versions}
+          viewedId={viewed?.id ?? null}
+          problem={versionProblem}
+        />
 
         {viewed ? <RecordedConfiguration configuration={viewed} older={viewingOlder} /> : (
           <Card className="p-[18px]">
@@ -134,20 +140,21 @@ export async function ProvisionalPricingScreen({
 
 function VersionList({
   versions,
+  storedCount,
   viewedId,
   problem,
 }: {
   versions: readonly PricingVersionSummary[];
+  storedCount: number;
   viewedId: string | null;
   problem: string | null;
 }) {
   return (
     <Card className="p-[18px]">
       <h2 className="t-card-title text-ink">Configuration versions</h2>
+      <p className="t-body mt-[8px] text-body">{versionListCaption(storedCount, versions.length)}</p>
       {problem ? <p role="alert" className="t-body mt-[8px] text-danger">{problem}</p> : null}
-      {versions.length === 0 ? (
-        <p className="t-body mt-[8px] text-body">No version has been saved.</p>
-      ) : (
+      {versions.length > 0 ? (
         <ul className="mt-[10px] flex flex-col gap-[8px]">
           {versions.map((version) => {
             const current = version.id === viewedId;
@@ -170,7 +177,7 @@ function VersionList({
             );
           })}
         </ul>
-      )}
+      ) : null}
     </Card>
   );
 }
@@ -196,8 +203,8 @@ function RecordedConfiguration({
       </p>
       {configuration.note ? <p className="t-body mt-[6px] text-body">Note: {configuration.note}</p> : null}
       <p className="t-caption mt-[8px] text-muted">
-        Band edges are minimum-inclusive and maximum-exclusive. That convention is not confirmed.
-        No question-to-level mapping is configured.
+        Band boundaries use a minimum-inclusive, maximum-exclusive edge for this preview. That convention is not confirmed.
+        Questions stored here are definitions only. No question-to-level mapping is configured.
       </p>
       <ul className="mt-[10px] flex list-disc flex-col gap-[4px] pl-[20px] text-[14px] text-body">
         {configuration.bands.map((band) => (
