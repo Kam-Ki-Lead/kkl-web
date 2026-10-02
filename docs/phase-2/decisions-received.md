@@ -206,7 +206,13 @@ A-5, a decision.
 Type 1 is the **existing approved homepage**, already built. **No redesign
 required.** See A-6 above and `evidence/cr06/`.
 
-### CR06-b · Logo colours — **in progress, awaiting the file**
+### CR06-b · Logo colours — **file received 2 October 2026**
+
+The logo JPEG was supplied with the instruction to use it as the visual reference for the whole site. Palette implementation is recorded separately in `docs/phase-2/brand-revision.md` and frontend `af0579c`. That instruction does not resolve any other open decision.
+
+The historical waiting note below is what was true until the file arrived.
+
+### CR06-b · Logo colours — waiting note, superseded 2 October 2026
 
 **Awaiting the authoritative logo file from the client. Colour verification has
 not started** and cannot begin until the file is in hand — the real file, not a

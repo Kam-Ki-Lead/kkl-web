@@ -108,9 +108,10 @@ brief:
 
 ### Waiting on you — one item
 
-**CR06-b · The authoritative logo file.** This item is **in progress and
-awaiting that file**; **colour verification has not started** and will not until
-the file is in hand.
+**CR06-b · The authoritative logo file.** The file was received on
+2 October 2026. Palette implementation and its verification are recorded in
+`brand-revision.md` and are not a resolution of any other open item. The
+paragraphs below are the waiting rule that applied until that file arrived.
 
 Until then, and stated so nobody has to infer it:
 
