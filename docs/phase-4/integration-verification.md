@@ -10,6 +10,7 @@ integration claim, not client acceptance, and not a deployment record.
 | | |
 |---|---|
 | Frontend base | `02687ea` (purchase confirmation against backend implementation `16afab5`) |
+| Frontend Phase 4 prep | `dc2f275` |
 | Backend OpenAPI consulted | `1.0.0-phase3.t` @ `a6d6d4d` on `claude/phase-3-backend` |
 | Geometry / unrelated | `docs/phase-2/visual/geometry-1440.json` left unstaged; not part of this record |
 
