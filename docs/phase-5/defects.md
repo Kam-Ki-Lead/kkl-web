@@ -20,8 +20,8 @@ defects and are not closed by a frontend wording change.
 
 ## Not closed, and not frontend defects
 
-These blocked the journey. They are the backend dependency list. This
-window did not guess a rule for them.
+These are the backend dependency list. This window did not guess a
+rule for them. The completed local checks do not close them.
 
 | Block | What the browser could not finish |
 | --- | --- |
@@ -33,7 +33,8 @@ window did not guess a rule for them.
 | Q-7 | No WhatsApp or other live message. The support ticket was an in-app row only. |
 | Q-8 | No upload and no download of file bytes. Export is 503. |
 | Exotel, Sarvam | No call and no speech request. Voice health stayed simulated. |
-| Meta Instant Form | Not built. |
 | External staging | No public URL. |
 | Platform secrets | Health still reports the loader as not integrated. |
 | Client and security sign-off | Not given by this window. |
+
+Meta Instant Form intake is not in that table. It is not built, and it is waiting on scope authorisation. It is not an automatic Phase 5 acceptance gate.

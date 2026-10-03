@@ -97,7 +97,9 @@ Account isolation that was exercised: a seller cannot open the operations consol
 
 ## Performance
 
-Two browser timings on this machine, one navigation each: sale tab about 910 ms, public search about 1081 ms. They are not agreed targets and they are not a load test. No tool was pointed at Razorpay, WhatsApp, Exotel, Sarvam, or at ports 4010 and 4011.
+Two browser timings on this machine, one navigation each: sale tab about 910 ms, public search about 1081 ms. They are completed local observations. They are not agreed targets, and they are not a load test. No tool was pointed at Razorpay, WhatsApp, Exotel, Sarvam, or at ports 4010 and 4011.
+
+kkl-backend `docs/phase-5/results.md` records three-second runs from `tests/phase5-performance.test.mjs` (evidence `local_synthetic_load`): search about 3002 ms, lead reads about 3019 ms, call scheduling about 3034 ms, idle poll about 3004 ms. This window did not rerun them. They are short synthetic local benchmarks. They are not sustained-load or production-capacity validation. `agreedTarget` and `acceptanceThreshold` are false.
 
 ## F5-3 pending order
 
