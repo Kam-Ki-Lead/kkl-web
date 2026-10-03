@@ -99,6 +99,30 @@ Account isolation that was exercised: a seller cannot open the operations consol
 
 Two browser timings on this machine, one navigation each: sale tab about 910 ms, public search about 1081 ms. They are not agreed targets and they are not a load test. No tool was pointed at Razorpay, WhatsApp, Exotel, Sarvam, or at ports 4010 and 4011.
 
+## F5-3 pending order
+
+The purchase path does not leave an order pending. A dedicated row was
+written in `kkl_phase5` the same way `tests/financial-integrity.test.mjs`
+writes one: staff inserted lead `LD-P5-F53-PENDING`
+(`3719ddf4-1750-49da-aeeb-fd01d4af51ca`, consent unknown, source
+`synthetic_test`), and the seller inserted order `ORD-P5-F53-PENDING`
+(`756b70e8-5b09-43fd-af28-dd4113d668af`) with status `pending` and
+fingerprint `fixture`. No wallet entry was posted. The seller ledger
+stayed at 0 entries and balance 0. The seeded intake lead was not the
+order's lead. `kkl_review` and `kkl_phase4` were not opened.
+
+Seller sign-in used one code after the UTC daily window had moved. Rate
+limit rows were not reset. The check is `scripts/verify-phase5-f53.mjs`
+and `docs/phase-5/f53-pending-order.json`, at `2026-10-03T06:52:09Z`.
+
+`/seller/orders` showed chip Pending on that order. The detail showed
+the same chip, "This order is not paid", "Nothing was released for this
+order", and no Open the lead, Cancel, or Request refund control. The
+shell balance stayed ₹0. This is not a purchase and not a charge.
+
+`customerOrderStatus` in `tests/phase5-origin.test.mjs` keeps `pending`
+from becoming `failed` or `paid`.
+
 ## Unit checks that are not this browser pass
 
 `tests/phase5-origin.test.mjs` refuses two backend origins and accepts one origin with a trailing slash. `tests/auth-contract.test.mjs` refuses an empty `next`, a `next` over 512 characters, a protocol-relative `next`, a backslash, a NUL, a control character, and `%2f` / `%5c`. The browser retest covered only `//evil.example/steal`.

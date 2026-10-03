@@ -18,7 +18,12 @@ export default async function BuilderOrderPage({
   if (order === null) notFound();
 
   return (
-    <BuilderShell title={`Order ${order.reference}`} subtitle="What you ordered, and what paid for it">
+    <BuilderShell
+      title={`Order ${order.reference}`}
+      subtitle={order.status === "paid"
+        ? "What you ordered, and what paid for it"
+        : "What you ordered. This order is not paid."}
+    >
       <OrderDetail order={order} paths={BUILDER_ORDER_PATHS} />
     </BuilderShell>
   );

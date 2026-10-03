@@ -89,9 +89,11 @@ export function OrderList({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-[10px]">
                     <p className="t-mono text-[13px] text-muted">{order.reference}</p>
-                    <Chip tone={orderChip(order.status).tone}>
-                      {orderChip(order.status).label}
-                    </Chip>
+                    <span data-order-status={order.status}>
+                      <Chip tone={orderChip(order.status).tone}>
+                        {orderChip(order.status).label}
+                      </Chip>
+                    </span>
                   </div>
                   <h2 className="t-card-title mt-[3px] text-ink">
                     <Link
@@ -126,9 +128,11 @@ export function OrderDetail({ order, paths }: { order: LeadOrder; paths: OrderPa
     <div className="flex flex-col gap-[16px]">
       <div className="flex flex-wrap items-center gap-[12px]">
         <p className="t-mono text-[14px] text-muted">{order.reference}</p>
-        <Chip tone={orderChip(order.status).tone}>
-          {orderChip(order.status).label}
-        </Chip>
+        <span data-order-status={order.status}>
+          <Chip tone={orderChip(order.status).tone}>
+            {orderChip(order.status).label}
+          </Chip>
+        </span>
         <Link href={paths.ordersHref} className="t-caption font-semibold text-brand">
           All orders
         </Link>
@@ -168,17 +172,27 @@ export function OrderDetail({ order, paths }: { order: LeadOrder; paths: OrderPa
           <dl className="grid grid-cols-2 gap-[14px] max-[560px]:grid-cols-1">
             <Row label="Method" value={order.payment.label} />
             <Row label="Amount" value={`${formatExactInr(order.payment.amountCredits)} credits`} />
-            <Row label="Ledger entry" value={order.payment.ledgerReference} mono />
+            {order.status === "paid" ? (
+              <Row label="Ledger entry" value={order.payment.ledgerReference} mono />
+            ) : null}
           </dl>
         </InsetPanel>
-        <p className="t-caption mt-[12px] text-muted">
-          Credits were deducted first and the lead released only because that succeeded. The
-          deduction is on your{" "}
-          <Link href={paths.ledgerHref} className="font-semibold text-brand">
-            credit ledger
-          </Link>{" "}
-          under the reference above, so the money can be traced rather than taken on trust.
-        </p>
+        {order.status === "paid" ? (
+          <p className="t-caption mt-[12px] text-muted">
+            Credits were deducted first and the lead released only because that succeeded. The
+            deduction is on your{" "}
+            <Link href={paths.ledgerHref} className="font-semibold text-brand">
+              credit ledger
+            </Link>{" "}
+            under the reference above, so the money can be traced rather than taken on trust.
+          </p>
+        ) : (
+          <p className="t-caption mt-[12px] text-muted">
+            {order.status === "pending"
+              ? "This order is pending. The lead was not released, and a pending order is not shown as a paid or failed charge."
+              : "This order is not paid. Nothing was released."}
+          </p>
+        )}
         <p className="t-caption mt-[8px] text-muted">
           Paying by card or UPI instead of wallet credits is a later addition. No payment provider
           has been chosen, and none is contacted anywhere in this build.

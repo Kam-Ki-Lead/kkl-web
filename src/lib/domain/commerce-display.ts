@@ -44,6 +44,17 @@ export function readWalletReconciliation(body: unknown): WalletReconciliation | 
   };
 }
 
+/**
+ * Customer order chip. `completed` is the only paid state. `pending` stays
+ * pending: it is not a failed charge, and it does not release contact.
+ */
+export function customerOrderStatus(status: string): "paid" | "pending" | "cancelled" | "failed" {
+  if (status === "completed") return "paid";
+  if (status === "pending") return "pending";
+  if (status === "cancelled") return "cancelled";
+  return "failed";
+}
+
 export function agingDiscountSentence(discountRendered: boolean): string {
   return discountRendered
     ? "The aging discount shown on the Sale tab is 20%; no other discount rule is set."

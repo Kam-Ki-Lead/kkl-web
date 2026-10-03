@@ -20,6 +20,7 @@ import type {
 } from "@/lib/domain/types";
 import type { UsageMonth } from "@/lib/services/contracts";
 import {
+  customerOrderStatus,
   readPriceChangedQuote,
   readWalletReconciliation,
   purchaseExpectedFields,
@@ -167,10 +168,7 @@ const toDetail = (lead: BackendLead): MarketplaceLeadDetail => ({
 });
 
 function orderStatus(status: BackendOrder["status"]): LeadOrderStatus {
-  if (status === "completed") return "paid";
-  if (status === "pending") return "pending";
-  if (status === "cancelled") return "cancelled";
-  return "failed";
+  return customerOrderStatus(status);
 }
 
 function toLeadOrder(order: BackendOrder): LeadOrder {

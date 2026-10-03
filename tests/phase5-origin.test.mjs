@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { assertSingleBackendOrigin } from "../src/lib/services/backend/config.ts";
-import { agingDiscountSentence, readWalletReconciliation } from "../src/lib/domain/commerce-display.ts";
+import { agingDiscountSentence, customerOrderStatus, readWalletReconciliation } from "../src/lib/domain/commerce-display.ts";
 
 const ORIGIN_VARS = [
   "KKL_BACKEND_BASE_URL",
@@ -55,6 +55,15 @@ test("wallet reconciliation keeps the service fields", () => {
   assert.equal(row?.balanced, true);
   assert.equal(row?.entryCount, 0);
   assert.equal(readWalletReconciliation({ balanced: "yes" }), null);
+});
+
+test("a pending order stays pending and is not a failed charge", () => {
+  assert.equal(customerOrderStatus("pending"), "pending");
+  assert.equal(customerOrderStatus("completed"), "paid");
+  assert.equal(customerOrderStatus("cancelled"), "cancelled");
+  assert.equal(customerOrderStatus("failed"), "failed");
+  assert.notEqual(customerOrderStatus("pending"), "failed");
+  assert.notEqual(customerOrderStatus("pending"), "paid");
 });
 
 test("a backend marketplace does not describe a 20% charge", () => {

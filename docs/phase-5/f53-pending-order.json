@@ -1,0 +1,19 @@
+{
+  "category": "review-browser",
+  "at": "2026-10-03T06:52:09.861Z",
+  "orderId": "756b70e8-5b09-43fd-af28-dd4113d668af",
+  "orderRef": "ORD-P5-F53-PENDING",
+  "fixture": "synthetic pending row written as the seller; no wallet entry; consent left unknown",
+  "results": [
+    {
+      "name": "Seller order list shows Pending",
+      "pass": true,
+      "detail": "chip=Pending url=http://127.0.0.1:3815/seller/orders"
+    },
+    {
+      "name": "Seller order detail stays pending and releases nothing",
+      "pass": true,
+      "detail": "chip=Pending openLead=0 cancel=0 756b70e8-5b09-43fd-af28-dd4113d668af What you ordered. This order is not paid. ◈ ₹0 credits P5 756b70e8-5b09-43fd-af28-dd4113d668af Pending All orders What you ordered Item Synthetic pending order for F5-3. Not a purchase and not consent to sell. Area Placed 3 Oct 2026, 12:14 pm Marketplace Seller lead pool Nothing was released for this order. Payment Method Wallet credits Amount ₹40 credits This order is pending. Th"
+    }
+  ]
+}

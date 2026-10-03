@@ -28,6 +28,7 @@ change the backend file's conclusion.
 - A purchased-lead download that returns 503 text and no contact file.
 - A support body that stays text.
 - A protocol-relative `next` that stays on `/account`.
+- A synthetic pending order on the seller's list and detail. The chip reads Pending. Nothing was released. No cancel or refund control. The wallet was not debited.
 
 ## What still prevents Phase 5 acceptance
 
@@ -35,12 +36,10 @@ change the backend file's conclusion.
 2. Q-4. The intake lead cannot be bought. Staff cannot award verified. No consent was recorded from qualification (Q-6).
 3. Q-5. There is no Razorpay sandbox payment and no signed sandbox webhook from Razorpay.
 4. Q-7. There is no WhatsApp sandbox send. No live message was sent.
-5. Q-8. There is no file upload or download. Export is an explicit refusal.
+5. Q-8. There is no file upload or download. The purchased-lead export returns 503 text. That refusal is correct unavailable behaviour, not a completed download.
 6. Exotel and Sarvam were not called. A simulated voice socket is not a delivered call.
 7. Meta Instant Form intake is not built.
 8. There is no externally reachable staging URL and no platform secret loader.
-9. F5-3 stays open. A pending order chip was not shown in the browser because the seeded account has no pending order.
-10. The seller fixture phone is at its daily OTP cap until that window moves, so a further seller-role browser run has to wait or use another synthetic phone. This window did not reset rate-limit rows.
-11. No client signature and no security signature. This checklist does not provide either.
+9. No client signature and no security signature. This checklist does not provide either.
 
-A local review-browser pass, including the closed frontend rows F5-1, F5-2, F5-4, and F5-5, does not close that list.
+F5-1, F5-2, F5-3, F5-4, and F5-5 are closed in `defects.md`. Closing them does not close the list above.
