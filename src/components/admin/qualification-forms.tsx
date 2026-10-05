@@ -135,8 +135,8 @@ export function SyntheticQuestionSetForm() {
   const [state, action, pending] = useActionState(registerSyntheticQuestions, initial);
   return (
     <form action={action} className="mt-[12px] flex flex-col gap-[12px]">
-      <Field id="versionLabel" label="Version label" labelSize="sm" helper="Lowercase. Activates the synthetic SYNTHETIC prompts only." error={state.field === "versionLabel" ? state.error : undefined}>
-        <TextInput id="versionLabel" name="versionLabel" defaultValue={`synthetic-${Date.now().toString(36).slice(-6)}`} invalid={state.field === "versionLabel"} />
+      <Field id="versionLabel" label="Version label" labelSize="sm" helper="Lowercase. Leave it blank and one is generated. Activates the synthetic SYNTHETIC prompts only." error={state.field === "versionLabel" ? state.error : undefined}>
+        <TextInput id="versionLabel" name="versionLabel" placeholder="synthetic-…" invalid={state.field === "versionLabel"} />
       </Field>
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Registering…" : "Register synthetic question set"}

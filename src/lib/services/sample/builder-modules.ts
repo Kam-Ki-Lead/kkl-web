@@ -259,7 +259,7 @@ function seedThreads(): StoredThread[] {
         {
           id: id(),
           author: "support",
-          authorLabel: "Kam Ki Lead support",
+          authorLabel: "Kaam Ki Lead support",
           body: "The listing is currently unpublished — you can republish it from My properties. Nothing was removed.",
           sentAt: "2026-09-16T11:05:00.000Z",
         },
@@ -532,7 +532,7 @@ export const builderCredits: CreditService = {
         gstin: null,
       },
       issuedBy: {
-        name: "Kam Ki Lead",
+        name: "Kaam Ki Lead",
         addressLines: ["Kolkata, West Bengal"],
         gstin: null,
       },

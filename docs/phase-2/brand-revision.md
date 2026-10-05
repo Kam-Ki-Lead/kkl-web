@@ -94,7 +94,7 @@ brand blue or saffron as a rendered colour. Those values stay in comments
 and in `kkl-design` at `5bc3512`.
 
 A later check used the Tab key in Chrome on the homepage. The first Tab
-focused the “Kam Ki Lead” link, and that link matched `:focus-visible`.
+focused the “Kaam Ki Lead” link, and that link matched `:focus-visible`.
 The ring was solid, 3px, `rgb(243, 148, 42)`, with a 2px offset and a 1px
 ink shadow `rgb(18, 24, 43)`. Signed in as Review Builder, number ending
 0104, `/builder` opened the Dashboard. The navigation was labelled
@@ -102,3 +102,27 @@ ink shadow `rgb(18, 24, 43)`. Signed in as Review Builder, number ending
 Subscription, Buy Leads, My leads, My purchases, Billing & credits,
 Support, and Profile. The rail background was `rgb(75, 41, 115)`. The
 staff-session refusal above is a different account.
+
+## The trading name is "Kaam Ki Lead"
+
+The owner corrected the spelling: it is Kaam Ki Lead, not Kam Ki Lead. The
+application carried the wrong spelling in 34 places, all of them visible to
+somebody — the page title and its template, the wordmark's accessible name,
+four more "— home" link labels, the footer copyright line, and body copy on
+the property, profile, enquiry and builder-pricing screens. All 34 are
+corrected, together with the project's own prose.
+
+Two sets of files keep the old spelling on purpose.
+
+The Phase 1 design-direction prototype under `docs/design/prototype/` is
+preserved as the rejected reference artifact. It is what was shown and
+turned down; rewriting its text would change a record of that, and it is
+already excluded from the application's lint rules for the same reason.
+
+`docs/phase-5/browser-evidence.json` and the other captured evidence files
+hold verbatim text read off rendered pages during a verification run.
+Editing a capture would make it a claim about a run that did not happen.
+They will carry the corrected name the next time those scripts run.
+
+Repository and organisation names (`kkl-web`, `Kam-Ki-Lead`) are unchanged.
+Renaming either is not part of this correction.

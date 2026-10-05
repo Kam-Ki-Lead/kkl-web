@@ -828,7 +828,10 @@ export function providerStatusLabel(status: string, providerVerified: boolean): 
   return status.replace(/_/g, " ");
 }
 
-export function levelDisplay(qualification: QualificationSnapshot): string {
+// The parameter stays in the signature so callers do not change when the
+// question-to-level mapping is confirmed. There is nothing to read off the
+// snapshot until then, and no level is invented from one.
+export function levelDisplay(_qualification: QualificationSnapshot): string {
   return "mapping not configured";
 }
 

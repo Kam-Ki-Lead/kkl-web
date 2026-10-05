@@ -10,6 +10,20 @@ const config = [
   ...coreWebVitals,
   ...typescript,
   {
+    rules: {
+      // An underscore prefix is how this codebase says "this parameter is
+      // part of the signature and deliberately unused" — levelDisplay keeps
+      // its snapshot argument so callers do not change when the
+      // question-to-level mapping is confirmed. Without this the convention
+      // cannot be expressed and the warning has to be lived with instead.
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      }],
+    },
+  },
+  {
     ignores: [
       ".next/**",
       "node_modules/**",

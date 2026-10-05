@@ -85,7 +85,7 @@ function seed(): LeadRequestState {
         responses: [
           {
             id: "lrr-1",
-            authorLabel: "Kam Ki Lead team",
+            authorLabel: "Kaam Ki Lead team",
             body: "We are checking the qualified pipeline for Rajarhat against this requirement and will update this request.",
             at: "2026-09-25T11:15:00.000Z",
           },
@@ -257,7 +257,7 @@ export function respondToRequest(input: {
   } else {
     const response: LeadRequestResponse = {
       id: `lrr-${request.responses.length + 1}-${request.id}`,
-      authorLabel: "Kam Ki Lead team",
+      authorLabel: "Kaam Ki Lead team",
       body,
       at,
     };

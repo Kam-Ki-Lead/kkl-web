@@ -48,42 +48,14 @@ export default async function ShortlistPage() {
     );
   }
 
+  // The read is what can fail, so the read is what is wrapped. Building the
+  // JSX inside the try would put every child's render inside this catch,
+  // which is not what the catch is for and is what React's
+  // error-boundaries rule objects to: a component's render errors reach an
+  // error boundary, never a try around the JSX expression.
+  let list;
   try {
-    const list = await readShortlist();
-    return (
-      <div className="mx-auto max-w-[760px] px-[32px] pb-[60px] pt-[30px] max-[1060px]:px-[18px]">
-        <h1 className="t-title text-ink">My shortlist</h1>
-        <p className="t-body mt-[6px] text-body">
-          Published properties saved on this account. {list.total} saved.
-        </p>
-        {list.items.length === 0 ? (
-          <div className="mt-[18px]">
-            <StateMessage title="Nothing is shortlisted">
-              Only a published property can be saved here. Publication is not available, so this
-              list stays empty. A draft is not added in its place.
-            </StateMessage>
-          </div>
-        ) : (
-          <ul className="mt-[18px] flex flex-col gap-[12px]">
-            {list.items.map((item) => (
-              <li key={item.listingId} className="flex items-start justify-between gap-[14px] rounded-[10px] border border-line px-[16px] py-[14px]">
-                <div>
-                  <p className="text-[16px] font-semibold text-ink">{item.title ?? item.reference ?? item.listingId}</p>
-                  <p className="t-caption mt-[4px] text-muted">
-                    {item.status ?? "Status not reported"}
-                    {item.priceInr != null ? ` · ₹${item.priceInr.toLocaleString("en-IN")}` : ""}
-                    {item.priceMinInr != null || item.priceMaxInr != null
-                      ? ` · range ₹${item.priceMinInr?.toLocaleString("en-IN") ?? "—"}–₹${item.priceMaxInr?.toLocaleString("en-IN") ?? "—"}`
-                      : ""}
-                  </p>
-                </div>
-                <ShortlistRemoveButton listingId={item.listingId} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
+    list = await readShortlist();
   } catch (error) {
     if (error instanceof ServiceError && error.kind === "unauthenticated") {
       return (
@@ -110,4 +82,39 @@ export default async function ShortlistPage() {
     }
     throw error;
   }
+
+  return (
+    <div className="mx-auto max-w-[760px] px-[32px] pb-[60px] pt-[30px] max-[1060px]:px-[18px]">
+      <h1 className="t-title text-ink">My shortlist</h1>
+      <p className="t-body mt-[6px] text-body">
+        Published properties saved on this account. {list.total} saved.
+      </p>
+      {list.items.length === 0 ? (
+        <div className="mt-[18px]">
+          <StateMessage title="Nothing is shortlisted">
+            Only a published property can be saved here. Publication is not available, so this
+            list stays empty. A draft is not added in its place.
+          </StateMessage>
+        </div>
+      ) : (
+        <ul className="mt-[18px] flex flex-col gap-[12px]">
+          {list.items.map((item) => (
+            <li key={item.listingId} className="flex items-start justify-between gap-[14px] rounded-[10px] border border-line px-[16px] py-[14px]">
+              <div>
+                <p className="text-[16px] font-semibold text-ink">{item.title ?? item.reference ?? item.listingId}</p>
+                <p className="t-caption mt-[4px] text-muted">
+                  {item.status ?? "Status not reported"}
+                  {item.priceInr != null ? ` · ₹${item.priceInr.toLocaleString("en-IN")}` : ""}
+                  {item.priceMinInr != null || item.priceMaxInr != null
+                    ? ` · range ₹${item.priceMinInr?.toLocaleString("en-IN") ?? "—"}–₹${item.priceMaxInr?.toLocaleString("en-IN") ?? "—"}`
+                    : ""}
+                </p>
+              </div>
+              <ShortlistRemoveButton listingId={item.listingId} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }

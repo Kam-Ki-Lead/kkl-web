@@ -84,7 +84,7 @@ export default async function EnquiryDetailPage({
         <p className="t-caption mt-[6px] text-body">
           {enquiry.status === "contacted"
             ? "The builder has marked this enquiry as contacted. Replies sent through the portal appear here."
-            : "No reply yet. Kam Ki Lead does not promise a response time."}
+            : "No reply yet. Kaam Ki Lead does not promise a response time."}
         </p>
       </Card>
 

@@ -93,7 +93,12 @@ export async function registerSyntheticQuestions(
   _previous: QualificationActionState,
   formData: FormData,
 ): Promise<QualificationActionState> {
-  const label = String(formData.get("versionLabel") ?? "").trim().toLowerCase();
+  const typed = String(formData.get("versionLabel") ?? "").trim().toLowerCase();
+  // Blank means "pick one for me". The suggestion used to be a Date.now()
+  // call in the form's render, which React 19 reports as an impure component
+  // and which produces a different value on the server and on hydration.
+  // Generating it here costs nothing and is a single, stable decision.
+  const label = typed || `synthetic-${Date.now().toString(36).slice(-6)}`;
   if (!/^[a-z0-9][a-z0-9._-]{0,63}$/.test(label)) {
     return { error: "Use a short lowercase version label.", field: "versionLabel" };
   }

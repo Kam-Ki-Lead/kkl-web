@@ -76,7 +76,7 @@ export async function AdminShell({
     (l) => l.status === "submitted" || l.status === "in_review",
   ).length;
 
-  let asideName = signedInName ?? SAMPLE_STAFF.name;
+  const asideName = signedInName ?? SAMPLE_STAFF.name;
   let asideTeam = signedInName ? "Signed-in session" : SAMPLE_STAFF.team;
   if (bearerMode() === "browser-session" && signedInName === "Session") {
     asideTeam = "Account could not be read";

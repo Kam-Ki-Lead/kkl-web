@@ -419,7 +419,7 @@ const coverLine = (text, opts = {}) =>
 
 const cover = [
   new Paragraph({ spacing: { before: 1800, after: 0 }, children: [
-    new TextRun({ text: "Kam Ki Lead", size: 56, bold: true, color: INK }),
+    new TextRun({ text: "Kaam Ki Lead", size: 56, bold: true, color: INK }),
   ] }),
   new Paragraph({ spacing: { before: 60, after: 400 }, children: [
     new TextRun({ text: "Consolidated technical documentation", size: 34, color: MUTED }),
@@ -471,9 +471,9 @@ const heading = (size, before, after) => ({
 });
 
 const doc = new Document({
-  title: "Kam Ki Lead — consolidated technical documentation",
-  description: "Prompt-by-prompt technical history of the Kam Ki Lead project",
-  creator: "Kam Ki Lead project",
+  title: "Kaam Ki Lead — consolidated technical documentation",
+  description: "Prompt-by-prompt technical history of the Kaam Ki Lead project",
+  creator: "Kaam Ki Lead project",
   styles: {
     default: {
       document: {
@@ -514,7 +514,7 @@ const doc = new Document({
   sections: [
     {
       properties: { page: { margin: { top: 1300, bottom: 1200, left: 1440, right: 1440 } } },
-      footers: { default: footer("Kam Ki Lead — technical documentation") },
+      footers: { default: footer("Kaam Ki Lead — technical documentation") },
       children: [...cover, ...portrait],
     },
     {
@@ -524,7 +524,7 @@ const doc = new Document({
           margin: { top: 1200, bottom: 1100, left: 936, right: 936 },
         },
       },
-      footers: { default: footer("Kam Ki Lead — traceability matrix") },
+      footers: { default: footer("Kaam Ki Lead — traceability matrix") },
       children: landscape,
     },
   ],

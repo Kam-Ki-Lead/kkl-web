@@ -2,14 +2,11 @@
  * Completes browser checks that remain after mutation fixtures were exercised
  * (review/resume already applied). Does not reseed or click retry.
  */
-import { createRequire } from "node:module";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { loadPlaywright } from "./repo-paths.mjs";
 
-const playwrightSpec = process.env.PLAYWRIGHT
-  ?? "C:/Users/noora/AppData/Local/Cursor/AgentStores/cursor_agent_stores/01afa20b-2d9b-4665-bc47-8402816b45f6/files/pw/node_modules/playwright";
-const require = createRequire(import.meta.url);
-const chromium = require(join(playwrightSpec.replace(/[\\/]+$/, ""), "index.js")).chromium;
+const chromium = loadPlaywright().chromium;
 
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3812";
 const BACKEND = process.env.BACKEND_URL ?? "http://127.0.0.1:4011";

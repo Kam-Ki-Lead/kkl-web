@@ -1,4 +1,4 @@
-import type { ListingDraft, ListingSummary } from "@/lib/domain/types";
+import type { ListingSummary } from "@/lib/domain/types";
 import type { ListingService } from "@/lib/services/contracts";
 import { ServiceError, ValidationError } from "@/lib/services/contracts";
 import {

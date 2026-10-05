@@ -1,6 +1,6 @@
-# Kam Ki Lead — technical history
+# Kaam Ki Lead — technical history
 
-A prompt-by-prompt account of how Kam Ki Lead was built, what was decided, what
+A prompt-by-prompt account of how Kaam Ki Lead was built, what was decided, what
 was verified, and what is still open. Written on **28 September 2026** against
 the commits listed below.
 

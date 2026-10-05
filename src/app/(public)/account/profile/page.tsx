@@ -42,7 +42,7 @@ export default async function ProfilePage() {
     <div className="mx-auto max-w-[660px] px-[32px] pb-[60px] pt-[28px] max-[1060px]:px-[18px]">
       <h1 className="t-title text-ink">Profile &amp; settings</h1>
       <p className="t-body mt-[6px] text-body">
-        Your details, and how Kam Ki Lead contacts you about enquiries.
+        Your details, and how Kaam Ki Lead contacts you about enquiries.
       </p>
 
       <Card className="mt-[18px] p-[22px]">

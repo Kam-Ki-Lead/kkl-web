@@ -74,7 +74,7 @@ export function PublicFooter() {
         </div>
 
         <div className="mt-[28px] flex flex-wrap items-center justify-between gap-[12px] border-t border-[#23387F] pt-[16px]">
-          <p className="text-[14px] text-[#9FACE4]">© 2026 Kam Ki Lead</p>
+          <p className="text-[14px] text-[#9FACE4]">© 2026 Kaam Ki Lead</p>
           <p className="text-[14px] text-[#9FACE4]">Kolkata · New Town · Rajarhat · Salt Lake</p>
         </div>
       </div>

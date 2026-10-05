@@ -20,7 +20,7 @@ Nothing here is marked accepted. Acceptance is a person saying yes.
 
 > You are editing a listing. You have typed something and not saved it.
 >
-> - If you click anything **inside Kam Ki Lead** — a section link, "Close
+> - If you click anything **inside Kaam Ki Lead** — a section link, "Close
 >   editor", the console rail, the logo — you get the approved dialog:
 >   **Save draft and close · Discard changes · Keep editing.**
 > - If you press the browser's **Back** button, that dialog does **not**

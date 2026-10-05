@@ -112,7 +112,7 @@ were found. **None has been changed.**
 
 Two sentences, if only two are read:
 
-> Kam Ki Lead has a complete, verified frontend for six audiences over sample
+> Kaam Ki Lead has a complete, verified frontend for six audiences over sample
 > services, one genuinely persistent and account-isolated backend domain, and a
 > documented set of decisions and dependencies that are explicit about what has
 > not been decided.

@@ -205,7 +205,7 @@ const contents = toc
 
 const matrix = parseCsv(read("traceability.csv"));
 
-const document = `# Kam Ki Lead — consolidated technical documentation
+const document = `# Kaam Ki Lead — consolidated technical documentation
 
 **Generated file — do not edit by hand.** It is assembled from the chapter
 files in \`docs/technical-history/\` by \`build-consolidated.mjs\`, so the

@@ -1,4 +1,4 @@
-# Kam Ki Lead — consolidated technical documentation
+# Kaam Ki Lead — consolidated technical documentation
 
 **Generated file — do not edit by hand.** It is assembled from the chapter
 files in `docs/technical-history/` by `build-consolidated.mjs`, so the
@@ -12,7 +12,7 @@ node docs/technical-history/build-consolidated.mjs
 Sources: `README.md`, `01-project-scope-and-evolution.md`, `02-prompt-by-prompt-worklog.md`, `03-architecture-and-repository-boundaries.md`, `04-design-and-frontend-methodology.md`, `05-role-journeys-and-screen-implementation.md`, `06-data-services-and-backend-integration.md`, `07-security-verification-and-accessibility.md`, `08-defects-root-causes-and-corrections.md`, `09-client-changes-and-decision-history.md`, `10-environments-and-reproducibility.md`, `11-current-status-and-outstanding-work.md`, and
 `traceability.csv` — all in this folder.
 
-A prompt-by-prompt account of how Kam Ki Lead was built, what was decided, what
+A prompt-by-prompt account of how Kaam Ki Lead was built, what was decided, what
 was verified, and what is still open. Written on **28 September 2026** against
 the commits listed below.
 
@@ -219,7 +219,7 @@ labelled as that agent's claim, not as a finding.
 
 ## 1. Project scope and evolution
 
-How Kam Ki Lead got from a demo that won the work to the state in chapter 11.
+How Kaam Ki Lead got from a demo that won the work to the state in chapter 11.
 Each stage is dated from evidence. Where a later requirement did not exist at an
 earlier stage, this chapter says so rather than reading it backwards.
 
@@ -401,7 +401,7 @@ attached (`KamKiLead_Development_Proposal.pdf`,
 
 > "PRIMARY PRODUCT EXPERIENCE — PUBLIC PROPERTY PORTAL
 >
-> Kam Ki Lead must have a full 99acres-style property discovery interface. This
+> Kaam Ki Lead must have a full 99acres-style property discovery interface. This
 > is a central product experience, not a marketing page in front of a lead
 > marketplace. … Do not begin with an admin dashboard or treat the public portal
 > as a secondary screen."
@@ -534,7 +534,7 @@ in PRM-005.
 
 **Date** 21 September 2026, 05:14 · **Source** user prompt
 
-> "Begin Phase 2 frontend development for Kam Ki Lead. The client has approved
+> "Begin Phase 2 frontend development for Kaam Ki Lead. The client has approved
 > the Phase 1 designs. Use this repository as the approved design reference:
 > https://github.com/Kam-Ki-Lead/kkl-design Baseline commit: 5bc3512…"
 
@@ -1000,7 +1000,7 @@ reference image attached
 `policyProvenance` so staff see the basis while no customer-facing type carries
 a field that could show it.
 
-For Type 1: the attached image's own chrome reads *"ROUND 3 · Kam Ki Lead —
+For Type 1: the attached image's own chrome reads *"ROUND 3 · Kaam Ki Lead —
 responsive portal homepage · Prototype · fit to window, 1209px · synthetic
 listings, stock photography"* — the kkl-design prototype viewer. The build was
 captured at the same 1209 px and compared: header, hero and search card match,
@@ -1047,7 +1047,7 @@ figures without saying they predate all CR work; that section is now scoped.
 
 **Date** 28 September 2026, 10:21 · **Source** user prompt
 
-> "Create comprehensive technical documentation of the Kam Ki Lead project,
+> "Create comprehensive technical documentation of the Kaam Ki Lead project,
 > covering the work performed in response to every recoverable project prompt…
 > THIS IS A DOCUMENTATION-ONLY TASK."
 
@@ -2718,7 +2718,7 @@ were found. **None has been changed.**
 
 Two sentences, if only two are read:
 
-> Kam Ki Lead has a complete, verified frontend for six audiences over sample
+> Kaam Ki Lead has a complete, verified frontend for six audiences over sample
 > services, one genuinely persistent and account-isolated backend domain, and a
 > documented set of decisions and dependencies that are explicit about what has
 > not been decided.

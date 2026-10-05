@@ -1,6 +1,6 @@
 # 1. Project scope and evolution
 
-How Kam Ki Lead got from a demo that won the work to the state in chapter 11.
+How Kaam Ki Lead got from a demo that won the work to the state in chapter 11.
 Each stage is dated from evidence. Where a later requirement did not exist at an
 earlier stage, this chapter says so rather than reading it backwards.
 

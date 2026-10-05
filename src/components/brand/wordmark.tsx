@@ -24,6 +24,14 @@ export function Wordmark({
 
   return (
     <span className="inline-flex flex-none items-center gap-[10px] whitespace-nowrap">
+      {/*
+        A plain <img>, not next/image. The mark is a single small static file
+        served from /public at a fixed size on every page; the optimiser would
+        add a per-request image route and, on a provider that bills for it, a
+        cost, for no change to what renders. Width and height are the file's
+        own, so the box is reserved and nothing shifts as it loads.
+      */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/brand/kkl-logo.jpg"
         alt=""

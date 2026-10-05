@@ -1,6 +1,6 @@
 # kkl-web
 
-Kam Ki Lead (KKL) — public property portal plus Buyer, Seller, Builder, and Admin interfaces.
+Kaam Ki Lead (KKL) — public property portal plus Buyer, Seller, Builder, and Admin interfaces.
 Next.js, React, TypeScript, Tailwind. Shared components and design tokens live here.
 
 **This repository holds no database access and no authoritative wallet/business logic.** Every

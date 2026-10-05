@@ -1470,7 +1470,7 @@ frontend started.
 | Check | Result |
 | --- | --- |
 | Review marketplace | Review Seller, number ending 0102. Buy Leads said “No leads match these filters”. There was no lead link and no “Confirm and buy” button. No purchase was submitted. |
-| Keyboard focus | Chrome Tab on the homepage. The first Tab focused the “Kam Ki Lead” link. It matched `:focus-visible`. The ring was solid, 3px, `rgb(243, 148, 42)`, offset 2px, with a 1px ink shadow `rgb(18, 24, 43)`. |
+| Keyboard focus | Chrome Tab on the homepage. The first Tab focused the “Kaam Ki Lead” link. It matched `:focus-visible`. The ring was solid, 3px, `rgb(243, 148, 42)`, offset 2px, with a 1px ink shadow `rgb(18, 24, 43)`. |
 | Builder console | Review Builder, number ending 0104. `/builder` opened the Dashboard. The navigation was labelled “Builder console” and listed Dashboard, My properties, Enquiries, Subscription, Buy Leads, My leads, My purchases, Billing & credits, Support, and Profile. The rail background was `rgb(75, 41, 115)`. |
 
 Workbook rates were not loaded. Saving and previewing still do not change a

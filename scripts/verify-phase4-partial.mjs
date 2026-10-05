@@ -2,18 +2,11 @@
  * Partial Phase 4.c checks that do not require the sole staff OTP
  * (+919800004010 is daily rate-limited on this host).
  */
-import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { pathToFileURL, fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { loadPlaywright } from "./repo-paths.mjs";
 
-const playwrightSpec = process.env.PLAYWRIGHT
-  ?? "C:/Users/noora/AppData/Local/Cursor/AgentStores/cursor_agent_stores/01afa20b-2d9b-4665-bc47-8402816b45f6/files/pw/node_modules/playwright";
-const require = createRequire(import.meta.url);
-const playwrightPackage = /^[a-zA-Z]:[\\/]/.test(playwrightSpec)
-  ? require(join(playwrightSpec, "index.js"))
-  : require(playwrightSpec);
-const chromium = playwrightPackage.chromium;
+const chromium = loadPlaywright().chromium;
 if (!chromium) throw new Error("playwright chromium export missing");
 
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3812";

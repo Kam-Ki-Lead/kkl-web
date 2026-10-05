@@ -130,7 +130,7 @@ export function DashboardRail({
       className={`flex ${t.width} flex-none flex-col ${t.surface} max-[1060px]:hidden`}
     >
       <div className="px-[18px] py-[20px]">
-        <Link href="/" aria-label="Kam Ki Lead — home" className="inline-block">
+        <Link href="/" aria-label="Kaam Ki Lead — home" className="inline-block">
           <Wordmark size="rail" onDark />
         </Link>
       </div>

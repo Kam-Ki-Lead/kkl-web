@@ -37,7 +37,7 @@ export function OnboardingShell({
   return (
     <div className="min-h-screen bg-surface">
       <header className="flex items-center justify-between gap-[14px] border-b border-line bg-white px-[32px] py-[16px] max-[1060px]:px-[16px]">
-        <Link href="/" aria-label="Kam Ki Lead — home">
+        <Link href="/" aria-label="Kaam Ki Lead — home">
           <Wordmark />
         </Link>
         <p className="text-[15px] text-muted">Broker &amp; agency registration</p>

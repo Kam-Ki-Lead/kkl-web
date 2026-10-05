@@ -1051,7 +1051,7 @@ export function getInvoice(id: string): InvoiceDetail | null {
       gstin: state().billing.gstin,
     },
     issuedBy: {
-      name: "Kam Ki Lead",
+      name: "Kaam Ki Lead",
       addressLines: ["Kolkata, West Bengal"],
       // Null, and the screen says why: D-13 leaves GST treatment unconfirmed.
       gstin: null,
@@ -1109,14 +1109,14 @@ function seedThreads(): StoredThread[] {
         {
           id: id(),
           author: "support",
-          authorLabel: "Kam Ki Lead support",
+          authorLabel: "Kaam Ki Lead support",
           body: "Thanks — we have pulled the call recording and asked the qualification team to re-check the number. We will confirm the outcome here.",
           sentAt: "2026-09-12T10:10:00.000Z",
         },
         {
           id: id(),
           author: "support",
-          authorLabel: "Kam Ki Lead support",
+          authorLabel: "Kaam Ki Lead support",
           body: "The number was mis-keyed during intake and has been corrected on your purchased lead. Whether a credit refund applies is still being decided by the client, so we have not applied one.",
           sentAt: "2026-09-13T03:48:00.000Z",
         },
@@ -1141,7 +1141,7 @@ function seedThreads(): StoredThread[] {
         {
           id: id(),
           author: "support",
-          authorLabel: "Kam Ki Lead support",
+          authorLabel: "Kaam Ki Lead support",
           body: "It is INV-2026-0902, under Billing → Invoices. Marking this resolved — reopen by replying if anything is still missing.",
           sentAt: "2026-09-05T06:02:00.000Z",
         },
@@ -1166,7 +1166,7 @@ function seedThreads(): StoredThread[] {
         {
           id: id(),
           author: "support",
-          authorLabel: "Kam Ki Lead support",
+          authorLabel: "Kaam Ki Lead support",
           body: "Either both sides in one PDF or the e-Aadhaar PDF. Could you confirm which you uploaded so we can check what came through?",
           sentAt: "2026-08-30T04:44:00.000Z",
         },

@@ -30,7 +30,7 @@ export function BuilderOnboardingShell({
           content alike: 16px / 20px 22px / 24px 28px across the three
           widths. */}
       <header className="flex items-center justify-between gap-[14px] border-b border-line bg-white p-[16px] min-[620px]:max-[1059px]:px-[22px] min-[620px]:max-[1059px]:py-[20px] min-[1060px]:px-[28px] min-[1060px]:py-[24px]">
-        <Link href="/" aria-label="Kam Ki Lead — home">
+        <Link href="/" aria-label="Kaam Ki Lead — home">
           <Wordmark />
         </Link>
         {/* 15px, as the approved header sets it — not the 13px caption. */}

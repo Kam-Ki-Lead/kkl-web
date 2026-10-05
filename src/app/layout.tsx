@@ -28,8 +28,8 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Kam Ki Lead",
-    template: "%s · Kam Ki Lead",
+    default: "Kaam Ki Lead",
+    template: "%s · Kaam Ki Lead",
   },
   description:
     "A property portal for Kolkata, and a lead marketplace for verified brokers and builders.",

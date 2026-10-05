@@ -24,7 +24,7 @@ attached (`KamKiLead_Development_Proposal.pdf`,
 
 > "PRIMARY PRODUCT EXPERIENCE — PUBLIC PROPERTY PORTAL
 >
-> Kam Ki Lead must have a full 99acres-style property discovery interface. This
+> Kaam Ki Lead must have a full 99acres-style property discovery interface. This
 > is a central product experience, not a marketing page in front of a lead
 > marketplace. … Do not begin with an admin dashboard or treat the public portal
 > as a secondary screen."
@@ -157,7 +157,7 @@ in PRM-005.
 
 **Date** 21 September 2026, 05:14 · **Source** user prompt
 
-> "Begin Phase 2 frontend development for Kam Ki Lead. The client has approved
+> "Begin Phase 2 frontend development for Kaam Ki Lead. The client has approved
 > the Phase 1 designs. Use this repository as the approved design reference:
 > https://github.com/Kam-Ki-Lead/kkl-design Baseline commit: 5bc3512…"
 
@@ -623,7 +623,7 @@ reference image attached
 `policyProvenance` so staff see the basis while no customer-facing type carries
 a field that could show it.
 
-For Type 1: the attached image's own chrome reads *"ROUND 3 · Kam Ki Lead —
+For Type 1: the attached image's own chrome reads *"ROUND 3 · Kaam Ki Lead —
 responsive portal homepage · Prototype · fit to window, 1209px · synthetic
 listings, stock photography"* — the kkl-design prototype viewer. The build was
 captured at the same 1209 px and compared: header, hero and search card match,
@@ -670,7 +670,7 @@ figures without saying they predate all CR work; that section is now scoped.
 
 **Date** 28 September 2026, 10:21 · **Source** user prompt
 
-> "Create comprehensive technical documentation of the Kam Ki Lead project,
+> "Create comprehensive technical documentation of the Kaam Ki Lead project,
 > covering the work performed in response to every recoverable project prompt…
 > THIS IS A DOCUMENTATION-ONLY TASK."
 

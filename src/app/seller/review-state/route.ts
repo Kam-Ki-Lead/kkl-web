@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Only same-origin paths are followed, so this cannot be used to bounce
-  // someone to another site with a Kam Ki Lead URL.
+  // someone to another site with a Kaam Ki Lead URL.
   const raw = params.get("to") ?? "/seller";
   const to = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/seller";
 

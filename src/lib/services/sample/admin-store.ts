@@ -1270,7 +1270,7 @@ function staticThreadMessages(reference: string): AdminTicketMessage[] {
     },
     {
       id: "SM-2",
-      authorLabel: "Kam Ki Lead support",
+      authorLabel: "Kaam Ki Lead support",
       body: "The subscription price and billing cycle are not set yet (D-01). We will write to you as soon as they are agreed — nothing is being charged in the meantime.",
       sentAt: "2026-09-15T09:02:00.000Z",
       internal: false,
@@ -1329,13 +1329,13 @@ export function replyToTicket(input: {
     sellerStore.postStaffReply({
       reference: input.reference,
       body: input.body.trim(),
-      staffLabel: "Kam Ki Lead support",
+      staffLabel: "Kaam Ki Lead support",
     });
   } else if (ticket.liveConsole === "builder") {
     builderSupport.postStaffReply({
       reference: input.reference,
       body: input.body.trim(),
-      staffLabel: "Kam Ki Lead support",
+      staffLabel: "Kaam Ki Lead support",
     });
   }
   // A ticket from an account with no console has nowhere to deliver to. It is
@@ -1895,13 +1895,13 @@ const CALLS: readonly VoiceCall[] = [
     outcome: "qualified",
     consentLabel: "Given",
     transcript: [
-      { at: "00:00", who: "Kam Ki Lead (automated)", text: "Good morning, this is Kam Ki Lead calling about your property enquiry in New Town. Is now a good time to speak?", automated: true },
+      { at: "00:00", who: "Kaam Ki Lead (automated)", text: "Good morning, this is Kaam Ki Lead calling about your property enquiry in New Town. Is now a good time to speak?", automated: true },
       { at: "00:09", who: "Buyer", text: "Yes, go ahead.", automated: false },
-      { at: "00:14", who: "Kam Ki Lead (automated)", text: "What budget range are you working with?", automated: true },
+      { at: "00:14", who: "Kaam Ki Lead (automated)", text: "What budget range are you working with?", automated: true },
       { at: "00:22", who: "Buyer", text: "Around one crore, maybe up to one and a half if the project is right.", automated: false },
-      { at: "01:05", who: "Kam Ki Lead (automated)", text: "And how soon would you want possession?", automated: true },
+      { at: "01:05", who: "Kaam Ki Lead (automated)", text: "And how soon would you want possession?", automated: true },
       { at: "01:12", who: "Buyer", text: "Within six months. We are relocating from Salt Lake.", automated: false },
-      { at: "03:04", who: "Kam Ki Lead (automated)", text: "May we share your requirement with verified brokers and builders so they can contact you about matching properties?", automated: true },
+      { at: "03:04", who: "Kaam Ki Lead (automated)", text: "May we share your requirement with verified brokers and builders so they can contact you about matching properties?", automated: true },
       { at: "03:12", who: "Buyer", text: "Yes, that is fine.", automated: false },
     ],
     captured: [
@@ -1932,9 +1932,9 @@ const CALLS: readonly VoiceCall[] = [
     outcome: "declined",
     consentLabel: "Refused",
     transcript: [
-      { at: "00:00", who: "Kam Ki Lead (automated)", text: "Good afternoon, this is Kam Ki Lead calling about your property enquiry. Is now a good time?", automated: true },
+      { at: "00:00", who: "Kaam Ki Lead (automated)", text: "Good afternoon, this is Kaam Ki Lead calling about your property enquiry. Is now a good time?", automated: true },
       { at: "00:11", who: "Buyer", text: "Who gave you this number?", automated: false },
-      { at: "00:40", who: "Kam Ki Lead (automated)", text: "May we share your requirement with verified brokers so they can contact you?", automated: true },
+      { at: "00:40", who: "Kaam Ki Lead (automated)", text: "May we share your requirement with verified brokers so they can contact you?", automated: true },
       { at: "00:48", who: "Buyer", text: "No. Please do not call again.", automated: false },
     ],
     captured: [],

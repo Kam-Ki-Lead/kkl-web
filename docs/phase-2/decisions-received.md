@@ -150,7 +150,7 @@ production on nobody's authority.
 
 - **Source:** project owner, 28 September 2026, as an attached image.
 - **What the image is:** the kkl-design prototype viewer, Round 3 — its own
-  chrome reads *"ROUND 3 · Kam Ki Lead — responsive portal homepage · Prototype ·
+  chrome reads *"ROUND 3 · Kaam Ki Lead — responsive portal homepage · Prototype ·
   fit to window, 1209px · synthetic listings, stock photography"*.
 - **Therefore:** **Type 1 is the homepage that was already approved and already
   built.** CR06-a closes with no redesign, which is the outcome worth having.

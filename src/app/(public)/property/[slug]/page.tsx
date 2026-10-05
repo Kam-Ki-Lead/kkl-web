@@ -184,8 +184,8 @@ export default async function PropertyDetailPage({
               </p>
               <p className="t-caption mt-[6px] text-body">
                 {property.possession
-                  ? `The builder has published a target handover of ${property.possession}. Kam Ki Lead does not verify construction progress.`
-                  : "The builder has not published a handover date. Kam Ki Lead does not verify construction progress."}
+                  ? `The builder has published a target handover of ${property.possession}. Kaam Ki Lead does not verify construction progress.`
+                  : "The builder has not published a handover date. Kaam Ki Lead does not verify construction progress."}
               </p>
             </InsetPanel>
           </Section>
@@ -214,7 +214,7 @@ export default async function PropertyDetailPage({
             <h2 className="text-[15px] font-bold text-ink">Listed by</h2>
             <p className="mt-[4px] text-[15px] text-body">{property.builderName}</p>
             <p className="mt-[4px] text-[14px] text-muted">
-              Builder account, verified by Kam Ki Lead before publishing.
+              Builder account, verified by Kaam Ki Lead before publishing.
             </p>
           </Card>
         </aside>

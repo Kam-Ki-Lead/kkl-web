@@ -263,7 +263,7 @@ function PricingFields({ listing }: { listing: ListingDraft }) {
       </div>
 
       <p className="t-caption text-muted">
-        Prices are yours to set and are shown to buyers as entered. Kam Ki Lead does not add a
+        Prices are yours to set and are shown to buyers as entered. Kaam Ki Lead does not add a
         margin, and the platform&rsquo;s own lead prices are a separate, unresolved decision (D-03).
       </p>
       {listing.listingPriceInr != null ? (

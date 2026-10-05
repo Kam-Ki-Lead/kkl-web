@@ -59,7 +59,7 @@ export default async function EnquiryConfirmedPage({
       </Card>
 
       <p className="t-caption mt-[14px] text-muted">
-        A builder usually replies through the portal. Kam Ki Lead does not promise a response
+        A builder usually replies through the portal. Kaam Ki Lead does not promise a response
         time.
       </p>
     </div>

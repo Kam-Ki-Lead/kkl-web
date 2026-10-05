@@ -5,21 +5,18 @@
  * not restart ports 4010 or 4011. Fixture publication, verification and
  * consent are not created here.
  *
- *   PLAYWRIGHT=C:\Users\noora\kkl-tools\node_modules\playwright \
  *   BASE_URL=http://127.0.0.1:3815 BACKEND_URL=http://127.0.0.1:4012 \
  *     node scripts/verify-phase5.mjs
+ *
+ * PLAYWRIGHT may name a directory holding the package, if it is not resolvable
+ * from this repository. The three repository roots are resolved as siblings;
+ * KKL_BACKEND_ROOT and KKL_VOICE_ROOT override that.
  */
-import { createRequire } from "node:module";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { execSync } from "node:child_process";
+import { loadPlaywright, revisions } from "./repo-paths.mjs";
 
-const playwrightSpec = process.env.PLAYWRIGHT ?? "C:\\Users\\noora\\kkl-tools\\node_modules\\playwright";
-const require = createRequire(import.meta.url);
-const playwrightPackage = /^[a-zA-Z]:[\\/]/.test(playwrightSpec)
-  ? require(join(playwrightSpec.replace(/[\\/]+$/, ""), "index.js"))
-  : require(playwrightSpec);
-const chromium = playwrightPackage.chromium;
+const chromium = loadPlaywright().chromium;
 if (!chromium) throw new Error("playwright chromium export missing");
 
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3815";
@@ -46,14 +43,6 @@ const ok = (name, pass, detail) => {
   results.push({ name, pass, detail: String(detail).slice(0, 500) });
   console.log(`${pass ? "PASS" : "FAIL"}  ${name}\n      ${String(detail).replace(/\s+/g, " ").slice(0, 360)}`);
 };
-
-function revision(cwd) {
-  try {
-    return execSync("git rev-parse --short HEAD", { cwd, encoding: "utf8" }).trim();
-  } catch {
-    return "unreadable";
-  }
-}
 
 async function devCode(challengeId) {
   const response = await fetch(`${BACKEND}/v1/dev/challenges/${challengeId}/code`, {
@@ -393,11 +382,7 @@ const evidence = {
   category: "review-browser",
   notSandbox: true,
   notLiveProvider: true,
-  revisions: {
-    web: revision("C:/Users/noora/Downloads/kaam-ki-lead/kkl-web"),
-    backend: revision("C:/Users/noora/Downloads/kkl-backend/kkl-backend"),
-    voice: revision("C:/Users/noora/Downloads/kkl-voice"),
-  },
+  revisions: revisions(),
   base: BASE,
   backend: BACKEND,
   voice: VOICE,

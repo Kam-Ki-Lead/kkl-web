@@ -3,7 +3,7 @@
 **Answer received:** project owner, 28 September 2026, as an attached image.
 
 `type-1-reference.jpg` is that image. Its own chrome identifies it: *"ROUND 3 ·
-Kam Ki Lead — responsive portal homepage · Prototype · fit to window, 1209px ·
+Kaam Ki Lead — responsive portal homepage · Prototype · fit to window, 1209px ·
 synthetic listings, stock photography"* — the kkl-design prototype viewer.
 
 **So "Type 1" is the homepage that was already approved and already built.**
@@ -16,7 +16,7 @@ Everything structural, and the copy word for word.
 
 | | Type 1 | This build |
 |---|---|---|
-| Header | `K Kam Ki Lead ◉ Kolkata ▾ Buy Projects New launches Find my match ♡ Shortlist (0) List a project Sign in` | identical |
+| Header | `K Kaam Ki Lead ◉ Kolkata ▾ Buy Projects New launches Find my match ♡ Shortlist (0) List a project Sign in` | identical |
 | Hero eyebrow / title | FEATURED PROJECT · Ivy Court, Action Area I | identical |
 | Hero body | "3 BHK apartments of 1,320–1,690 sq ft, new launch, possession Jun 2029." | identical |
 | Hero price / action | ₹1.05Cr – ₹1.6Cr · View project (saffron) | identical |

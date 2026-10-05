@@ -46,7 +46,7 @@ export function PublicHeaderFallback() {
   return (
     <header className="border-b border-line bg-white">
       <div className="mx-auto box-content flex max-w-[1280px] items-center gap-[22px] px-[32px] py-[14px] max-[1060px]:px-[18px]">
-        <Link href="/" aria-label="Kam Ki Lead — home" className="flex-none">
+        <Link href="/" aria-label="Kaam Ki Lead — home" className="flex-none">
           <Wordmark />
         </Link>
         <CitySelector />
@@ -80,7 +80,7 @@ export function PublicHeader({
   return (
     <header className="border-b border-line bg-white">
       <div className="mx-auto box-content flex max-w-[1280px] items-center gap-[22px] px-[32px] py-[14px] max-[1060px]:px-[18px]">
-        <Link href="/" aria-label="Kam Ki Lead — home" className="flex-none">
+        <Link href="/" aria-label="Kaam Ki Lead — home" className="flex-none">
           <Wordmark />
         </Link>
 
