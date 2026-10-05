@@ -27,6 +27,9 @@ import { processState } from "./process-state";
 import { areaOptionsFor, displayPath, isWithin } from "./locations";
 import * as builderStore from "./builder-store";
 import { projectOrder } from "./lead-orders";
+import {
+  PURCHASED_EXPORT_CONTENT_TYPE, purchasedLeadsCsv,
+} from "@/lib/domain/purchased-export";
 
 /**
  * The Builder's marketplace, credits and support.
@@ -391,35 +394,28 @@ export const builderLeadMarket: LeadMarketService = {
   },
 
   async exportPurchased({ ids }) {
+    // The same columns the Seller export uses. These two had grown separate
+    // serialisers with different column sets, so one requirement produced two
+    // different files depending on which console asked.
     const rows = [...m().soldLeads.values()].filter((l) => (ids ? ids.includes(l.id) : true));
-    const cell = (v: string | number | null) => {
-      const s = v === null ? "" : String(v);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const lines = [
-      ["Lead", "Order", "Purchased", "Requirement", "Area", "Name", "Mobile", "Email", "Credits paid"].join(
-        ",",
-      ),
-      ...rows.map((l) =>
-        [
-          l.id,
-          l.orderId,
-          l.purchasedAt,
-          l.requirement,
-          l.locationPath.join(" / "),
-          l.contact.name,
-          l.contact.phone,
-          l.contact.email,
-          l.pricePaidCredits,
-        ]
-          .map(cell)
-          .join(","),
-      ),
-    ];
     return {
       filename: `kkl-builder-leads-${new Date().toISOString().slice(0, 10)}.csv`,
-      contentType: "text/csv; charset=utf-8",
-      body: `${lines.join("\r\n")}\r\n`,
+      contentType: PURCHASED_EXPORT_CONTENT_TYPE,
+      body: purchasedLeadsCsv(rows.map((l) => ({
+        leadId: l.id,
+        orderReference: l.orderId,
+        purchasedAt: l.purchasedAt,
+        requirement: l.requirement,
+        area: l.locationPath.join(" / "),
+        configuration: l.configuration,
+        budgetBand: l.budgetBand,
+        intentScore: l.intentScore,
+        name: l.contact.name,
+        mobile: l.contact.phone,
+        email: l.contact.email,
+        bestTimeToCall: l.contact.bestTimeToCall,
+        creditsPaid: l.pricePaidCredits,
+      }))),
     };
   },
 };

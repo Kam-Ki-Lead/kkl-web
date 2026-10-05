@@ -415,3 +415,97 @@ test("an application result names the unsold scope and a preview is not one", ()
   }), null);
   assert.equal(readApplication(previewBody()), null);
 });
+
+/**
+ * Which band-and-level pairs can produce a credit figure.
+ *
+ * The backend reports it; the screen has to be able to say which cells, not
+ * just how many. A reading that disagreed with itself — a count that did not
+ * match the list — would put a number on screen with nothing behind it, so
+ * that is refused rather than displayed.
+ */
+
+const priceabilityBody = (overrides = {}) => ({
+  cells: 4,
+  priceable: 3,
+  unpriceable: 1,
+  unpriceableCells: [{
+    bandId: "22222222-2222-2222-2222-222222222222",
+    bandLabel: "Half rupee",
+    level: 4,
+    basePriceInr: "1250.00",
+    multiplier: "1.35",
+    exactInr: "1687.50",
+    reason: "not_a_whole_rupee",
+  }],
+  note: "1 of 4 band-and-level pairs are not a whole number of rupees, so no credit figure "
+    + "exists for them and a quote refuses with not_a_whole_rupee. No rounding rule is "
+    + "confirmed, so none is applied.",
+  ...overrides,
+});
+
+test("the unpriceable cells are read with the band, level and exact amount", () => {
+  const configuration = readConfiguration({
+    ...configurationBody(),
+    priceability: priceabilityBody(),
+  });
+  assert.equal(configuration.priceability.cells, 4);
+  assert.equal(configuration.priceability.unpriceable, 1);
+  const [cell] = configuration.priceability.unpriceableCells;
+  assert.equal(cell.bandLabel, "Half rupee");
+  assert.equal(cell.level, 4);
+  assert.equal(cell.basePriceInr, "1250.00");
+  assert.equal(cell.exactInr, "1687.50");
+  assert.equal(cell.reason, "not_a_whole_rupee");
+  assert.match(configuration.priceability.note, /No rounding rule is confirmed/);
+});
+
+test("a backend that does not report priceability is read, not refused", () => {
+  // An older backend simply omits it. The screen says so; it does not throw
+  // the whole configuration away.
+  const configuration = readConfiguration(configurationBody());
+  assert.notEqual(configuration, null);
+  assert.equal(configuration.priceability, null);
+});
+
+test("a priceability report that disagrees with itself is refused", () => {
+  // The count and the list must agree, and the parts must sum to the whole.
+  assert.equal(readConfiguration({
+    ...configurationBody(),
+    priceability: priceabilityBody({ unpriceable: 2 }),
+  }), null, "a count larger than the list was accepted");
+  assert.equal(readConfiguration({
+    ...configurationBody(),
+    priceability: priceabilityBody({ cells: 9 }),
+  }), null, "priceable + unpriceable did not equal cells");
+  assert.equal(readConfiguration({
+    ...configurationBody(),
+    priceability: priceabilityBody({ unpriceableCells: [] }),
+  }), null, "an empty list with a non-zero count was accepted");
+  assert.equal(readConfiguration({
+    ...configurationBody(),
+    priceability: priceabilityBody({
+      unpriceableCells: [{ ...priceabilityBody().unpriceableCells[0], reason: "rounded" }],
+    }),
+  }), null, "a reason this client does not know was accepted");
+  assert.equal(readConfiguration({
+    ...configurationBody(),
+    priceability: priceabilityBody({ note: 42 }),
+  }), null);
+});
+
+test("every pair being a whole rupee is reported as zero, not as absent", () => {
+  const configuration = readConfiguration({
+    ...configurationBody(),
+    priceability: {
+      cells: 2,
+      priceable: 2,
+      unpriceable: 0,
+      unpriceableCells: [],
+      note: "Every band and level pair is a whole number of rupees.",
+    },
+  });
+  assert.equal(configuration.priceability.unpriceable, 0);
+  assert.deepEqual(configuration.priceability.unpriceableCells, []);
+  assert.notEqual(configuration.priceability, null, "zero is not absent");
+});

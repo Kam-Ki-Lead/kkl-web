@@ -269,6 +269,32 @@ function RecordedConfiguration({
           </ul>
         </div>
       ) : null}
+      {configuration.priceability === null ? (
+        <p className="t-caption mt-[10px] text-muted">
+          This backend does not report which band and level pairs produce a whole number of
+          rupees. Preview a cell to find out.
+        </p>
+      ) : (
+        <div className="mt-[10px]">
+          <h3 className="text-[14px] font-semibold text-ink">
+            Pairs that cannot produce a credit figure
+          </h3>
+          <p className="t-caption mt-[4px] text-muted">{configuration.priceability.note}</p>
+          {configuration.priceability.unpriceable > 0 ? (
+            <ul className="mt-[4px] flex list-disc flex-col gap-[4px] pl-[20px] text-[14px] text-body">
+              {configuration.priceability.unpriceableCells.map((cell) => (
+                <li key={`${cell.bandId}-${cell.level}`}>
+                  {cell.bandLabel}, level {cell.level}:{" "}
+                  {formatProvisionalInr(cell.basePriceInr)} × {cell.multiplier}
+                  {cell.exactInr ? ` = ${formatProvisionalInr(cell.exactInr)}` : ""}
+                  . Not a whole rupee, so a quote refuses. No rounding rule is confirmed, so
+                  none is applied.
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      )}
       {configuration.unconfirmed.length > 0 ? (
         <div className="mt-[12px]">
           <h3 className="text-[14px] font-semibold text-ink">Unresolved assumptions</h3>

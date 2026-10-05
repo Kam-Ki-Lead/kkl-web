@@ -107,6 +107,34 @@ export type PricingGap = {
   beforeInr: string;
 };
 
+/**
+ * A band-and-level pair whose base price times its multiplier is not a whole
+ * number of rupees, so there is no credit figure for it.
+ *
+ * R-CR-01 maps one whole rupee to one credit and the backend does not round —
+ * the nearest-₹100 rounding in the workbook is a demonstrated formula, not a
+ * confirmed rule. A quote for one of these cells refuses with
+ * `not_a_whole_rupee`. This is reported so the screen can say which cells
+ * those are, instead of leaving staff to preview each one by hand.
+ */
+export type PricingUnpriceableCell = {
+  bandId: string;
+  bandLabel: string;
+  level: number;
+  basePriceInr: string;
+  multiplier: string;
+  exactInr: string | null;
+  reason: "not_a_whole_rupee";
+};
+
+export type PricingPriceability = {
+  cells: number;
+  priceable: number;
+  unpriceable: number;
+  unpriceableCells: PricingUnpriceableCell[];
+  note: string;
+};
+
 export type PricingConfigurationView = {
   id: string;
   version: number;
@@ -118,6 +146,7 @@ export type PricingConfigurationView = {
   questions: PricingQuestionView[];
   questionMapping: "not_configured";
   gaps: PricingGap[];
+  priceability: PricingPriceability | null;
   purchasable: false;
   boundaryConventionConfirmed: false;
   unconfirmed: PricingAssumption[];
@@ -522,6 +551,45 @@ function gaps(value: unknown): PricingGap[] | null {
   return items;
 }
 
+function priceability(value: unknown): PricingPriceability | null | "invalid" {
+  // Absent is not invalid: a backend that has not been updated yet simply
+  // does not report it, and the screen says so rather than refusing the
+  // whole configuration.
+  if (value === undefined || value === null) return null;
+  const row = record(value);
+  if (!row || typeof row.note !== "string") return "invalid";
+  const cells = integer(row.cells);
+  const priceableCount = integer(row.priceable);
+  const unpriceableCount = integer(row.unpriceable);
+  if (cells === null || priceableCount === null || unpriceableCount === null) return "invalid";
+  if (!Array.isArray(row.unpriceableCells)) return "invalid";
+  const unpriceableCells: PricingUnpriceableCell[] = [];
+  for (const item of row.unpriceableCells) {
+    const cell = record(item);
+    if (!cell || typeof cell.bandId !== "string" || typeof cell.bandLabel !== "string") {
+      return "invalid";
+    }
+    const level = integer(cell.level);
+    const basePriceInr = rupeeString(cell.basePriceInr);
+    if (level === null || !basePriceInr || typeof cell.multiplier !== "string") return "invalid";
+    if (cell.reason !== "not_a_whole_rupee") return "invalid";
+    unpriceableCells.push({
+      bandId: cell.bandId,
+      bandLabel: cell.bandLabel,
+      level,
+      basePriceInr,
+      multiplier: cell.multiplier,
+      exactInr: typeof cell.exactInr === "string" ? cell.exactInr : null,
+      reason: "not_a_whole_rupee",
+    });
+  }
+  // The count and the list have to agree, or one of them is wrong and the
+  // screen would report a number it cannot show the cause of.
+  if (unpriceableCells.length !== unpriceableCount) return "invalid";
+  if (priceableCount + unpriceableCount !== cells) return "invalid";
+  return { cells, priceable: priceableCount, unpriceable: unpriceableCount, unpriceableCells, note: row.note };
+}
+
 export function readConfiguration(body: unknown): PricingConfigurationView | null {
   const row = record(body);
   if (!row) return null;
@@ -574,7 +642,8 @@ export function readConfiguration(body: unknown): PricingConfigurationView | nul
 
   const unconfirmed = assumptions(row.unconfirmed ?? []);
   const parsedGaps = gaps(row.gaps);
-  if (!unconfirmed || !parsedGaps) return null;
+  const parsedPriceability = priceability(row.priceability);
+  if (!unconfirmed || !parsedGaps || parsedPriceability === "invalid") return null;
   return {
     id: row.id,
     version,
@@ -586,6 +655,7 @@ export function readConfiguration(body: unknown): PricingConfigurationView | nul
     questions,
     questionMapping: "not_configured",
     gaps: parsedGaps,
+    priceability: parsedPriceability,
     purchasable: false,
     boundaryConventionConfirmed: false,
     unconfirmed,

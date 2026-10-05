@@ -27,6 +27,9 @@ import {
   type WalletReconciliation,
 } from "@/lib/domain/commerce-display";
 import { callAs, type BackendRole } from "./session";
+import {
+  PURCHASED_EXPORT_CONTENT_TYPE, purchasedLeadsCsv, purchasedLeadsFilename,
+} from "@/lib/domain/purchased-export";
 
 /**
  * The marketplace, the wallet and orders, served by kkl-backend.
@@ -196,6 +199,32 @@ function toLeadOrder(order: BackendOrder): LeadOrder {
     scope: "seller",
   };
 }
+
+/** What POST /v1/orders/export answers. */
+type BackendExport = {
+  readonly total: number;
+  readonly exportedAt: string;
+  readonly notAvailable: readonly string[];
+  readonly withoutContact: readonly string[];
+  readonly leads: ReadonlyArray<{
+    readonly leadId: string;
+    readonly orderId: string;
+    readonly orderReference: string;
+    readonly leadReference: string | null;
+    readonly purchasedAt: string;
+    readonly pricePaidCredits: number;
+    readonly requirement: string | null;
+    readonly locationName: string | null;
+    readonly propertyType: string | null;
+    readonly budgetBand: string | null;
+    readonly intentScore: number | null;
+    readonly contact: {
+      readonly fullName: string | null;
+      readonly phone: string | null;
+      readonly email: string | null;
+    } | null;
+  }>;
+};
 
 function toPurchasedLead(order: BackendOrder): PurchasedLead | null {
   if (order.status !== "completed" || !order.contact) return null;
@@ -400,15 +429,50 @@ export function backendLeadMarket(role: BackendRole): LeadMarketService {
       };
     },
 
-    async exportPurchased() {
-      // The export is a file of contact details. It is not built against the
-      // backend yet, and a half-built one that silently omitted rows would be
-      // worse than none.
-      throw new ServiceError(
-        "unavailable",
-        "Exporting purchased leads is not available while the marketplace is served by "
-        + "kkl-backend. The records are on the orders screen.",
-      );
+    /**
+     * CSV of the caller's own purchased leads, from kkl-backend.
+     *
+     * `POST /v1/orders/export` rather than a read: it writes one
+     * `lead_contact.exported` audit entry naming the actor and the lead ids,
+     * which is the record this route's comment said only the server could
+     * keep. Access is the database's — `lead_contacts` releases a row only
+     * to an account holding a completed order for that lead — so a lead id
+     * belonging to somebody else comes back under `notAvailable` and never
+     * in the file.
+     *
+     * No object storage is involved, here or in the route: the body is the
+     * response.
+     */
+    async exportPurchased({ ids }) {
+      const { status, body } = await callAs<BackendExport>(role, "/v1/orders/export", {
+        method: "POST",
+        body: ids && ids.length > 0 ? { leadIds: [...ids] } : {},
+      });
+      if (status !== 200) raise(status, body as { error?: string });
+      return {
+        filename: role === "builder"
+          ? `kkl-builder-leads-${new Date().toISOString().slice(0, 10)}.csv`
+          : purchasedLeadsFilename(),
+        contentType: PURCHASED_EXPORT_CONTENT_TYPE,
+        body: purchasedLeadsCsv(body.leads.map((lead) => ({
+          leadId: lead.leadId,
+          orderReference: lead.orderReference,
+          purchasedAt: lead.purchasedAt,
+          requirement: lead.requirement,
+          area: lead.locationName,
+          configuration: lead.propertyType,
+          budgetBand: lead.budgetBand,
+          // Null, not zero. The question-to-level mapping is not confirmed,
+          // and a zero in this column would read as a scored lead.
+          intentScore: lead.intentScore,
+          name: lead.contact?.fullName ?? null,
+          mobile: lead.contact?.phone ?? null,
+          email: lead.contact?.email ?? null,
+          // Free text from a qualification call that has not happened.
+          bestTimeToCall: null,
+          creditsPaid: lead.pricePaidCredits,
+        }))),
+      };
     },
   };
 }

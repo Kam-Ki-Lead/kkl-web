@@ -231,12 +231,30 @@ try {
       `url=${page.url()} ${body.replace(/\s+/g, " ").slice(0, 300)}`,
     );
 
-    const exportResponse = await page.goto(`${BASE}/seller/purchased/export.csv`, { waitUntil: "commit" });
-    const exportText = await exportResponse?.text() ?? "";
+    // The export is built. It must answer, carry the shared header, and
+    // contain no contact this account did not buy. The fixture account has
+    // no completed purchase, so one header line and nothing else is right.
+    const exportResponse = await page.request.get(`${BASE}/seller/purchased/export.csv`);
+    const exportText = await exportResponse.text();
+    const exportLines = exportText.split("\r\n").filter((line) => line.length > 0);
     ok(
-      "Purchased-lead download does not return contact rows",
-      !/\+91\d{10}/.test(exportText) && !/phone,/.test(exportText.toLowerCase()),
-      `status=${exportResponse?.status()} ${exportText.replace(/\s+/g, " ").slice(0, 220)}`,
+      "Purchased-lead download answers with its own header and no other contact",
+      exportResponse.status() === 200
+        && exportLines[0]?.startsWith("Lead,Order,Purchased,Requirement,Area")
+        && exportLines.length === 1
+        && !/\+91\d{10}/.test(exportText),
+      `status=${exportResponse.status()} rows=${exportLines.length} `
+      + `${exportText.replace(/\s+/g, " ").slice(0, 200)}`,
+    );
+
+    // An id this account does not own is a 404, not an empty file that looks
+    // like a successful export of nothing.
+    const notOwned = await page.request.get(
+      `${BASE}/seller/purchased/00000000-0000-0000-0000-000000000000/export.csv`);
+    ok(
+      "A purchased-lead export for an unowned id is refused, not empty",
+      notOwned.status() === 404 || notOwned.status() === 403,
+      `status=${notOwned.status()}`,
     );
 
     await page.goto(`${BASE}/seller/support/new`, { waitUntil: "networkidle" });

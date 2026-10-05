@@ -29,6 +29,7 @@ import type {
 import { processState } from "./process-state";
 import { projectOrder } from "./lead-orders";
 import { areaOptionsFor, displayPath, isWithin } from "./locations";
+import { purchasedLeadsCsv } from "@/lib/domain/purchased-export";
 
 /**
  * In-process Seller state for a review session.
@@ -612,50 +613,24 @@ export function getOrder(reference: string): LeadOrder | null {
 }
 
 /** CSV of the caller's own purchased leads. Quoting is deliberate, not optional. */
+/** CSV of the caller's own purchased leads, through the shared serialiser. */
 export function exportPurchasedCsv(ids?: readonly string[]): string {
   const rows = listPurchased().filter((l) => (ids ? ids.includes(l.id) : true));
-  const head = [
-    "Lead",
-    "Order",
-    "Purchased",
-    "Requirement",
-    "Area",
-    "Configuration",
-    "Budget band",
-    "Intent score",
-    "Name",
-    "Mobile",
-    "Email",
-    "Best time to call",
-    "Credits paid",
-  ];
-  const cell = (v: string | number | null) => {
-    const s = v === null ? "" : String(v);
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-  const lines = [head.join(",")];
-  for (const l of rows) {
-    lines.push(
-      [
-        l.id,
-        l.orderId,
-        l.purchasedAt,
-        l.requirement,
-        l.locationPath.join(" / "),
-        l.configuration,
-        l.budgetBand,
-        l.intentScore,
-        l.contact.name,
-        l.contact.phone,
-        l.contact.email,
-        l.contact.bestTimeToCall,
-        l.pricePaidCredits,
-      ]
-        .map(cell)
-        .join(","),
-    );
-  }
-  return `${lines.join("\r\n")}\r\n`;
+  return purchasedLeadsCsv(rows.map((l) => ({
+    leadId: l.id,
+    orderReference: l.orderId,
+    purchasedAt: l.purchasedAt,
+    requirement: l.requirement,
+    area: l.locationPath.join(" / "),
+    configuration: l.configuration,
+    budgetBand: l.budgetBand,
+    intentScore: l.intentScore,
+    name: l.contact.name,
+    mobile: l.contact.phone,
+    email: l.contact.email,
+    bestTimeToCall: l.contact.bestTimeToCall,
+    creditsPaid: l.pricePaidCredits,
+  })));
 }
 
 // ------------------------------------------------------------------ credits --

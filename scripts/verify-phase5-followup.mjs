@@ -90,15 +90,25 @@ try {
     `buyLink=${buyLink} ${lead.slice(lead.indexOf("Lead price"), lead.indexOf("Lead price") + 360)}`,
   );
 
+  // The export is built now, so the check is what it returns rather than
+  // that it refuses. This account has bought nothing in this fixture, so the
+  // right answer is a header and no rows — not an empty file, and not a row
+  // belonging to anybody else.
   const exported = await page.request.get(`${BASE}/seller/purchased/export.csv`);
   const exportBody = await exported.text();
+  const exportRows = exportBody.split("\r\n").filter((line) => line.length > 0);
   ok(
-    "Purchased-lead download returns the refusal and no contact rows",
-    exported.status() === 503
-      && /not available/i.test(exportBody)
-      && !/phone/i.test(exportBody)
-      && !/\+91/.test(exportBody),
-    `status=${exported.status()} ${exportBody.replace(/\s+/g, " ").slice(0, 240)}`,
+    "Purchased-lead download returns the caller's own rows and no other contact",
+    exported.status() === 200
+      && exportRows[0] === "Lead,Order,Purchased,Requirement,Area,Configuration,"
+        + "Budget band,Intent score,Name,Mobile,Email,Best time to call,Credits paid"
+      && exportRows.length === 1
+      && !/\+91/.test(exportBody)
+      && exported.headers()["content-disposition"]?.includes("attachment")
+      && exported.headers()["cache-control"] === "no-store",
+    `status=${exported.status()} rows=${exportRows.length} `
+    + `cc=${exported.headers()["cache-control"]} `
+    + `${exportBody.replace(/\s+/g, " ").slice(0, 200)}`,
   );
 } finally {
   writeFileSync("docs/phase-5/browser-followup.json", JSON.stringify({
