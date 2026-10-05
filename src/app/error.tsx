@@ -18,6 +18,25 @@ import { StateMessage } from "@/components/ui/states";
  * with a digest in production precisely so an internal detail does not reach
  * a browser, and this screen must not undo that. The digest is what a
  * support thread can quote so the entry can be found in the server log.
+ *
+ * WHAT THIS SCREEN MUST NOT SAY
+ * It used to say "Nothing you had entered has been submitted, and no credits
+ * have been spent." That was an assurance it is in no position to give. A
+ * server action can complete — deduct credits, create the order, release the
+ * contact — and the render that follows it can still throw. This boundary
+ * receives an error, not an outcome: it cannot see whether a mutation
+ * committed, and in the one case that matters most it would be telling the
+ * customer their purchase failed when it succeeded.
+ *
+ * So it says what it knows, which is nothing about the outcome, and sends
+ * the customer to the record that does know. That record is the point: a
+ * purchase is idempotent on a key the form generated, and the orders screen
+ * is where it can be seen. Guessing and resubmitting is the one thing this
+ * screen must not encourage.
+ *
+ * It does not link to those screens. The boundary is at the root segment and
+ * has no idea which role is signed in, and sending a buyer to a Seller route
+ * produces an access panel rather than help. The places are named instead.
  */
 export default function RouteError({
   error,
@@ -39,15 +58,21 @@ export default function RouteError({
         title="This page could not be loaded"
         action={
           <>
-            <Button onClick={reset}>Try again</Button>
+            <Button onClick={reset}>Reload this page</Button>
             <ButtonLink href="/" variant="secondary">Go to the homepage</ButtonLink>
           </>
         }
       >
-        Something failed while building this page. Nothing you had entered has been submitted,
-        and no credits have been spent.
+        Something failed while this page was being built.
+        {" "}
+        If you had just submitted something — a purchase, an enquiry or a form — this screen
+        cannot tell you whether it went through. Open your dashboard and check your orders,
+        purchases or enquiries before sending it again, so you do not do it twice.
         {error.digest ? ` Quote reference ${error.digest} if you contact support.` : ""}
       </StateMessage>
+      <p className="t-caption mt-[10px] text-center text-muted">
+        Reloading this page does not resend anything.
+      </p>
     </div>
   );
 }

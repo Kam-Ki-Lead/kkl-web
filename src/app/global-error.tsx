@@ -12,6 +12,11 @@
  * either.
  *
  * It must not import anything that could be the thing that failed.
+ *
+ * Like `error.tsx`, it says nothing about whether a mutation committed. It
+ * used to claim that nothing had been submitted and no credits spent, which
+ * it cannot know: a server action can succeed and the render after it can
+ * still throw. See `error.tsx` for the full reasoning.
  */
 export default function GlobalError({
   error,
@@ -40,8 +45,10 @@ export default function GlobalError({
             Kaam Ki Lead could not start this page
           </h1>
           <p style={{ marginTop: "8px", color: "#4A5168" }}>
-            Something failed before the page could be built. Nothing you had entered has been
-            submitted, and no credits have been spent.
+            Something failed before the page could be built. If you had just submitted
+            something — a purchase, an enquiry or a form — this screen cannot tell you whether
+            it went through. Open your dashboard and check your orders, purchases or enquiries
+            before sending it again, so you do not do it twice.
             {error.digest ? ` Quote reference ${error.digest} if you contact support.` : ""}
           </p>
           <p style={{ marginTop: "20px", display: "flex", gap: "10px", justifyContent: "center" }}>
@@ -59,7 +66,7 @@ export default function GlobalError({
                 cursor: "pointer",
               }}
             >
-              Try again
+              Reload this page
             </button>
             {/*
               A plain <a>, not next/link. The root layout is what failed, so a
@@ -82,6 +89,9 @@ export default function GlobalError({
             >
               Go to the homepage
             </a>
+          </p>
+          <p style={{ marginTop: "10px", fontSize: "14px", color: "#5B6075" }}>
+            Reloading this page does not resend anything.
           </p>
         </main>
       </body>

@@ -53,6 +53,9 @@ import {
   searchAreas,
 } from "./locations";
 import type { LocationService } from "@/lib/services/contracts";
+import {
+  PURCHASED_EXPORT_CONTENT_TYPE, purchasedLeadsFilename,
+} from "@/lib/domain/purchased-export";
 
 /**
  * Sample implementation of the service contracts.
@@ -349,9 +352,11 @@ const leadMarketService: LeadMarketService = {
     return sellerStore.getOrder(reference);
   },
   async exportPurchased({ ids }) {
+    // Filename and content type come from the shared module too. This one
+    // re-typed both, which is how the three export paths drift apart.
     return {
-      filename: `kkl-purchased-leads-${new Date().toISOString().slice(0, 10)}.csv`,
-      contentType: "text/csv; charset=utf-8",
+      filename: purchasedLeadsFilename(),
+      contentType: PURCHASED_EXPORT_CONTENT_TYPE,
       body: sellerStore.exportPurchasedCsv(ids),
     };
   },
