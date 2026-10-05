@@ -126,3 +126,24 @@ They will carry the corrected name the next time those scripts run.
 
 Repository and organisation names (`kkl-web`, `Kam-Ki-Lead`) are unchanged.
 Renaming either is not part of this correction.
+
+### What a text search missed
+
+The first pass searched for the contiguous string "Kam Ki Lead" and reported
+nothing left. A browser check then showed the old spelling still rendering on
+the wordmark, which appears on every page.
+
+Three places split the name in the source, so no search for the whole string
+could find them:
+
+- `components/brand/wordmark.tsx` renders it in two spans, "Kam Ki" and
+  "Lead", so "Lead" can carry a heavier weight. The rendered name was wrong
+  on every page in the application.
+- `components/seller/kyc-form.tsx` and
+  `app/builder/enquiries/notifications/page.tsx` wrap the name across a line
+  break in JSX, which renders as one string.
+
+All three are corrected. The sweep that found them is whitespace-insensitive
+(`Kam\s+Ki\s+Lead`) and is the one to use on a JSX codebase. Verified in a
+headless browser on the homepage, a 404 route and the Seller verification
+screen: the old spelling is absent and the new one present on all three.

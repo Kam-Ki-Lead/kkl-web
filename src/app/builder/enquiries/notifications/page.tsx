@@ -82,8 +82,8 @@ export default function NotificationStatesPage() {
           </p>
           <blockquote className="mt-[14px] rounded-[10px] border border-line bg-tint p-[16px]">
             <p className="t-body text-body">
-              You have a new enquiry on Greenview Residency from a verified buyer. Open your Kam Ki
-              Lead builder console to respond.
+              You have a new enquiry on Greenview Residency from a verified buyer. Open your Kaam
+              Ki Lead builder console to respond.
             </p>
           </blockquote>
           <p className="t-caption mt-[10px] text-warning">

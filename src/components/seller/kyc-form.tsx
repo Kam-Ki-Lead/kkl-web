@@ -62,8 +62,8 @@ export function KycForm({ isSample, storesIdentity = true }: { isSample: boolean
 
       <Card className="bg-tint p-[16px]">
         <p className="t-caption text-muted">
-          Accepted: JPG, PNG or PDF up to 5 MB per document. Documents are visible only to Kam Ki
-          Lead administrators.
+          Accepted: JPG, PNG or PDF up to 5 MB per document. Documents are visible only to Kaam
+          Ki Lead administrators.
         </p>
         <p className="t-caption mt-[8px] text-warning">
           <strong>Nothing is uploaded yet.</strong>{" "}

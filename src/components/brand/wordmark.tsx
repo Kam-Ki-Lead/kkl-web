@@ -51,7 +51,11 @@ export function Wordmark({
             color: onDark ? "var(--color-on-brand)" : "var(--color-ink)",
           }}
         >
-          Kam Ki
+          {/* Two spans, so "Lead" can carry the heavier weight. The name is
+              split here, which is why a search for the whole string "Kam Ki
+              Lead" did not find the wordmark when the spelling was
+              corrected everywhere else. */}
+          Kaam Ki
         </span>
         <span
           style={{
