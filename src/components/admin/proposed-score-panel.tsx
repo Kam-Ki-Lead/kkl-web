@@ -39,14 +39,30 @@ export function ProposedScorePanel({ score }: { score: ProposedScore | null }) {
     <Card>
       <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
         <h2 className="t-h3 text-ink">Proposed assessment</h2>
-        <Chip tone="neutral">{shown.policyLabel}</Chip>
+        <div className="flex flex-wrap items-center gap-[8px]">
+          {shown.suppression ? (
+            <Chip tone="danger">{shown.suppression.chip}</Chip>
+          ) : null}
+          <Chip tone="neutral">{shown.policyLabel}</Chip>
+        </div>
       </div>
 
-      {/* Above the caveat and above the number, because it overrides both. */}
-      {shown.optOutNotice ? (
-        <p className="t-body mt-[10px] rounded-[8px] bg-[#FDE8E8] px-[12px] py-[10px] text-body">
-          {shown.optOutNotice}
-        </p>
+      {/*
+        First thing under the heading, ahead of the caveat and the number,
+        because it overrides both. A suppressed person with strong readiness is
+        the exact case where somebody skims the verdict and reaches for the
+        phone, so the banner states the instruction rather than only the fact.
+      */}
+      {shown.suppression ? (
+        <div
+          role="alert"
+          className="mt-[10px] rounded-[8px] border-l-[4px] border-danger bg-[#FBEFED] px-[14px] py-[12px]"
+        >
+          <p className="t-label text-danger">{shown.suppression.chip}</p>
+          <p className="t-body mt-[4px] font-semibold text-ink">{shown.suppression.banner}</p>
+          <p className="t-body mt-[4px] text-body">{shown.suppression.appliesDespite}</p>
+          <p className="t-body mt-[4px] text-muted">{shown.suppression.instruction}</p>
+        </div>
       ) : null}
 
       <p className="t-body mt-[10px] rounded-[8px] bg-[#FFF7E8] px-[12px] py-[10px] text-body">

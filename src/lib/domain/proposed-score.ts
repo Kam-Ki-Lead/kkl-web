@@ -92,6 +92,22 @@ export type PresentedAxis = {
 };
 
 export type PresentedScore = {
+  /**
+   * Set whenever the person has opted out, and null otherwise.
+   *
+   * Separate from `headline` so a screen cannot render the assessment without
+   * deciding what to do about this: a suppressed person with strong readiness
+   * is the exact case where a reader skims the verdict and reaches for the
+   * phone. It carries its own short banner text, the chip wording, and the
+   * instruction, so no component has to compose the warning itself.
+   */
+  readonly suppression: {
+    readonly suppressed: true;
+    readonly chip: string;
+    readonly banner: string;
+    readonly instruction: string;
+    readonly appliesDespite: string;
+  } | null;
   /** Never just a number, and never one figure standing for all three axes. */
   readonly headline: string;
   /** Shown adjacent to the headline, always. */
@@ -101,7 +117,7 @@ export type PresentedScore = {
   readonly axes: readonly PresentedAxis[];
   readonly ceilingNote: string;
   readonly stopReason: string | null;
-  /** Non-null whenever the person has opted out. Shown above everything else. */
+  /** Retained for callers that render a single line. Mirrors `suppression.banner`. */
   readonly optOutNotice: string | null;
   readonly commercialNote: string;
   readonly inactiveProposalNote: string | null;
@@ -165,7 +181,26 @@ export function presentProposedScore(score: ProposedScore | null): PresentedScor
     },
   ];
 
+  const suppressed = score.optOut.optedOut === true;
+
+  // Built once and reused for the banner, the chip and the legacy single-line
+  // field, so the three can never disagree with each other on screen.
+  const suppression = suppressed
+    ? {
+      suppressed: true as const,
+      chip: "DO NOT CONTACT",
+      banner: "This person has opted out. Do not call, message or add them to any "
+        + "campaign. No contact and no sale, whatever this assessment says.",
+      instruction: "If you need to reach them, that is a decision for whoever owns "
+        + "the suppression list — not something this screen can authorise.",
+      appliesDespite: score.readiness.verdict === "strong"
+        ? "Their readiness reads Strong. That does not lift the suppression."
+        : "Opt-out is enforced independently of every assessment on this panel.",
+    }
+    : null;
+
   return {
+    suppression,
     headline: completeness.level === null
       ? "Not yet assessed"
       : `Proposed completeness level ${completeness.level} of ${completeness.ceiling}`,
@@ -179,10 +214,7 @@ export function presentProposedScore(score: ProposedScore | null): PresentedScor
         ? null
         : `Stopped at level ${stopped}: `
           + `${completeness.levels.find((l) => l.level === stopped)?.why ?? ""}`,
-    optOutNotice: score.optOut.optedOut
-      ? "This person has opted out. No contact and no sale, whatever this assessment says. "
-        + "Opt-out is enforced independently of any score."
-      : null,
+    optOutNotice: suppression ? `${suppression.banner} ${suppression.appliesDespite}` : null,
     commercialNote: score.commercialEffect.why,
     inactiveProposalNote: score.financialFit.inactiveProposal
       ? `Inactive proposal says "${score.financialFit.inactiveProposal.opinion}". `
@@ -228,4 +260,15 @@ export function mayPriceFromProposedScore(score: ProposedScore | null): boolean 
 export function mayReleaseContact(score: ProposedScore | null): boolean {
   void score;
   return false;
+}
+
+/**
+ * Whether this person is on the do-not-contact list.
+ *
+ * Read straight from the run's opt-out state, never from the assessment. A
+ * component asking "may I show a call button?" asks this, not the readiness
+ * verdict, so the answer cannot drift when the policy changes.
+ */
+export function isSuppressed(score: ProposedScore | null): boolean {
+  return score?.optOut.optedOut === true;
 }

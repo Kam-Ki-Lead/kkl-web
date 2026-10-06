@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PROPOSED_SCORE_CAVEAT, mayPriceFromProposedScore, mayReleaseContact,
+  PROPOSED_SCORE_CAVEAT, isSuppressed, mayPriceFromProposedScore, mayReleaseContact,
   presentProposedScore,
 } from '../src/lib/domain/proposed-score.ts';
 
@@ -136,16 +136,69 @@ describe('presenting a proposed assessment', { concurrency: false }, () => {
     assert.match(shown.stopReason, /q06_purchase_purpose/);
   });
 
+  const suppressedScore = (over = {}) => score({
+    optOut: { optedOut: true, enforcement: 'independent_of_scoring' },
+    commercialEffect: { ...score().commercialEffect,
+      why: 'This person has opted out. No contact and no sale, whatever the assessment says.' },
+    ...over,
+  });
+
   test('opt-out is shown, and shown as independent of the assessment', () => {
     assert.equal(presentProposedScore(score()).optOutNotice, null);
-    const shown = presentProposedScore(score({
-      optOut: { optedOut: true, enforcement: 'independent_of_scoring' },
-      commercialEffect: { ...score().commercialEffect,
-        why: 'This person has opted out. No contact and no sale, whatever the assessment says.' },
-    }));
+    const shown = presentProposedScore(suppressedScore());
     assert.match(shown.optOutNotice, /opted out/);
-    assert.match(shown.optOutNotice, /independently of any score/);
     assert.match(shown.commercialNote, /No contact and no sale/);
+  });
+
+  // Asked for explicitly: a suppressed profile must read as do-not-contact
+  // whatever its readiness says.
+  test('a suppressed profile carries a structured suppression block', () => {
+    assert.equal(presentProposedScore(score()).suppression, null);
+    const shown = presentProposedScore(suppressedScore());
+    assert.equal(shown.suppression.suppressed, true);
+    assert.equal(shown.suppression.chip, 'DO NOT CONTACT');
+    assert.match(shown.suppression.banner, /opted out/);
+    assert.match(shown.suppression.banner, /Do not call, message/);
+    assert.match(shown.suppression.instruction, /not something this screen can authorise/);
+  });
+
+  test('strong readiness does not soften the suppression — it is named in it', () => {
+    const shown = presentProposedScore(suppressedScore({
+      readiness: { ...score().readiness, verdict: 'strong', reasons: [] },
+    }));
+    assert.equal(shown.suppression.chip, 'DO NOT CONTACT');
+    assert.match(shown.suppression.appliesDespite, /readiness reads Strong/);
+    assert.match(shown.suppression.appliesDespite, /does not lift the suppression/);
+    // And the readiness axis still reports honestly rather than being blanked.
+    assert.equal(shown.axes[1].value, 'Strong');
+  });
+
+  test('suppression holds across every readiness verdict and completeness level', () => {
+    for (const verdict of ['strong', 'moderate', 'low', 'undetermined']) {
+      for (const level of [null, 1, 6]) {
+        const shown = presentProposedScore(suppressedScore({
+          readiness: { ...score().readiness, verdict },
+          completeness: { ...score().completeness, level },
+          proposedLevel: level,
+        }));
+        assert.equal(shown.suppression.chip, 'DO NOT CONTACT', `${verdict}/${level}`);
+        assert.ok(shown.optOutNotice, `${verdict}/${level}`);
+      }
+    }
+  });
+
+  test('the single-line notice never disagrees with the block', () => {
+    const shown = presentProposedScore(suppressedScore());
+    assert.ok(shown.optOutNotice.startsWith(shown.suppression.banner));
+    assert.ok(shown.optOutNotice.includes(shown.suppression.appliesDespite));
+  });
+
+  test('suppression is read from the opt-out state, never from the assessment', () => {
+    assert.equal(isSuppressed(suppressedScore()), true);
+    assert.equal(isSuppressed(score()), false);
+    assert.equal(isSuppressed(score({
+      readiness: { ...score().readiness, verdict: 'strong' } })), false);
+    assert.equal(isSuppressed(null), false);
   });
 
   test('all ten factors are listed, with the four this policy does not assess', () => {
