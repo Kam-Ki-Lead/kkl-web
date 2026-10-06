@@ -8,6 +8,8 @@ import {
   QualificationReviewForm,
 } from "@/components/admin/qualification-forms";
 import { FixtureNotice } from "@/components/admin/sample-notice";
+import { ProposedScorePanel } from "@/components/admin/proposed-score-panel";
+import type { ProposedScore } from "@/lib/domain/proposed-score";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
@@ -61,6 +63,10 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
       run.channel === "whatsapp" ? "← WhatsApp qualification" : "← Voice qualification";
     const dispatch = run.providerDispatch;
     const effect = run.effect;
+    // Published by the backend only once a proposed score has been computed
+    // for this run. Absent is the normal case and renders as "not scored yet";
+    // it is deliberately not defaulted to a level.
+    const proposedScore = (run as { proposedScore?: ProposedScore | null }).proposedScore ?? null;
 
     return (
       <AdminShell title={run.reference} subtitle="Answers, evidence and review">
@@ -69,6 +75,7 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
           <Link href={listHref} className="t-caption text-brand underline underline-offset-2">
             {listLabel}
           </Link>
+          <ProposedScorePanel score={proposedScore} />
           <Link
             href={`/admin/leads/${encodeURIComponent(run.leadId)}`}
             className="t-caption text-brand underline underline-offset-2"
