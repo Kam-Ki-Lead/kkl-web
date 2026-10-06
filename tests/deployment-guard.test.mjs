@@ -5,12 +5,16 @@
  * -----------------------------------
  * `verify-sample-mode-guard.sh` builds and serves the application for each of
  * eight scenarios, which takes minutes and covers the combinations somebody
- * thought of. The guard's decision is a pure function of four values, so the
- * whole space is 3 x 2 x 4 x 3 = 72 combinations and can be checked in
+ * thought of. The guard's decision is a pure function of its inputs, so the
+ * whole space is 4 x 2 x 5 x 3 = 120 combinations and can be checked in
  * milliseconds. The shell script proves the guard is *wired in*; this proves it
  * is *right*.
  *
- * Run:  node --test "tests/*.test.mjs"
+ * `staging-guard.test.mjs` beside this one runs the real module in a child
+ * process. Prefer adding a rule there: a mirror can drift, and this one has
+ * no way to notice. What the mirror is still for is the exhaustive table.
+ *
+ * Run:  node --experimental-strip-types --test "tests/*.test.mjs"
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -22,7 +26,15 @@ import assert from 'node:assert/strict';
  * `@/` alias and one of them throws at module load by design. If the two ever
  * disagree the shell script catches it, because that one runs the real thing.
  */
-function guard({ builtEnv, builtSource, serverEnv, serverSource }) {
+function guard({
+  builtEnv, builtSource, serverEnv, serverSource,
+  // The two that only matter once a deployment is publicly reachable. They
+  // default to the configuration a staging deployment must have, so the
+  // exhaustive table below varies the four values it is about.
+  auth = 'backend',
+  backendOrigin = 'https://kkl-backend-staging.up.railway.app',
+  devSecrets = [],
+}) {
   // 1. A served build must say what it is. Missing declarations first, because
   //    "nobody configured this" must be a visible failure rather than a
   //    silent fallback to whatever the bundle happens to contain.
@@ -42,11 +54,27 @@ function guard({ builtEnv, builtSource, serverEnv, serverSource }) {
     return { serve: false, reason: 'production_with_sample' };
   }
 
+  // 4. A publicly reachable deployment running sample services must still have
+  //    a real session, because the sample sign-in step accepts any six digits.
+  //    Staging gets this rule instead of rule 3: refusing `sample` outright
+  //    would make staging impossible, since the platform-wide `api` client does
+  //    not exist.
+  if (PUBLIC.has(serverEnv) && serverSource === 'sample') {
+    if (auth !== 'backend') return { serve: false, reason: 'public_sample_without_real_auth' };
+    if (!backendOrigin) return { serve: false, reason: 'public_auth_without_origin' };
+  }
+
+  // 5. And it must not carry the development identity issuer's secret.
+  if (PUBLIC.has(serverEnv) && devSecrets.length > 0) {
+    return { serve: false, reason: 'public_with_dev_secret' };
+  }
+
   return { serve: true, reason: 'ok' };
 }
 
-const ENVS = ['development', 'review', 'production'];
+const ENVS = ['development', 'review', 'staging', 'production'];
 const SOURCES = ['sample', 'api'];
+const PUBLIC = new Set(['staging', 'production']);
 
 test('the documented local review configuration serves', () => {
   const result = guard({
@@ -109,7 +137,38 @@ test('every bundle/server disagreement is refused', () => {
   }
 });
 
-test('the whole 72-combination space has exactly the serving cases expected', () => {
+test('a publicly reachable sample deployment needs a real session', () => {
+  for (const serverEnv of ENVS) {
+    const result = guard({
+      builtEnv: serverEnv, builtSource: 'sample',
+      serverEnv, serverSource: 'sample',
+      // `null`, not `undefined`: a default parameter treats undefined as absent
+      // and would hand this test the very value it is trying to remove.
+      auth: null,
+    });
+    if (PUBLIC.has(serverEnv)) {
+      assert.equal(result.serve, false, `${serverEnv} served the sample sign-in step publicly`);
+    } else {
+      assert.equal(result.serve, true, `${serverEnv} is private and keeps the prototype step`);
+    }
+  }
+});
+
+test('a development identity secret is refused wherever the public can reach it', () => {
+  for (const serverEnv of ENVS) {
+    for (const serverSource of SOURCES) {
+      if (serverEnv === 'production' && serverSource === 'sample') continue;
+      const result = guard({
+        builtEnv: serverEnv, builtSource: serverSource,
+        serverEnv, serverSource,
+        devSecrets: ['KKL_DEV_AUTH_SECRET'],
+      });
+      assert.equal(result.serve, !PUBLIC.has(serverEnv), `${serverEnv}/${serverSource}`);
+    }
+  }
+});
+
+test('the whole 120-combination space has exactly the serving cases expected', () => {
   const serving = [];
   for (const builtEnv of ENVS) {
     for (const builtSource of SOURCES) {
@@ -123,12 +182,17 @@ test('the whole 72-combination space has exactly the serving cases expected', ()
     }
   }
   // Only matched pairs serve, and production+sample is excluded from them.
+  // Only matched pairs serve. production+sample is excluded; staging+sample is
+  // not, because staging's rule is a real session rather than a real data
+  // source — and with `auth` at its default here, that rule is satisfied.
   assert.deepEqual(serving.sort(), [
     'development/api',
     'development/sample',
     'production/api',
     'review/api',
     'review/sample',
+    'staging/api',
+    'staging/sample',
   ]);
   assert.ok(!serving.includes('production/sample'), 'the one that must never serve');
 });

@@ -60,6 +60,12 @@ export function proxy(request: NextRequest) {
  */
 function documentHeaders(): Record<string, string> {
   return {
+    // A browser ignores this on a plaintext origin, so it is unconditional:
+    // one year, this host only. Not `includeSubDomains`, because a staging
+    // deployment lives on a platform subdomain it shares with every other
+    // project on that platform, and not `preload`, which is a commitment
+    // about a domain this deployment does not own.
+    "Strict-Transport-Security": "max-age=31536000",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",

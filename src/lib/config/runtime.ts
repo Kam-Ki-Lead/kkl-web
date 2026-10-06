@@ -52,8 +52,19 @@
 export type DataSource = "sample" | "api";
 
 /** Where this build is destined to run. Deliberately separate from NODE_ENV so a
- *  local production build stays possible while a real production deploy is guarded. */
-export type DeploymentEnv = "development" | "review" | "production";
+ *  local production build stays possible while a real production deploy is guarded.
+ *
+ *  `staging` is a deployment on a URL anyone can open, carrying synthetic data,
+ *  for testing. It is not production — no live call, no live message, no real
+ *  money — and it is not review, because review runs where only the reviewer
+ *  can reach it. kkl-backend has the same four declarations, for the same
+ *  reason: *anyone can reach this* and *this is the real business* are
+ *  independent properties, and the machinery that is unsafe on a public
+ *  address is not the same machinery that is unsafe with real money. */
+export type DeploymentEnv = "development" | "review" | "staging" | "production";
+
+/** Environments served on an address a stranger can open. */
+const PUBLICLY_REACHABLE: ReadonlySet<string> = new Set(["staging", "production"]);
 
 /** Read a variable from the live process, at the moment of the call. */
 function readEnv(name: string): string | undefined {
@@ -90,9 +101,12 @@ function given(raw: string | undefined): string | undefined {
 
 function parseDeploymentEnv(): DeploymentEnv {
   const raw = given(BUILT_ENV) ?? "development";
-  if (raw === "development" || raw === "review" || raw === "production") return raw;
+  if (raw === "development" || raw === "review" || raw === "staging" || raw === "production") {
+    return raw;
+  }
   throw new Error(
-    `NEXT_PUBLIC_KKL_ENV must be "development", "review" or "production"; received "${raw}".`,
+    "NEXT_PUBLIC_KKL_ENV must be \"development\", \"review\", \"staging\" or " +
+      `"production"; received "${raw}".`,
   );
 }
 
@@ -195,6 +209,67 @@ export function assertDeploymentSafe(): void {
         `KKL_DATA_SOURCE=${serverSource}. The data source is decided at build time, so setting it ` +
         `on the server alone has no effect. Rebuild with NEXT_PUBLIC_KKL_DATA_SOURCE=${serverSource}.`,
     );
+  }
+
+  // ---------------------------------------------------------------- staging
+  //
+  // A staging deployment runs on an address a stranger can open, so the one
+  // thing it may not do is the thing sample mode does for free: let anybody
+  // in. With `KKL_AUTH` unset, the sign-in step accepts any six digits and
+  // treats `000000` as the failure — that is the approved prototype's
+  // behaviour, and it authenticates nobody. On a private review host that is
+  // a reviewer walking through screens. On a public URL it is an open door to
+  // every dashboard.
+  //
+  // So staging does NOT get the production rule (refuse `sample` outright).
+  // It cannot: the platform-wide `api` client does not exist — kkl-backend
+  // serves individual domains, each behind its own switch, and `getServices()`
+  // throws for `api`. Refusing `sample` here would mean no staging deployment
+  // is possible at all, which is how a guard gets bypassed instead of
+  // satisfied. What staging gets instead is the narrower rule that closes the
+  // actual hole: the session must be a real one, issued by kkl-backend's
+  // published authenticator against a code it delivered.
+  //
+  // Everything else sample mode simulates — a purchase, a contact reveal —
+  // stays visible as simulated, because the sample-mode banner renders above
+  // every page and says so.
+  if (PUBLICLY_REACHABLE.has(effectiveEnv) && effectiveSource === "sample") {
+    const auth = readEnv("KKL_AUTH");
+    if (auth !== "backend") {
+      throw new Error(
+        `Refusing to serve: KKL_ENV=${effectiveEnv} is a publicly reachable deployment running ` +
+          "sample services, and KKL_AUTH is not \"backend\". The sample sign-in step accepts any " +
+          "six digits, so this would let anyone open any dashboard. Set KKL_AUTH=backend and " +
+          "KKL_BACKEND_BASE_URL so sign-in goes to kkl-backend's published authenticator.",
+      );
+    }
+    if (readEnv("KKL_BACKEND_BASE_URL") === undefined
+        && readEnv("KKL_LEAD_REQUESTS_BASE_URL") === undefined) {
+      throw new Error(
+        `Refusing to serve: KKL_ENV=${effectiveEnv} with KKL_AUTH=backend requires ` +
+          "KKL_BACKEND_BASE_URL (or KKL_LEAD_REQUESTS_BASE_URL) pointing at kkl-backend. " +
+          "Without an origin there is nowhere for a real session to come from.",
+      );
+    }
+  }
+
+  // The development identity issuer invents an account for a name and takes
+  // the role from the caller, "staff" included. kkl-backend already refuses it
+  // on a publicly reachable deployment; this refuses to deploy a web process
+  // that is configured to try, so the failure is one start-up error rather
+  // than a run of 404s nobody traces.
+  if (PUBLICLY_REACHABLE.has(effectiveEnv)) {
+    const devSecrets = ["KKL_DEV_AUTH_SECRET", "KKL_BACKEND_DEV_SECRET", "KKL_LEAD_REQUESTS_DEV_SECRET"]
+      .filter((name) => readEnv(name) !== undefined);
+    if (devSecrets.length > 0) {
+      throw new Error(
+        `Refusing to serve: ${devSecrets.join(", ")} ${devSecrets.length === 1 ? "is" : "are"} ` +
+          `set on a ${effectiveEnv} deployment. That secret exists to call kkl-backend's ` +
+          "development identity issuer, which invents an account for a name with whatever role " +
+          "is asked for. It must not be present where the public can reach this process. " +
+          "Remove it; KKL_AUTH=backend needs no shared secret.",
+      );
+    }
   }
 }
 
