@@ -71,7 +71,7 @@ for (const [label, path] of SCREENS) {
     //
     //  - aria-hidden descendants are not visible to anyone as a label. The
     //    wordmark's decorative "K" tile is aria-hidden, so the label is
-    //    "Kam Ki Lead", not "K Kam Ki Lead".
+    //    "Kaam Ki Lead", not "K Kaam Ki Lead".
     //  - 2.5.3 is about components labelled BY TEXT. A control whose visible
     //    content is an icon glyph ("☰") has no text label, so there is
     //    nothing for the accessible name to contain.
@@ -79,9 +79,9 @@ for (const [label, path] of SCREENS) {
       const clone = el.cloneNode(true);
       for (const hidden of clone.querySelectorAll('[aria-hidden="true"]')) hidden.remove();
       // textContent runs adjacent inline elements together: the wordmark is
-      // <span>Kam Ki</span><span>Lead</span> separated by a CSS gap, and reads
-      // as "Kam KiLead" unless the boundary is respected. A voice-control user
-      // sees "Kam Ki Lead".
+      // <span>Kaam Ki</span><span>Lead</span> separated by a CSS gap, and reads
+      // as "Kaam KiLead" unless the boundary is respected. A voice-control user
+      // sees "Kaam Ki Lead".
       for (const child of clone.querySelectorAll('*')) child.append(' ');
       return (clone.textContent || el.value || '').trim().replace(/\s+/g, ' ');
     };

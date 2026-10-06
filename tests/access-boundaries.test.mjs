@@ -138,7 +138,7 @@ test('an internal note is absent from the user projection, not flagged in it', (
   const thread = [
     { id: 'm1', authorLabel: 'Sanjay Paul', body: 'The number is disconnected.', sentAt: '1', internal: false },
     { id: 'm2', authorLabel: 'A. Dutta', body: 'Mis-keyed at intake. No refund policy yet.', sentAt: '2', internal: true },
-    { id: 'm3', authorLabel: 'Kam Ki Lead support', body: 'Corrected on your lead.', sentAt: '3', internal: false },
+    { id: 'm3', authorLabel: 'Kaam Ki Lead support', body: 'Corrected on your lead.', sentAt: '3', internal: false },
   ];
   const visible = userVisibleThread(thread);
 

@@ -147,3 +147,49 @@ All three are corrected. The sweep that found them is whitespace-insensitive
 (`Kam\s+Ki\s+Lead`) and is the one to use on a JSX codebase. Verified in a
 headless browser on the homepage, a 404 route and the Seller verification
 screen: the old spelling is absent and the new one present on all three.
+
+### The last three, 6 October 2026
+
+A sweep ahead of a public staging deployment found three remaining
+occurrences. None of them was on a rendered page — the whitespace-insensitive
+pattern above had caught all of those — but all three were places the name
+would eventually be read.
+
+- `app/admin/login/page.tsx` — the staff sign-in screen's work-email
+  placeholder read `name@kamkilead.internal`, which is rendered text a staff
+  member sees. Corrected to `name@kaamkilead.internal`. `.internal` resolves
+  nowhere, so there is no functional change; it is a hint, not an address.
+- `scripts/verify-accessible-names.mjs` — the comments explaining the
+  accessible-name rules quoted the old spelling while describing what the
+  page renders *now*, including the `<span>Kam Ki</span><span>Lead</span>`
+  example. A comment that contradicts the code it explains is a defect with a
+  long fuse.
+- `tests/access-boundaries.test.mjs` — a fixture message carried
+  `authorLabel: 'Kam Ki Lead support'`. A fixture label is text a screen
+  displays, so it follows the same rule as the screen.
+
+Deliberately **not** changed, because they are historical records and changing
+them would make the record wrong:
+
+- `docs/phase-5/browser-evidence.json` — captured page text from a run that
+  happened. It is evidence of what was on screen that day.
+- `docs/design/prototype/*` — the frozen design-direction prototype. Not
+  served by the application, and dated.
+- The comment in `components/brand/wordmark.tsx` that quotes the old spelling
+  while explaining why a contiguous-string search missed the wordmark. The
+  quotation is the point.
+- `kkl-backend/docs/audit-2026-10/requirement-implementation.md` R-PUB-11,
+  which names the old spelling as the defect it records.
+
+Repository identifiers are unchanged: the GitHub organisation
+`Kam-Ki-Lead`, the repository names, the `KKL_*` variable names, the `kkl_*`
+database roles and the `/v1/*` API paths all stay as they are. None of them
+is customer-facing and renaming any of them would be a functional change for
+no benefit.
+
+Verified by serving a production build (`NEXT_PUBLIC_KKL_ENV=staging`) and
+fetching 17 routes, including the homepage, search, support, the broker and
+builder landing pages, post-property, find-my-match, both dashboards' redirect
+responses, the staff sign-in screen, the customer sign-in screen and a 404.
+Every page: zero occurrences of `Kam Ki`, zero of `kamkilead`, and
+`Kaam Ki Lead` present in the `<title>` and the body.

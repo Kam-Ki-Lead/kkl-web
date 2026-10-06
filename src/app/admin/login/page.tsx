@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
               id="staff-email"
               name="email"
               type="email"
-              placeholder="name@kamkilead.internal"
+              placeholder="name@kaamkilead.internal"
               disabled
               autoComplete="off"
             />
