@@ -31,6 +31,24 @@ describe('presenting corrected answers', { concurrency: false }, () => {
     assert.equal(shown.note, null);
   });
 
+  test('an answer the buyer confirmed replacing is named a correction', () => {
+    const [shown] = presentAnswers([answer({
+      status: 'superseded', superseded: true, supersededReason: 'buyer_confirmed_correction',
+      value: { optionId: 'q04_kolkata' } })]);
+    assert.equal(shown.state, 'corrected');
+    assert.equal(shown.needsHumanReview, false);
+    assert.match(shown.note, /picked this answer out of a list and confirmed/);
+  });
+
+  test('a WhatsApp correction is counted in the run summary', () => {
+    const line = correctionSummary([
+      answer({ status: 'superseded', superseded: true,
+        supersededReason: 'buyer_confirmed_correction', value: { optionId: 'q04_kolkata' } }),
+      answer({ value: { optionId: 'q04_hooghly' } }),
+    ]);
+    assert.match(line, /1 answer corrected \(q04_city\)/);
+  });
+
   test('a corrected answer is named a correction, not just superseded', () => {
     const [shown] = presentAnswers([answer({
       status: 'superseded', superseded: true, supersededReason: 'explicit_correction',

@@ -7,12 +7,22 @@ import { redirectForAuth } from "@/lib/auth/recover";
 import { ServiceError } from "@/lib/services/contracts";
 import {
   recoverQualificationRun,
+  refreshRunRecommendations,
   registerSyntheticQuestionSet,
+  resolveRunContradiction,
   reviewQualificationRun,
   setCallingWindow,
   setOptOutSignals,
   startQualificationRun,
 } from "@/lib/services/backend/qualification";
+import {
+  STALE_SCREEN_MESSAGE,
+  replacementValue,
+  resolutionNotice,
+  validateResolution,
+  type ResolutionChoice,
+} from "@/lib/domain/contradiction-resolution";
+import { refreshNotice } from "@/lib/domain/recommendation-refresh";
 
 const SETTINGS_PATH = "/admin/settings";
 const SYSTEM_PATH = "/admin/system";
@@ -240,6 +250,109 @@ export async function retryQualificationRun(
         `Retry applied. Run state is ${run.state}.${dispatchNote} `
         + "Retry only proceeds when capabilities.retry.dispatchesProvider is false "
         + "on this host.",
+    };
+  } catch (error) {
+    redirectForAuth(error, runPath(runId));
+    if (error instanceof ServiceError) return { error: error.message };
+    throw error;
+  }
+}
+
+/**
+ * Settles a contradiction a run is held for.
+ *
+ * The form carries one of two things: the id of a conflicting answer to keep,
+ * or a value to put in their place. Validated here against the same rules the
+ * backend applies, so a staff member is told what is wrong beside the field
+ * rather than by a 422 that loses what they typed.
+ *
+ * `expectedUpdatedAt` is what the screen was showing. If the run moved under
+ * it the save is refused, and the refusal says to reload rather than
+ * pretending the decision was made against what is there now.
+ *
+ * A resolution contacts nobody. The notice says so every time, because
+ * "resumed" is the word somebody reads as "we called them".
+ */
+export async function resolveRunContradictionAction(
+  _previous: QualificationActionState,
+  formData: FormData,
+): Promise<QualificationActionState> {
+  const runId = String(formData.get("runId") ?? "").trim();
+  const questionKey = String(formData.get("questionKey") ?? "").trim();
+  const mode = String(formData.get("mode") ?? "").trim();
+  const reason = String(formData.get("reason") ?? "").trim();
+  const observedAt = String(formData.get("observedAt") ?? "").trim() || null;
+  const schemaType = String(formData.get("schemaType") ?? "").trim();
+  const hasOptions = String(formData.get("hasOptions") ?? "") === "yes";
+
+  // The form says which shape the question takes, because the server action
+  // does not hold the question set and must not guess one.
+  let choice: ResolutionChoice | null = null;
+  if (mode === "keep") {
+    const answerId = String(formData.get("keepAnswerId") ?? "").trim();
+    if (answerId) choice = { kind: "keep", answerId };
+  } else if (mode === "enter") {
+    const raw = String(formData.get("value") ?? "");
+    if (raw.trim()) {
+      const question = {
+        key: questionKey,
+        prompt: questionKey,
+        required: true,
+        answerSchema: hasOptions
+          ? { type: schemaType || undefined, options: [{ id: raw.trim(), label: raw.trim() }] }
+          : { type: schemaType || undefined },
+      };
+      choice = { kind: "enter", value: replacementValue(question, raw) };
+    }
+  }
+
+  const problem = validateResolution({ questionKey, choice, reason });
+  if (problem) return { error: problem.message, field: problem.field };
+
+  try {
+    const result = await resolveRunContradiction({
+      runId,
+      questionKey,
+      choice: choice as ResolutionChoice,
+      reason,
+      idempotencyKey: `resolve-${randomUUID()}`,
+      expectedUpdatedAt: observedAt,
+    });
+    revalidatePath(runPath(runId));
+    revalidatePath(VOICE_PATH);
+    revalidatePath("/admin/whatsapp");
+    return { notice: resolutionNotice(result) };
+  } catch (error) {
+    redirectForAuth(error, runPath(runId));
+    if (error instanceof ServiceError) {
+      if (/changed since/i.test(error.message)) {
+        return { error: STALE_SCREEN_MESSAGE, field: "reason" };
+      }
+      return { error: error.message };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Recomputes recommendations against the answers as they now stand.
+ *
+ * Deliberately an action rather than something a page load does: recomputing
+ * what somebody is about to act on, without being asked, is how a screen
+ * tells two different stories on two refreshes. It changes no selection and
+ * no visit request.
+ */
+export async function refreshRunRecommendationsAction(
+  _previous: QualificationActionState,
+  formData: FormData,
+): Promise<QualificationActionState> {
+  const runId = String(formData.get("runId") ?? "").trim();
+  try {
+    const result = await refreshRunRecommendations({ runId });
+    revalidatePath(runPath(runId));
+    return {
+      notice:
+        `${refreshNotice(result)} ${result.guarantees.join(" ")}`,
     };
   } catch (error) {
     redirectForAuth(error, runPath(runId));

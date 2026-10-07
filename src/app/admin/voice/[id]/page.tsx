@@ -7,6 +7,10 @@ import {
   QualificationRecoveryForm,
   QualificationReviewForm,
 } from "@/components/admin/qualification-forms";
+import {
+  ContradictionPanel,
+  RecommendationFreshnessPanel,
+} from "@/components/admin/contradiction-resolution";
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { ProposedScorePanel } from "@/components/admin/proposed-score-panel";
 import type { ProposedScore } from "@/lib/domain/proposed-score";
@@ -16,7 +20,7 @@ import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
 import { getServices } from "@/lib/services";
 import { qualificationStoreKind } from "@/lib/services/backend/config";
-import { getVoiceCall } from "@/lib/services/backend/qualification";
+import { getRunContradictions, getVoiceCall } from "@/lib/services/backend/qualification";
 import {
   intentDisplay,
   levelDisplay,
@@ -68,6 +72,11 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
     // for this run. Absent is the normal case and renders as "not scored yet";
     // it is deliberately not defaulted to a level.
     const proposedScore = (run as { proposedScore?: ProposedScore | null }).proposedScore ?? null;
+
+    // A separate read, because a conflict carries the question and both
+    // sides' evidence and the run payload carries neither. A failure here
+    // shows as a failure in its own panel rather than taking the page down.
+    const conflicts = await getRunContradictions(run.id);
 
     return (
       <AdminShell title={run.reference} subtitle="Answers, evidence and review">
@@ -233,6 +242,23 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
               </dl>
             )}
           </Card>
+
+          <ContradictionPanel
+            runId={run.id}
+            view={conflicts.ok ? conflicts.value : null}
+            loadError={conflicts.ok ? null : conflicts.message}
+          />
+
+          <RecommendationFreshnessPanel runId={run.id} state={run.recommendations} />
+
+          {run.pendingAction ? (
+            <p className="t-body rounded-[8px] bg-tint px-[13px] py-[10px] text-body" role="status">
+              A <strong className="text-ink">{run.pendingAction.kind.replace(/_/g, " ")}</strong>{" "}
+              is in progress with this person
+              {run.pendingAction.step ? ` (step: ${run.pendingAction.step})` : ""}. Their next
+              reply belongs to it, so the conversation is not waiting on the next question.
+            </p>
+          ) : null}
 
           {run.consentEvidence.length > 0 ? (
             <Card className="p-[18px]">

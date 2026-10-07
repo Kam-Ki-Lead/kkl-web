@@ -18,8 +18,11 @@ import {
   readOptOutResponse,
   readQualificationRun,
   readQualificationRunPage,
+  readContradictionView,
   readQuestionSetPage,
+  readRefreshResult,
   readRegisteredQuestionSet,
+  readResolutionResult,
   readStaffLeadDetail,
   readStaffLeadPage,
   type CallingWindowConfig,
@@ -29,9 +32,12 @@ import {
   type QualificationRunPage,
   type QuestionSetSummary,
   type ReviewFilter,
+  type ResolutionResult,
   type StaffLeadDetail,
   type StaffLeadPage,
 } from "./qualification-reading";
+import type { ContradictionView, ResolutionChoice } from "@/lib/domain/contradiction-resolution";
+import type { RefreshResult } from "@/lib/domain/recommendation-refresh";
 import { SYNTHETIC_QUESTION_SET } from "./qualification-synthetic";
 import { staffRefusal } from "./staff-views";
 
@@ -405,4 +411,106 @@ export async function probeVoiceBridgeFromAdmin(): Promise<never> {
     "Admin screens do not call /v1/voice-bridge. Staff use /v1/admin/qualification. "
       + `OpenAPI ${PHASE4A_OPENAPI} on backend ${PHASE4A_BACKEND}.`,
   );
+}
+
+// ------------------------------------- resolving a run held for review ----
+
+/**
+ * The conflicts on a run, with the question and both sides' evidence.
+ *
+ * A read. It changes nothing, and in particular it does not resolve anything
+ * or recompute a recommendation, so a page can load it freely.
+ */
+export async function getRunContradictions(
+  runId: string,
+): Promise<QualificationLoad<ContradictionView>> {
+  try {
+    const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
+      "staff",
+      `/v1/admin/qualification/runs/${encodeURIComponent(runId)}/contradictions`,
+    );
+    if (status === 403 || status === 401) {
+      return refused(status, body.error, "This account cannot open contradictions.");
+    }
+    if (status !== 200) {
+      return { ok: false, message: body.error ?? `The service returned ${status}.` };
+    }
+    const view = readContradictionView(body);
+    if (!view) return { ok: false, message: "The contradiction response was not readable." };
+    return { ok: true, value: view };
+  } catch (error) {
+    return fail(error, "Contradictions could not be loaded.");
+  }
+}
+
+/**
+ * Settles one conflict: keep an answer already given, or enter a replacement.
+ *
+ * `expectedUpdatedAt` is what the screen was looking at. The backend refuses
+ * the save if the run moved under it, which is the point: a decision made
+ * against answers somebody has since changed is worse than one that is
+ * refused.
+ *
+ * `idempotencyKey` makes a retried submit safe. A resolution is append-only
+ * and a second one would be a second record of the same decision.
+ *
+ * Nothing here dispatches to a provider. The backend says so in the response
+ * and the caller repeats it, because "the run resumed" is the sentence
+ * somebody reads as "we contacted them".
+ */
+export async function resolveRunContradiction(input: {
+  runId: string;
+  questionKey: string;
+  choice: ResolutionChoice;
+  reason: string;
+  idempotencyKey: string;
+  expectedUpdatedAt: string | null;
+}): Promise<ResolutionResult> {
+  const payload: Record<string, unknown> = {
+    questionKey: input.questionKey,
+    reason: input.reason,
+    idempotencyKey: input.idempotencyKey,
+    expectedUpdatedAt: input.expectedUpdatedAt,
+  };
+  if (input.choice.kind === "keep") payload.keepAnswerId = input.choice.answerId;
+  else payload.value = input.choice.value;
+
+  const { status, body } = await callAs<Record<string, unknown> & { error?: string; code?: string }>(
+    "staff",
+    `/v1/admin/qualification/runs/${encodeURIComponent(input.runId)}/contradictions`,
+    { method: "POST", body: payload },
+  );
+  if (status !== 200) raise(status, body);
+  const result = readResolutionResult(body);
+  if (!result) throw new ServiceError("unavailable", "The resolution response was not readable.");
+  if (result.providerDispatch?.dispatched === true) {
+    throw new ServiceError(
+      "unavailable",
+      "A resolution reported a provider dispatch. Resolving an answer must not contact "
+        + "anybody — treat this run as needing a look before anything else is done to it.",
+    );
+  }
+  return result;
+}
+
+/**
+ * Recomputes recommendations from the answers as they now stand.
+ *
+ * Separate from resolving, and separate again from contacting anybody. A
+ * selection that no longer fits comes back flagged; no visit request is
+ * cancelled, replaced or duplicated, and the response says so.
+ */
+export async function refreshRunRecommendations(input: {
+  runId: string;
+  limit?: number;
+}): Promise<RefreshResult> {
+  const { status, body } = await callAs<Record<string, unknown> & { error?: string }>(
+    "staff",
+    `/v1/admin/qualification/runs/${encodeURIComponent(input.runId)}/recommendations`,
+    { method: "POST", body: input.limit ? { limit: input.limit } : {} },
+  );
+  if (status !== 200) raise(status, body);
+  const result = readRefreshResult(body);
+  if (!result) throw new ServiceError("unavailable", "The refresh response was not readable.");
+  return result;
 }

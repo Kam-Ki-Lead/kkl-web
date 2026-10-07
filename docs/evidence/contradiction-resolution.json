@@ -1,0 +1,95 @@
+{
+  "revisions": {
+    "web": "a0184e2",
+    "backend": "d4ba202",
+    "voice": "411a253"
+  },
+  "runId": "31b6d293-a378-45b2-8a46-799c3ec2c77a",
+  "checks": [
+    {
+      "name": "A run with two answers to one question is held for review",
+      "pass": true,
+      "detail": "state=incomplete failureReason=contradictory_answers"
+    },
+    {
+      "name": "The conflict is shown with the client's own question",
+      "pass": true,
+      "detail": "Contradictions | Which city are you looking to buy in?"
+    },
+    {
+      "name": "Both answers are offered as labels, not option ids",
+      "pass": true,
+      "detail": "Kolkata | Hooghly"
+    },
+    {
+      "name": "Resolving is said not to contact anybody",
+      "pass": true,
+      "detail": "Resolving records which answer stands and why. It does not contact anybody, does not lift a suppression and does not grant consent."
+    },
+    {
+      "name": "An empty reason never reaches the service",
+      "pass": true,
+      "detail": "browser validation: Please fill out this field."
+    },
+    {
+      "name": "A too-short reason is rejected without losing what was typed",
+      "pass": true,
+      "detail": "Say why this is the answer that stands (at least 3 characters). It is kept with the resolution and read by whoever looks at this run next. · kept=\"x\""
+    },
+    {
+      "name": "The resolution saves and says what did not happen",
+      "pass": true,
+      "detail": "q04_city settled: an answer already given now stands. The run has gone back to collecting. Recommendations are now out of date (q04_city) and need recomputing. Nobody was contacted, no suppression was lifted and no consent was granted. The original answers are kept as evidence."
+    },
+    {
+      "name": "Resuming is reported, and not as a call",
+      "pass": true,
+      "detail": "voice · collecting · review pending"
+    },
+    {
+      "name": "The run went back to collecting",
+      "pass": true,
+      "detail": "state=collecting failureReason=null"
+    },
+    {
+      "name": "Nothing is left unresolved, and the decision is recorded with who made it",
+      "pass": true,
+      "detail": "{\"id\":\"9bdf5deb-5e44-45fe-b3fe-1439c78e9d29\",\"questionKey\":\"q04_city\",\"resolution\":\"kept\",\"resultingAnswerId\":\"6bcc0418-7c2b-40d4-948f-cdde65e52330\",\"reason\":\"She confirmed Hooghly when we rang back on 7 October.\",\"recordedAt\":\"2026-10-07T10:16:12.148Z\",\"actorRole\":\"staff\"}"
+    },
+    {
+      "name": "The original answers are kept as evidence",
+      "pass": true,
+      "detail": "superseded/staff_correction, superseded/staff_correction, answered"
+    },
+    {
+      "name": "No consent was recorded by resolving",
+      "pass": true,
+      "detail": "0 evidence rows"
+    },
+    {
+      "name": "The settled decision survives a reload and reads as append-only",
+      "pass": true,
+      "detail": "Already settled | Append-only. A resolution cannot be edited or removed, here or in the database."
+    },
+    {
+      "name": "Staleness is reported without the page recomputing anything",
+      "pass": true,
+      "detail": "These recommendations are out of date. q04_city changed after they were computed. Recomputing re-reads the current answers. It never cancels, replaces or duplicates a visit request, and never removes a selection."
+    },
+    {
+      "name": "Recomputing says what it did not touch",
+      "pass": true,
+      "detail": "10 projects meet the current answers. No visit request was cancelled, replaced or duplicated. No selection was removed. Recommendations, selections and visit requests are reported separately."
+    },
+    {
+      "name": "A signed-out visitor is sent to sign in rather than shown the conflict",
+      "pass": true,
+      "detail": "http://127.0.0.1:3813/auth?next=%2Fadmin%2Fvoice%2F31b6d293-a378-45b2-8a46-799c3ec2c77a"
+    },
+    {
+      "name": "A service failure on the conflicts read",
+      "pass": null,
+      "detail": "Not exercised in a browser: the read happens inside the Next server, where a page-level route interception does not reach. Covered by tests/contradiction-resolution.test.mjs instead."
+    }
+  ]
+}

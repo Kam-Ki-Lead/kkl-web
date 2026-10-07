@@ -9,6 +9,18 @@
  * `staff_saved` is not client-approved.
  */
 
+import type {
+  ConflictQuestion,
+  Contradiction,
+  ContradictionView,
+  RecordedResolution,
+} from "@/lib/domain/contradiction-resolution";
+import type {
+  RefreshResult,
+  RefreshedSelection,
+  ResolvedArea,
+} from "@/lib/domain/recommendation-refresh";
+
 export const PHASE4A_OPENAPI = "1.0.0-phase4.c" as const;
 export const PHASE4A_BACKEND = "d4c2532" as const;
 
@@ -247,6 +259,18 @@ export type StaffLeadPage = {
   readonly leads: readonly StaffLeadSummary[];
 };
 
+export type RunRecommendationState = {
+  readonly staleSince: string | null;
+  readonly staleBecause: readonly string[];
+  readonly refreshPath: string | null;
+  readonly note: string | null;
+};
+
+export type RunPendingAction = {
+  readonly kind: string;
+  readonly step: string | null;
+};
+
 export type QualificationRun = {
   readonly id: string;
   readonly reference: string;
@@ -286,6 +310,17 @@ export type QualificationRun = {
   readonly providerDispatch: ProviderDispatch | null;
   readonly capabilities: RunCapabilities | null;
   readonly effect: "adapter_invoked" | "recorded_only" | string | null;
+  /**
+   * Whether the run's recommendations still describe its current answers.
+   * Read-only: a page load must not recompute what somebody is about to act
+   * on. Null from a backend that predates the field.
+   */
+  readonly recommendations: RunRecommendationState | null;
+  /**
+   * A multi-turn step the conversation is in the middle of — a correction the
+   * buyer started on WhatsApp, say. The step's contents are not published.
+   */
+  readonly pendingAction: RunPendingAction | null;
   readonly duplicate?: boolean;
 };
 
@@ -585,8 +620,30 @@ export function readQualificationRun(body: unknown): QualificationRun | null {
     providerDispatch: readProviderDispatch(row.providerDispatch),
     capabilities: readCapabilities(row.capabilities),
     effect: text(row.effect),
+    recommendations: readRecommendationState(row.recommendations),
+    pendingAction: readPendingAction(row.pendingAction),
     duplicate: bool(row.duplicate) === true ? true : undefined,
   };
+}
+
+function readRecommendationState(value: unknown): RunRecommendationState | null {
+  const row = record(value);
+  if (!row) return null;
+  const because = Array.isArray(row.staleBecause)
+    ? row.staleBecause.filter((key): key is string => typeof key === "string")
+    : [];
+  return {
+    staleSince: text(row.staleSince),
+    staleBecause: because,
+    refreshPath: text(row.refreshPath),
+    note: text(row.note),
+  };
+}
+
+function readPendingAction(value: unknown): RunPendingAction | null {
+  const row = record(value);
+  if (!row || typeof row.kind !== "string") return null;
+  return { kind: row.kind, step: text(row.step) };
 }
 
 export function readQualificationRunPage(body: unknown): QualificationRunPage | null {
@@ -845,4 +902,206 @@ export function levelDisplay(_qualification: QualificationSnapshot): string {
 export function intentDisplay(qualification: QualificationSnapshot): string {
   if (qualification.modelReportedIntent === null) return "No model intent reported";
   return `Model-reported intent ${qualification.modelReportedIntent}/100 — not a qualification level`;
+}
+
+// ------------------------------------------- contradictions and refreshes --
+
+/**
+ * Readings of the two routes a held run needs: see the conflict, settle it.
+ *
+ * Shaped as the domain modules want them, so a screen never reads a raw
+ * payload. A conflict arrives with the question itself attached — a screen
+ * offering "enter a replacement" must show the client's own prompt and
+ * options rather than decode `q04_hooghly` on the reader's behalf.
+ */
+
+
+function readConflictQuestion(value: unknown): ConflictQuestion | null {
+  const row = record(value);
+  if (!row || typeof row.key !== "string") return null;
+  const schema = record(row.answerSchema);
+  const options = schema && Array.isArray(schema.options)
+    ? schema.options
+      .map((item) => {
+        const option = record(item);
+        if (!option || typeof option.id !== "string") return null;
+        return { id: option.id, label: text(option.label) ?? option.id };
+      })
+      .filter((option): option is { id: string; label: string } => option !== null)
+    : undefined;
+  return {
+    key: row.key,
+    prompt: text(row.prompt) ?? row.key,
+    required: bool(row.required) !== false,
+    answerSchema: schema
+      ? {
+        type: text(schema.type) ?? undefined,
+        options,
+        min: integer(schema.min) ?? undefined,
+        max: integer(schema.max) ?? undefined,
+        maxLength: integer(schema.maxLength) ?? undefined,
+      }
+      : null,
+  };
+}
+
+function readRecordedResolution(value: unknown): RecordedResolution | null {
+  const row = record(value);
+  if (!row || typeof row.id !== "string") return null;
+  return {
+    id: row.id,
+    questionKey: text(row.questionKey) ?? "",
+    resolution: text(row.resolution) ?? "",
+    resultingAnswerId: text(row.resultingAnswerId),
+    reason: text(row.reason) ?? "",
+    actorRole: text(row.actorRole),
+    recordedAt: text(row.recordedAt),
+  };
+}
+
+export function readContradictionView(body: unknown): ContradictionView | null {
+  const row = record(body);
+  if (!row || !Array.isArray(row.unresolved)) return null;
+  const unresolved: Contradiction[] = [];
+  for (const item of row.unresolved) {
+    const conflict = record(item);
+    if (!conflict || typeof conflict.questionKey !== "string") return null;
+    if (!Array.isArray(conflict.answers)) return null;
+    const answers = [];
+    for (const entry of conflict.answers) {
+      const answer = record(entry);
+      if (!answer || typeof answer.answerId !== "string") return null;
+      answers.push({
+        answerId: answer.answerId,
+        value: answer.value ?? null,
+        rawText: text(answer.rawText),
+        source: text(answer.source),
+        recordedAt: text(answer.recordedAt),
+      });
+    }
+    unresolved.push({
+      questionKey: conflict.questionKey,
+      question: readConflictQuestion(conflict.question),
+      answers,
+    });
+  }
+  const resolved: RecordedResolution[] = [];
+  if (Array.isArray(row.resolved)) {
+    for (const item of row.resolved) {
+      const recorded = readRecordedResolution(item);
+      if (!recorded) return null;
+      resolved.push(recorded);
+    }
+  }
+  return {
+    runId: text(row.runId) ?? "",
+    observedAt: text(row.observedAt),
+    unresolved,
+    resolved,
+    note: text(row.note),
+  };
+}
+
+export type ResolutionResult = {
+  readonly id: string;
+  readonly questionKey: string;
+  readonly resolution: string;
+  readonly resultingAnswerId: string | null;
+  readonly reason: string;
+  readonly duplicate: boolean;
+  readonly resumed: boolean;
+  readonly stillInConflict: boolean;
+  readonly recommendationsStale: readonly string[];
+  /** Said explicitly because "resumed" is what somebody reads as "we called". */
+  readonly providerDispatch: ProviderDispatch | null;
+};
+
+export function readResolutionResult(body: unknown): ResolutionResult | null {
+  const row = record(body);
+  if (!row || typeof row.id !== "string") return null;
+  const stale = Array.isArray(row.recommendationsStale)
+    ? row.recommendationsStale.filter((key): key is string => typeof key === "string")
+    : [];
+  return {
+    id: row.id,
+    questionKey: text(row.questionKey) ?? "",
+    resolution: text(row.resolution) ?? "",
+    resultingAnswerId: text(row.resultingAnswerId),
+    reason: text(row.reason) ?? "",
+    duplicate: bool(row.duplicate) === true,
+    resumed: bool(row.resumed) === true,
+    stillInConflict: bool(row.stillInConflict) === true,
+    recommendationsStale: stale,
+    providerDispatch: readProviderDispatch(row.providerDispatch),
+  };
+}
+
+function readArea(value: unknown): ResolvedArea | null {
+  const row = record(value);
+  if (!row) return null;
+  const unresolved = Array.isArray(row.unresolved)
+    ? row.unresolved
+      .map((item) => {
+        const entry = record(item);
+        if (!entry || typeof entry.optionId !== "string") return null;
+        return {
+          optionId: entry.optionId,
+          status: text(entry.status) ?? "",
+          reason: text(entry.reason),
+        };
+      })
+      .filter((entry): entry is { optionId: string; status: string; reason: string | null } =>
+        entry !== null)
+    : [];
+  return {
+    usable: bool(row.usable) === true,
+    narrowedBy: text(row.narrowedBy),
+    selection: text(row.selection),
+    unresolved,
+    searchedNodeCount: integer(row.searchedNodeCount) ?? 0,
+    note: text(row.note),
+  };
+}
+
+export function readRefreshResult(body: unknown): RefreshResult | null {
+  const row = record(body);
+  if (!row || typeof row.runId !== "string") return null;
+  if (!Array.isArray(row.selections)) return null;
+  const selections: RefreshedSelection[] = [];
+  for (const item of row.selections) {
+    const entry = record(item);
+    if (!entry || typeof entry.selectionId !== "string") return null;
+    selections.push({
+      selectionId: entry.selectionId,
+      listingId: text(entry.listingId),
+      freeTextLabel: text(entry.freeTextLabel),
+      enquiryId: text(entry.enquiryId),
+      matchState: text(entry.matchState) ?? "not_rechecked",
+      detail: text(entry.detail),
+    });
+  }
+  const recommendations = record(row.recommendations);
+  const matches = recommendations && Array.isArray(recommendations.matches)
+    ? recommendations.matches.length : 0;
+  const unavailable = recommendations ? record(recommendations.unavailable) : null;
+  const staleBecause = Array.isArray(row.staleBecause)
+    ? row.staleBecause.filter((key): key is string => typeof key === "string")
+    : [];
+  const guarantees = Array.isArray(row.guarantees)
+    ? row.guarantees.filter((line): line is string => typeof line === "string")
+    : [];
+  return {
+    runId: row.runId,
+    refreshedAt: text(row.refreshedAt),
+    wasStale: bool(row.wasStale) === true,
+    staleBecause,
+    area: readArea(row.area),
+    matchCount: matches,
+    unavailableReason: text(unavailable?.reason),
+    selections,
+    visitRequestsPreserved: integer(row.visitRequestsPreserved) ?? 0,
+    needsAttention: bool(row.needsAttention) === true,
+    summary: text(row.summary) ?? "",
+    guarantees,
+  };
 }

@@ -16,7 +16,8 @@ export type AnswerStatus =
   | "answered" | "skipped" | "unclear" | "contradictory" | "replaced" | "superseded";
 
 export type SupersededReason =
-  | "explicit_correction" | "staff_correction" | "dependent_answer_invalidated";
+  | "explicit_correction" | "buyer_confirmed_correction" | "staff_correction"
+  | "dependent_answer_invalidated";
 
 /**
  * What the backend sends. `status` is deliberately a plain string: the API
@@ -53,6 +54,11 @@ const SUPERSEDED_WORDS: Record<SupersededReason, { state: PresentedAnswer["state
     state: "corrected",
     note: "The buyer replaced this answer later in the conversation. Kept as evidence of "
       + "what was said; only the current answer is used.",
+  },
+  buyer_confirmed_correction: {
+    state: "corrected",
+    note: "The buyer picked this answer out of a list and confirmed the replacement before "
+      + "it was applied. Kept as evidence of what was said.",
   },
   staff_correction: {
     state: "corrected",
@@ -132,7 +138,9 @@ export function needsHumanReview(answers: readonly RunAnswer[]): boolean {
  */
 export function correctionSummary(answers: readonly RunAnswer[]): string | null {
   const corrected = answers.filter((a) => a.superseded
-    && (a.supersededReason === "explicit_correction" || a.supersededReason === "staff_correction"));
+    && (a.supersededReason === "explicit_correction"
+      || a.supersededReason === "buyer_confirmed_correction"
+      || a.supersededReason === "staff_correction"));
   if (corrected.length === 0) return null;
   const keys = [...new Set(corrected.map((a) => a.questionKey))];
   return `${corrected.length} answer${corrected.length === 1 ? "" : "s"} corrected `
