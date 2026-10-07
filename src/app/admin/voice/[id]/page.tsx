@@ -10,6 +10,7 @@ import {
 import { FixtureNotice } from "@/components/admin/sample-notice";
 import { ProposedScorePanel } from "@/components/admin/proposed-score-panel";
 import type { ProposedScore } from "@/lib/domain/proposed-score";
+import { correctionSummary, presentAnswers } from "@/lib/domain/answer-corrections";
 import { Card } from "@/components/ui/card";
 import { Chip, type ChipTone } from "@/components/ui/chip";
 import { StateMessage } from "@/components/ui/states";
@@ -189,29 +190,44 @@ export default async function AdminCallPage({ params }: { params: Promise<{ id: 
               Question-set version {run.questionSet.versionLabel}. Answer counts do not assign a
               level.
             </p>
+            {correctionSummary(run.answers) ? (
+              <p className="t-body mt-[10px] rounded-[8px] bg-[#F6F8FD] px-[12px] py-[10px] text-body">
+                {correctionSummary(run.answers)}
+              </p>
+            ) : null}
             {run.answers.length === 0 ? (
               <p className="t-body mt-[10px] text-body">No answers recorded on this run yet.</p>
             ) : (
               <dl className="mt-[10px] flex flex-col">
-                {run.answers.map((answer) => (
+                {presentAnswers(run.answers).map((answer) => (
                   <div
                     key={answer.id}
-                    className="flex flex-wrap items-baseline justify-between gap-[10px] border-b border-line py-[9px] last:border-b-0"
+                    className="border-b border-line py-[9px] last:border-b-0"
                   >
-                    <dt className="t-caption text-muted">
-                      {answer.questionKey}
-                      {answer.superseded ? " · superseded" : ""}
-                    </dt>
-                    <dd className="text-[15px] font-semibold text-ink">
-                      {answer.status === "answered"
-                        ? String(answer.value)
-                        : answer.status.replace(/_/g, " ")}
-                      {answer.recordedAt ? (
-                        <span className="t-mono ml-[8px] text-[12px] font-normal text-muted">
-                          {answer.recordedAt}
+                    <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
+                      <dt className="t-caption text-muted">{answer.questionKey}</dt>
+                      <dd className="text-[15px] font-semibold text-ink">
+                        <span className={answer.state === "current" ? "" : "line-through opacity-70"}>
+                          {answer.value}
                         </span>
-                      ) : null}
-                    </dd>
+                        <span className="ml-[8px]">
+                          <Chip tone={answer.tone}>{answer.state}</Chip>
+                        </span>
+                        {answer.recordedAt ? (
+                          <span className="t-mono ml-[8px] text-[12px] font-normal text-muted">
+                            {answer.recordedAt}
+                          </span>
+                        ) : null}
+                      </dd>
+                    </div>
+                    {answer.note ? (
+                      <p
+                        className="t-caption mt-[3px] text-muted"
+                        {...(answer.needsHumanReview ? { role: "alert" } : {})}
+                      >
+                        {answer.note}
+                      </p>
+                    ) : null}
                   </div>
                 ))}
               </dl>

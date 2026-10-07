@@ -82,6 +82,12 @@ export type QualificationAnswer = {
   readonly sourceEventId: string | null;
   readonly recordedAt: string | null;
   readonly superseded: boolean;
+  /**
+   * Why an answer stopped being the current one: an explicit correction, a
+   * staff correction, or a dependent answer invalidated by one. Null for a
+   * live answer, and null from a backend that predates the field.
+   */
+  readonly supersededReason: string | null;
 };
 
 export type QualificationCall = {
@@ -358,6 +364,7 @@ function readAnswer(value: unknown): QualificationAnswer | null {
     sourceEventId: text(row.sourceEventId),
     recordedAt: text(row.recordedAt),
     superseded: bool(row.superseded) === true,
+    supersededReason: text(row.supersededReason),
   };
 }
 
