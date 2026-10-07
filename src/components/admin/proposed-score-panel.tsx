@@ -84,6 +84,9 @@ export function ProposedScorePanel({ score }: { score: ProposedScore | null }) {
         ))}
       </dl>
 
+      <p className="t-body mt-[10px] text-muted">{shown.engagementNote}</p>
+      <p className="t-body mt-[4px] text-muted">{shown.decisionNote}</p>
+
       <p className="t-body mt-[12px] text-body">{shown.ceilingNote}</p>
 
       {shown.stopReason ? (

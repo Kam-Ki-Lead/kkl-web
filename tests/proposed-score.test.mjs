@@ -31,11 +31,19 @@ const score = (over = {}) => ({
       completenessLevel(n, true, 'every required question answered')),
   },
   readiness: {
-    verdict: 'low',
-    signals: { timeline: 'exploring', siteVisit: 'not asked for' },
+    policyVersion: 'proposed-readiness-v1',
+    verdict: 'exploratory',
+    because: 'the buyer chose "Just Exploring" on the timeline',
+    intent: { timeline: 'exploratory', siteVisit: 'deferred',
+      projectSelectedFromOurInventory: false },
+    engagement: { verdict: 'wants_contact', informationOnly: false,
+      note: 'Asking for a call is not a commitment to buy.' },
+    decisionContext: { decisionMaker: 'self', involvesOthers: false, penalty: 'none',
+      note: 'Who decides is context, never a mark against the buyer.' },
+    uncertainty: { confidence: 'medium', usableIntentSignals: 2, of: 3,
+      unanswered: [], flagged: [], note: 'Every intent question has a usable answer.' },
     reasons: ['timeline is "Just Exploring"', 'no site visit requested'],
     isALevel: false,
-    note: 'Reported separately from completeness.',
   },
   financialFit: {
     verdict: 'undetermined',
@@ -85,12 +93,13 @@ describe('presenting a proposed assessment', { concurrency: false }, () => {
     const shown = presentProposedScore(score());
     const [complete, ready] = shown.axes;
     assert.equal(complete.value, 'Level 6 of 6');
-    assert.equal(ready.value, 'Low');
+    assert.equal(ready.value, 'Exploratory');
     assert.match(ready.detail, /Just Exploring/);
+    assert.match(ready.detail, /Confidence: medium/);
   });
 
   test('readiness is never shown as a level', () => {
-    for (const verdict of ['strong', 'moderate', 'low', 'undetermined']) {
+    for (const verdict of ['urgent', 'active', 'exploratory', 'undetermined']) {
       const shown = presentProposedScore(score({
         readiness: { ...score().readiness, verdict } }));
       const ready = shown.axes[1];
@@ -162,19 +171,19 @@ describe('presenting a proposed assessment', { concurrency: false }, () => {
     assert.match(shown.suppression.instruction, /not something this screen can authorise/);
   });
 
-  test('strong readiness does not soften the suppression — it is named in it', () => {
+  test('urgent readiness does not soften the suppression — it is named in it', () => {
     const shown = presentProposedScore(suppressedScore({
-      readiness: { ...score().readiness, verdict: 'strong', reasons: [] },
+      readiness: { ...score().readiness, verdict: 'urgent', reasons: [] },
     }));
     assert.equal(shown.suppression.chip, 'DO NOT CONTACT');
-    assert.match(shown.suppression.appliesDespite, /readiness reads Strong/);
+    assert.match(shown.suppression.appliesDespite, /readiness reads Urgent/);
     assert.match(shown.suppression.appliesDespite, /does not lift the suppression/);
     // And the readiness axis still reports honestly rather than being blanked.
-    assert.equal(shown.axes[1].value, 'Strong');
+    assert.equal(shown.axes[1].value, 'Urgent');
   });
 
   test('suppression holds across every readiness verdict and completeness level', () => {
-    for (const verdict of ['strong', 'moderate', 'low', 'undetermined']) {
+    for (const verdict of ['urgent', 'active', 'exploratory', 'undetermined']) {
       for (const level of [null, 1, 6]) {
         const shown = presentProposedScore(suppressedScore({
           readiness: { ...score().readiness, verdict },
@@ -238,6 +247,26 @@ describe('presenting a proposed assessment', { concurrency: false }, () => {
     assert.equal(mayPriceFromProposedScore(null), false);
     assert.equal(mayReleaseContact(score()), false);
     assert.equal(mayReleaseContact(score({
-      readiness: { ...score().readiness, verdict: 'strong' } })), false);
+      readiness: { ...score().readiness, verdict: 'urgent' } })), false);
+  });
+
+  // D5: engagement and context are reported, and neither reads as intent.
+  test('a contact request is shown as engagement, not as wanting to buy', () => {
+    const shown = presentProposedScore(score());
+    assert.match(shown.engagementNote, /wanting to talk is not the same as wanting to buy/);
+    const informational = presentProposedScore(score({
+      readiness: { ...score().readiness,
+        engagement: { ...score().readiness.engagement, informationOnly: true } } }));
+    assert.match(informational.engagementNote, /a question, not a commitment to buy/);
+  });
+
+  test('a shared decision is shown as context and never as a penalty', () => {
+    assert.equal(presentProposedScore(score()).decisionNote, 'Deciding alone.');
+    const shared = presentProposedScore(score({
+      readiness: { ...score().readiness,
+        decisionContext: { decisionMaker: 'joint', involvesOthers: true, penalty: 'none',
+          note: 'context' } } }));
+    assert.match(shared.decisionNote, /context for the call, not a mark against the buyer/);
+    assert.match(shared.decisionNote, /lowers\s+nothing/);
   });
 });

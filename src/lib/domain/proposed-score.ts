@@ -33,14 +33,47 @@ export type CompletenessLevel = {
   readonly unusable?: readonly { key: string; status: string }[];
 };
 
-export type ReadinessVerdict = "strong" | "moderate" | "low" | "undetermined";
+/**
+ * Four values, each meaning one thing. "Exploratory" is the buyer telling us
+ * they are looking; "undetermined" is us not knowing. They are different
+ * states and the screen must not collapse them into one word.
+ */
+export type ReadinessVerdict = "urgent" | "active" | "exploratory" | "undetermined";
 
 export type Readiness = {
+  readonly policyVersion: string;
   readonly verdict: ReadinessVerdict;
-  readonly signals: Readonly<Record<string, string>>;
+  /** One sentence: why this verdict and not another. */
+  readonly because: string;
+  /** Says something about wanting to BUY. */
+  readonly intent: {
+    readonly timeline: string;
+    readonly siteVisit: string;
+    readonly projectSelectedFromOurInventory: boolean;
+  };
+  /** Says something about wanting to TALK. Never raises the verdict. */
+  readonly engagement: {
+    readonly verdict: string;
+    readonly informationOnly: boolean;
+    readonly note: string;
+  };
+  /** Shapes the conversation. Never a penalty. */
+  readonly decisionContext: {
+    readonly decisionMaker: string;
+    readonly involvesOthers: boolean;
+    readonly penalty: "none";
+    readonly note: string;
+  };
+  readonly uncertainty: {
+    readonly confidence: "none" | "low" | "medium" | "high";
+    readonly usableIntentSignals: number;
+    readonly of: number;
+    readonly unanswered: readonly string[];
+    readonly flagged: readonly { key: string; status: string }[];
+    readonly note: string;
+  };
   readonly reasons: readonly string[];
   readonly isALevel: boolean;
-  readonly note: string;
 };
 
 export type FinancialFit = {
@@ -121,6 +154,13 @@ export type PresentedScore = {
   readonly optOutNotice: string | null;
   readonly commercialNote: string;
   readonly inactiveProposalNote: string | null;
+  /**
+   * Asking for a call is not the same as wanting to buy. Shown beside the
+   * readiness verdict so nobody reads a contact request as intent.
+   */
+  readonly engagementNote: string;
+  /** A shared decision is context, and the panel says so in those words. */
+  readonly decisionNote: string;
   readonly rows: readonly {
     level: number; factor: string; axis: Axis;
     state: "met" | "not met" | "not assessed"; why: string;
@@ -133,9 +173,9 @@ export const PROPOSED_SCORE_CAVEAT =
   + "price, authorise a purchase or release a contact.";
 
 const READINESS_WORDS: Record<ReadinessVerdict, string> = {
-  strong: "Strong",
-  moderate: "Moderate",
-  low: "Low",
+  urgent: "Urgent",
+  active: "Active",
+  exploratory: "Exploratory",
   undetermined: "Undetermined",
 };
 
@@ -168,10 +208,11 @@ export function presentProposedScore(score: ProposedScore | null): PresentedScor
     {
       label: "Buyer readiness",
       value: READINESS_WORDS[score.readiness.verdict] ?? "Undetermined",
-      detail: score.readiness.reasons.length
-        ? score.readiness.reasons.join("; ")
-        : "Read from the timeline, decision-maker, site-visit and requested-action answers. "
-          + "Not a level, and not added to the completeness figure.",
+      detail: `${score.readiness.because}. Confidence: `
+        + `${score.readiness.uncertainty.confidence} `
+        + `(${score.readiness.uncertainty.usableIntentSignals} of `
+        + `${score.readiness.uncertainty.of} intent signals usable).`
+        + (score.readiness.reasons.length ? ` ${score.readiness.reasons.join("; ")}.` : ""),
     },
     {
       label: "Financial fit",
@@ -193,8 +234,9 @@ export function presentProposedScore(score: ProposedScore | null): PresentedScor
         + "campaign. No contact and no sale, whatever this assessment says.",
       instruction: "If you need to reach them, that is a decision for whoever owns "
         + "the suppression list — not something this screen can authorise.",
-      appliesDespite: score.readiness.verdict === "strong"
-        ? "Their readiness reads Strong. That does not lift the suppression."
+      appliesDespite: score.readiness.verdict === "urgent" || score.readiness.verdict === "active"
+        ? `Their readiness reads ${READINESS_WORDS[score.readiness.verdict]}. `
+          + "That does not lift the suppression."
         : "Opt-out is enforced independently of every assessment on this panel.",
     }
     : null;
@@ -216,6 +258,18 @@ export function presentProposedScore(score: ProposedScore | null): PresentedScor
           + `${completeness.levels.find((l) => l.level === stopped)?.why ?? ""}`,
     optOutNotice: suppression ? `${suppression.banner} ${suppression.appliesDespite}` : null,
     commercialNote: score.commercialEffect.why,
+    engagementNote: score.readiness.engagement.informationOnly
+      ? "They asked only for information. That is a question, not a commitment to buy, "
+        + "and it does not raise the readiness verdict."
+      : score.readiness.engagement.verdict === "wants_contact"
+        ? "They asked to be contacted. That is reported here and does not raise the "
+          + "readiness verdict — wanting to talk is not the same as wanting to buy."
+        : "No contact request recorded on question 20.",
+    decisionNote: score.readiness.decisionContext.involvesOthers
+      ? `Decided with others (${score.readiness.decisionContext.decisionMaker}). `
+        + "This is context for the call, not a mark against the buyer, and it lowers "
+        + "nothing on this panel."
+      : "Deciding alone.",
     inactiveProposalNote: score.financialFit.inactiveProposal
       ? `Inactive proposal says "${score.financialFit.inactiveProposal.opinion}". `
         + "It is switched off, it affects nothing, and it is shown only so it can be "
