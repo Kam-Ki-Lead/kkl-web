@@ -3,7 +3,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { assertSingleBackendOrigin } from "../src/lib/services/backend/config.ts";
+import { assertSingleBackendOrigin, locationBackendConfig, authBackendBaseUrl } from "../src/lib/services/backend/config.ts";
 import { agingDiscountSentence, customerOrderStatus, readWalletReconciliation } from "../src/lib/domain/commerce-display.ts";
 
 const ORIGIN_VARS = [
@@ -32,6 +32,23 @@ test("one Phase 5 origin is accepted", () => {
     KKL_LEAD_REQUESTS_BASE_URL: "http://127.0.0.1:4012/",
   }, () => {
     assert.doesNotThrow(() => assertSingleBackendOrigin());
+  });
+});
+
+test("staging's single documented URL serves locations and authentication", () => {
+  withOrigins({ KKL_BACKEND_BASE_URL: "https://backend.example/" }, () => {
+    assert.equal(locationBackendConfig().baseUrl, "https://backend.example");
+    assert.equal(authBackendBaseUrl(), "https://backend.example");
+  });
+});
+
+test("legacy locations URL still works but missing or conflicting URLs refuse", () => {
+  withOrigins({ KKL_LOCATIONS_BASE_URL: "https://backend.example/" }, () => {
+    assert.equal(locationBackendConfig().baseUrl, "https://backend.example");
+  });
+  withOrigins({}, () => assert.throws(() => locationBackendConfig(), /requires KKL_BACKEND_BASE_URL/));
+  withOrigins({ KKL_BACKEND_BASE_URL: "https://one.example", KKL_LOCATIONS_BASE_URL: "https://two.example" }, () => {
+    assert.throws(() => locationBackendConfig(), /more than one origin/);
   });
 });
 

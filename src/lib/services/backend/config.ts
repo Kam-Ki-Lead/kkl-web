@@ -123,10 +123,10 @@ export function locationStoreKind(): LocationStoreKind {
 
 export function locationBackendConfig(): LocationBackendConfig {
   assertSingleBackendOrigin();
-  const baseUrl = read("KKL_LOCATIONS_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL");
+  const baseUrl = read("KKL_LOCATIONS_BASE_URL") ?? read("KKL_LEAD_REQUESTS_BASE_URL") ?? read("KKL_BACKEND_BASE_URL");
   if (baseUrl === undefined) {
     throw new Error(
-      "KKL_LOCATIONS=backend requires KKL_LOCATIONS_BASE_URL (or KKL_LEAD_REQUESTS_BASE_URL) " +
+      "KKL_LOCATIONS=backend requires KKL_BACKEND_BASE_URL (or KKL_LOCATIONS_BASE_URL / KKL_LEAD_REQUESTS_BASE_URL) " +
         "pointing at kkl-backend. kkl-web does not fall back to the sample location records " +
         "when the backend is unconfigured — staff would be maintaining records nobody reads.",
     );
