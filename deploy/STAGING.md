@@ -12,3 +12,6 @@ there is no public development-code or role-issuing bypass.
 Future releases: merge reviewed changes into `staging`, then check the hosted
 build and smoke tests. Pushing this branch can trigger deployment once connected.
 Do not force-push it or assume the historical development branches auto-sync.
+
+Email uses Resend on the backend. Do not add RESEND or SENDGRID secrets to Vercel.
+See the shared deployment runbook RESEND.md for Railway variables. Phone OTP is unchanged.
