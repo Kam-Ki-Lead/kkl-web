@@ -152,42 +152,67 @@ try {
       ? "sale section present with priced rows"
       : "no sale section, as expected when the feed is empty");
 
-  // 5 — Buy/Rent offers only filters the marketplace reads.
-  await page.locator('button[aria-pressed]:has-text("Buy/Rent")').click();
-  await page.waitForTimeout(400);
-  const buyRent = await page.locator("form").first().innerText();
-  const hasTypeSelect = await page.locator("#home-type").count();
-  const hasBudgetSelect = await page.locator("#home-budget").count();
-  ok("Buy/Rent does not offer a property type or a budget band it cannot forward",
-    hasTypeSelect === 0 && hasBudgetSelect === 0,
-    `property-type selects: ${hasTypeSelect}, budget selects: ${hasBudgetSelect}`);
-  ok("Buy/Rent says where the budget band is chosen",
-    /results page/i.test(buyRent),
-    buyRent.split("\n").find((l) => /results page/i.test(l)) ?? "absent");
-  ok("Buy/Rent describes the records as buyer requirements",
-    /buyer requirements/i.test(buyRent) && /Search leads/i.test(buyRent),
-    buyRent.split("\n").filter((l) => /requirement|Search leads/i.test(l)).join(" | "));
+  // 5 — one search, no tab strip, and no control that filters nothing.
+  //
+  // The card used to split into "Projects" and "Buy/Rent" tabs, and carried a
+  // "Search type" box that sat in the row with the real fields, looked like a
+  // control and filtered nothing. It was reported as not working, which it
+  // was not: it was a styled div displaying which tab you were on.
+  const card = page.locator("form").first();
+  const cardText = await card.innerText();
+  const tabs = await page.locator("button[aria-pressed]").count();
+  ok("The search is one section, not two tabs",
+    tabs === 0,
+    `tab buttons: ${tabs}`);
+  ok("The dead Search type box is gone",
+    !/Builder projects/.test(cardText) && !/Buyer requirements/.test(cardText),
+    cardText.split("\n").filter((l) => /Search type|Searching/.test(l)).join(" | ")
+      || "no Search type field");
 
-  // 6 — the query it actually navigates to.
-  await page.selectOption("#home-bhk", "3");
-  await page.locator('button:has-text("Search leads")').click();
-  await page.waitForURL(/\/seller\/leads/, { timeout: 20000 });
+  // 6 — the buy/rent control, and the thing that matters about it: it filters.
+  const transactions = await page.locator("#home-transaction").count();
+  ok("Buy or rent is a dropdown on that one section",
+    transactions === 1,
+    `buy/rent selects: ${transactions}`);
+
+  const searchLabel = async () =>
+    (await card.locator('button[type="submit"]').innerText()).trim();
+  const countIn = (label) => Number(/Search (\d+)/.exec(label)?.[1] ?? "-1");
+
+  const either = countIn(await searchLabel());
+  await page.selectOption("#home-transaction", "rent");
+  await page.waitForTimeout(900);
+  const renting = countIn(await searchLabel());
+  await page.selectOption("#home-transaction", "sale");
+  await page.waitForTimeout(900);
+  const buying = countIn(await searchLabel());
+
+  ok("Choosing buy or rent changes the result count",
+    renting > 0 && buying > 0 && renting !== either && buying !== either,
+    `either ${either}, rent ${renting}, buy ${buying}`);
+  ok("and the two together account for everything",
+    renting + buying === either,
+    `${renting} + ${buying} = ${renting + buying}, either = ${either}`);
+
+  // 7 — the query it navigates to, and the results page honouring it.
+  await page.selectOption("#home-transaction", "rent");
+  await page.waitForTimeout(500);
+  await card.locator('button[type="submit"]').click();
+  await page.waitForURL(/\/search/, { timeout: 20000 });
   const url = new URL(page.url());
-  ok("The lead search forwards the configuration the marketplace matches",
-    url.searchParams.get("config") === "3 BHK",
-    `config=${url.searchParams.get("config")}`);
-  ok("and forwards no property type and no display budget label",
-    !url.searchParams.has("type") && !url.searchParams.has("budget"),
+  ok("Search carries the choice into the query",
+    url.searchParams.get("transaction") === "rent",
     `query: ${url.search || "(empty)"}`);
+  // The applied-filter chips are drawn by the client filter bar, so they
+  // appear after hydration rather than in the first paint.
+  await page.getByText(/To rent|To buy/).first()
+    .waitFor({ timeout: 15000 }).catch(() => {});
+  const results = await page.locator("body").innerText();
+  ok("and the results page shows it applied rather than dropping it",
+    /To rent/.test(results),
+    results.split("\n").filter((l) => /To rent|To buy/.test(l)).join(" | ") || "no chip");
 
-  // 7 — projects mode keeps its own count and budget band.
   await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
-  await page.locator('button[aria-pressed]:has-text("Projects")').click();
-  await page.waitForTimeout(400);
-  const projects = await page.locator("form").first().innerText();
-  ok("Projects mode still counts projects and offers a budget",
-    /Search \d+ project/i.test(projects) && (await page.locator("#home-budget").count()) === 1,
-    projects.split("\n").find((l) => /Search \d+ project/i.test(l)) ?? "absent");
 
   // 7a — Featured Leads is backed by leads.
   const featured = page.locator("section:has(h2:text-is('Featured Leads'))");
@@ -311,12 +336,11 @@ try {
   }
 
   await small.goto(`${BASE}/`, { waitUntil: "networkidle" });
-  await small.locator('button[aria-pressed]:has-text("Buy/Rent")').click();
-  await small.waitForTimeout(400);
   const phoneForm = await small.locator("form").first().innerText();
-  ok("The phone layout does not offer the removed property-type disclosure",
-    !/More filters/i.test(phoneForm),
-    phoneForm.split("\n").filter((l) => /More filters/i.test(l)).join(" | ") || "absent, as intended");
+  ok("The phone gets the same one search, with the buy/rent dropdown",
+    (await small.locator("button[aria-pressed]").count()) === 0
+      && (await small.locator("#home-transaction").count()) === 1,
+    phoneForm.split("\n").slice(0, 6).join(" | "));
 
   // Every control a thumb has to hit is at least 44px tall (C-04).
   const shortControls = await small.evaluate(() => {

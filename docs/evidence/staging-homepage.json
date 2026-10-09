@@ -1,6 +1,6 @@
 {
   "revisions": {
-    "web": "7ff071f",
+    "web": "915f4b9",
     "backend": "fa3e208",
     "voice": "943340e"
   },
@@ -32,34 +32,39 @@
       "detail": "sale section present with priced rows"
     },
     {
-      "name": "Buy/Rent does not offer a property type or a budget band it cannot forward",
+      "name": "The search is one section, not two tabs",
       "pass": true,
-      "detail": "property-type selects: 0, budget selects: 0"
+      "detail": "tab buttons: 0"
     },
     {
-      "name": "Buy/Rent says where the budget band is chosen",
+      "name": "The dead Search type box is gone",
       "pass": true,
-      "detail": "Choose a budget band on the results page, from the bands buyers have stated."
+      "detail": "no Search type field"
     },
     {
-      "name": "Buy/Rent describes the records as buyer requirements",
+      "name": "Buy or rent is a dropdown on that one section",
       "pass": true,
-      "detail": "Buyer requirements | Search leads | Browse buyer requirements by area, configuration and budget."
+      "detail": "buy/rent selects: 1"
     },
     {
-      "name": "The lead search forwards the configuration the marketplace matches",
+      "name": "Choosing buy or rent changes the result count",
       "pass": true,
-      "detail": "config=3 BHK"
+      "detail": "either 8, rent 2, buy 6"
     },
     {
-      "name": "and forwards no property type and no display budget label",
+      "name": "and the two together account for everything",
       "pass": true,
-      "detail": "query: ?config=3+BHK"
+      "detail": "2 + 6 = 8, either = 8"
     },
     {
-      "name": "Projects mode still counts projects and offers a budget",
+      "name": "Search carries the choice into the query",
       "pass": true,
-      "detail": "Search 8 projects"
+      "detail": "query: ?transaction=rent"
+    },
+    {
+      "name": "and the results page shows it applied rather than dropping it",
+      "pass": true,
+      "detail": "To rent"
     },
     {
       "name": "The homepage has a Featured Leads section",
@@ -157,9 +162,9 @@
       "detail": "scrollWidth 390 vs clientWidth 390"
     },
     {
-      "name": "The phone layout does not offer the removed property-type disclosure",
+      "name": "The phone gets the same one search, with the buy/rent dropdown",
       "pass": true,
-      "detail": "absent, as intended"
+      "detail": "Location | Buy or rent | Buy or rent | Buy | Rent | BHK"
     },
     {
       "name": "Every search control on a phone is at least 44px tall",

@@ -81,6 +81,7 @@ function matches(property: PropertySummary, filters: Parameters<PropertyService[
     const wanted = new Set(filters.configurations.map((c) => c.replace(/\D/g, "")));
     if (!property.configurations.some((c) => wanted.has(c))) return false;
   }
+  if (filters.transaction && property.transaction !== filters.transaction) return false;
   if (filters.construction && property.construction !== filters.construction) return false;
   if (filters.newLaunchOnly && !property.newLaunch) return false;
   if (filters.reraOnly && !property.reraRegistered) return false;

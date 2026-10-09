@@ -28,15 +28,23 @@ const L = 100_000;
 const CR = 10_000_000;
 
 function property(
-  input: Omit<PropertySummary, "coverImage" | "locationPath"> &
-    Partial<Pick<PropertySummary, "coverImage">>,
+  input: Omit<PropertySummary, "coverImage" | "locationPath" | "transaction"> &
+    Partial<Pick<PropertySummary, "coverImage" | "transaction">>,
 ): PropertySummary {
   // The display path is derived from the location record (CR05) — a fixture
   // states *which area* and the record says how the path reads.
   const locationPath = displayPath(input.locationId);
   // Null unless review imagery is switched on, so the designed no-image
   // fallback is the default everywhere.
-  return { coverImage: reviewCoverFor(input.id, input.title), locationPath, ...input };
+  // Sale unless a fixture says otherwise. Most published inventory is for
+  // sale, and defaulting here means a fixture only states the interesting
+  // case rather than repeating "sale" nine times.
+  return {
+    transaction: "sale" as const,
+    coverImage: reviewCoverFor(input.id, input.title),
+    locationPath,
+    ...input,
+  };
 }
 
 export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
@@ -84,6 +92,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
   property({
     id: "p-sundew",
+    transaction: "rent",
     slug: "sundew-enclave",
     title: "Sundew Enclave",
     locationId: "rajarhat",
@@ -154,6 +163,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
   property({
     id: "p-willow-court",
+    transaction: "rent",
     slug: "willow-court",
     title: "Willow Court",
     locationId: "action-area-ii",

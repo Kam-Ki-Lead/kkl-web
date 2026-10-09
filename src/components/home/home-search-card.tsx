@@ -1,23 +1,42 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { countMatchingProperties } from "@/app/actions/search-count";
 import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
-import { NOT_FORWARDED, leadSearchHref } from "@/lib/domain/lead-search-query";
+import type { PropertyTransaction } from "@/lib/domain/types";
+import {
+  propertySearchFilters,
+  propertySearchHref,
+  TRANSACTION_OPTIONS,
+} from "@/lib/domain/property-search-query";
 
 /**
  * The homepage search card (P-01): the primary action on the page.
  *
- * "Results update as you change a field" is literal — the count comes from the
- * service on every change, not from a guess in the browser.
+ * ONE SECTION, NOT TWO TABS
+ *
+ * It used to split into "Projects" and "Buy/Rent", which were not two views
+ * of one search — they searched different things, properties and leads, and
+ * the tab strip made that look like a filter. Buy and rent are a property's
+ * transaction, so they belong in a dropdown inside one search, which is what
+ * this is.
+ *
+ * Lead discovery did not disappear with the tab: "Buy Leads" in the
+ * navigation and the Featured Leads row both open the lead marketplace.
+ *
+ * "Results update as you change a field" is literal — the count comes from
+ * the service on every change, not from a guess in the browser.
  *
  * Property types are the approved sample set; the full list is an open client
  * decision (D-09), so this does not present itself as exhaustive.
  */
 
+/** The label that means no budget preference. */
+const ANY_BUDGET = "Any budget";
+
 const BUDGETS: ReadonlyArray<{ label: string; maxInr?: number; minInr?: number }> = [
-  { label: "Any budget" },
+  { label: ANY_BUDGET },
   { label: "Up to ₹50L", maxInr: 5_000_000 },
   { label: "Up to ₹1Cr", maxInr: 10_000_000 },
   { label: "Up to ₹1.5Cr", maxInr: 15_000_000 },
@@ -25,7 +44,6 @@ const BUDGETS: ReadonlyArray<{ label: string; maxInr?: number; minInr?: number }
 ];
 
 const CONFIGURATIONS = ["Any BHK", "1 BHK", "2 BHK", "3 BHK", "4 BHK"];
-type SearchMode = "projects" | "buy_rent";
 
 export function HomeSearchCard({
   areas,
@@ -39,25 +57,29 @@ export function HomeSearchCard({
   const [, startTransition] = useTransition();
 
   const [locality, setLocality] = useState("");
-  const [searchMode, setSearchMode] = useState<SearchMode>("buy_rent");
+  const [transaction, setTransaction] = useState<"" | PropertyTransaction>("");
   const [configuration, setConfiguration] = useState("");
   const [budgetLabel, setBudgetLabel] = useState(BUDGETS[0]?.label as string);
   const [count, setCount] = useState(initialCount);
 
   const budget = BUDGETS.find((b) => b.label === budgetLabel);
 
+  // Every field on the card is in this object, and every field in this object
+  // is one the search honours. That is the invariant the card lost when it
+  // carried a "Search type" box that read like a control and filtered
+  // nothing.
+  const filters = useMemo(
+    () => propertySearchFilters({
+      locality,
+      transaction,
+      bhk: configuration,
+      budget: { min: budget?.minInr, max: budget?.maxInr },
+    }),
+    [locality, transaction, configuration, budget?.minInr, budget?.maxInr],
+  );
+
   useEffect(() => {
-    if (searchMode !== "projects") return;
     let cancelled = false;
-    const filters = {
-      locationId: locality || undefined,
-      // This effect only runs in projects mode, so the type is always
-      // "project" here; there is no other branch to express.
-      propertyType: "project",
-      configurations: configuration ? [configuration] : undefined,
-      minBudgetInr: budget?.minInr,
-      maxBudgetInr: budget?.maxInr,
-    };
     countMatchingProperties(filters)
       .then((next) => {
         if (!cancelled) setCount(next);
@@ -68,26 +90,20 @@ export function HomeSearchCard({
     return () => {
       cancelled = true;
     };
-  }, [locality, configuration, budget?.minInr, budget?.maxInr, searchMode]);
+  }, [filters]);
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    const params = new URLSearchParams();
-    if (searchMode === "buy_rent") {
-      // Only what the marketplace genuinely filters on. `lead-search-query`
-      // holds the mapping and the reasons, so the card and `/seller/leads`
-      // cannot drift apart again.
-      startTransition(() =>
-        router.push(leadSearchHref({ areaId: locality, bhk: configuration })),
-      );
-      return;
-    }
-
-    if (locality) params.set("locality", locality);
-    params.set("type", "project");
-    if (configuration) params.set("bhk", configuration);
-    if (budgetLabel !== "Any budget") params.set("budget", budgetLabel);
-    startTransition(() => router.push(`/search?${params}`));
+    // Same module the results page reads, so the card cannot send a field
+    // the search does not honour.
+    const href = propertySearchHref({
+      locality,
+      transaction,
+      bhk: configuration,
+      budget: budgetLabel,
+      anyBudgetLabel: ANY_BUDGET,
+    });
+    startTransition(() => router.push(href));
   }
 
   return (
@@ -97,21 +113,6 @@ export function HomeSearchCard({
       onSubmit={submit}
       className="relative z-10 mx-[20px] mt-[16px] rounded-[10px] border border-line bg-white p-[20px] shadow-[0_8px_28px_rgba(16,26,64,0.10)] max-[900px]:mx-0 max-[900px]:mt-[16px]"
     >
-      <div className="mb-[14px] flex gap-[8px] border-b border-line">
-        <SearchModeButton
-          active={searchMode === "projects"}
-          onClick={() => setSearchMode("projects")}
-        >
-          Projects
-        </SearchModeButton>
-        <SearchModeButton
-          active={searchMode === "buy_rent"}
-          onClick={() => setSearchMode("buy_rent")}
-        >
-          Buy/Rent
-        </SearchModeButton>
-      </div>
-
       {/* Narrow screens get Location full width, then BHK and Budget paired, with
           property type behind a disclosure — four selects side by side does not
           survive a phone, and the approved mobile layout moves it out of the way. */}
@@ -131,24 +132,14 @@ export function HomeSearchCard({
             onSelect={setLocality}
           />
         </div>
-        {searchMode === "buy_rent" ? (
-          // Property type is not a lead filter — the marketplace has no such
-          // parameter — so it is not offered here. Offering a control that
-          // changes nothing is worse than leaving it out.
-          <div className="flex flex-col gap-[6px] max-[900px]:hidden">
-            <span className="t-label text-body">Searching</span>
-            <div className="flex min-h-[48px] items-center rounded-[8px] border border-brand-mist bg-tint px-[13px] text-[15px] font-semibold text-brand">
-              Buyer requirements
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-[6px] max-[900px]:hidden">
-            <span className="t-label text-body">Search type</span>
-            <div className="flex min-h-[48px] items-center rounded-[8px] border border-brand-mist bg-tint px-[13px] text-[15px] font-semibold text-brand">
-              Builder projects
-            </div>
-          </div>
-        )}
+        <SearchField
+          id="home-transaction"
+          name="transaction"
+          label="Buy or rent"
+          value={transaction}
+          onChange={(next) => setTransaction(next as "" | PropertyTransaction)}
+          options={TRANSACTION_OPTIONS}
+        />
         <SearchField
           id="home-bhk"
           name="bhk"
@@ -160,26 +151,14 @@ export function HomeSearchCard({
             label: c,
           }))}
         />
-        {searchMode === "projects" ? (
-          <SearchField
-            id="home-budget"
-            name="budget"
-            label="Budget"
-            value={budgetLabel}
-            onChange={setBudgetLabel}
-            options={BUDGETS.map((b) => ({ value: b.label, label: b.label }))}
-          />
-        ) : (
-          // The marketplace compares a lead's budget band for exact equality
-          // against the band the buyer stated. These labels are not those
-          // values, so the band is chosen on the results page instead.
-          <div className="flex flex-col gap-[6px]">
-            <span className="t-label text-body">Budget</span>
-            <p className="t-caption flex min-h-[48px] items-center text-muted">
-              {NOT_FORWARDED.budget}
-            </p>
-          </div>
-        )}
+        <SearchField
+          id="home-budget"
+          name="budget"
+          label="Budget"
+          value={budgetLabel}
+          onChange={setBudgetLabel}
+          options={BUDGETS.map((b) => ({ value: b.label, label: b.label }))}
+        />
       </div>
 
       <div className="mt-[16px] flex flex-wrap items-center gap-[16px] max-[900px]:flex-col max-[900px]:items-stretch max-[900px]:gap-[10px]">
@@ -187,45 +166,14 @@ export function HomeSearchCard({
           type="submit"
           className="flex-none rounded-[6px] bg-brand px-[34px] py-[17px] text-[18px] font-bold text-white hover:bg-brand-deep max-[900px]:w-full"
         >
-          {searchMode === "projects"
-            ? `Search ${count} ${count === 1 ? "project" : "projects"}`
-            : "Search leads"}
+          Search {count} {count === 1 ? "property" : "properties"}
         </button>
         <span aria-live="polite" className="text-[15px] text-muted max-[900px]:hidden">
-          {searchMode === "projects"
-            ? "Results update as you change a field."
-            : "Browse buyer requirements by area, configuration and budget."}
+          Results update as you change a field.
         </span>
 
       </div>
     </form>
-  );
-}
-
-function SearchModeButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      // C-04: every control a thumb has to hit is at least 44px tall. The
-      // measured height here was 43px, which the phone check caught.
-      className={`min-h-[44px] border-b-[3px] px-[14px] pb-[9px] pt-[5px] font-[family-name:var(--font-heading)] text-[17px] font-bold transition-colors ${
-        active
-          ? "border-saffron text-brand"
-          : "border-transparent text-muted hover:border-brand-mist hover:text-brand"
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 

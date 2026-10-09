@@ -4,6 +4,7 @@ import { getServices } from "@/lib/services";
 import type { PropertySearchFilters, PropertySortKey } from "@/lib/domain/types";
 import { PropertyCard } from "@/components/property/property-card";
 import { SearchFilters, SearchSort } from "@/components/search/search-filters";
+import { propertySearchFilters } from "@/lib/domain/property-search-query";
 import { ButtonLink } from "@/components/ui/button";
 import { SkeletonBlock, SkeletonRows, StateMessage } from "@/components/ui/states";
 
@@ -25,14 +26,17 @@ function one(value: string | string[] | undefined): string | undefined {
 function toFilters(params: SearchParams): PropertySearchFilters {
   const budget = BUDGET_BANDS[one(params.budget) ?? ""] ?? {};
   const possession = one(params.possession);
-  const bhk = one(params.bhk);
 
   return {
-    locationId: one(params.locality),
+    // Shared with the homepage card, so the count it shows and the results
+    // this page returns can never come from different filters.
+    ...propertySearchFilters({
+      locality: one(params.locality),
+      transaction: one(params.transaction),
+      bhk: one(params.bhk),
+      budget: { min: budget.min, max: budget.max },
+    }),
     propertyType: one(params.type),
-    configurations: bhk ? [bhk] : undefined,
-    minBudgetInr: budget.min,
-    maxBudgetInr: budget.max,
     construction:
       possession === "ready"
         ? "ready_to_move"

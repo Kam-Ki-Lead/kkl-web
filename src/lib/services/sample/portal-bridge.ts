@@ -77,6 +77,12 @@ function toPortalSummary(listing: ReturnType<typeof builderStore.portalListings>
     id: listing.id,
     slug: slugify(listing.title || `listing-${listing.id}`),
     title: listing.title || "Untitled project",
+    // The console editor does not ask whether a listing is for sale or to
+    // let, so there is nothing to carry across and every console listing
+    // reads as a sale. `listings.transaction` exists in kkl-backend and the
+    // real posting flow writes it; the sample editor is what is missing the
+    // question, and a listing posted to let would be shown wrongly here.
+    transaction: "sale",
     locationId,
     locationPath: displayPath(locationId),
     configurations: listing.configurations,

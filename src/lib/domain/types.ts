@@ -95,6 +95,14 @@ export type PropertySummary = {
   readonly price: PriceRange;
   readonly possession: string | null;
   readonly construction: "under_construction" | "ready_to_move";
+  /**
+   * Whether the property is for sale or to let.
+   *
+   * `listings.transaction` in kkl-backend carries exactly these two values and
+   * the owner/builder posting flow already writes it; this is the same field
+   * reaching the public search, which had no concept of it.
+   */
+  readonly transaction: PropertyTransaction;
   readonly reraRegistered: boolean;
   /** A new launch is a distinct status from construction stage — the approved
    *  homepage badges them differently. */
@@ -123,8 +131,12 @@ export type PropertyDetail = PropertySummary & {
   readonly status: PropertyStatus;
 };
 
+/** Buy or rent. The vocabulary is kkl-backend's, not a display label. */
+export type PropertyTransaction = "sale" | "rent";
+
 export type PropertySearchFilters = {
   readonly locationId?: string;
+  readonly transaction?: PropertyTransaction;
   readonly propertyType?: string;
   readonly configurations?: readonly string[];
   readonly minBudgetInr?: number;

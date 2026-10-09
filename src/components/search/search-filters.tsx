@@ -39,6 +39,8 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
     bhk: params.get("bhk") ?? "",
     budget: params.get("budget") ?? "Any budget",
     possession: params.get("possession") ?? "",
+    // "" is no preference, which is not the same as either value.
+    transaction: params.get("transaction") ?? "",
   };
 
   function update(next: Partial<typeof current>) {
@@ -49,6 +51,7 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
     if (merged.bhk) q.set("bhk", merged.bhk);
     if (merged.budget && merged.budget !== "Any budget") q.set("budget", merged.budget);
     if (merged.possession) q.set("possession", merged.possession);
+    if (merged.transaction) q.set("transaction", merged.transaction);
     router.push(q.size ? `/search?${q}` : "/search");
   }
 
@@ -56,6 +59,12 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
     areas.find((l) => l.id === current.locality)?.label ?? null;
 
   const appliedChips: ReadonlyArray<{ label: string; clear: Partial<typeof current> }> = [
+    ...(current.transaction
+      ? [{
+        label: current.transaction === "rent" ? "To rent" : "To buy",
+        clear: { transaction: "" },
+      }]
+      : []),
     ...(current.type !== "Any type"
       ? [{ label: current.type, clear: { type: "Any type" } }]
       : []),
@@ -88,6 +97,19 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
             allLabel="All of Kolkata"
             onSelect={(id) => update({ locality: id })}
           />
+        </Field>
+
+        <Field id="f-buy-rent" label="Buy or rent">
+          <select
+            id="f-buy-rent"
+            value={current.transaction}
+            onChange={(e) => update({ transaction: e.target.value })}
+            className={selectClass}
+          >
+            <option value="">Buy or rent</option>
+            <option value="sale">Buy</option>
+            <option value="rent">Rent</option>
+          </select>
         </Field>
 
         <Field id="f-type" label="Property type">
