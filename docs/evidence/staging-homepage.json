@@ -1,7 +1,7 @@
 {
   "revisions": {
-    "web": "4db4e59",
-    "backend": "7c05990",
+    "web": "07e2c02",
+    "backend": "e80389a",
     "voice": "943340e"
   },
   "base": "http://127.0.0.1:3813",
@@ -22,14 +22,14 @@
       "detail": "neither banner sentence appears"
     },
     {
-      "name": "Published properties are not labelled as leads",
+      "name": "The property row has a property heading, not a lead one",
       "pass": true,
-      "detail": "FEATURED PROJECT | Featured properties | Featured | Featured projects"
+      "detail": "Featured Check Beta · Villa | FEATURED PROJECT | Featured Leads | Featured Check Alpha | Featured Check Beta | Featured properties | Featured | Featured projects"
     },
     {
       "name": "An empty sale feed renders nothing at all",
       "pass": true,
-      "detail": "no sale section, as expected when the feed is empty"
+      "detail": "sale section present with priced rows"
     },
     {
       "name": "Buy/Rent does not offer a property type or a budget band it cannot forward",
@@ -60,6 +60,61 @@
       "name": "Projects mode still counts projects and offers a budget",
       "pass": true,
       "detail": "Search 8 projects"
+    },
+    {
+      "name": "The homepage has a Featured Leads section",
+      "pass": true,
+      "detail": "sections titled \"Featured Leads\": 1"
+    },
+    {
+      "name": "It renders lead cards",
+      "pass": true,
+      "detail": "6 cards"
+    },
+    {
+      "name": "Every card's action says Buy Leads",
+      "pass": true,
+      "detail": "6 of 6 cards"
+    },
+    {
+      "name": "View all opens Buy Leads, not the property search",
+      "pass": true,
+      "detail": "View all -> /seller/leads"
+    },
+    {
+      "name": "A card leads into the existing lead purchase route",
+      "pass": true,
+      "detail": "card -> /seller/leads/aa993dcd-1e62-4bc2-b10b-b8b06d8ceacc"
+    },
+    {
+      "name": "The cards are the seeded leads, shown by reference",
+      "pass": true,
+      "detail": "HOME-001 | HOME-002"
+    },
+    {
+      "name": "A recorded qualification level is shown and an unrecorded one is simply absent",
+      "pass": true,
+      "detail": "Qualification 8000 | Qualification 7999 | Qualification 4 | Qualification 4 | Qualification 4 | Qualification 4"
+    },
+    {
+      "name": "A discounted lead carries a discount badge and a credit price",
+      "pass": true,
+      "detail": "1500 credits | 1000 credits | 50% off | 2700 credits"
+    },
+    {
+      "name": "No contact detail from the seeded leads appears on the page",
+      "pass": true,
+      "detail": "none of 5 present"
+    },
+    {
+      "name": "No pricing mechanic appears on the page",
+      "pass": true,
+      "detail": "no base price, demand uplift, pre-discount price or policy version"
+    },
+    {
+      "name": "The property row is still present, under a property heading",
+      "pass": true,
+      "detail": "Featured Check Beta · Villa | Featured Leads | Featured Check Alpha | Featured Check Beta | Featured properties | Featured | Featured projects"
     },
     {
       "name": "Generated artwork is labelled an illustration, in the badge and the alt text",

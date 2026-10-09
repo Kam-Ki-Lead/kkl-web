@@ -1,3 +1,4 @@
+import { FeaturedLeads } from "@/components/home/featured-leads";
 import { LeadSale } from "@/components/home/lead-sale";
 import Link from "next/link";
 import { getServices } from "@/lib/services";
@@ -15,6 +16,21 @@ import { StateMessage } from "@/components/ui/states";
  * properties and projects, locality browsing, the match prompt, and the
  * role-entry sidebar.
  */
+/**
+ * Rendered per request, not prerendered.
+ *
+ * This page quotes live marketplace figures: the featured-leads row and the
+ * sale row both show a backend-computed credit price and a discount that
+ * moves as a lead ages and as demand in its area changes. Prerendered, the
+ * build's copy is frozen — which is how both rows came to render nothing at
+ * all on a server whose backend was unreachable at build time, and how a
+ * price somebody saw could stop being the price they would pay.
+ *
+ * The property content below is cheap to re-render and not worth splitting
+ * the page for.
+ */
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const services = getServices();
   const [home, areas] = await Promise.all([
@@ -37,21 +53,14 @@ export default async function HomePage() {
 
       <div className="mt-[28px] grid grid-cols-[1fr_320px] items-start gap-[24px] max-[1060px]:grid-cols-1">
         <div>
-          <section className="mb-[32px]">
-            {/* NOT "Featured Leads".
-                This section renders `home.featuredProperties` through
-                `PropertyCard`, links to the property search, and its empty
-                state talks about builders publishing listings. Every card is a
-                published PROPERTY record; a click goes to a property detail
-                page. Titling it "Leads" described three different things at
-                once and sent a Seller looking for buyer requirements to a
-                property listing.
+          <FeaturedLeads />
 
-                The real lead entry points are the sale feed at the top of this
-                page and "Buy Leads" in the navigation, both backed by actual
-                leads. A genuine featured-LEADS row would need a backend feed
-                that selects leads, which does not exist — raised in the
-                handover note rather than faked with a label. */}
+          <section className="mb-[32px]">
+            {/* Properties, under a property heading.
+                This row renders `home.featuredProperties` through
+                `PropertyCard` and links to the property search, so it says
+                "properties". The lead row above it is backed by
+                /v1/leads/featured and is where "Featured Leads" now lives. */}
             <SectionHeader
               title="Featured properties"
               level="page"

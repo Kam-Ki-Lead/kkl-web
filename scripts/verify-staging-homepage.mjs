@@ -57,6 +57,17 @@ const INTERNAL_PRICING = [
 
 const PUBLIC_ROUTES = ["/", "/search", "/support"];
 
+/**
+ * Attached to the seeded featured leads in the database.
+ *
+ * Checking these are absent only means something because they exist on the
+ * leads the page is showing: the cards are real rows with real contact
+ * records behind them, and the page withholds them.
+ */
+const SEEDED_CONTACT = [
+  "Ritu Sengupta", "9830000000", "ritu@example.invalid", "LEAKCHECK", "Park Street",
+];
+
 const browser = await chromium.launch(CHROME ? { executablePath: CHROME } : {});
 const evidence = { revisions: revisions(), base: BASE, checks };
 
@@ -114,9 +125,13 @@ try {
       ? "neither banner sentence appears"
       : `still present: ${bannerFound.join(" | ")}`);
 
-  // 3 — no section calls published properties leads.
-  ok("Published properties are not labelled as leads",
-    !/Featured Leads/i.test(home) && /Featured properties/i.test(home),
+  // 3 — the property row is not the one called "Leads".
+  //
+  // "Featured Leads" is now a real section backed by /v1/leads/featured, so
+  // its presence is correct. What must still hold is that the property row
+  // has its own property heading rather than borrowing the lead one.
+  ok("The property row has a property heading, not a lead one",
+    /Featured properties/i.test(home),
     home.split("\n").filter((l) => /^Featured/i.test(l.trim())).join(" | ") || "(no Featured heading)");
 
   // 4 — the empty sale feed renders nothing rather than an apology.
@@ -162,6 +177,66 @@ try {
   ok("Projects mode still counts projects and offers a budget",
     /Search \d+ project/i.test(projects) && (await page.locator("#home-budget").count()) === 1,
     projects.split("\n").find((l) => /Search \d+ project/i.test(l)) ?? "absent");
+
+  // 7a — Featured Leads is backed by leads.
+  const featured = page.locator("section:has(h2:text-is('Featured Leads'))");
+  const featuredCount = await featured.count();
+  ok("The homepage has a Featured Leads section",
+    featuredCount === 1,
+    `sections titled "Featured Leads": ${featuredCount}`);
+
+  if (featuredCount === 1) {
+    const cards = featured.locator("ul > li");
+    const cardCount = await cards.count();
+    ok("It renders lead cards",
+      cardCount > 0,
+      `${cardCount} cards`);
+
+    const featuredText = await featured.innerText();
+    ok("Every card's action says Buy Leads",
+      (await featured.locator('a:has-text("Buy Leads")').count()) === cardCount && cardCount > 0,
+      `${await featured.locator('a:has-text("Buy Leads")').count()} of ${cardCount} cards`);
+
+    // Into the marketplace, not the property search.
+    const viewAll = await featured.locator('a:has-text("View all")').getAttribute("href");
+    ok("View all opens Buy Leads, not the property search",
+      viewAll === "/seller/leads",
+      `View all -> ${viewAll}`);
+
+    const firstCta = await featured.locator('a:has-text("Buy Leads")').first().getAttribute("href");
+    ok("A card leads into the existing lead purchase route",
+      typeof firstCta === "string" && /^\/seller\/leads\/[^/]+$/.test(firstCta),
+      `card -> ${firstCta}`);
+
+    // The seeded leads, by reference, so these really are those rows.
+    ok("The cards are the seeded leads, shown by reference",
+      /HOME-00\d/.test(featuredText),
+      featuredText.split("\n").filter((l) => /HOME-00\d/.test(l)).join(" | "));
+
+    ok("A recorded qualification level is shown and an unrecorded one is simply absent",
+      /Qualification 8000/.test(featuredText)
+        && !/Qualification 0\b/.test(featuredText)
+        && !/Qualification (—|-|null|undefined)/.test(featuredText),
+      featuredText.split("\n").filter((l) => /Qualification/.test(l)).join(" | ") || "none shown");
+
+    ok("A discounted lead carries a discount badge and a credit price",
+      /% off/.test(featuredText) && /credits/.test(featuredText),
+      featuredText.split("\n").filter((l) => /% off|credits/.test(l)).slice(0, 4).join(" | "));
+
+    ok("No contact detail from the seeded leads appears on the page",
+      SEEDED_CONTACT.every((secret) => !home.includes(secret)),
+      SEEDED_CONTACT.filter((secret) => home.includes(secret)).join(", ") || "none of 5 present");
+
+    ok("No pricing mechanic appears on the page",
+      !/baseCredits|demandPercent|policyVersion|originalPrice/i.test(home)
+        && !/\buplift\b/i.test(home),
+      "no base price, demand uplift, pre-discount price or policy version");
+
+    // And the property row keeps its own honest heading beneath it.
+    ok("The property row is still present, under a property heading",
+      /Featured properties/.test(home) && /Featured projects/.test(home),
+      home.split("\n").filter((l) => /^Featured/.test(l.trim())).join(" | "));
+  }
 
   // 8 — generated artwork is labelled wherever it stands in for a photograph.
   const illustrations = await page.locator('img[alt*="Architectural illustration"]').count();
