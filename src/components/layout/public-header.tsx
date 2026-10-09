@@ -27,14 +27,33 @@ import {
 /** Lead purchasing is the primary action; property browsing remains separate. */
 const NAV = [
   { href: "/seller/leads", label: "Buy Leads", match: (p: string) => p.startsWith("/seller/leads") },
-  { href: "/search", label: "Projects", match: () => false },
+  {
+    href: "/search",
+    label: "Projects",
+    match: (p: string, q: URLSearchParams) =>
+      (p === "/search" && q.get("possession") !== "new_launch") || p.startsWith("/property/"),
+  },
   {
     href: "/search?possession=new_launch",
     label: "New launches",
     match: (p: string, q: URLSearchParams) => p === "/search" && q.get("possession") === "new_launch",
   },
-  { href: "/find-my-match", label: "Find my match", match: (p: string) => p === "/find-my-match" },
+  { href: "/find-my-match", label: "Find my match", match: (p: string) => p.startsWith("/find-my-match") },
 ];
+
+const desktopNavClass = (current: boolean) =>
+  `relative rounded-[6px] px-[10px] py-[9px] text-[16px] transition-colors duration-150 after:absolute after:inset-x-[10px] after:bottom-[3px] after:h-[2px] after:rounded-full after:transition-colors ${
+    current
+      ? "bg-brand-wash font-bold text-brand after:bg-saffron"
+      : "font-medium text-body after:bg-transparent hover:bg-tint hover:text-brand hover:after:bg-brand/35"
+  }`;
+
+const mobileNavClass = (current: boolean) =>
+  `flex min-h-[44px] items-center rounded-[6px] border-b border-line px-[10px] text-[16px] transition-colors ${
+    current
+      ? "bg-brand-wash font-bold text-brand"
+      : "font-medium text-body hover:bg-tint hover:text-brand"
+  }`;
 
 /** The header without active-state marking, used while the query string resolves. */
 export function PublicHeaderFallback() {
@@ -50,7 +69,7 @@ export function PublicHeaderFallback() {
             <Link
               key={item.label}
               href={item.href}
-              className="text-[16px] font-medium text-body hover:text-brand"
+              className={desktopNavClass(false)}
             >
               {item.label}
             </Link>
@@ -89,11 +108,7 @@ export function PublicHeader({
                 key={item.label}
                 href={item.href}
                 aria-current={current ? "page" : undefined}
-                className={
-                  current
-                    ? "border-b-[3px] border-saffron pb-[5px] text-[16px] font-bold text-brand"
-                    : "text-[16px] font-medium text-body hover:text-brand"
-                }
+                className={desktopNavClass(current)}
               >
                 {item.label}
               </Link>
@@ -107,17 +122,27 @@ export function PublicHeader({
             /* 2.5.3 Label in Name: the visible text has to be inside the
                accessible name, or "click Shortlist (0)" matches nothing. */
             aria-label={shortlistAccessibleName(shortlist)}
-            className="text-[16px] font-medium text-body hover:text-brand"
+            aria-current={pathname.includes("/shortlist") ? "page" : undefined}
+            className={desktopNavClass(pathname.includes("/shortlist"))}
           >
             <span aria-hidden="true">♡ </span>
             {shortlistVisibleLabel(shortlist)}
           </Link>
-          <Link href="/builders" className="text-[16px] font-medium text-body hover:text-brand">
+          <Link
+            href="/builders"
+            aria-current={pathname.startsWith("/builders") ? "page" : undefined}
+            className={desktopNavClass(pathname.startsWith("/builders"))}
+          >
             List a project
           </Link>
           <Link
             href="/auth"
-            className="rounded-[6px] border-2 border-control-border px-[18px] py-[9px] text-[16px] font-semibold text-brand hover:border-brand"
+            aria-current={pathname.startsWith("/auth") ? "page" : undefined}
+            className={`rounded-[6px] border-2 px-[18px] py-[9px] text-[16px] font-semibold transition-colors ${
+              pathname.startsWith("/auth")
+                ? "border-brand bg-brand-wash text-brand"
+                : "border-control-border text-brand hover:border-brand hover:bg-tint"
+            }`}
           >
             Sign in
           </Link>
@@ -147,9 +172,7 @@ export function PublicHeader({
                 href={item.href}
                 onClick={() => setDrawerOpen(false)}
                 aria-current={isCurrent(item) ? "page" : undefined}
-                className={`flex min-h-[44px] items-center border-b border-line text-[16px] ${
-                  isCurrent(item) ? "font-bold text-brand" : "font-medium text-body"
-                }`}
+                className={mobileNavClass(isCurrent(item))}
               >
                 {item.label}
               </Link>
@@ -158,7 +181,8 @@ export function PublicHeader({
               href={shortlistHref(shortlist)}
               aria-label={shortlistAccessibleName(shortlist)}
               onClick={() => setDrawerOpen(false)}
-              className="flex min-h-[44px] items-center border-b border-line text-[16px] font-medium text-body"
+              aria-current={pathname.includes("/shortlist") ? "page" : undefined}
+              className={mobileNavClass(pathname.includes("/shortlist"))}
             >
               <span aria-hidden="true">♡&nbsp;</span>
               {shortlistVisibleLabel(shortlist)}
@@ -166,14 +190,20 @@ export function PublicHeader({
             <Link
               href="/builders"
               onClick={() => setDrawerOpen(false)}
-              className="flex min-h-[44px] items-center border-b border-line text-[16px] font-medium text-body"
+              aria-current={pathname.startsWith("/builders") ? "page" : undefined}
+              className={mobileNavClass(pathname.startsWith("/builders"))}
             >
               List a project
             </Link>
             <Link
               href="/auth"
               onClick={() => setDrawerOpen(false)}
-              className="mt-[12px] flex min-h-[44px] items-center justify-center rounded-[6px] border-2 border-control-border text-[16px] font-semibold text-brand"
+              aria-current={pathname.startsWith("/auth") ? "page" : undefined}
+              className={`mt-[12px] flex min-h-[44px] items-center justify-center rounded-[6px] border-2 text-[16px] font-semibold transition-colors ${
+                pathname.startsWith("/auth")
+                  ? "border-brand bg-brand-wash text-brand"
+                  : "border-control-border text-brand hover:border-brand hover:bg-tint"
+              }`}
             >
               Sign in
             </Link>
