@@ -23,7 +23,7 @@ export function sellerRailItems(newLeadCount: number | null): readonly RailItem[
     { href: "/seller/orders", label: "My purchases" },
     // CR03: Request Leads is its own journey, separate from buying an
     // available lead — the rail names it for what it is.
-    { href: "/seller/requests", label: "Lead requests" },
+    { href: "/seller/requests", label: "Purchase Order System" },
     // CR07: what needs checking, per action. Not the same question as "is my
     // KYC submission approved", which lives under Profile.
     { href: "/seller/verification", label: "Verification" },

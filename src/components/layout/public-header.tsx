@@ -24,14 +24,9 @@ import {
  * every request independently of what this renders.
  */
 
-/**
- * The approved public header carries Buy, Projects and New launches, but the
- * approved inventory defines exactly one search screen (P-02). "Projects" and
- * "Buy" therefore resolve to the same search until a distinct projects view is
- * specified; "New launches" is a real filtered view of it.
- */
+/** Lead purchasing is the primary action; property browsing remains separate. */
 const NAV = [
-  { href: "/search", label: "Buy", match: (p: string, q: URLSearchParams) => p === "/search" && !q.has("possession") },
+  { href: "/seller/leads", label: "Buy Leads", match: (p: string) => p.startsWith("/seller/leads") },
   { href: "/search", label: "Projects", match: () => false },
   {
     href: "/search?possession=new_launch",

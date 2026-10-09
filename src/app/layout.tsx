@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s · Kaam Ki Lead",
   },
   description:
-    "A property portal for Kolkata, and a lead marketplace for verified brokers and builders.",
+    "Buy real estate leads with Kaam Ki Lead. A lead marketplace for brokers, agencies and builders, with purchase requests by area and buyer requirements.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

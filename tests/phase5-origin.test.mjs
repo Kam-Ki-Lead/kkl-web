@@ -84,6 +84,6 @@ test("a pending order stays pending and is not a failed charge", () => {
 });
 
 test("a backend marketplace does not describe a 20% charge", () => {
-  assert.match(agingDiscountSentence(false), /not applied/);
+  assert.match(agingDiscountSentence(false), /90% off at 7–13 days/);
   assert.doesNotMatch(agingDiscountSentence(false), /shown on the Sale tab is 20%/);
 });

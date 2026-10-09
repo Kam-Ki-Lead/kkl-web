@@ -50,7 +50,7 @@ export function adminRailItems(counts: {
     { group: "LEADS", href: "/admin/leads/intake", label: "Lead intake" },
     { group: "LEADS", href: "/admin/leads", label: "Leads", excludePrefix: "/admin/leads/intake" },
     // CR03: the Request Leads queue — Sellers' requests for leads, handled here.
-    { group: "LEADS", href: "/admin/requests", label: "Lead requests" },
+    { group: "LEADS", href: "/admin/requests", label: "Purchase Order System" },
     { group: "LEADS", href: "/admin/settings/pricing", label: "Pricing & aging" },
 
     { group: "MONEY", href: "/admin/orders", label: "Orders" },

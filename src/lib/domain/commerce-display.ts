@@ -58,7 +58,7 @@ export function customerOrderStatus(status: string): "paid" | "pending" | "cance
 export function agingDiscountSentence(discountRendered: boolean): string {
   return discountRendered
     ? "The aging discount shown on the Sale tab is 20%; no other discount rule is set."
-    : "A 20% window is stated for a lead that is 2–10 days old. That discount is not applied. The price charged is the configured price.";
+    : "Unsold leads are 90% off at 7–13 days, 80% off at 14–20 days, and 50% off from day 21. Search demand can increase the base price by up to 20%. Review the current credit price before purchasing.";
 }
 
 export const UNPRICED_LABEL = "Not priced yet";

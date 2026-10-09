@@ -86,7 +86,7 @@ export function LeadCard({
             refuses. The server decides `purchasable`; this renders it. */}
         {lead.purchasable ? (
           <ButtonLink href={`${basePath}/${lead.id}/buy`}>
-            {lead.priceCredits === null ? "Buy this lead" : `Buy for ${formatExactInr(lead.priceCredits)}`}
+            {lead.priceCredits === null ? "Buy Leads" : `Buy Leads for ${formatExactInr(lead.priceCredits)}`}
           </ButtonLink>
         ) : (
           <span

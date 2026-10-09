@@ -191,7 +191,7 @@ export default async function MaskedLeadPage({
 
               <ButtonLink href={`/seller/leads/${lead.id}/buy`} className="mt-[16px] w-full">
 
-                Buy this lead
+                Buy Leads
 
               </ButtonLink>
 
@@ -207,7 +207,7 @@ export default async function MaskedLeadPage({
 
                 >
 
-                  Buy this lead
+                  Buy Leads
 
                 </span>
 

@@ -61,7 +61,9 @@ type BackendLead = {
   id: string;
   reference: string;
   status: string;
+  locationId: string | null;
   locationName: string | null;
+  marketQuote?: { ageDays: number; discountPercent: number; originalPriceCredits: number | null };
   propertyType: string | null;
   budgetBand: string | null;
   configurations: string[];
@@ -144,18 +146,18 @@ function toMarketplaceLead(lead: BackendLead): MarketplaceLead {
     // about somebody nobody has spoken to.
     intentBand: null,
     intentScore: null,
-    status: lead.status === "on_sale" ? "on_sale" : "listed",
+    status: (lead.marketQuote?.discountPercent ?? 0) > 0 || lead.status === "on_sale" ? "on_sale" : "listed",
     // The aging rule is unconfirmed (Q-1b), so no age-derived discount is
     // computed here; the age itself is a fact and stays 0 until the backend
     // sends one.
-    ageDays: 0,
+    ageDays: lead.marketQuote?.ageDays ?? 0,
     priceCredits: lead.priceCredits,
     priceConfigurationId: typeof lead.priceConfigurationId === "string" ? lead.priceConfigurationId : null,
     priceConfigurationVersion:
       typeof lead.priceConfigurationVersion === "number" && Number.isSafeInteger(lead.priceConfigurationVersion)
         ? lead.priceConfigurationVersion
         : null,
-    originalPriceCredits: null,
+    originalPriceCredits: (lead.marketQuote?.discountPercent ?? 0) > 0 ? lead.marketQuote?.originalPriceCredits ?? null : null,
     // kkl-backend composes no mask: it has read no contact to mask.
     contactMask: null,
     contactState: lead.contact,
@@ -308,7 +310,8 @@ export function backendLeadMarket(role: BackendRole): LeadMarketService {
         role, "/v1/leads?eligible=true");
       if (status !== 200) raise(status, body);
       const mapped = body.leads.map(toMarketplaceLead);
-      const leads = filterMarketplace(mapped, query);
+      const areaName = body.leads.find((lead) => lead.locationId === query.areaId)?.locationName;
+      const leads = filterMarketplace(mapped, areaName ? { ...query, areaId: areaName } : query);
       return {
         leads,
         total: leads.length,
@@ -317,8 +320,7 @@ export function backendLeadMarket(role: BackendRole): LeadMarketService {
         // out, and inventing one would be worse than the honest null.
         withheld: null,
         filterOptions: {
-          areas: [...new Set(body.leads.map((l) => l.locationName).filter(
-            (n): n is string => n !== null))].map((name) => ({ id: name, name, label: name })),
+          areas: [...new Map(body.leads.filter((lead) => lead.locationId && lead.locationName).map((lead) => [lead.locationId, { id: lead.locationId as string, name: lead.locationName as string, label: lead.locationName as string }])).values()],
           budgetBands: [...new Set(body.leads.map((l) => l.budgetBand).filter(
             (b): b is string => b !== null))],
           configurations: [...new Set(body.leads.flatMap((l) => l.configurations))],
@@ -347,7 +349,7 @@ export function backendLeadMarket(role: BackendRole): LeadMarketService {
           body: {
             leadId: input.leadId,
             idempotencyKey: input.idempotencyKey,
-            ...(expected ?? {}),
+            ...(expected ?? (Number.isSafeInteger(input.expectedPriceCredits) && (input.expectedPriceCredits ?? 0) > 0 ? { expectedPriceCredits: input.expectedPriceCredits } : {})),
           },
         });
 

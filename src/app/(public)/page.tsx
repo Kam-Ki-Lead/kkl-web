@@ -1,3 +1,4 @@
+import { LeadSale } from "@/components/home/lead-sale";
 import Link from "next/link";
 import { getServices } from "@/lib/services";
 import { formatPriceRange } from "@/lib/format";
@@ -25,6 +26,18 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[20px] max-[1060px]:px-[18px]">
+      <section className="mb-[28px] rounded-[12px] border border-line bg-brand-wash px-[28px] py-[36px] max-[560px]:px-[18px]">
+        <p className="t-label text-brand">REAL ESTATE LEAD MARKETPLACE</p>
+        <h1 className="mt-[12px] text-[38px] font-extrabold leading-tight text-ink max-[560px]:text-[28px]">Buy Leads. Connect with property buyers.</h1>
+        <p className="mt-[16px] max-w-[65ch] text-[18px] text-body">Kaam Ki Lead helps brokers, agencies and builders find and purchase real estate leads. Explore buyer requirements by area and budget, or ask our team to find the leads you need.</p>
+        <div className="mt-[24px] flex flex-wrap gap-[12px]">
+          <ButtonLink href="/seller/leads">Buy Leads</ButtonLink>
+          <ButtonLink href="/seller/requests/new">Raise a purchase request</ButtonLink>
+        </div>
+        <p className="mt-[16px] t-caption text-muted">Lead purchases use wallet credits. Contact access depends on purchase eligibility. Submitting a purchase request does not spend credits.</p>
+      </section>
+      <LeadSale />
+      <h2 className="mb-[12px] text-[24px] font-bold text-ink">Looking for a property? Explore projects and send an enquiry.</h2>
       {home.featuredHero ? <FeaturedHero property={home.featuredHero} /> : null}
 
       <HomeSearchCard
@@ -180,7 +193,7 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
         {/* The approved banner title steps 26/32/38px and the price
             22/26/28px at the 620/1060 frame breaks — the sizes live in the
             classes because an inline fontSize would defeat them. */}
-        <h1
+        <h2
           className="text-white text-[38px] max-[619px]:text-[26px] min-[620px]:max-[1059px]:text-[32px]"
           style={{
             fontFamily: "var(--font-heading)",
@@ -190,7 +203,7 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
           }}
         >
           {property.title}
-        </h1>
+        </h2>
 
         <p className="text-[17px] leading-[1.5] text-[#E6EAF9] max-[900px]:hidden">
           {property.configurations.join(", ")} BHK apartments of {property.areaSummary}

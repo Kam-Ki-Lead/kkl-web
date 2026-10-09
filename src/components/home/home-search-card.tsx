@@ -82,12 +82,12 @@ export function HomeSearchCard({
       action="/search"
       method="get"
       onSubmit={submit}
-      className="relative z-10 mx-[20px] -mt-[62px] rounded-[10px] border border-line bg-white p-[20px] shadow-[0_8px_28px_rgba(16,26,64,0.10)] max-[900px]:mx-0 max-[900px]:-mt-[32px]"
+      className="relative z-10 mx-[20px] mt-[16px] rounded-[10px] border border-line bg-white p-[20px] shadow-[0_8px_28px_rgba(16,26,64,0.10)] max-[900px]:mx-0 max-[900px]:mt-[16px]"
     >
       <div className="mb-[14px] flex gap-[20px] border-b border-line">
         {/* The approved P-01 search tab is 17px/700 Archivo. */}
         <span className="border-b-[3px] border-saffron pb-[8px] font-[family-name:var(--font-heading)] text-[17px] font-bold text-brand">
-          Buy
+          Property enquiries
         </span>
       </div>
 

@@ -1,3 +1,4 @@
+import { CreditExpiry } from "@/components/console/credit-expiry";
 import type { Metadata } from "next";
 import { SellerShell } from "@/components/seller/seller-shell";
 import { UsageChart } from "@/components/console/usage-chart";
@@ -5,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { formatCreditBalance, formatDate, formatSignedInr } from "@/lib/format";
 import { getServices } from "@/lib/services";
-import { DECISIONS } from "@/lib/config/business-rules";
 import { marketplaceStoreKind } from "@/lib/services/backend/config";
 import { readOwnWalletReconciliation } from "@/lib/services/backend/commerce";
 import { WalletReconciliationNote } from "@/components/console/wallet-reconciliation";
@@ -52,25 +52,7 @@ export default async function BillingPage() {
             </div>
           </Card>
 
-          {/* D-04. The panel says what is undecided rather than showing a date or
-              a countdown that nobody has agreed. */}
-          <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[22px]">
-            <h2 className="t-card-title text-ink">Expiry &amp; renewal</h2>
-            <p className="t-body mt-[6px] text-body">
-              The specification says credits expire, but the period, the renewal route and whether
-              expired credits can be restored are not decided. Nothing is shown to sellers until
-              they are.
-            </p>
-            <ButtonLink
-              href="/seller/billing/expiry"
-              variant="secondary"
-              size="action"
-              className="mt-[14px]"
-            >
-              See the proposed states
-            </ButtonLink>
-            <p className="t-caption mt-[10px] text-muted">{DECISIONS["D-04"].question} — D-04</p>
-          </Card>
+          <CreditExpiry role="seller" />
         </div>
 
         <Card className="p-[22px]">

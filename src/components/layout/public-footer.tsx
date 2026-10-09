@@ -18,7 +18,7 @@ const COLUMNS: ReadonlyArray<{ heading: string; links: ReadonlyArray<[string, st
     links: [
       ["For builders", "/builders"],
       ["For brokers", "/brokers"],
-      ["Buy Leads", "/brokers"],
+      ["Buy Leads", "/seller/leads"],
       ["Verification & KYC", "/brokers"],
       ["Sign in", "/auth"],
     ],
@@ -49,8 +49,7 @@ export function PublicFooter() {
           <div>
             <Wordmark size="sm" onDark />
             <p className="mt-[12px] max-w-[34ch] text-[15px] leading-[1.6] text-on-brand">
-              A property portal for Kolkata, and a lead marketplace for verified brokers and
-              builders.
+              A real estate lead marketplace for brokers, agencies and builders. Buy Leads or submit a purchase request for the areas you serve.
             </p>
           </div>
 

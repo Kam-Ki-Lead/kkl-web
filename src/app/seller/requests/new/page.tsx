@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { SellerShell } from "@/components/seller/seller-shell";
 import { LeadRequestForm } from "@/components/seller/lead-request-form";
 import { newLeadRequestToken } from "@/app/actions/lead-requests";
-import { PendingRule } from "@/components/ui/states";
-import { DECISIONS } from "@/lib/config/business-rules";
 import { getServices } from "@/lib/services";
 
-export const metadata: Metadata = { title: "Request leads" };
+export const metadata: Metadata = { title: "New purchase request" };
 
 /**
  * CR03 — Request Leads.
@@ -30,12 +28,12 @@ export default async function NewLeadRequestPage() {
 
   return (
     <SellerShell
-      title="Request leads"
+      title="New purchase request"
       subtitle="Tell us the leads you need — the team picks it up from here"
     >
       <div className="flex max-w-[660px] flex-col gap-[16px]">
         <p className="t-caption text-muted">
-          <PendingRule>{DECISIONS["D-17"].pendingCopy}</PendingRule>
+          Choose the area and type of leads you need. Your request is saved for the Admin team to review and reply. Submitting this form does not spend credits or confirm a purchase.
         </p>
         <LeadRequestForm areas={areas} idempotencyKey={idempotencyKey} />
       </div>

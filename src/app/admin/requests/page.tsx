@@ -11,7 +11,7 @@ import { formatDate } from "@/lib/format";
 import { getServices } from "@/lib/services";
 import type { LeadRequestStatus } from "@/lib/domain/types";
 
-export const metadata: Metadata = { title: "Lead requests", robots: { index: false } };
+export const metadata: Metadata = { title: "Purchase Order System", robots: { index: false } };
 
 const STATUS_FILTERS: readonly { value: LeadRequestStatus | ""; label: string }[] = [
   { value: "", label: "All" },
@@ -65,7 +65,7 @@ export default async function AdminLeadRequestsPage({
   };
 
   return (
-    <AdminShell title="Lead requests" subtitle="What Sellers have asked the team to find">
+    <AdminShell title="Purchase Order System" subtitle="What Sellers have asked the team to find">
       <div className="flex max-w-[900px] flex-col gap-[12px]">
         <div className="flex flex-wrap gap-[8px]">
           {STATUS_FILTERS.map((option) => {

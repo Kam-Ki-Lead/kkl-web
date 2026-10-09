@@ -11,7 +11,7 @@ import { DECISIONS } from "@/lib/config/business-rules";
 import { formatDate } from "@/lib/format";
 import { getServices } from "@/lib/services";
 
-export const metadata: Metadata = { title: "My lead requests" };
+export const metadata: Metadata = { title: "Purchase Order System" };
 
 /**
  * CR03 — the Seller's own lead requests (the tracking view).
@@ -31,7 +31,7 @@ export default async function SellerRequestsPage() {
 
   return (
     <SellerShell
-      title="My lead requests"
+      title="Purchase Order System"
       subtitle="Leads you have asked us to find, and where each request stands"
     >
       <div className="flex max-w-[900px] flex-col gap-[14px]">

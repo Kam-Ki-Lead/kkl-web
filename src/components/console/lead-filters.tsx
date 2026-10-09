@@ -1,5 +1,6 @@
 "use client";
 
+import { searchLeads } from "@/app/actions/lead-search";
 import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -45,10 +46,10 @@ export function LeadFilters({
   return (
     <form
       ref={form}
-      method="GET"
-      action={action}
+      action={searchLeads}
       className="grid grid-cols-4 gap-[14px] max-[1060px]:grid-cols-2 max-[560px]:grid-cols-1"
     >
+      <input type="hidden" name="marketplace" value={action.startsWith("/builder") ? "builder" : "seller"} />
       {/* The tab and sort are part of the view, not of this form's fields, so
           they ride along rather than resetting when a filter changes. */}
       {params.get("tab") ? <input type="hidden" name="tab" value={params.get("tab") as string} /> : null}
