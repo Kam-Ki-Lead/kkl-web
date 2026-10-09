@@ -26,18 +26,8 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[20px] max-[1060px]:px-[18px]">
-      <section className="mb-[28px] rounded-[12px] border border-line bg-brand-wash px-[28px] py-[36px] max-[560px]:px-[18px]">
-        <p className="t-label text-brand">REAL ESTATE LEAD MARKETPLACE</p>
-        <h1 className="mt-[12px] text-[38px] font-extrabold leading-tight text-ink max-[560px]:text-[28px]">Buy Leads. Connect with property buyers.</h1>
-        <p className="mt-[16px] max-w-[65ch] text-[18px] text-body">Kaam Ki Lead helps brokers, agencies and builders find and purchase real estate leads. Explore buyer requirements by area and budget, or ask our team to find the leads you need.</p>
-        <div className="mt-[24px] flex flex-wrap gap-[12px]">
-          <ButtonLink href="/seller/leads">Buy Leads</ButtonLink>
-          <ButtonLink href="/seller/requests/new">Raise a purchase request</ButtonLink>
-        </div>
-        <p className="mt-[16px] t-caption text-muted">Lead purchases use wallet credits. Contact access depends on purchase eligibility. Submitting a purchase request does not spend credits.</p>
-      </section>
+      <h1 className="sr-only">Kaam Ki Lead — Buy Leads</h1>
       <LeadSale />
-      <h2 className="mb-[12px] text-[24px] font-bold text-ink">Looking for a property? Explore projects and send an enquiry.</h2>
       {home.featuredHero ? <FeaturedHero property={home.featuredHero} /> : null}
 
       <HomeSearchCard
