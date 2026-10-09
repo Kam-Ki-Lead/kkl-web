@@ -26,6 +26,7 @@ import {
 
 /** Lead purchasing is the primary action; property browsing remains separate. */
 const NAV = [
+  { href: "/", label: "Home", match: (p: string) => p === "/" },
   { href: "/seller/leads", label: "Buy Leads", match: (p: string) => p.startsWith("/seller/leads") },
   {
     href: "/search",
@@ -38,20 +39,19 @@ const NAV = [
     label: "New launches",
     match: (p: string, q: URLSearchParams) => p === "/search" && q.get("possession") === "new_launch",
   },
-  { href: "/find-my-match", label: "Find my match", match: (p: string) => p.startsWith("/find-my-match") },
 ];
 
 const desktopNavClass = (current: boolean) =>
   `relative rounded-[6px] px-[10px] py-[9px] text-[16px] transition-colors duration-150 after:absolute after:inset-x-[10px] after:bottom-[3px] after:h-[2px] after:rounded-full after:transition-colors ${
     current
-      ? "bg-brand-wash font-bold text-brand after:bg-saffron"
+      ? "bg-brand-deep font-bold text-white after:bg-saffron"
       : "font-medium text-body after:bg-transparent hover:bg-tint hover:text-brand hover:after:bg-brand/35"
   }`;
 
 const mobileNavClass = (current: boolean) =>
   `flex min-h-[44px] items-center rounded-[6px] border-b border-line px-[10px] text-[16px] transition-colors ${
     current
-      ? "bg-brand-wash font-bold text-brand"
+      ? "bg-brand-deep font-bold text-white"
       : "font-medium text-body hover:bg-tint hover:text-brand"
   }`;
 
@@ -140,7 +140,7 @@ export function PublicHeader({
             aria-current={pathname.startsWith("/auth") ? "page" : undefined}
             className={`rounded-[6px] border-2 px-[18px] py-[9px] text-[16px] font-semibold transition-colors ${
               pathname.startsWith("/auth")
-                ? "border-brand bg-brand-wash text-brand"
+                ? "border-brand-deep bg-brand-deep text-white"
                 : "border-control-border text-brand hover:border-brand hover:bg-tint"
             }`}
           >
@@ -201,7 +201,7 @@ export function PublicHeader({
               aria-current={pathname.startsWith("/auth") ? "page" : undefined}
               className={`mt-[12px] flex min-h-[44px] items-center justify-center rounded-[6px] border-2 text-[16px] font-semibold transition-colors ${
                 pathname.startsWith("/auth")
-                  ? "border-brand bg-brand-wash text-brand"
+                  ? "border-brand-deep bg-brand-deep text-white"
                   : "border-control-border text-brand hover:border-brand hover:bg-tint"
               }`}
             >

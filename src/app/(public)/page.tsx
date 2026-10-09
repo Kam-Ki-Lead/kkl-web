@@ -39,7 +39,7 @@ export default async function HomePage() {
         <div>
           <section className="mb-[32px]">
             <SectionHeader
-              title="Featured properties"
+              title="Featured Leads"
               level="page"
               subtitle="Curated selection in Kolkata"
               action={
@@ -59,7 +59,7 @@ export default async function HomePage() {
               </div>
             ) : (
               <StateMessage
-                title="No featured properties right now"
+                title="No featured leads right now"
                 action={
                   <ButtonLink href="/search" size="sm">
                     Browse all listings
@@ -116,8 +116,6 @@ export default async function HomePage() {
               ))}
             </div>
           </section>
-
-          <FindMyMatchPanel />
         </div>
 
         <aside className="flex flex-col gap-[16px]">
@@ -226,33 +224,6 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
 function spellSmallNumber(n: number): string {
   const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
   return words[n] ?? String(n);
-}
-
-function FindMyMatchPanel() {
-  return (
-    <section className="rounded-[12px] border border-[#F3DFB4] bg-[#FFF7E8] p-[24px]">
-      <span className="t-eyebrow text-warning">Find my match</span>
-      <h2 className="t-section-title mt-[8px] max-w-[22ch] text-ink">
-        Not sure where to start? Tell us what you need.
-      </h2>
-      <div className="mt-[12px] flex flex-wrap items-center justify-between gap-[18px]">
-        <p className="t-body max-w-[52ch] text-body">
-          Five short questions — budget, location, handover timing, configuration, and whether
-          you are buying to live in or to invest. We match published projects to your
-          requirement and you can shortlist from the results.
-        </p>
-        <div className="flex flex-col items-start gap-[8px]">
-          <ButtonLink href="/find-my-match">Find matching homes</ButtonLink>
-          <Link
-            href="/find-my-match#how"
-            className="text-[15px] font-semibold text-brand underline underline-offset-2 hover:text-brand-deep"
-          >
-            See how matching works
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
 }
 
 function GuestCard() {

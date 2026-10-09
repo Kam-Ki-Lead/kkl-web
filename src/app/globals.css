@@ -18,16 +18,16 @@
  * saffron #F2A20C.
  */
 @theme {
-  /* Sampled mid-purple face. White text on it is 8.80:1. */
-  --color-brand: #643681;
-  /* Sampled dark-purple face. White text on it is 11.27:1. */
-  --color-brand-deep: #4b2973;
+  /* Brightened 20% from the sampled mid-purple for the public-facing revision. */
+  --color-brand: #78419b;
+  /* Brightened 20% from the sampled dark-purple; remains the active-navigation face. */
+  --color-brand-deep: #5a318a;
   /* Sampled orange. Ink text on it is 7.62:1. On white it is 2.31:1, so it is not a text colour. */
-  --color-saffron: #f3942a;
+  --color-saffron: #ffb233;
   /* Light lavender for text on the purple rail and footer. 9.13:1 on brand-deep. */
   --color-on-brand: #ede4f5;
-  /* Darker than the sampled face, for the homepage wash only. */
-  --color-brand-wash: #2a1544;
+  /* Brightened 20% from the previous homepage wash. */
+  --color-brand-wash: #321952;
   /* Light purple line for selected and grouped rows. Not a control identifier. */
   --color-brand-mist: #e4d8ef;
   --color-ink: #12182b;

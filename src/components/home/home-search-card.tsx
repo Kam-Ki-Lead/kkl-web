@@ -25,6 +25,7 @@ const BUDGETS: ReadonlyArray<{ label: string; maxInr?: number; minInr?: number }
 
 const CONFIGURATIONS = ["Any BHK", "1 BHK", "2 BHK", "3 BHK", "4 BHK"];
 const TYPES = ["Apartment", "Villa", "Plot", "Commercial"];
+type SearchMode = "projects" | "buy_rent";
 
 export function HomeSearchCard({
   areas,
@@ -38,6 +39,7 @@ export function HomeSearchCard({
   const [, startTransition] = useTransition();
 
   const [locality, setLocality] = useState("");
+  const [searchMode, setSearchMode] = useState<SearchMode>("buy_rent");
   const [propertyType, setPropertyType] = useState(TYPES[0] as string);
   const [configuration, setConfiguration] = useState("");
   const [budgetLabel, setBudgetLabel] = useState(BUDGETS[0]?.label as string);
@@ -50,7 +52,7 @@ export function HomeSearchCard({
     let cancelled = false;
     const filters = {
       locationId: locality || undefined,
-      propertyType,
+      propertyType: searchMode === "projects" ? "project" : propertyType,
       configurations: configuration ? [configuration] : undefined,
       minBudgetInr: budget?.minInr,
       maxBudgetInr: budget?.maxInr,
@@ -65,13 +67,14 @@ export function HomeSearchCard({
     return () => {
       cancelled = true;
     };
-  }, [locality, propertyType, configuration, budget?.minInr, budget?.maxInr]);
+  }, [locality, propertyType, configuration, budget?.minInr, budget?.maxInr, searchMode]);
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
     const params = new URLSearchParams();
     if (locality) params.set("locality", locality);
-    if (propertyType && propertyType !== "Apartment") params.set("type", propertyType);
+    if (searchMode === "projects") params.set("type", "project");
+    else if (propertyType && propertyType !== "Apartment") params.set("type", propertyType);
     if (configuration) params.set("bhk", configuration);
     if (budgetLabel !== "Any budget") params.set("budget", budgetLabel);
     startTransition(() => router.push(params.size ? `/search?${params}` : "/search"));
@@ -84,11 +87,19 @@ export function HomeSearchCard({
       onSubmit={submit}
       className="relative z-10 mx-[20px] mt-[16px] rounded-[10px] border border-line bg-white p-[20px] shadow-[0_8px_28px_rgba(16,26,64,0.10)] max-[900px]:mx-0 max-[900px]:mt-[16px]"
     >
-      <div className="mb-[14px] flex gap-[20px] border-b border-line">
-        {/* The approved P-01 search tab is 17px/700 Archivo. */}
-        <span className="border-b-[3px] border-saffron pb-[8px] font-[family-name:var(--font-heading)] text-[17px] font-bold text-brand">
-          Property enquiries
-        </span>
+      <div className="mb-[14px] flex gap-[8px] border-b border-line">
+        <SearchModeButton
+          active={searchMode === "projects"}
+          onClick={() => setSearchMode("projects")}
+        >
+          Projects
+        </SearchModeButton>
+        <SearchModeButton
+          active={searchMode === "buy_rent"}
+          onClick={() => setSearchMode("buy_rent")}
+        >
+          Buy/Rent
+        </SearchModeButton>
       </div>
 
       {/* Narrow screens get Location full width, then BHK and Budget paired, with
@@ -110,15 +121,24 @@ export function HomeSearchCard({
             onSelect={setLocality}
           />
         </div>
-        <SearchField
-          id="home-type"
-          name="type"
-          label="Property type"
-          value={propertyType}
-          onChange={setPropertyType}
-          options={TYPES.map((t) => ({ value: t, label: t }))}
-          className={moreFiltersOpen ? "max-[900px]:col-span-2" : "max-[900px]:hidden"}
-        />
+        {searchMode === "buy_rent" ? (
+          <SearchField
+            id="home-type"
+            name="type"
+            label="Property type"
+            value={propertyType}
+            onChange={setPropertyType}
+            options={TYPES.map((t) => ({ value: t, label: t }))}
+            className={moreFiltersOpen ? "max-[900px]:col-span-2" : "max-[900px]:hidden"}
+          />
+        ) : (
+          <div className="flex flex-col gap-[6px] max-[900px]:hidden">
+            <span className="t-label text-body">Search type</span>
+            <div className="flex min-h-[48px] items-center rounded-[8px] border border-brand-mist bg-tint px-[13px] text-[15px] font-semibold text-brand">
+              Builder projects
+            </div>
+          </div>
+        )}
         <SearchField
           id="home-bhk"
           name="bhk"
@@ -145,12 +165,12 @@ export function HomeSearchCard({
           type="submit"
           className="flex-none rounded-[6px] bg-brand px-[34px] py-[17px] text-[18px] font-bold text-white hover:bg-brand-deep max-[900px]:w-full"
         >
-          Search {count} {count === 1 ? "property" : "properties"}
+          Search {count} {searchMode === "projects" ? (count === 1 ? "project" : "projects") : (count === 1 ? "property" : "properties")}
         </button>
         <span aria-live="polite" className="text-[15px] text-muted max-[900px]:hidden">
           Results update as you change a field.
         </span>
-        {!moreFiltersOpen ? (
+        {searchMode === "buy_rent" && !moreFiltersOpen ? (
           <button
             type="button"
             onClick={() => setMoreFiltersOpen(true)}
@@ -161,6 +181,31 @@ export function HomeSearchCard({
         ) : null}
       </div>
     </form>
+  );
+}
+
+function SearchModeButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`border-b-[3px] px-[14px] pb-[8px] pt-[4px] font-[family-name:var(--font-heading)] text-[17px] font-bold transition-colors ${
+        active
+          ? "border-saffron text-brand"
+          : "border-transparent text-muted hover:border-brand-mist hover:text-brand"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
