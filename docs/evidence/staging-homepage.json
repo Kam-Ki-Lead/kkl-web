@@ -1,7 +1,7 @@
 {
   "revisions": {
-    "web": "07e2c02",
-    "backend": "e80389a",
+    "web": "7ff071f",
+    "backend": "fa3e208",
     "voice": "943340e"
   },
   "base": "http://127.0.0.1:3813",
@@ -24,7 +24,7 @@
     {
       "name": "The property row has a property heading, not a lead one",
       "pass": true,
-      "detail": "Featured Check Beta · Villa | FEATURED PROJECT | Featured Leads | Featured Check Alpha | Featured Check Beta | Featured properties | Featured | Featured projects"
+      "detail": "FEATURED PROJECT | Featured Check Beta · Villa | Featured Leads | Featured Check Alpha | Featured Check Beta | Featured properties | Featured | Featured projects"
     },
     {
       "name": "An empty sale feed renders nothing at all",
@@ -39,7 +39,7 @@
     {
       "name": "Buy/Rent says where the budget band is chosen",
       "pass": true,
-      "detail": "A lead's budget band is compared exactly against the band the buyer stated, and this card's bands are display labels rather than those values. Choose a band on the results page, from the bands that exist."
+      "detail": "Choose a budget band on the results page, from the bands buyers have stated."
     },
     {
       "name": "Buy/Rent describes the records as buyer requirements",
@@ -84,7 +84,7 @@
     {
       "name": "A card leads into the existing lead purchase route",
       "pass": true,
-      "detail": "card -> /seller/leads/aa993dcd-1e62-4bc2-b10b-b8b06d8ceacc"
+      "detail": "card -> /seller/leads/cff46112-ef06-48e0-930d-3c3375d951f1"
     },
     {
       "name": "The cards are the seeded leads, shown by reference",

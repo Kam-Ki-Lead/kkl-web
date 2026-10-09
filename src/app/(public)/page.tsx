@@ -40,18 +40,38 @@ export default async function HomePage() {
     services.locations.areaOptions({ cityId: "in-wb-kol" }),
   ]);
 
+  const hero = home.featuredHero;
+
   return (
-    <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] pt-[20px] max-[1060px]:px-[18px]">
+    <>
       <h1 className="sr-only">Kaam Ki Lead — Buy Leads</h1>
-      <LeadSale />
-      {home.featuredHero ? <FeaturedHero property={home.featuredHero} /> : null}
 
-      <HomeSearchCard
-        areas={areas}
-        initialCount={home.totalPublishedListings}
-      />
+      {/* FULL BLEED.
+          The banner sits outside the page's 1280px frame so it runs the whole
+          width of the window, edge to edge, with the search card lifted onto
+          its lower edge. Everything below stays inside the frame. */}
+      {hero ? <FeaturedHero property={hero} /> : null}
 
-      <div className="mt-[28px] grid grid-cols-[1fr_320px] items-start gap-[24px] max-[1060px]:grid-cols-1">
+      <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] max-[1060px]:px-[18px]">
+        {/* Lifted onto the banner. Only when there is a banner to lift it onto,
+            and only on desktop — below 900px the banner is a compact panel and
+            an overlap would crowd it. */}
+        <div
+          className={
+            hero
+              ? "relative z-10 -mt-[72px] max-[900px]:mt-[16px]"
+              : "pt-[20px]"
+          }
+        >
+          <HomeSearchCard
+            areas={areas}
+            initialCount={home.totalPublishedListings}
+          />
+        </div>
+
+        <LeadSale />
+
+        <div className="mt-[28px] grid grid-cols-[1fr_320px] items-start gap-[24px] max-[1060px]:grid-cols-1">
         <div>
           <FeaturedLeads />
 
@@ -158,8 +178,9 @@ export default async function HomePage() {
             href="/brokers"
           />
         </aside>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -173,8 +194,11 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
     .filter(Boolean)
     .join(" · ");
 
+  // Runs the full width of the window. Rounded corners and a side border
+  // belong to a card inside a frame; against the window edge they read as a
+  // mistake, so the only rule left is the one along the bottom.
   return (
-    <section className="relative h-[380px] overflow-hidden rounded-[10px] border border-line max-[900px]:h-auto max-[900px]:border-0 max-[900px]:bg-brand-wash">
+    <section className="relative h-[420px] overflow-hidden border-b border-line max-[900px]:h-auto max-[900px]:border-0 max-[900px]:bg-brand-wash">
       <div aria-hidden="true" className="brand-highlight absolute inset-x-0 top-0 z-[1] h-[4px]" />
       {/* The photograph and its gradient are a desktop treatment. On mobile the
           approved design drops to a compact dark panel — the image would push the
@@ -197,7 +221,17 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
         }}
       />
 
-      <div className="absolute inset-y-0 left-0 flex max-w-[54%] flex-col justify-center gap-[12px] px-[40px] py-[36px] max-[900px]:static max-[900px]:max-w-none max-[900px]:gap-[8px] max-[900px]:px-[18px] max-[900px]:py-[20px]">
+      {/* The banner is full width; its words are not. They sit in the same
+          1280px frame as the navigation and the content below, so the title
+          lines up with everything else instead of drifting to the window's
+          edge on a wide screen.
+
+          `pb` leaves room for the search card lifted onto the lower edge:
+          the block is centred, so the extra bottom padding lifts the text
+          clear of the overlap rather than hiding the price behind it. */}
+      <div className="absolute inset-0 flex items-center max-[900px]:static">
+      <div className="mx-auto box-content w-full max-w-[1280px] px-[32px] max-[1060px]:px-[18px] max-[900px]:px-0">
+      <div className="flex max-w-[54%] flex-col gap-[12px] pb-[72px] max-[900px]:static max-[900px]:max-w-none max-[900px]:gap-[8px] max-[900px]:px-[18px] max-[900px]:py-[20px] max-[900px]:pb-[20px]">
         <span className="t-mono text-[11px] tracking-[0.14em] text-[#FAD9A3]">
           FEATURED PROJECT
         </span>
@@ -238,6 +272,8 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
           ) : null}
           <AccentButtonLink href={`/property/${property.slug}`}>View project</AccentButtonLink>
         </div>
+      </div>
+      </div>
       </div>
     </section>
   );

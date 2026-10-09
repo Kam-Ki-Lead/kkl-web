@@ -20,6 +20,17 @@
  * Sign in, buy anything, send a message, or touch a deployed environment. It
  * reads public pages from a locally served build.
  *
+ * FIXTURES THIS NEEDS
+ *
+ * Three checks read the featured row's cards by reference, so the database
+ * must hold the `HOME-00x` leads with contact rows attached — attached on
+ * purpose, because "no contact detail on the page" only means something when
+ * there is contact detail to withhold. Without them those three fail rather
+ * than passing quietly, which is the right way round: a seeding step that was
+ * skipped should look like a failure, not like a pass.
+ *
+ * The seed is in docs/evidence/featured-leads-fixture.sql.
+ *
  * Run (kkl-web and kkl-backend already up):
  *   BASE_URL=http://127.0.0.1:3813 PLAYWRIGHT=playwright-core \
  *   CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome \

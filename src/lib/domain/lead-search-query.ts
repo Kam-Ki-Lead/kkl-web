@@ -73,10 +73,11 @@ export function leadSearchHref(search: HomeLeadSearch): string {
  * where their budget selection went.
  */
 export const NOT_FORWARDED = Object.freeze({
+  // Kept to one line. The full reasoning belongs in this module's comment, not
+  // in a form field: the long version ran to four lines on the card and pushed
+  // everything beside it out of alignment.
   budget:
-    "A lead's budget band is compared exactly against the band the buyer stated, "
-    + "and this card's bands are display labels rather than those values. Choose a "
-    + "band on the results page, from the bands that exist.",
+    "Choose a budget band on the results page, from the bands buyers have stated.",
   propertyType:
     "The lead marketplace has no property-type filter. A buyer requirement records "
     + "a configuration and a budget, not a property type to match against.",
