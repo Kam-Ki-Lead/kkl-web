@@ -1,10 +1,10 @@
 {
   "revisions": {
-    "web": "a0184e2",
-    "backend": "d4ba202",
-    "voice": "411a253"
+    "web": "4db4e59",
+    "backend": "7c05990",
+    "voice": "943340e"
   },
-  "runId": "31b6d293-a378-45b2-8a46-799c3ec2c77a",
+  "runId": "b599c30b-eb26-4c12-bb20-2252de3afdfe",
   "checks": [
     {
       "name": "A run with two answers to one question is held for review",
@@ -54,7 +54,7 @@
     {
       "name": "Nothing is left unresolved, and the decision is recorded with who made it",
       "pass": true,
-      "detail": "{\"id\":\"9bdf5deb-5e44-45fe-b3fe-1439c78e9d29\",\"questionKey\":\"q04_city\",\"resolution\":\"kept\",\"resultingAnswerId\":\"6bcc0418-7c2b-40d4-948f-cdde65e52330\",\"reason\":\"She confirmed Hooghly when we rang back on 7 October.\",\"recordedAt\":\"2026-10-07T10:16:12.148Z\",\"actorRole\":\"staff\"}"
+      "detail": "{\"id\":\"6cc240a0-6920-4e70-a850-9b8c7dc7e8f0\",\"questionKey\":\"q04_city\",\"resolution\":\"kept\",\"resultingAnswerId\":\"b962b6ce-97c2-4134-bcc4-1e8e2c73b75f\",\"reason\":\"She confirmed Hooghly when we rang back on 7 October.\",\"recordedAt\":\"2026-10-09T12:03:54.594Z\",\"actorRole\":\"staff\"}"
     },
     {
       "name": "The original answers are kept as evidence",
@@ -84,7 +84,7 @@
     {
       "name": "A signed-out visitor is sent to sign in rather than shown the conflict",
       "pass": true,
-      "detail": "http://127.0.0.1:3813/auth?next=%2Fadmin%2Fvoice%2F31b6d293-a378-45b2-8a46-799c3ec2c77a"
+      "detail": "http://127.0.0.1:3813/auth?next=%2Fadmin%2Fvoice%2Fb599c30b-eb26-4c12-bb20-2252de3afdfe"
     },
     {
       "name": "A service failure on the conflicts read",

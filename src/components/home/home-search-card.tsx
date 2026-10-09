@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { countMatchingProperties } from "@/app/actions/search-count";
 import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
+import { NOT_FORWARDED, leadSearchHref } from "@/lib/domain/lead-search-query";
 
 /**
  * The homepage search card (P-01): the primary action on the page.
@@ -24,7 +25,6 @@ const BUDGETS: ReadonlyArray<{ label: string; maxInr?: number; minInr?: number }
 ];
 
 const CONFIGURATIONS = ["Any BHK", "1 BHK", "2 BHK", "3 BHK", "4 BHK"];
-const TYPES = ["Apartment", "Villa", "Plot", "Commercial"];
 type SearchMode = "projects" | "buy_rent";
 
 export function HomeSearchCard({
@@ -40,11 +40,9 @@ export function HomeSearchCard({
 
   const [locality, setLocality] = useState("");
   const [searchMode, setSearchMode] = useState<SearchMode>("buy_rent");
-  const [propertyType, setPropertyType] = useState(TYPES[0] as string);
   const [configuration, setConfiguration] = useState("");
   const [budgetLabel, setBudgetLabel] = useState(BUDGETS[0]?.label as string);
   const [count, setCount] = useState(initialCount);
-  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
 
   const budget = BUDGETS.find((b) => b.label === budgetLabel);
 
@@ -53,7 +51,9 @@ export function HomeSearchCard({
     let cancelled = false;
     const filters = {
       locationId: locality || undefined,
-      propertyType: searchMode === "projects" ? "project" : propertyType,
+      // This effect only runs in projects mode, so the type is always
+      // "project" here; there is no other branch to express.
+      propertyType: "project",
       configurations: configuration ? [configuration] : undefined,
       minBudgetInr: budget?.minInr,
       maxBudgetInr: budget?.maxInr,
@@ -68,18 +68,17 @@ export function HomeSearchCard({
     return () => {
       cancelled = true;
     };
-  }, [locality, propertyType, configuration, budget?.minInr, budget?.maxInr, searchMode]);
+  }, [locality, configuration, budget?.minInr, budget?.maxInr, searchMode]);
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
     const params = new URLSearchParams();
     if (searchMode === "buy_rent") {
-      if (locality) params.set("area", locality);
-      if (configuration) params.set("config", configuration);
-      else if (propertyType) params.set("config", propertyType);
-      if (budgetLabel !== "Any budget") params.set("budget", budgetLabel);
+      // Only what the marketplace genuinely filters on. `lead-search-query`
+      // holds the mapping and the reasons, so the card and `/seller/leads`
+      // cannot drift apart again.
       startTransition(() =>
-        router.push(params.size ? `/seller/leads?${params}` : "/seller/leads"),
+        router.push(leadSearchHref({ areaId: locality, bhk: configuration })),
       );
       return;
     }
@@ -133,15 +132,15 @@ export function HomeSearchCard({
           />
         </div>
         {searchMode === "buy_rent" ? (
-          <SearchField
-            id="home-type"
-            name="type"
-            label="Property type"
-            value={propertyType}
-            onChange={setPropertyType}
-            options={TYPES.map((t) => ({ value: t, label: t }))}
-            className={moreFiltersOpen ? "max-[900px]:col-span-2" : "max-[900px]:hidden"}
-          />
+          // Property type is not a lead filter — the marketplace has no such
+          // parameter — so it is not offered here. Offering a control that
+          // changes nothing is worse than leaving it out.
+          <div className="flex flex-col gap-[6px] max-[900px]:hidden">
+            <span className="t-label text-body">Searching</span>
+            <div className="flex min-h-[48px] items-center rounded-[8px] border border-brand-mist bg-tint px-[13px] text-[15px] font-semibold text-brand">
+              Buyer requirements
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col gap-[6px] max-[900px]:hidden">
             <span className="t-label text-body">Search type</span>
@@ -161,14 +160,26 @@ export function HomeSearchCard({
             label: c,
           }))}
         />
-        <SearchField
-          id="home-budget"
-          name="budget"
-          label="Budget"
-          value={budgetLabel}
-          onChange={setBudgetLabel}
-          options={BUDGETS.map((b) => ({ value: b.label, label: b.label }))}
-        />
+        {searchMode === "projects" ? (
+          <SearchField
+            id="home-budget"
+            name="budget"
+            label="Budget"
+            value={budgetLabel}
+            onChange={setBudgetLabel}
+            options={BUDGETS.map((b) => ({ value: b.label, label: b.label }))}
+          />
+        ) : (
+          // The marketplace compares a lead's budget band for exact equality
+          // against the band the buyer stated. These labels are not those
+          // values, so the band is chosen on the results page instead.
+          <div className="flex flex-col gap-[6px]">
+            <span className="t-label text-body">Budget</span>
+            <p className="t-caption flex min-h-[48px] items-center text-muted">
+              {NOT_FORWARDED.budget}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-[16px] flex flex-wrap items-center gap-[16px] max-[900px]:flex-col max-[900px]:items-stretch max-[900px]:gap-[10px]">
@@ -185,15 +196,7 @@ export function HomeSearchCard({
             ? "Results update as you change a field."
             : "Browse buyer requirements by area, configuration and budget."}
         </span>
-        {searchMode === "buy_rent" && !moreFiltersOpen ? (
-          <button
-            type="button"
-            onClick={() => setMoreFiltersOpen(true)}
-            className="hidden min-h-[44px] text-[15px] font-bold text-brand underline underline-offset-2 max-[900px]:block"
-          >
-            + More filters (property type)
-          </button>
-        ) : null}
+
       </div>
     </form>
   );
@@ -213,7 +216,9 @@ function SearchModeButton({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`border-b-[3px] px-[14px] pb-[8px] pt-[4px] font-[family-name:var(--font-heading)] text-[17px] font-bold transition-colors ${
+      // C-04: every control a thumb has to hit is at least 44px tall. The
+      // measured height here was 43px, which the phone check caught.
+      className={`min-h-[44px] border-b-[3px] px-[14px] pb-[9px] pt-[5px] font-[family-name:var(--font-heading)] text-[17px] font-bold transition-colors ${
         active
           ? "border-saffron text-brand"
           : "border-transparent text-muted hover:border-brand-mist hover:text-brand"

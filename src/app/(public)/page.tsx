@@ -38,10 +38,24 @@ export default async function HomePage() {
       <div className="mt-[28px] grid grid-cols-[1fr_320px] items-start gap-[24px] max-[1060px]:grid-cols-1">
         <div>
           <section className="mb-[32px]">
+            {/* NOT "Featured Leads".
+                This section renders `home.featuredProperties` through
+                `PropertyCard`, links to the property search, and its empty
+                state talks about builders publishing listings. Every card is a
+                published PROPERTY record; a click goes to a property detail
+                page. Titling it "Leads" described three different things at
+                once and sent a Seller looking for buyer requirements to a
+                property listing.
+
+                The real lead entry points are the sale feed at the top of this
+                page and "Buy Leads" in the navigation, both backed by actual
+                leads. A genuine featured-LEADS row would need a backend feed
+                that selects leads, which does not exist — raised in the
+                handover note rather than faked with a label. */}
             <SectionHeader
-              title="Featured Leads"
+              title="Featured properties"
               level="page"
-              subtitle="Curated selection in Kolkata"
+              subtitle="Published listings in Kolkata"
               action={
                 <Link
                   href="/search"
@@ -59,15 +73,15 @@ export default async function HomePage() {
               </div>
             ) : (
               <StateMessage
-                title="No featured leads right now"
+                title="No featured properties right now"
                 action={
                   <ButtonLink href="/search" size="sm">
                     Browse all listings
                   </ButtonLink>
                 }
               >
-                Featured projects appear here once builders publish them. Every published
-                listing is still searchable.
+                Featured properties appear here once owners and builders publish them.
+                Every published listing is still searchable.
               </StateMessage>
             )}
           </section>

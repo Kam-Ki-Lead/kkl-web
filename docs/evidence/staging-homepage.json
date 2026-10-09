@@ -1,0 +1,120 @@
+{
+  "revisions": {
+    "web": "4db4e59",
+    "backend": "7c05990",
+    "voice": "943340e"
+  },
+  "base": "http://127.0.0.1:3813",
+  "checks": [
+    {
+      "name": "Every resource the homepage needs loads",
+      "pass": true,
+      "detail": "no failed document, script, style or image request"
+    },
+    {
+      "name": "No internal pricing policy wording on the homepage",
+      "pass": true,
+      "detail": "none of 9 patterns present"
+    },
+    {
+      "name": "The marketplace policy banner is gone",
+      "pass": true,
+      "detail": "neither banner sentence appears"
+    },
+    {
+      "name": "Published properties are not labelled as leads",
+      "pass": true,
+      "detail": "FEATURED PROJECT | Featured properties | Featured | Featured projects"
+    },
+    {
+      "name": "An empty sale feed renders nothing at all",
+      "pass": true,
+      "detail": "no sale section, as expected when the feed is empty"
+    },
+    {
+      "name": "Buy/Rent does not offer a property type or a budget band it cannot forward",
+      "pass": true,
+      "detail": "property-type selects: 0, budget selects: 0"
+    },
+    {
+      "name": "Buy/Rent says where the budget band is chosen",
+      "pass": true,
+      "detail": "A lead's budget band is compared exactly against the band the buyer stated, and this card's bands are display labels rather than those values. Choose a band on the results page, from the bands that exist."
+    },
+    {
+      "name": "Buy/Rent describes the records as buyer requirements",
+      "pass": true,
+      "detail": "Buyer requirements | Search leads | Browse buyer requirements by area, configuration and budget."
+    },
+    {
+      "name": "The lead search forwards the configuration the marketplace matches",
+      "pass": true,
+      "detail": "config=3 BHK"
+    },
+    {
+      "name": "and forwards no property type and no display budget label",
+      "pass": true,
+      "detail": "query: ?config=3+BHK"
+    },
+    {
+      "name": "Projects mode still counts projects and offers a budget",
+      "pass": true,
+      "detail": "Search 8 projects"
+    },
+    {
+      "name": "Generated artwork is labelled an illustration, in the badge and the alt text",
+      "pass": true,
+      "detail": "illustration images: 5, visible \"Illustration\" badges: 5"
+    },
+    {
+      "name": "Navigation leads with Home and Buy Leads, and no longer offers Find my match",
+      "pass": true,
+      "detail": "Kaam Ki | Lead | ◉ | Kolkata | ▾ | Home | Buy Leads | Projects | New launches | ♡ Shortlist | List a project | Sign in"
+    },
+    {
+      "name": "The Find my match route still works for an old link",
+      "pass": true,
+      "detail": "GET /find-my-match -> 200"
+    },
+    {
+      "name": "A public nested route marks a navigation item as the current page",
+      "pass": true,
+      "detail": "aria-current on \"Projects\""
+    },
+    {
+      "name": "and the active item's text is white, not purple on purple",
+      "pass": true,
+      "detail": "computed colour: rgb(255, 255, 255)"
+    },
+    {
+      "name": "No sideways scrolling at 390px on /",
+      "pass": true,
+      "detail": "scrollWidth 390 vs clientWidth 390"
+    },
+    {
+      "name": "No sideways scrolling at 390px on /search",
+      "pass": true,
+      "detail": "scrollWidth 390 vs clientWidth 390"
+    },
+    {
+      "name": "No sideways scrolling at 390px on /support",
+      "pass": true,
+      "detail": "scrollWidth 390 vs clientWidth 390"
+    },
+    {
+      "name": "The phone layout does not offer the removed property-type disclosure",
+      "pass": true,
+      "detail": "absent, as intended"
+    },
+    {
+      "name": "Every search control on a phone is at least 44px tall",
+      "pass": true,
+      "detail": "all controls >= 44px"
+    },
+    {
+      "name": "No internal pricing wording on the phone homepage either",
+      "pass": true,
+      "detail": "none of 9 patterns present"
+    }
+  ]
+}
