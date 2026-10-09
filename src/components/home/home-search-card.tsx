@@ -49,6 +49,7 @@ export function HomeSearchCard({
   const budget = BUDGETS.find((b) => b.label === budgetLabel);
 
   useEffect(() => {
+    if (searchMode !== "projects") return;
     let cancelled = false;
     const filters = {
       locationId: locality || undefined,
@@ -72,12 +73,22 @@ export function HomeSearchCard({
   function submit(event: React.FormEvent) {
     event.preventDefault();
     const params = new URLSearchParams();
+    if (searchMode === "buy_rent") {
+      if (locality) params.set("area", locality);
+      if (configuration) params.set("config", configuration);
+      else if (propertyType) params.set("config", propertyType);
+      if (budgetLabel !== "Any budget") params.set("budget", budgetLabel);
+      startTransition(() =>
+        router.push(params.size ? `/seller/leads?${params}` : "/seller/leads"),
+      );
+      return;
+    }
+
     if (locality) params.set("locality", locality);
-    if (searchMode === "projects") params.set("type", "project");
-    else if (propertyType && propertyType !== "Apartment") params.set("type", propertyType);
+    params.set("type", "project");
     if (configuration) params.set("bhk", configuration);
     if (budgetLabel !== "Any budget") params.set("budget", budgetLabel);
-    startTransition(() => router.push(params.size ? `/search?${params}` : "/search"));
+    startTransition(() => router.push(`/search?${params}`));
   }
 
   return (
@@ -165,10 +176,14 @@ export function HomeSearchCard({
           type="submit"
           className="flex-none rounded-[6px] bg-brand px-[34px] py-[17px] text-[18px] font-bold text-white hover:bg-brand-deep max-[900px]:w-full"
         >
-          Search {count} {searchMode === "projects" ? (count === 1 ? "project" : "projects") : (count === 1 ? "property" : "properties")}
+          {searchMode === "projects"
+            ? `Search ${count} ${count === 1 ? "project" : "projects"}`
+            : "Search leads"}
         </button>
         <span aria-live="polite" className="text-[15px] text-muted max-[900px]:hidden">
-          Results update as you change a field.
+          {searchMode === "projects"
+            ? "Results update as you change a field."
+            : "Browse buyer requirements by area, configuration and budget."}
         </span>
         {searchMode === "buy_rent" && !moreFiltersOpen ? (
           <button
