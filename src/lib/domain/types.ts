@@ -149,6 +149,24 @@ export type PropertySearchFilters = {
   readonly transaction?: PropertyTransaction;
   readonly propertyType?: string;
   readonly configurations?: readonly string[];
+  /**
+   * The floor for "4+ BHK".
+   *
+   * `configurations` matches exact counts, which cannot express "four or
+   * more" — listing 4, 5, 6 … would be a guess about what gets built.
+   */
+  readonly minBedrooms?: number;
+  /**
+   * How many buyer leads are live in the property's area, as a range.
+   *
+   * NOT A COUNT STORED ON THE PROPERTY. A lead belongs to an area, never to a
+   * listing, so this is "leads currently purchasable in this locality" —
+   * derived on read. A denormalised per-listing column would be wrong the
+   * moment a lead in that area is sold, and would also describe properties as
+   * if they owned leads, which they do not.
+   */
+  readonly minLeadsAvailable?: number;
+  readonly maxLeadsAvailable?: number;
   readonly minBudgetInr?: number;
   readonly maxBudgetInr?: number;
   readonly construction?: PropertySummary["construction"];

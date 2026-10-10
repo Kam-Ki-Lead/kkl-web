@@ -90,6 +90,22 @@ function matches(property: PropertySummary, filters: Parameters<PropertyService[
       if (!haystack.includes(needle)) return false;
     }
   }
+  if (filters.minBedrooms !== undefined) {
+    // "4+ BHK". The largest configuration the project publishes decides it;
+    // a 2/3/4 BHK project is a 4+ BHK project to somebody who wants four.
+    const largest = property.configurations.reduce((most, c) => {
+      const n = Number(c.replace(/\D/g, ""));
+      return Number.isFinite(n) && n > most ? n : most;
+    }, 0);
+    if (largest < filters.minBedrooms) return false;
+  }
+  if (filters.minLeadsAvailable !== undefined || filters.maxLeadsAvailable !== undefined) {
+    // Leads live in an area, not on a listing, so this is a live count of
+    // what is purchasable in this property's locality. Both ends inclusive.
+    const available = sellerStore.leadsAvailableIn(property.locationId);
+    if (filters.minLeadsAvailable !== undefined && available < filters.minLeadsAvailable) return false;
+    if (filters.maxLeadsAvailable !== undefined && available > filters.maxLeadsAvailable) return false;
+  }
   if (filters.transaction && property.transaction !== filters.transaction) return false;
   if (filters.construction && property.construction !== filters.construction) return false;
   if (filters.newLaunchOnly && !property.newLaunch) return false;
@@ -179,14 +195,14 @@ const propertyService: PropertyService = {
     };
   },
 
-  async search({ filters, sort, page }): Promise<Paged<PropertySummary>> {
+  async search({ filters, sort, page, pageSize = PAGE_SIZE }): Promise<Paged<PropertySummary>> {
     const all = sorted(live().filter((p) => matches(p, filters)), sort);
-    const start = (page - 1) * PAGE_SIZE;
+    const start = (page - 1) * pageSize;
     return {
-      items: all.slice(start, start + PAGE_SIZE),
+      items: all.slice(start, start + pageSize),
       total: all.length,
       page,
-      pageSize: PAGE_SIZE,
+      pageSize,
     };
   },
 

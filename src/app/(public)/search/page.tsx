@@ -5,6 +5,12 @@ import type { PropertySearchFilters, PropertySortKey } from "@/lib/domain/types"
 import { PropertyCard } from "@/components/property/property-card";
 import { SearchFilters, SearchSort } from "@/components/search/search-filters";
 import { propertySearchFilters } from "@/lib/domain/property-search-query";
+import {
+  BUDGET,
+  FilterError,
+  parseFilters,
+  toPropertySearchFilters,
+} from "@/lib/domain/property-filters";
 import { ButtonLink } from "@/components/ui/button";
 import { SkeletonBlock, SkeletonRows, StateMessage } from "@/components/ui/states";
 
@@ -23,11 +29,59 @@ function one(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
+/**
+ * The hero bar's parameters, layered over this page's own.
+ *
+ * The bar speaks the endpoints' vocabulary — `mode`, `bhk`, `budget` as a
+ * band token, and the quantity trio — because that is the published contract
+ * and the same module parses both. This page's filter row speaks its own,
+ * older set, and links to it exist.
+ *
+ * So these are layered, not chosen between: the legacy reading runs first,
+ * then any bar parameter that is actually present overrides it. Choosing one
+ * reading wholesale dropped `transaction` from `/search?locality=x&transaction=rent`,
+ * because that link carries one name from each set.
+ *
+ * A malformed bar parameter is not an error page. The endpoints answer 400,
+ * because a caller can fix the request; somebody arriving from a stale
+ * bookmark is better served by results than by validation text, so an
+ * unparseable set is simply not layered.
+ */
+const BAR_PARAMS = ["location", "mode", "bhk", "qty", "qtyMin", "qtyMax"] as const;
+
+function barFilters(params: SearchParams): PropertySearchFilters | null {
+  const present: Record<string, string | string[] | undefined> = {};
+  for (const key of BAR_PARAMS) {
+    if (params[key] !== undefined) present[key] = params[key];
+  }
+  // `budget` is shared: the bar sends a band token, the filter row sends a
+  // label. Only a token belongs to the bar's reading.
+  const budget = one(params.budget);
+  if (budget && BUDGET[budget]) present.budget = budget;
+  // `locality` is shared too, and means the same thing in both, so it is left
+  // to the legacy reading rather than parsed twice.
+
+  if (Object.keys(present).length === 0) return null;
+  try {
+    return toPropertySearchFilters(parseFilters(present));
+  } catch (error) {
+    if (error instanceof FilterError) return null;
+    throw error;
+  }
+}
+
+/** Only the keys a filter actually set, so a layer cannot blank one below it. */
+function defined(filters: PropertySearchFilters): Partial<PropertySearchFilters> {
+  return Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value !== undefined),
+  );
+}
+
 function toFilters(params: SearchParams): PropertySearchFilters {
   const budget = BUDGET_BANDS[one(params.budget) ?? ""] ?? {};
   const possession = one(params.possession);
 
-  return {
+  const legacy: PropertySearchFilters = {
     // Shared with the homepage card, so the count it shows and the results
     // this page returns can never come from different filters.
     ...propertySearchFilters({
@@ -39,6 +93,16 @@ function toFilters(params: SearchParams): PropertySearchFilters {
     // `q` is the header search panel's parameter.
     text: one(params.q)?.trim() || undefined,
     propertyType: one(params.type),
+    ...possessionFilters(possession),
+  };
+
+  const bar = barFilters(params);
+  return bar ? { ...legacy, ...defined(bar) } : legacy;
+}
+
+/** The possession control, shared by both readings above. */
+function possessionFilters(possession: string | undefined): PropertySearchFilters {
+  return {
     construction:
       possession === "ready"
         ? "ready_to_move"

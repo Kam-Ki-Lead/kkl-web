@@ -1,0 +1,406 @@
+/**
+ * The property search's filter vocabulary and its validation, in one place.
+ *
+ * WHY THIS EXISTS
+ *
+ * `property-search-query.ts` maps the homepage card's controls onto a query
+ * string. This module is the other half: it is what turns an arbitrary query
+ * string — from the hero bar, from a bookmark, from anything — into a filter
+ * object, and it is what refuses the ones that make no sense.
+ *
+ * It is the single source of truth for the two endpoints and for the bar, so
+ * the number on the Search button cannot be computed from different rules
+ * than the results page uses. It is pure: no React, no DOM, no service, no
+ * database, so every rule below is testable without any of them.
+ *
+ * THE RULE THAT GOVERNS EVERY RANGE
+ *
+ * Inclusive at both ends. A listing with exactly 500 leads in its area is in
+ * "0–500" and in "500–1,000". A null upper bound is open-ended. This is said
+ * once here rather than re-derived at each call site, because the boundary is
+ * exactly where range filters disagree with each other.
+ */
+
+import type { PropertySearchFilters, PropertyTransaction } from "./types";
+
+/* ------------------------------------------------------------- vocabulary -- */
+
+/** A closed or open-ended range. `null` as the upper bound means no limit. */
+export type Band = readonly [number, number | null];
+
+/**
+ * Budget bands, in rupees.
+ *
+ * These are the bands the brief names. They are not the homepage card's
+ * previous "Up to …" labels, which overlapped each other and could not be
+ * expressed as a single query token — see the delivery note.
+ */
+export const BUDGET: Readonly<Record<string, Band>> = Object.freeze({
+  u50l: [0, 5_000_000],
+  "50l-1cr": [5_000_000, 10_000_000],
+  "1cr-2cr": [10_000_000, 20_000_000],
+  "2crplus": [20_000_000, null],
+});
+
+export const BUDGET_LABELS: Readonly<Record<string, string>> = Object.freeze({
+  u50l: "Under ₹50L",
+  "50l-1cr": "₹50L–₹1Cr",
+  "1cr-2cr": "₹1Cr–₹2Cr",
+  "2crplus": "₹2Cr+",
+});
+
+/**
+ * The quantity presets, generated from one step.
+ *
+ * Change `QTY_STEP` or `QTY_BANDS` and the keys, the labels and the server's
+ * accepted vocabulary all move together. Writing the five bands out by hand is
+ * how a control ends up offering a value the server rejects.
+ */
+export const QTY_STEP = 500;
+export const QTY_BANDS = 4;
+
+/** The largest quantity anybody may type. Above this is a typo, not a filter. */
+export const MAX_QTY = 1_000_000;
+
+function buildQtyPresets(step: number, bands: number): Readonly<Record<string, Band>> {
+  const out: Record<string, Band> = {};
+  for (let i = 0; i < bands; i += 1) {
+    out[`${i * step}-${(i + 1) * step}`] = [i * step, (i + 1) * step];
+  }
+  out[`${bands * step}plus`] = [bands * step, null];
+  return Object.freeze(out);
+}
+
+export const QTY: Readonly<Record<string, Band>> = buildQtyPresets(QTY_STEP, QTY_BANDS);
+
+/** The token used for the custom-range option. */
+export const QTY_CUSTOM = "custom";
+
+const group = (n: number) => n.toLocaleString("en-IN");
+
+/** The label for a preset key, e.g. "500–1,000" or "2,000+". */
+export function qtyLabel(key: string): string {
+  const band = QTY[key];
+  if (!band) return "";
+  const [lo, hi] = band;
+  return hi === null ? `${group(lo)}+` : `${group(lo)}–${group(hi)}`;
+}
+
+/** Every quantity option the control offers, presets first. */
+export const QTY_OPTIONS: ReadonlyArray<{ value: string; label: string }> = Object.freeze([
+  { value: "", label: "Any quantity" },
+  ...Object.keys(QTY).map((value) => ({ value, label: qtyLabel(value) })),
+  { value: QTY_CUSTOM, label: "Custom range…" },
+]);
+
+export const BHK_VALUES = Object.freeze(["1", "2", "3", "4plus"] as const);
+export const MODE_VALUES = Object.freeze(["buy", "rent"] as const);
+
+/** The bedroom count at which "4+" begins. Derived from the last BHK value. */
+export const BHK_PLUS_FROM = 4;
+
+export const BHK_OPTIONS: ReadonlyArray<{ value: string; label: string }> = Object.freeze([
+  { value: "", label: "Any BHK" },
+  { value: "1", label: "1 BHK" },
+  { value: "2", label: "2 BHK" },
+  { value: "3", label: "3 BHK" },
+  { value: "4plus", label: "4+ BHK" },
+]);
+
+/**
+ * Buy or rent.
+ *
+ * The query says `buy`; the record says `sale`. `listings.transaction` in
+ * kkl-backend has carried `sale` since the owner posting flow was built, and
+ * renaming a stored value to match a query token would be the wrong way round.
+ */
+export const MODE_OPTIONS: ReadonlyArray<{ value: string; label: string }> = Object.freeze([
+  { value: "", label: "Buy or rent" },
+  { value: "buy", label: "Buy" },
+  { value: "rent", label: "Rent" },
+]);
+
+const MODE_TO_TRANSACTION: Readonly<Record<string, PropertyTransaction>> = Object.freeze({
+  buy: "sale",
+  rent: "rent",
+});
+
+export const MAX_LOCATION_LENGTH = 80;
+
+/* ------------------------------------------------------------------ errors -- */
+
+/**
+ * A rejected request.
+ *
+ * It carries its own status so a route handler can answer without a table of
+ * message-to-status guesses, and so an unexpected throw stays a 500 rather
+ * than being reported to the caller as their mistake.
+ */
+export class FilterError extends Error {
+  readonly status = 400;
+  constructor(message: string) {
+    super(message);
+    this.name = "FilterError";
+  }
+}
+
+const bad = (message: string) => new FilterError(message);
+
+/* -------------------------------------------------------------- the parse -- */
+
+/** What a parsed query means. Every field is optional; absent means unfiltered. */
+export type ParsedFilters = {
+  /** Free text, matched against the locality path and the project name. */
+  readonly location?: string;
+  /** A location-record id, from the area picker. Hierarchical. */
+  readonly locality?: string;
+  readonly mode?: "buy" | "rent";
+  readonly bhk?: (typeof BHK_VALUES)[number];
+  readonly budget?: Band;
+  readonly qty?: Band;
+};
+
+/** The parameters the filter understands. Anything else is a mistake. */
+export const FILTER_PARAMS = Object.freeze([
+  "location",
+  "locality",
+  "mode",
+  "bhk",
+  "budget",
+  "qty",
+  "qtyMin",
+  "qtyMax",
+] as const);
+
+/** The paging parameters, accepted only by the listing endpoint. */
+export const PAGE_PARAMS = Object.freeze(["page", "pageSize"] as const);
+
+/** A query string as any of the shapes this application hands around. */
+export type QueryLike =
+  | URLSearchParams
+  | Record<string, string | string[] | undefined>;
+
+/**
+ * One value per key, or a rejection.
+ *
+ * A repeated parameter is refused rather than resolved to the first or the
+ * last: `?mode=buy&mode=rent` is not a search anybody meant, and silently
+ * picking one of them produces a result the caller cannot explain.
+ */
+function readOne(query: QueryLike, key: string): string | undefined {
+  if (query instanceof URLSearchParams) {
+    const all = query.getAll(key);
+    if (all.length > 1) throw bad(`repeated parameter: ${key}`);
+    return all[0];
+  }
+  const raw = query[key];
+  if (raw === undefined) return undefined;
+  if (Array.isArray(raw)) {
+    if (raw.length > 1) throw bad(`repeated parameter: ${key}`);
+    return raw[0];
+  }
+  if (typeof raw !== "string") throw bad(`invalid parameter: ${key}`);
+  return raw;
+}
+
+function keysOf(query: QueryLike): string[] {
+  return query instanceof URLSearchParams
+    ? [...new Set(query.keys())]
+    : Object.keys(query);
+}
+
+/** A whole number within the cap, or a rejection naming the field. */
+export function wholeNumber(value: string, name: string): number {
+  if (!/^\d{1,9}$/.test(value)) throw bad(`${name} must be a whole number`);
+  const n = Number(value);
+  if (n > MAX_QTY) throw bad(`${name} is too large`);
+  return n;
+}
+
+/**
+ * A query string as a filter, or a `FilterError`.
+ *
+ * `allow` widens the accepted parameter set; the listing endpoint passes the
+ * paging keys. Everything outside it is refused by name, because a filter that
+ * silently ignores `?bkh=3` returns the wrong results and says nothing.
+ */
+export function parseFilters(
+  query: QueryLike,
+  { allow = [] as readonly string[] } = {},
+): ParsedFilters {
+  const known = new Set<string>([...FILTER_PARAMS, ...allow]);
+  for (const key of keysOf(query)) {
+    if (!known.has(key)) throw bad(`unknown parameter: ${key}`);
+  }
+
+  const f: {
+    location?: string;
+    locality?: string;
+    mode?: "buy" | "rent";
+    bhk?: (typeof BHK_VALUES)[number];
+    budget?: Band;
+    qty?: Band;
+  } = {};
+
+  const location = (readOne(query, "location") ?? "").trim();
+  if (location.length > MAX_LOCATION_LENGTH) throw bad("location is too long");
+  if (location) f.location = location;
+
+  const locality = (readOne(query, "locality") ?? "").trim();
+  if (locality.length > MAX_LOCATION_LENGTH) throw bad("locality is too long");
+  if (locality) f.locality = locality;
+
+  const mode = readOne(query, "mode");
+  if (mode) {
+    if (!(MODE_VALUES as readonly string[]).includes(mode)) throw bad("invalid mode");
+    f.mode = mode as "buy" | "rent";
+  }
+
+  const bhk = readOne(query, "bhk");
+  if (bhk) {
+    if (!(BHK_VALUES as readonly string[]).includes(bhk)) throw bad("invalid bhk");
+    f.bhk = bhk as (typeof BHK_VALUES)[number];
+  }
+
+  const budget = readOne(query, "budget");
+  if (budget) {
+    const band = BUDGET[budget];
+    if (!band) throw bad("invalid budget");
+    f.budget = band;
+  }
+
+  const qty = readOne(query, "qty");
+  const qtyMin = readOne(query, "qtyMin");
+  const qtyMax = readOne(query, "qtyMax");
+  if (qty) {
+    if (qty === QTY_CUSTOM) {
+      const hasMin = Boolean(qtyMin && qtyMin.trim());
+      const hasMax = Boolean(qtyMax && qtyMax.trim());
+      if (!hasMin && !hasMax) throw bad("custom quantity needs qtyMin, qtyMax or both");
+      const min = hasMin ? wholeNumber((qtyMin as string).trim(), "qtyMin") : 0;
+      const max = hasMax ? wholeNumber((qtyMax as string).trim(), "qtyMax") : null;
+      if (max !== null && min > max) throw bad("qtyMin cannot be greater than qtyMax");
+      f.qty = [min, max];
+    } else {
+      const band = QTY[qty];
+      if (!band) throw bad("invalid qty");
+      f.qty = band;
+    }
+  }
+
+  return f;
+}
+
+/** `page` and `pageSize`, clamped. Defaults 1 and 12, and 50 is the ceiling. */
+export const PAGE_SIZE_DEFAULT = 12;
+export const PAGE_SIZE_MAX = 50;
+
+export function parsePaging(query: QueryLike): { page: number; pageSize: number } {
+  const readInt = (key: string, fallback: number) => {
+    const raw = readOne(query, key);
+    if (raw === undefined || raw.trim() === "") return fallback;
+    const n = Number.parseInt(raw, 10);
+    return Number.isFinite(n) ? n : fallback;
+  };
+  return {
+    page: Math.max(1, readInt("page", 1)),
+    pageSize: Math.min(PAGE_SIZE_MAX, Math.max(1, readInt("pageSize", PAGE_SIZE_DEFAULT))),
+  };
+}
+
+/* ------------------------------------------------- onto the service's type -- */
+
+/**
+ * A parsed query as the filter the property service takes.
+ *
+ * The two vocabularies stay separate on purpose. The query is a public
+ * contract — `mode=buy`, `bhk=4plus` — and the service's filter is the
+ * application's own shape. Mapping here means neither has to bend to the
+ * other, and a change to one is a change to this function.
+ */
+export function toPropertySearchFilters(f: ParsedFilters): PropertySearchFilters {
+  return {
+    text: f.location,
+    locationId: f.locality,
+    transaction: f.mode ? MODE_TO_TRANSACTION[f.mode] : undefined,
+    configurations: f.bhk && f.bhk !== "4plus" ? [f.bhk] : undefined,
+    minBedrooms: f.bhk === "4plus" ? BHK_PLUS_FROM : undefined,
+    minBudgetInr: f.budget?.[0],
+    maxBudgetInr: f.budget?.[1] ?? undefined,
+    minLeadsAvailable: f.qty?.[0],
+    maxLeadsAvailable: f.qty?.[1] ?? undefined,
+  };
+}
+
+/** Inclusive at both ends; a null upper bound is open-ended. */
+export function inBand(value: number, [lo, hi]: Band): boolean {
+  return value >= lo && (hi === null || value <= hi);
+}
+
+/* ------------------------------------------------------ the SQL this means -- */
+
+/**
+ * The same filter as a parameterised statement.
+ *
+ * kkl-web's public property search is served by the sample service today —
+ * `services.properties` is the one domain `getServices()` never swaps for a
+ * backend implementation — so nothing in this repository executes SQL. This
+ * function exists so that the day kkl-backend serves the search, the query is
+ * already written, already parameterised and already tested against the same
+ * filter object the sample service matches on.
+ *
+ * Every value is a placeholder. There is no interpolation of caller input
+ * anywhere in it, including the LIKE pattern, whose wildcards are escaped and
+ * whose escape character is declared.
+ *
+ * The lead count is a correlated subquery rather than a denormalised column:
+ * leads belong to an area, not to a listing, and a stored per-listing count
+ * would be wrong the moment a lead is sold. See the delivery note.
+ */
+export function toSql(
+  f: ParsedFilters,
+  { limit = PAGE_SIZE_DEFAULT, offset = 0, city = "Kolkata" } = {},
+): { text: string; values: unknown[] } {
+  const values: unknown[] = [city];
+  const where: string[] = ["l.city = $1"];
+  const p = (value: unknown) => {
+    values.push(value);
+    return `$${values.length}`;
+  };
+
+  // `%`, `_` and the escape character itself are escaped, so a search for
+  // "100%" is a search for the text and not for every row.
+  if (f.location) {
+    const pattern = `%${f.location.replace(/[\\%_]/g, "\\$&")}%`;
+    where.push(`(l.locality ILIKE ${p(pattern)} ESCAPE '\\' OR l.name ILIKE ${p(pattern)} ESCAPE '\\')`);
+  }
+  if (f.locality) where.push(`l.area_id = ${p(f.locality)}`);
+  if (f.mode) where.push(`l.transaction = ${p(MODE_TO_TRANSACTION[f.mode])}`);
+  if (f.bhk) {
+    where.push(
+      f.bhk === "4plus" ? `l.bedrooms >= ${p(BHK_PLUS_FROM)}` : `l.bedrooms = ${p(Number(f.bhk))}`,
+    );
+  }
+  if (f.budget) {
+    where.push(`l.price >= ${p(f.budget[0])}`);
+    if (f.budget[1] !== null) where.push(`l.price <= ${p(f.budget[1])}`);
+  }
+  if (f.qty) {
+    const count =
+      "(SELECT count(*) FROM leads ld WHERE ld.area_id = l.area_id " +
+      "AND ld.status IN ('listed','on_sale') AND ld.consent_status = 'granted')";
+    where.push(`${count} >= ${p(f.qty[0])}`);
+    if (f.qty[1] !== null) where.push(`${count} <= ${p(f.qty[1])}`);
+  }
+
+  // Suggested index: CREATE INDEX ON listings (city, transaction, bedrooms, price);
+  // and on leads (area_id, status, consent_status) for the subquery.
+  const limitAt = p(limit);
+  const offsetAt = p(offset);
+  return {
+    text:
+      "SELECT l.id, l.name, l.locality, l.transaction, l.bedrooms, l.price " +
+      `FROM listings l WHERE ${where.join(" AND ")} ORDER BY l.id LIMIT ${limitAt} OFFSET ${offsetAt}`,
+    values,
+  };
+}

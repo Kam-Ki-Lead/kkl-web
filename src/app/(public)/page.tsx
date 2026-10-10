@@ -5,7 +5,7 @@ import { getServices } from "@/lib/services";
 import { formatPriceRange } from "@/lib/format";
 import { PropertyCard, ProjectCard } from "@/components/property/property-card";
 import { PropertyImage } from "@/components/property/property-image";
-import { HomeSearchCard } from "@/components/home/home-search-card";
+import { HeroSearchBar } from "@/components/home/hero-search-bar";
 import { Card, SectionHeader } from "@/components/ui/card";
 import { ButtonLink, AccentButtonLink } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/states";
@@ -63,7 +63,7 @@ export default async function HomePage() {
               : "pt-[20px]"
           }
         >
-          <HomeSearchCard
+          <HeroSearchBar
             areas={areas}
             initialCount={home.totalPublishedListings}
           />

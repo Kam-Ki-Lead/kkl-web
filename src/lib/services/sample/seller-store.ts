@@ -510,6 +510,24 @@ export function listLeads(query: LeadMarketQuery): LeadMarketPage {
   };
 }
 
+/**
+ * How many leads are currently purchasable in an area.
+ *
+ * Hierarchical, like every other area filter (CR05): a locality covers its
+ * sub-localities. Sold leads are excluded, because "available" is the whole
+ * point of the number.
+ *
+ * Derived on read rather than stored on a property. A lead belongs to an
+ * area; no listing owns one. A per-listing count would be wrong the moment a
+ * lead in that area is sold, and would quietly describe properties as though
+ * they came with leads attached.
+ */
+export function leadsAvailableIn(areaId: string): number {
+  return SEED_LEADS.filter(
+    (l) => !state().soldLeads.has(l.id) && isWithin(l.locationId, areaId),
+  ).length;
+}
+
 export function getLead(id: string): MarketplaceLeadDetail | null {
   if (state().soldLeads.has(id)) return null;
   const seed = SEED_LEADS.find((l) => l.id === id);

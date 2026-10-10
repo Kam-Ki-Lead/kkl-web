@@ -139,6 +139,13 @@ export interface PropertyService {
     filters: PropertySearchFilters;
     sort: PropertySortKey;
     page: number;
+    /**
+     * Rows per page. Omitted, the implementation's own page size applies —
+     * the search screen has always used it and does not pass one. The
+     * listing endpoint does, because its contract publishes a default and a
+     * ceiling that the screen's grid has no reason to share.
+     */
+    pageSize?: number;
   }): Promise<Paged<PropertySummary>>;
   getBySlug(slug: string): Promise<PropertyDetail>;
   countMatching(filters: PropertySearchFilters): Promise<number>;
