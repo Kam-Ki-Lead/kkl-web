@@ -1,6 +1,6 @@
 {
   "revisions": {
-    "web": "3d81764",
+    "web": "39dda86",
     "backend": "fa3e208",
     "voice": "943340e"
   },
@@ -70,6 +70,51 @@
       "name": "shadow goes again at the top",
       "pass": true,
       "detail": "none"
+    },
+    {
+      "name": "the bar draws four tabs",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "name": "following \"Home\" keeps the header",
+      "pass": true,
+      "detail": "/"
+    },
+    {
+      "name": "and \"Home\" is the current tab there",
+      "pass": true,
+      "detail": "Home"
+    },
+    {
+      "name": "following \"Buy leads\" keeps the header",
+      "pass": true,
+      "detail": "/brokers"
+    },
+    {
+      "name": "and \"Buy leads\" is the current tab there",
+      "pass": true,
+      "detail": "Buy leads"
+    },
+    {
+      "name": "following \"Projects\" keeps the header",
+      "pass": true,
+      "detail": "/search"
+    },
+    {
+      "name": "and \"Projects\" is the current tab there",
+      "pass": true,
+      "detail": "Projects"
+    },
+    {
+      "name": "following \"New launches\" keeps the header",
+      "pass": true,
+      "detail": "/search?possession=new_launch"
+    },
+    {
+      "name": "and \"New launches\" is the current tab there",
+      "pass": true,
+      "detail": "New launches"
     },
     {
       "name": "Home is current on /",

@@ -16,14 +16,15 @@ import {
   CITIES,
   CITY_STORAGE_KEY,
   DEFAULT_CITY_ID,
-  HEADER_NAV,
   SEARCH_PLACEHOLDER,
   type City,
   type HeaderNavItem,
   type QueryLike,
   activeNavLabel,
   cityButtonLabel,
+  buyLeadsHref,
   cityLabel,
+  headerNav,
   headerSearchHref,
   readCityId,
   shortlistBadge,
@@ -55,6 +56,14 @@ export type SiteHeaderProps = {
   /** The cities on offer. See the note in `site-header.ts` before widening. */
   readonly cities?: readonly City[];
   readonly defaultCityId?: string;
+  /**
+   * Whether this visitor has a session.
+   *
+   * It only decides where Buy leads points: the console for somebody signed
+   * in, the public brokers page for everybody else. It is not access control
+   * — kkl-backend authorises every request regardless of what this renders.
+   */
+  readonly signedIn?: boolean;
   readonly nav?: readonly HeaderNavItem[];
   readonly shortlistHref?: string;
   readonly listProjectHref?: string;
@@ -124,7 +133,8 @@ function HeaderView({
   shortlistCount = 0,
   cities = CITIES,
   defaultCityId = DEFAULT_CITY_ID,
-  nav = HEADER_NAV,
+  signedIn = false,
+  nav: navProp,
   shortlistHref = "/account/shortlist",
   listProjectHref = "/builders",
   helpHref = "/support",
@@ -134,6 +144,7 @@ function HeaderView({
 }: SiteHeaderProps & { query: QueryLike | null }) {
   const pathname = usePathname();
   const router = useRouter();
+  const nav = navProp ?? headerNav(buyLeadsHref(signedIn));
 
   const [cityOpen, setCityOpen] = useState(false);
   const [cityActive, setCityActive] = useState(0);

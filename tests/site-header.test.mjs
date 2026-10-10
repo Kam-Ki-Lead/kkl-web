@@ -1,12 +1,16 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  BUY_LEADS_CONSOLE,
+  BUY_LEADS_PUBLIC,
   CITIES,
   CITY_STORAGE_KEY,
   DEFAULT_CITY_ID,
   HEADER_NAV,
   SEARCH_TEXT_PARAM,
   activeNavLabel,
+  buyLeadsHref,
+  headerNav,
   cityButtonLabel,
   cityLabel,
   headerSearchHref,
@@ -65,12 +69,46 @@ describe('the header', { concurrency: false }, () => {
 
   test('every tab is reachable from its own href', () => {
     // A tab whose own link does not light it is a tab nobody can select.
-    for (const item of HEADER_NAV) {
-      const url = new URL(item.href, 'https://example.invalid');
-      assert.equal(
-        activeNavLabel(url.pathname, url.searchParams),
-        item.label,
-        `${item.label} (${item.href})`);
+    // Both forms of the nav, because Buy leads has two destinations.
+    for (const nav of [headerNav(BUY_LEADS_PUBLIC), headerNav(BUY_LEADS_CONSOLE)]) {
+      for (const item of nav) {
+        const url = new URL(item.href, 'https://example.invalid');
+        assert.equal(
+          activeNavLabel(url.pathname, url.searchParams, nav),
+          item.label,
+          `${item.label} (${item.href})`);
+      }
+    }
+  });
+
+  // ---------------------------------------------------------- Buy leads --
+
+  test('Buy leads goes to the console only for somebody signed in', () => {
+    assert.equal(buyLeadsHref(true), BUY_LEADS_CONSOLE);
+    assert.equal(buyLeadsHref(false), BUY_LEADS_PUBLIC);
+    assert.equal(BUY_LEADS_PUBLIC, '/brokers');
+    assert.equal(BUY_LEADS_CONSOLE, '/seller/leads');
+  });
+
+  test('the signed-out default never points at the console', () => {
+    // /seller/leads is a different shell with no public header, so a tab
+    // pointing there can never be shown as current. This was reported as
+    // "the active state is not visible" and it was exactly right.
+    const buyLeads = HEADER_NAV.find((item) => item.label === 'Buy leads');
+    assert.equal(buyLeads.href, BUY_LEADS_PUBLIC);
+  });
+
+  test('both lead routes light the same tab', () => {
+    for (const path of [
+      '/brokers', '/brokers/anything', '/seller/leads', '/seller/leads/abc-123',
+    ]) {
+      assert.equal(activeNavLabel(path, query()), 'Buy leads', path);
+    }
+  });
+
+  test('a lookalike lead path lights nothing', () => {
+    for (const path of ['/brokersx', '/broker', '/seller/leadsx', '/sellers/leads']) {
+      assert.equal(activeNavLabel(path, query()), null, path);
     }
   });
 

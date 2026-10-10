@@ -168,6 +168,38 @@ try {
   await page.waitForTimeout(250);
   is("shadow goes again at the top", await page.evaluate(() => getComputedStyle(document.querySelector("header")).boxShadow), "none");
 
+  /*
+   * Every tab, followed.
+   *
+   * This is the check that was missing. "Buy leads" pointed at /seller/leads,
+   * which is the Seller console — a different shell, with its own rail and no
+   * public header. The tab's matching was right and its unit test passed, but
+   * following the link left the header behind, so the active state could
+   * never be seen. Reported as "the active state is not visible", correctly.
+   *
+   * So: read the hrefs off the rendered bar, go to each one, and require that
+   * the header is still there and that this tab is the current one. A tab
+   * that leaves the public shell fails here rather than in somebody's hands.
+   */
+  const tabs = await page.$$eval('header nav[aria-label="Main"] a', (links) =>
+    links.map((a) => ({ label: a.textContent.trim(), href: a.getAttribute("href") })));
+  is("the bar draws four tabs", tabs.length, 4);
+  for (const tab of tabs) {
+    await page.goto(`${BASE}${tab.href}`, { waitUntil: "networkidle" });
+    const header = await page.locator('header a[aria-label="Kaam Ki Lead — home"]').count();
+    if (header === 0) {
+      bad(`following "${tab.label}" keeps the header`,
+        `${tab.href} renders no public header, so this tab can never be current`);
+      continue;
+    }
+    ok(`following "${tab.label}" keeps the header`, tab.href);
+    const current = await page.locator('header nav[aria-label="Main"] a[aria-current="page"]').count()
+      ? await page.textContent('header nav[aria-label="Main"] a[aria-current="page"]')
+      : null;
+    is(`and "${tab.label}" is the current tab there`, current, tab.label);
+  }
+  await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+
   // 5. the active tab comes from the route
   is("Home is current on /", await page.textContent('header nav[aria-label="Main"] a[aria-current="page"]'), "Home");
   await page.goto(`${BASE}/search`, { waitUntil: "networkidle" });

@@ -92,6 +92,33 @@ export type HeaderNavItem = {
 const EMPTY_QUERY: QueryLike = { get: () => null };
 
 /**
+ * Where "Buy leads" goes, and why it is two routes.
+ *
+ * `/seller/leads` is the Seller console: its own shell, its own side rail,
+ * its own current-item marking, and no public header. A tab that points
+ * there can never be shown as current, because the header stops existing the
+ * moment it is followed — which is exactly how it was reported.
+ *
+ * `/brokers` is the public "Buy qualified buyer leads" page. It is inside the
+ * public shell, so the tab stays on screen and lights up.
+ *
+ * So the destination depends on who is asking: somebody signed in wants the
+ * lead list, somebody signed out wants the page explaining what a lead is and
+ * how to register. Both count as "Buy leads" for the active state, so the tab
+ * is also correct on the console if the header is ever rendered there.
+ */
+export const BUY_LEADS_PUBLIC = "/brokers";
+export const BUY_LEADS_CONSOLE = "/seller/leads";
+
+/** The destination for the Buy leads tab. */
+export function buyLeadsHref(signedIn: boolean): string {
+  return signedIn ? BUY_LEADS_CONSOLE : BUY_LEADS_PUBLIC;
+}
+
+const under = (pathname: string, route: string) =>
+  pathname === route || pathname.startsWith(`${route}/`);
+
+/**
  * The segmented tabs.
  *
  * These are the routes that exist in this application. "New launches" is the
@@ -100,16 +127,18 @@ const EMPTY_QUERY: QueryLike = { get: () => null };
  * on the first tab, as the design prototype did, marks Home as current on
  * every page in the site.
  */
-export const HEADER_NAV: readonly HeaderNavItem[] = Object.freeze([
+export function headerNav(buyLeads: string = BUY_LEADS_PUBLIC): readonly HeaderNavItem[] {
+  return Object.freeze([
   {
     href: "/",
     label: "Home",
     match: (pathname) => pathname === "/",
   },
   {
-    href: "/seller/leads",
+    href: buyLeads,
     label: "Buy leads",
-    match: (pathname) => pathname === "/seller/leads" || pathname.startsWith("/seller/leads/"),
+    match: (pathname) =>
+      under(pathname, BUY_LEADS_PUBLIC) || under(pathname, BUY_LEADS_CONSOLE),
   },
   {
     href: "/search",
@@ -123,7 +152,11 @@ export const HEADER_NAV: readonly HeaderNavItem[] = Object.freeze([
     label: "New launches",
     match: (pathname, query) => pathname === "/search" && query.get("possession") === "new_launch",
   },
-]);
+  ]);
+}
+
+/** The tabs as a signed-out visitor sees them. */
+export const HEADER_NAV: readonly HeaderNavItem[] = headerNav();
 
 /** The label of the current tab, or null when the route is not one of them. */
 export function activeNavLabel(
