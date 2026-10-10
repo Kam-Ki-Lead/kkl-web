@@ -1,3 +1,4 @@
+import type { FacetGroup } from "@/lib/domain/property-filters";
 import type { StaffRef } from "@/lib/domain/identity";
 import type {
   AdminAccount,
@@ -149,6 +150,22 @@ export interface PropertyService {
   }): Promise<Paged<PropertySummary>>;
   getBySlug(slug: string): Promise<PropertyDetail>;
   countMatching(filters: PropertySearchFilters): Promise<number>;
+  /**
+   * The counts behind the search bar's dropdowns.
+   *
+   * One call rather than one per option, because this runs on every keystroke.
+   * Each group carries the filters with its own dropdown cleared (the `any`
+   * count, and the set its options are counted within) and the filters for
+   * each option. An implementation is expected to answer each group in a
+   * single pass — `COUNT(*) FILTER (WHERE …)` over one scan, not N queries.
+   */
+  facetCounts(input: {
+    total: PropertySearchFilters;
+    groups: readonly FacetGroup[];
+  }): Promise<{
+    total: number;
+    facets: Record<string, Record<string, number>>;
+  }>;
   /** Scores published listings against a buyer requirement. Server-side only. */
   match(requirement: BuyerRequirement): Promise<readonly MatchedProperty[]>;
 }

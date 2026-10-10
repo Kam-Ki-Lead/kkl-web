@@ -357,50 +357,217 @@ export function inBand(value: number, [lo, hi]: Band): boolean {
  * leads belong to an area, not to a listing, and a stored per-listing count
  * would be wrong the moment a lead is sold. See the delivery note.
  */
+/** A lead count for the listing's area, as a scalar subquery. */
+const LEAD_COUNT_SUBQUERY =
+  "(SELECT count(*) FROM leads ld WHERE ld.area_id = l.area_id " +
+  "AND ld.status IN ('listed','on_sale') AND ld.consent_status = 'granted')";
+
+type Placeholder = (value: unknown) => string;
+
+/** `col BETWEEN lo AND hi`, or `col >= lo` when the band is open-ended. */
+function rangeClause(col: string, [lo, hi]: Band, p: Placeholder): string {
+  return hi === null ? `${col} >= ${p(lo)}` : `${col} BETWEEN ${p(lo)} AND ${p(hi)}`;
+}
+
+/**
+ * The WHERE clauses for a filter, every caller value as a placeholder.
+ *
+ * `%`, `_` and the escape character itself are escaped in the LIKE pattern,
+ * so a search for "100%" is a search for the text and not for every row, and
+ * the escape character is declared rather than assumed.
+ */
+function whereClauses(f: ParsedFilters, p: Placeholder, t = "l"): string[] {
+  const where: string[] = [];
+  if (f.location) {
+    const pattern = `%${f.location.replace(/[\\%_]/g, "\\$&")}%`;
+    where.push(`(${t}.locality ILIKE ${p(pattern)} ESCAPE '\\' OR ${t}.name ILIKE ${p(pattern)} ESCAPE '\\')`);
+  }
+  if (f.locality) where.push(`${t}.area_id = ${p(f.locality)}`);
+  if (f.mode) where.push(`${t}.transaction = ${p(MODE_TO_TRANSACTION[f.mode])}`);
+  if (f.bhk) {
+    where.push(f.bhk === "4plus" ? `${t}.bedrooms >= ${p(BHK_PLUS_FROM)}` : `${t}.bedrooms = ${p(Number(f.bhk))}`);
+  }
+  if (f.budget) where.push(rangeClause(`${t}.price`, f.budget, p));
+  if (f.qty) where.push(rangeClause(LEAD_COUNT_SUBQUERY, f.qty, p));
+  return where;
+}
+
+/**
+ * The same filter as a parameterised statement.
+ *
+ * kkl-web's public property search is served by the sample service today —
+ * `services.properties` is the one domain `getServices()` never swaps for a
+ * backend implementation — so nothing in this repository executes SQL. This
+ * exists so that the day kkl-backend serves the search, the query is already
+ * written, already parameterised and already tested against the same filter
+ * object the sample service matches on.
+ *
+ * The lead count is a correlated subquery rather than a denormalised column:
+ * leads belong to an area, not to a listing, and a stored per-listing count
+ * would be wrong the moment a lead in that area is sold.
+ *
+ * Suggested indexes:
+ *   CREATE INDEX ON listings (city, transaction, bedrooms, price);
+ *   CREATE INDEX ON leads (area_id, status, consent_status);
+ */
 export function toSql(
   f: ParsedFilters,
   { limit = PAGE_SIZE_DEFAULT, offset = 0, city = "Kolkata" } = {},
 ): { text: string; values: unknown[] } {
   const values: unknown[] = [city];
-  const where: string[] = ["l.city = $1"];
-  const p = (value: unknown) => {
+  const p: Placeholder = (value) => {
     values.push(value);
     return `$${values.length}`;
   };
-
-  // `%`, `_` and the escape character itself are escaped, so a search for
-  // "100%" is a search for the text and not for every row.
-  if (f.location) {
-    const pattern = `%${f.location.replace(/[\\%_]/g, "\\$&")}%`;
-    where.push(`(l.locality ILIKE ${p(pattern)} ESCAPE '\\' OR l.name ILIKE ${p(pattern)} ESCAPE '\\')`);
-  }
-  if (f.locality) where.push(`l.area_id = ${p(f.locality)}`);
-  if (f.mode) where.push(`l.transaction = ${p(MODE_TO_TRANSACTION[f.mode])}`);
-  if (f.bhk) {
-    where.push(
-      f.bhk === "4plus" ? `l.bedrooms >= ${p(BHK_PLUS_FROM)}` : `l.bedrooms = ${p(Number(f.bhk))}`,
-    );
-  }
-  if (f.budget) {
-    where.push(`l.price >= ${p(f.budget[0])}`);
-    if (f.budget[1] !== null) where.push(`l.price <= ${p(f.budget[1])}`);
-  }
-  if (f.qty) {
-    const count =
-      "(SELECT count(*) FROM leads ld WHERE ld.area_id = l.area_id " +
-      "AND ld.status IN ('listed','on_sale') AND ld.consent_status = 'granted')";
-    where.push(`${count} >= ${p(f.qty[0])}`);
-    if (f.qty[1] !== null) where.push(`${count} <= ${p(f.qty[1])}`);
-  }
-
-  // Suggested index: CREATE INDEX ON listings (city, transaction, bedrooms, price);
-  // and on leads (area_id, status, consent_status) for the subquery.
+  const where = ["l.city = $1", ...whereClauses(f, p)];
   const limitAt = p(limit);
   const offsetAt = p(offset);
   return {
     text:
       "SELECT l.id, l.name, l.locality, l.transaction, l.bedrooms, l.price " +
       `FROM listings l WHERE ${where.join(" AND ")} ORDER BY l.id LIMIT ${limitAt} OFFSET ${offsetAt}`,
+    values,
+  };
+}
+
+/* ----------------------------------------------------------------- facets -- */
+
+/**
+ * The dropdowns that carry result counts, and what each one offers.
+ *
+ * The same list drives the control, the endpoint and the tests, so a count
+ * can never be requested for an option the parser would refuse.
+ */
+export const FACET_KEYS = Object.freeze(["mode", "bhk", "budget", "qty"] as const);
+export type FacetKey = (typeof FACET_KEYS)[number];
+
+export const FACET_OPTIONS: Readonly<Record<FacetKey, readonly string[]>> = Object.freeze({
+  mode: MODE_VALUES,
+  bhk: BHK_VALUES,
+  budget: Object.freeze(Object.keys(BUDGET)),
+  qty: Object.freeze(Object.keys(QTY)),
+});
+
+/**
+ * One dropdown's counting job.
+ *
+ * `base` is every OTHER active filter — the count for its "any" row, and the
+ * set each option is counted within. This is the rule that makes the numbers
+ * useful: with Rent chosen, the BHK counts are counts of rent listings, but
+ * the Buy/Rent counts still show both, because that dropdown's own filter is
+ * the one being varied.
+ */
+export type FacetGroup = {
+  readonly key: FacetKey;
+  readonly base: PropertySearchFilters;
+  readonly options: ReadonlyArray<{ readonly key: string; readonly filters: PropertySearchFilters }>;
+};
+
+/** The parsed filter with one dropdown cleared. */
+export function withoutFacet(f: ParsedFilters, facet: FacetKey): ParsedFilters {
+  const next: Record<string, unknown> = { ...f };
+  delete next[facet];
+  return next as ParsedFilters;
+}
+
+/** The parsed filter with one dropdown set to one of its options. */
+export function withFacetOption(f: ParsedFilters, facet: FacetKey, key: string): ParsedFilters {
+  const base = withoutFacet(f, facet);
+  switch (facet) {
+    case "mode":
+      return { ...base, mode: key as "buy" | "rent" };
+    case "bhk":
+      return { ...base, bhk: key as (typeof BHK_VALUES)[number] };
+    case "budget":
+      return { ...base, budget: BUDGET[key] };
+    case "qty":
+      return { ...base, qty: QTY[key] };
+    default:
+      return base;
+  }
+}
+
+/**
+ * Everything the facets endpoint needs to count, as service-level filters.
+ *
+ * Built here rather than in the route so the counting rule is stated once and
+ * tested without a service. The service's job is only to execute it — in one
+ * pass per group, which is the shape `COUNT(*) FILTER (WHERE …)` takes.
+ */
+export function facetGroups(f: ParsedFilters): readonly FacetGroup[] {
+  return FACET_KEYS.map((key) => ({
+    key,
+    base: toPropertySearchFilters(withoutFacet(f, key)),
+    options: FACET_OPTIONS[key].map((option) => ({
+      key: option,
+      filters: toPropertySearchFilters(withFacetOption(f, key, option)),
+    })),
+  }));
+}
+
+/** The counts for one dropdown: `any`, then one per option. */
+export type FacetCounts = Record<string, number | null>;
+
+/**
+ * The response shape, assembled from what the service counted.
+ *
+ * `qty.custom` is null rather than 0: a custom range has no preset to count,
+ * and 0 would read as "no results", dimming a row that is perfectly usable.
+ */
+export function facetResponse(
+  counts: Record<string, FacetCounts>,
+): Record<FacetKey, FacetCounts> {
+  const out = {} as Record<FacetKey, FacetCounts>;
+  for (const key of FACET_KEYS) out[key] = { ...(counts[key] ?? {}) };
+  if (out.qty) out.qty.custom = null;
+  return out;
+}
+
+/**
+ * The faceted counts as one statement per dropdown.
+ *
+ * Not executed here — see the note on `toSql`. It is the shape the user's
+ * brief asks for, and it is written so that the day kkl-backend serves this,
+ * every option's count comes from one pass over the index rather than from
+ * one query per option.
+ */
+export function facetSql(f: ParsedFilters, facet: FacetKey, { city = "Kolkata" } = {}): {
+  text: string;
+  values: unknown[];
+} {
+  const others = withoutFacet(f, facet);
+  const values: unknown[] = [city];
+  const p = (value: unknown) => {
+    values.push(value);
+    return `$${values.length}`;
+  };
+
+  const clause = (key: FacetKey, option: string): string => {
+    switch (key) {
+      case "mode":
+        return `l.transaction = ${p(MODE_TO_TRANSACTION[option])}`;
+      case "bhk":
+        return option === "4plus" ? `l.bedrooms >= ${p(BHK_PLUS_FROM)}` : `l.bedrooms = ${p(Number(option))}`;
+      case "budget": {
+        const band = BUDGET[option];
+        return band ? rangeClause("l.price", band, p) : "FALSE";
+      }
+      case "qty": {
+        const band = QTY[option];
+        return band ? rangeClause(LEAD_COUNT_SUBQUERY, band, p) : "FALSE";
+      }
+      default:
+        return "TRUE";
+    }
+  };
+
+  const where = whereClauses(others, p, "l");
+  const columns = [
+    'COUNT(*) AS "any"',
+    ...FACET_OPTIONS[facet].map((option) => `COUNT(*) FILTER (WHERE ${clause(facet, option)}) AS "${option}"`),
+  ];
+  return {
+    text: `SELECT ${columns.join(", ")} FROM listings l WHERE ${["l.city = $1", ...where].join(" AND ")}`,
     values,
   };
 }

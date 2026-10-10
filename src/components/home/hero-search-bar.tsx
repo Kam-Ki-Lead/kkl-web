@@ -3,32 +3,40 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
 import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
+import { ResultCountDropdown, type DropdownOption } from "./result-count-dropdown";
 import {
   BHK_OPTIONS,
   BUDGET_LABELS,
+  FACET_KEYS,
   MODE_OPTIONS,
   QTY_CUSTOM,
   QTY_OPTIONS,
+  type FacetKey,
 } from "@/lib/domain/property-filters";
 
 /**
  * The hero's search bar — one rounded "glass pill" over the banner.
  *
- * WHAT THE SHAPE IS FOR
+ * FIVE FIELDS, ONE WIDTH
  *
- * Five fields separated by hairlines, then the Search button. It replaces a
- * four-field card, and the thing that actually changed is not the radius: the
- * count on the button is now fetched over HTTP and stale requests are
- * cancelled, so the number cannot be overwritten by a slower earlier one.
+ * Every field is `flex: 1 1 0; min-width: 0`. Location used to be wider,
+ * which left a gap between it and Buy-or-rent that read as a mistake rather
+ * than as emphasis. No field is special now.
  *
  * THE RULE THIS CARD KEEPS BREAKING
  *
  * Every control drawn here reaches a filter. The card once carried a "Search
- * type" box that looked like a control and filtered nothing, and the lesson
- * is written up in `property-search-query.ts`. The five fields below map onto
- * exactly the five parameters `property-filters.ts` accepts, and that module
- * is what both endpoints parse with — so a field cannot be added here without
+ * type" box that looked like a control and filtered nothing; the lesson is
+ * written up in `property-search-query.ts`. The five fields map onto exactly
+ * the parameters `property-filters.ts` accepts, and that module is what both
+ * the bar and the endpoints read — so a field cannot be added here without
  * the server understanding it.
+ *
+ * COUNTS
+ *
+ * One debounced request to /api/properties/facets feeds the Search button's
+ * number and the pill beside every option of every dropdown. Stale requests
+ * are aborted, so a slow early keystroke cannot overwrite a fast late one.
  *
  * QUANTITY OF LEADS IS NOT A PROPERTY'S PROPERTY
  *
@@ -37,7 +45,6 @@ import {
  * does — see the note on `minLeadsAvailable` in types.ts.
  */
 
-/** The bar's five fields, in order. Must match FILTER_PARAMS' spirit. */
 const BUDGET_OPTIONS: ReadonlyArray<{ value: string; label: string }> = Object.freeze([
   { value: "", label: "Any budget" },
   ...Object.entries(BUDGET_LABELS).map(([value, label]) => ({ value, label })),
@@ -58,12 +65,9 @@ type Draft = {
 
 const EMPTY: Draft = { locality: "", mode: "", bhk: "", budget: "", qty: "", qtyMin: "", qtyMax: "" };
 
-/**
- * The query a draft means.
- *
- * Only fields with a value appear — an "any" option sends no parameter at
- * all, so a default search is `/search` and not `/search?mode=&bhk=`.
- */
+type Facets = Record<string, Record<string, number | null>>;
+
+/** The query a draft means. An "any" option sends no parameter at all. */
 function toQuery(draft: Draft): URLSearchParams {
   const query = new URLSearchParams();
   if (draft.locality) query.set("locality", draft.locality);
@@ -83,17 +87,29 @@ function toQuery(draft: Draft): URLSearchParams {
 /**
  * The custom range's error, or "".
  *
- * Deliberately the same three rules the server applies, in the same order, so
- * the inline message and the 400 can never say different things.
+ * The same three rules the server applies, in the same order, so the inline
+ * message and the 400 can never say different things. `settled` is false
+ * while somebody is still typing: an empty pair is incomplete, not wrong, and
+ * shouting at a field nobody has filled in yet is the wrong moment.
  */
-export function customRangeError(draft: Draft): string {
+export function customRangeError(draft: Draft, settled = true): string {
   if (draft.qty !== QTY_CUSTOM) return "";
   const min = draft.qtyMin.trim();
   const max = draft.qtyMax.trim();
-  if (!min && !max) return "Enter a min, a max, or both.";
   if ((min && !WHOLE.test(min)) || (max && !WHOLE.test(max))) return "Use whole numbers only.";
   if (min && max && Number(min) > Number(max)) return "Min cannot be more than max.";
+  if (!min && !max) return settled ? "Enter a min, a max, or both." : "";
   return "";
+}
+
+/** What the trigger shows once a custom range is applied. */
+export function customRangeLabel(min: string, max: string): string {
+  const a = min.trim();
+  const b = max.trim();
+  if (a && b) return `${a}–${b}`;
+  if (a) return `${a}+`;
+  if (b) return `Up to ${b}`;
+  return "Custom range…";
 }
 
 export function HeroSearchBar({
@@ -110,52 +126,67 @@ export function HeroSearchBar({
 
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [count, setCount] = useState<number | null>(initialCount);
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [facets, setFacets] = useState<Facets | null>(null);
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const minRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const error = customRangeError(draft);
+  const liveError = customRangeError(draft, false);
+  const shownError = customRangeError(draft, showErrors);
   const set = useCallback(
     (patch: Partial<Draft>) => setDraft((previous) => ({ ...previous, ...patch })),
     [],
   );
 
-  /* -- the live count ----------------------------------------------------
-     Debounced, and every in-flight request is aborted when the next one
-     starts. Without that, a slow early keystroke can land after a fast late
-     one and leave the wrong number on the button. */
+  /* -- one request for the button and every pill -------------------------- */
   const key = toQuery(draft).toString();
   useEffect(() => {
-    if (error) return undefined;
+    if (liveError) return undefined;
     const timer = setTimeout(() => {
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
-      fetch(`/api/properties/count?${key}`, { signal: controller.signal })
+      fetch(`/api/properties/facets?${key}`, { signal: controller.signal })
         .then((response) => {
           if (!response.ok) throw new Error(String(response.status));
           return response.json();
         })
-        .then((body: { count?: unknown }) => {
-          if (typeof body.count === "number") setCount(body.count);
+        .then((body: { total?: unknown; facets?: unknown }) => {
+          if (typeof body.total === "number") setCount(body.total);
+          if (body.facets && typeof body.facets === "object") setFacets(body.facets as Facets);
         })
         .catch((cause: unknown) => {
           // An abort is this component replacing its own request, not a
-          // failure. Anything else drops the number rather than showing a
-          // stale one, and the button still works.
+          // failure. Anything else hides the pills and the number rather
+          // than showing stale ones; the form keeps working.
           if (cause instanceof DOMException && cause.name === "AbortError") return;
           setCount(null);
+          setFacets(null);
         });
     }, 250);
     return () => clearTimeout(timer);
-  }, [key, error]);
+  }, [key, liveError]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
+  const countsFor = (facet: FacetKey) => (facets ? (facets[facet] ?? null) : null);
+
+  function applyRange() {
+    setShowErrors(true);
+    if (customRangeError(draft, true)) {
+      minRef.current?.focus();
+      return;
+    }
+    setRangeOpen(false);
+  }
+
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (error) {
+    setShowErrors(true);
+    if (customRangeError(draft, true)) {
+      setRangeOpen(true);
       minRef.current?.focus();
       return;
     }
@@ -163,8 +194,11 @@ export function HeroSearchBar({
     startTransition(() => router.push(query ? `/search?${query}` : "/search"));
   }
 
-  const popoverId = `${base}-qty-pop`;
   const errorId = `${base}-qty-err`;
+  const qtyOptions: readonly DropdownOption[] = QTY_OPTIONS.map((option) => ({
+    ...option,
+    separated: option.value === QTY_CUSTOM,
+  }));
 
   return (
     <form
@@ -183,132 +217,151 @@ export function HeroSearchBar({
         "max-[980px]:flex-col max-[980px]:rounded-[22px] max-[980px]:p-[10px]",
       ].join(" ")}
     >
-      {/*
-        The picker brings its own bordered control, which is right everywhere
-        else and wrong inside a pill where four fields next to it have no box
-        at all. Restyled from here rather than in the component: the filter row
-        and the posting forms still want the border.
-      */}
-      <Field
-        className={[
-          "flex-[1.3]",
-          "[&_input]:h-[28px] [&_input]:min-h-0 [&_input]:rounded-none [&_input]:border-0",
-          "[&_input]:bg-transparent [&_input]:px-0 [&_input]:font-medium [&_input]:text-muted",
-          "[&_select]:min-h-0 [&_select]:border-0 [&_select]:bg-transparent [&_select]:px-0",
-          "max-[980px]:[&_input]:h-[44px]",
-        ].join(" ")}
-        label="Location"
-        htmlFor={`${base}-locality`}
-      >
-        <AreaPicker
-          id={`${base}-locality`}
-          name="locality"
-          areas={areas}
-          value={draft.locality}
-          allLabel="All of Kolkata"
-          onSelect={(locality) => set({ locality })}
+      <Field last={false}>
+        <label htmlFor={`${base}-locality`} className="text-[12px] font-bold text-ink">
+          Location
+        </label>
+        {/*
+          The picker brings its own bordered control, which is right everywhere
+          else and wrong inside a pill where four fields next to it have no box
+          at all. Restyled from here rather than in the component: the filter
+          row and the posting forms still want the border. The brand ring on
+          focus is the same one the dropdown triggers use.
+        */}
+        <div
+          className={[
+            "[&_input]:-mx-[8px] [&_input]:h-[32px] [&_input]:w-[calc(100%+16px)] [&_input]:min-h-0",
+            "[&_input]:rounded-[10px] [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-[8px]",
+            "[&_input]:font-medium [&_input]:text-muted [&_input]:outline-none",
+            "[&_input:focus-visible]:bg-brand/[0.07]",
+            "[&_input:focus-visible]:shadow-[0_0_0_2px_var(--color-brand),0_0_0_5px_rgba(120,65,155,0.2)]",
+            "[&_select]:min-h-0 [&_select]:border-0 [&_select]:bg-transparent [&_select]:px-0",
+            "max-[980px]:[&_input]:h-[44px]",
+          ].join(" ")}
+        >
+          <AreaPicker
+            id={`${base}-locality`}
+            name="locality"
+            areas={areas}
+            value={draft.locality}
+            allLabel="All of Kolkata"
+            onSelect={(locality) => set({ locality })}
+          />
+        </div>
+      </Field>
+
+      <Field last={false}>
+        <ResultCountDropdown
+          name="mode"
+          label="Buy or rent"
+          value={draft.mode}
+          options={MODE_OPTIONS}
+          counts={countsFor("mode")}
+          onChange={(mode) => set({ mode })}
         />
       </Field>
 
-      <Select
-        id={`${base}-mode`}
-        name="mode"
-        label="Buy or rent"
-        value={draft.mode}
-        options={MODE_OPTIONS}
-        onChange={(mode) => set({ mode })}
-      />
-      <Select
-        id={`${base}-bhk`}
-        name="bhk"
-        label="BHK"
-        value={draft.bhk}
-        options={BHK_OPTIONS}
-        onChange={(bhk) => set({ bhk })}
-      />
-      <Select
-        id={`${base}-budget`}
-        name="budget"
-        label="Budget"
-        value={draft.budget}
-        options={BUDGET_OPTIONS}
-        onChange={(budget) => set({ budget })}
-      />
+      <Field last={false}>
+        <ResultCountDropdown
+          name="bhk"
+          label="BHK"
+          value={draft.bhk}
+          options={BHK_OPTIONS}
+          counts={countsFor("bhk")}
+          onChange={(bhk) => set({ bhk })}
+        />
+      </Field>
 
-      <Field label="Quantity of leads" htmlFor={`${base}-qty`} last>
-        <select
-          id={`${base}-qty`}
+      <Field last={false}>
+        <ResultCountDropdown
+          name="budget"
+          label="Budget"
+          value={draft.budget}
+          options={BUDGET_OPTIONS}
+          counts={countsFor("budget")}
+          onChange={(budget) => set({ budget })}
+        />
+      </Field>
+
+      <Field last>
+        <ResultCountDropdown
           name="qty"
+          label="Quantity of leads"
           value={draft.qty}
-          aria-controls={popoverOpen ? popoverId : undefined}
-          aria-expanded={draft.qty === QTY_CUSTOM ? popoverOpen : undefined}
-          onChange={(event) => {
-            const qty = event.target.value;
+          options={qtyOptions}
+          counts={countsFor("qty")}
+          alignEnd
+          displayOverride={
+            draft.qty === QTY_CUSTOM ? customRangeLabel(draft.qtyMin, draft.qtyMax) : undefined
+          }
+          onChange={(qty) => {
             set({ qty });
             const custom = qty === QTY_CUSTOM;
-            setPopoverOpen(custom);
-            // Focus moves to Min only once the popover is actually there.
+            setRangeOpen(custom);
+            setShowErrors(false);
             if (custom) requestAnimationFrame(() => minRef.current?.focus());
           }}
-          className={CONTROL}
         >
-          {QTY_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-
-        {draft.qty === QTY_CUSTOM && popoverOpen ? (
-          <div
-            id={popoverId}
-            role="group"
-            aria-label="Custom lead quantity"
-            /* Upward on desktop so it never falls off the bottom of the
-               banner; in flow on a phone, where an anchored popover would
-               be pinned over the field it belongs to. */
-            className={[
-              "absolute right-0 bottom-[calc(100%+14px)] z-20 w-[300px] rounded-[16px]",
-              "border border-line bg-white p-[14px] shadow-[0_14px_40px_rgba(20,10,50,0.3)]",
-              "max-[980px]:static max-[980px]:mt-[10px] max-[980px]:w-auto max-[980px]:shadow-none",
-            ].join(" ")}
-          >
-            <div className="flex gap-[10px]">
-              <NumberField
-                id={`${base}-qty-min`}
-                name="qtyMin"
-                label="Min"
-                placeholder="0"
-                value={draft.qtyMin}
-                invalid={Boolean(error)}
-                describedBy={errorId}
-                inputRef={minRef}
-                onChange={(qtyMin) => set({ qtyMin })}
-              />
-              <NumberField
-                id={`${base}-qty-max`}
-                name="qtyMax"
-                label="Max"
-                placeholder="No limit"
-                value={draft.qtyMax}
-                invalid={Boolean(error)}
-                describedBy={errorId}
-                onChange={(qtyMax) => set({ qtyMax })}
-              />
+          {draft.qty === QTY_CUSTOM && rangeOpen ? (
+            <div
+              role="group"
+              aria-label="Custom lead quantity"
+              onKeyDown={(event) => {
+                if (event.key !== "Escape") return;
+                event.stopPropagation();
+                setRangeOpen(false);
+              }}
+              className={[
+                "absolute right-0 bottom-[calc(100%+14px)] z-30 w-[300px] rounded-[16px]",
+                "border border-line bg-white p-[14px] shadow-[0_14px_40px_rgba(20,10,50,0.3)]",
+                "max-[980px]:static max-[980px]:mt-[10px] max-[980px]:w-auto max-[980px]:shadow-none",
+              ].join(" ")}
+            >
+              <div className="flex gap-[10px]">
+                <NumberField
+                  id={`${base}-qty-min`}
+                  name="qtyMin"
+                  label="Min"
+                  placeholder="0"
+                  value={draft.qtyMin}
+                  invalid={Boolean(shownError)}
+                  describedBy={errorId}
+                  inputRef={minRef}
+                  onChange={(qtyMin) => set({ qtyMin })}
+                />
+                <NumberField
+                  id={`${base}-qty-max`}
+                  name="qtyMax"
+                  label="Max"
+                  placeholder="No limit"
+                  value={draft.qtyMax}
+                  invalid={Boolean(shownError)}
+                  describedBy={errorId}
+                  onChange={(qtyMax) => set({ qtyMax })}
+                />
+              </div>
+              <p id={errorId} aria-live="polite" className="mt-[8px] min-h-[1.2em] text-[12px] text-danger">
+                {shownError}
+              </p>
+              <button
+                type="button"
+                onClick={applyRange}
+                className="h-[40px] w-full rounded-[10px] bg-brand text-[15px] font-bold text-white hover:bg-brand-deep"
+              >
+                Apply
+              </button>
             </div>
-            <p id={errorId} aria-live="polite" className="mt-[8px] min-h-[1.2em] text-[12px] text-danger">
-              {error}
-            </p>
-          </div>
-        ) : null}
+          ) : null}
+        </ResultCountDropdown>
       </Field>
 
       <button
         type="submit"
         className={[
-          "ml-[8px] flex flex-none items-center gap-[8px] rounded-[999px] bg-brand px-[26px]",
-          "text-[15px] font-bold text-white hover:bg-brand-deep",
-          "max-[980px]:ml-0 max-[980px]:mt-[10px] max-[980px]:h-[50px] max-[980px]:justify-center max-[980px]:rounded-[14px]",
+          "ml-[8px] flex min-w-[170px] flex-none items-center justify-center gap-[8px] rounded-[999px]",
+          "bg-brand px-[34px] text-[15px] font-bold text-white hover:bg-brand-deep",
+          "max-[1100px]:min-w-[150px] max-[1100px]:px-[26px]",
+          "max-[980px]:ml-0 max-[980px]:mt-[10px] max-[980px]:h-[50px] max-[980px]:w-full max-[980px]:rounded-[14px]",
         ].join(" ")}
       >
         <svg
@@ -338,73 +391,26 @@ export function HeroSearchBar({
 
 /* --------------------------------------------------------------- the parts -- */
 
-/** 44px on touch widths, which is the floor a finger needs. */
-const CONTROL =
-  "h-[28px] w-full cursor-pointer border-0 bg-transparent p-0 text-[15px] font-medium text-muted " +
-  "focus:outline-none max-[980px]:h-[44px]";
-
-function Field({
-  label,
-  htmlFor,
-  children,
-  className = "",
-  last = false,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-  className?: string;
-  last?: boolean;
-}) {
+/**
+ * One slot in the bar.
+ *
+ * `flex-1 basis-0 min-w-0` on every one of them, with no first-child rule, is
+ * what makes the five equal. `min-w-0` is what lets a long value ellipsis
+ * instead of pushing its neighbours out of the bar.
+ */
+function Field({ children, last }: { children: React.ReactNode; last: boolean }) {
   return (
     <div
       className={[
-        "relative flex min-w-0 flex-1 flex-col gap-[2px] px-[18px] py-[8px]",
+        "relative flex min-w-0 flex-1 basis-0 flex-col gap-[2px] px-[18px] py-[8px]",
         last ? "" : "border-r border-line",
         "max-[1100px]:px-[12px]",
-        "max-[980px]:flex-none max-[980px]:border-r-0 max-[980px]:border-b max-[980px]:border-line max-[980px]:px-[12px] max-[980px]:py-[10px]",
-        className,
+        "max-[980px]:flex-none max-[980px]:border-r-0 max-[980px]:border-b max-[980px]:border-line",
+        "max-[980px]:px-[12px] max-[980px]:py-[10px]",
       ].join(" ")}
     >
-      <label htmlFor={htmlFor} className="text-[12px] font-bold text-ink">
-        {label}
-      </label>
       {children}
     </div>
-  );
-}
-
-function Select({
-  id,
-  name,
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  id: string;
-  name: string;
-  label: string;
-  value: string;
-  options: ReadonlyArray<{ value: string; label: string }>;
-  onChange: (next: string) => void;
-}) {
-  return (
-    <Field label={label} htmlFor={id}>
-      <select
-        id={id}
-        name={name}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={CONTROL}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </Field>
   );
 }
 
@@ -445,10 +451,13 @@ function NumberField({
         aria-describedby={describedBy}
         onChange={(event) => onChange(event.target.value)}
         className={[
-          "h-[44px] rounded-[10px] border bg-white px-[10px] text-[15px] font-medium text-ink",
+          "h-[42px] rounded-[10px] border bg-white px-[10px] text-[15px] font-medium text-ink",
           invalid ? "border-danger" : "border-line",
         ].join(" ")}
       />
     </label>
   );
 }
+
+/** Exported for the tests: the dropdowns the bar draws, in order. */
+export const BAR_FACETS: readonly FacetKey[] = FACET_KEYS;

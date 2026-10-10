@@ -219,6 +219,28 @@ const propertyService: PropertyService = {
   },
 
   /**
+   * Every dropdown's counts, one pass per dropdown.
+   *
+   * The published set is filtered once per group by that group's base — the
+   * other active filters — and every option of that group is then counted
+   * within that subset. That is the in-memory shape of
+   * `COUNT(*) FILTER (WHERE …)`: one scan per group, not one per option.
+   */
+  async facetCounts({ total, groups }) {
+    const published = live();
+    const facets: Record<string, Record<string, number>> = {};
+    for (const group of groups) {
+      const base = published.filter((p) => matches(p, group.base));
+      const counts: Record<string, number> = { any: base.length };
+      for (const option of group.options) {
+        counts[option.key] = base.filter((p) => matches(p, option.filters)).length;
+      }
+      facets[group.key] = counts;
+    }
+    return { total: published.filter((p) => matches(p, total)).length, facets };
+  },
+
+  /**
    * Locality and configuration are hard requirements; budget and timing move a
    * project up or down. The score is computed here, in the service, because the
    * real one will be computed by kkl-backend — never in the browser.

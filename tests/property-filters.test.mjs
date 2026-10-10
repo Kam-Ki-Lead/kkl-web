@@ -12,6 +12,11 @@ import {
   QTY_OPTIONS,
   QTY_STEP,
   inBand,
+  FACET_KEYS,
+  FACET_OPTIONS,
+  facetGroups,
+  facetResponse,
+  facetSql,
   parseFilters,
   parsePaging,
   qtyLabel,
@@ -309,16 +314,171 @@ describe('the property filter', { concurrency: false }, () => {
     assert.equal(new Set(placeholders).size <= values.length, true);
   });
 
-  test('an open-ended band adds no upper bound to the statement', () => {
-    const open = toSql(parseFilters(q({ qty: '2000plus' })));
+  test('a closed band is BETWEEN, an open one has no upper bound', () => {
+    // BETWEEN is inclusive at both ends, which is the rule everywhere here.
     const closed = toSql(parseFilters(q({ qty: '500-1000' })));
-    assert.equal((open.text.match(/<=/g) ?? []).length, 0);
-    assert.equal((closed.text.match(/<=/g) ?? []).length, 1);
+    assert.match(closed.text, /BETWEEN \$\d+ AND \$\d+/);
+    assert.ok(closed.values.includes(500) && closed.values.includes(1000));
+
+    const open = toSql(parseFilters(q({ qty: '2000plus' })));
+    assert.equal(open.text.includes('BETWEEN'), false);
+    assert.match(open.text, />= \$\d+/);
+    assert.ok(open.values.includes(2000));
   });
 
   test('the city stays fixed and parameterised', () => {
     const { text, values } = toSql(parseFilters(q({})));
     assert.match(text, /l\.city = \$1/);
     assert.equal(values[0], 'Kolkata');
+  });
+});
+
+/**
+ * The faceted counts.
+ *
+ * The rule under test is the one that makes the pills useful rather than
+ * confusing: a dropdown's own filter is removed before its options are
+ * counted, and every other filter stays. Without it, choosing Rent would make
+ * the Buy row read 0 and the control would look broken.
+ *
+ * These run against a small in-memory set rather than the sample service, so
+ * the arithmetic is checkable by eye. The matcher below is the reference's
+ * `matches`, which is the semantics the sample service implements.
+ */
+
+const ROWS = [
+  { name: 'Ivy Court', locality: 'Action Area I', mode: 'buy', bhk: 3, price: 10_500_000, leads: 120 },
+  { name: 'Salt Lake Heights', locality: 'Salt Lake', mode: 'buy', bhk: 3, price: 16_000_000, leads: 380 },
+  { name: 'Rajarhat Greens', locality: 'Rajarhat', mode: 'buy', bhk: 2, price: 6_200_000, leads: 450 },
+  { name: 'New Town Skyline', locality: 'New Town', mode: 'rent', bhk: 3, price: 45_000, leads: 520 },
+  { name: 'Ballygunge Place', locality: 'Ballygunge', mode: 'buy', bhk: 4, price: 32_000_000, leads: 760 },
+  { name: 'EM Bypass Towers', locality: 'EM Bypass', mode: 'buy', bhk: 2, price: 8_900_000, leads: 1100 },
+  { name: 'Garia Residency', locality: 'Garia', mode: 'rent', bhk: 1, price: 18_000, leads: 1650 },
+  { name: 'Tollygunge Park', locality: 'Tollygunge', mode: 'buy', bhk: 3, price: 12_400_000, leads: 2300 },
+];
+
+/** The service-level filter, applied to one row. Mirrors the sample service. */
+const hits = (row, f) => {
+  if (f.text && !`${row.locality} ${row.name}`.toLowerCase().includes(f.text.toLowerCase())) return false;
+  if (f.transaction && (f.transaction === 'sale' ? row.mode !== 'buy' : row.mode !== 'rent')) return false;
+  if (f.configurations && !f.configurations.includes(String(row.bhk))) return false;
+  if (f.minBedrooms !== undefined && row.bhk < f.minBedrooms) return false;
+  if (f.minBudgetInr !== undefined && row.price < f.minBudgetInr) return false;
+  if (f.maxBudgetInr !== undefined && row.price > f.maxBudgetInr) return false;
+  if (f.minLeadsAvailable !== undefined && row.leads < f.minLeadsAvailable) return false;
+  if (f.maxLeadsAvailable !== undefined && row.leads > f.maxLeadsAvailable) return false;
+  return true;
+};
+
+/** What the service would answer for a parsed query. */
+const countFacets = (parsed) => {
+  const out = {};
+  for (const group of facetGroups(parsed)) {
+    const base = ROWS.filter((r) => hits(r, group.base));
+    out[group.key] = { any: base.length };
+    for (const option of group.options) {
+      out[group.key][option.key] = base.filter((r) => hits(r, option.filters)).length;
+    }
+  }
+  return {
+    total: ROWS.filter((r) => hits(r, toPropertySearchFilters(parsed))).length,
+    facets: facetResponse(out),
+  };
+};
+
+describe('the faceted counts', { concurrency: false }, () => {
+  test('with no filters, every option counts the whole set', () => {
+    const { total, facets } = countFacets(parseFilters(q({})));
+    assert.equal(total, 8);
+    assert.equal(facets.mode.any, 8);
+    assert.equal(facets.mode.buy, 6);
+    assert.equal(facets.mode.rent, 2);
+    assert.equal(facets.bhk['1'], 1);
+    assert.equal(facets.bhk['2'], 2);
+    assert.equal(facets.bhk['3'], 4);
+    assert.equal(facets.bhk['4plus'], 1);
+    assert.equal(facets.budget.u50l, 2, 'the two cheapest; ₹62L sits in the band above');
+    assert.equal(facets.budget['50l-1cr'], 2);
+    assert.equal(facets.budget['1cr-2cr'], 3);
+    assert.equal(facets.budget['2crplus'], 1);
+    assert.equal(facets.qty['0-500'], 3, '120, 380, 450');
+    assert.equal(facets.qty['2000plus'], 1);
+  });
+
+  test("a dropdown's own filter does not constrain its own counts", () => {
+    // The rule, stated as the brief states it: with mode=rent chosen, the BHK
+    // counts are counts of rent listings, but Buy/Rent still shows both.
+    const { total, facets } = countFacets(parseFilters(q({ mode: 'rent' })));
+    assert.equal(total, 2);
+    assert.equal(facets.mode.buy, 6, 'Buy still shows what Buy would return');
+    assert.equal(facets.mode.rent, 2);
+    assert.equal(facets.mode.any, 8, 'and "any" is the count with mode cleared');
+
+    assert.equal(facets.bhk.any, 2, 'the other dropdowns are inside the rent set');
+    assert.equal(facets.bhk['1'], 1);
+    assert.equal(facets.bhk['3'], 1);
+    assert.equal(facets.bhk['2'], 0);
+    assert.equal(facets.bhk['4plus'], 0);
+  });
+
+  test('a custom quantity range constrains the other dropdowns', () => {
+    const { total, facets } = countFacets(parseFilters(q({ qty: 'custom', qtyMin: '400', qtyMax: '800' })));
+    // 450, 520, 760
+    assert.equal(total, 3);
+    assert.equal(facets.mode.buy, 2, 'Rajarhat Greens and Ballygunge Place');
+    assert.equal(facets.mode.rent, 1, 'New Town Skyline');
+    assert.equal(facets.qty.any, 8, 'qty is cleared for its own counts');
+    assert.equal(facets.qty['0-500'], 3, 'so its presets count the whole set');
+    assert.equal(facets.qty.custom, null, 'a custom range has no preset count');
+  });
+
+  test('a location filter constrains every dropdown', () => {
+    const { total, facets } = countFacets(parseFilters(q({ location: 'Salt Lake' })));
+    assert.equal(total, 1);
+    assert.equal(facets.mode.any, 1);
+    assert.equal(facets.mode.buy, 1);
+    assert.equal(facets.mode.rent, 0, 'a zero is a real answer, not a missing one');
+    assert.equal(facets.bhk['3'], 1);
+    assert.equal(facets.bhk['2'], 0);
+    assert.equal(facets.budget['1cr-2cr'], 1);
+    assert.equal(facets.qty['0-500'], 1);
+  });
+
+  test('two filters compose, and each dropdown drops only its own', () => {
+    const { total, facets } = countFacets(parseFilters(q({ mode: 'buy', bhk: '3' })));
+    assert.equal(total, 3, 'Ivy Court, Salt Lake Heights, Tollygunge Park');
+    assert.equal(facets.mode.rent, 1, 'rent + 3 BHK is New Town Skyline');
+    assert.equal(facets.bhk.any, 6, 'bhk cleared leaves every buy listing');
+    assert.equal(facets.bhk['4plus'], 1);
+    assert.equal(facets.budget.any, 3, 'budget sees both other filters');
+  });
+
+  test('every facet the bar draws is one the response carries', () => {
+    const { facets } = countFacets(parseFilters(q({})));
+    assert.deepEqual(Object.keys(facets), [...FACET_KEYS]);
+    for (const key of FACET_KEYS) {
+      assert.equal(typeof facets[key].any, 'number', `${key}.any`);
+      for (const option of FACET_OPTIONS[key]) {
+        assert.equal(typeof facets[key][option], 'number', `${key}.${option}`);
+      }
+    }
+  });
+
+  test('the facet statement counts every option in one pass', () => {
+    const { text, values } = facetSql(parseFilters(q({ mode: 'rent' })), 'bhk');
+    assert.match(text, /^SELECT COUNT\(\*\) AS "any"/);
+    assert.equal((text.match(/COUNT\(\*\) FILTER/g) ?? []).length, 4, 'one per BHK option');
+    assert.equal((text.match(/FROM listings/g) ?? []).length, 1, 'and one scan');
+    assert.match(text, /WHERE l\.city = \$1 AND l\.transaction = \$2/, 'the other filter stays');
+    assert.equal(values[1], 'rent');
+    assert.equal(text.includes("'rent'"), false, 'and travels as a placeholder');
+  });
+
+  test("the facet statement drops its own dropdown's filter", () => {
+    const { text } = facetSql(parseFilters(q({ mode: 'rent' })), 'mode');
+    const where = text.slice(text.indexOf(' WHERE '));
+    assert.equal(where.includes('l.transaction'), false, 'mode is not in the WHERE');
+    assert.equal(where.trim(), 'WHERE l.city = $1', 'only the fixed city is left');
+    assert.match(text, /FILTER \(WHERE l\.transaction = \$\d\)/, 'it lives in the FILTERs');
   });
 });
