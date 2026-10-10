@@ -1,0 +1,345 @@
+{
+  "revisions": {
+    "web": "3d81764",
+    "backend": "fa3e208",
+    "voice": "943340e"
+  },
+  "base": "http://127.0.0.1:3814",
+  "checks": [
+    {
+      "name": "the header really is in Plus Jakarta Sans",
+      "pass": true,
+      "detail": "Plus Jakarta Sans"
+    },
+    {
+      "name": "parity: utility strip",
+      "pass": true,
+      "detail": "19 properties match; 3 declared colour mapping(s)"
+    },
+    {
+      "name": "parity: utility row",
+      "pass": true,
+      "detail": "19 properties match; 2 declared colour mapping(s)"
+    },
+    {
+      "name": "parity: main row",
+      "pass": true,
+      "detail": "19 properties match; 2 declared colour mapping(s)"
+    },
+    {
+      "name": "parity: tab group",
+      "pass": true,
+      "detail": "19 properties match; 3 declared colour mapping(s)"
+    },
+    {
+      "name": "parity: active tab",
+      "pass": true,
+      "detail": "19 properties match; 2 declared colour mapping(s)"
+    },
+    {
+      "name": "parity: inactive tab",
+      "pass": true,
+      "detail": "19 properties match; 2 declared colour mapping(s)"
+    },
+    {
+      "name": "parity: icon button",
+      "pass": true,
+      "detail": "19 properties match; 2 declared colour mapping(s)"
+    },
+    {
+      "name": "parity: solid button",
+      "pass": true,
+      "detail": "19 properties match; 1 declared colour mapping(s)"
+    },
+    {
+      "name": "no shadow at rest",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "name": "header stays at the top when scrolled",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "shadow appears once scrolled",
+      "pass": true,
+      "detail": "rgba(30, 15, 60, 0.1) 0px 4px 16px 0px"
+    },
+    {
+      "name": "shadow goes again at the top",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "name": "Home is current on /",
+      "pass": true,
+      "detail": "Home"
+    },
+    {
+      "name": "Projects is current on /search",
+      "pass": true,
+      "detail": "Projects"
+    },
+    {
+      "name": "New launches is current on ?possession=new_launch",
+      "pass": true,
+      "detail": "New launches"
+    },
+    {
+      "name": "no tab is current off the tab set",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "the city button starts closed",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "it opens a listbox",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "six cities",
+      "pass": true,
+      "detail": "6"
+    },
+    {
+      "name": "Kolkata is the selected option",
+      "pass": true,
+      "detail": "Kolkata"
+    },
+    {
+      "name": "arrow keys and Enter choose a city",
+      "pass": true,
+      "detail": "Bengaluru"
+    },
+    {
+      "name": "focus returns to the button",
+      "pass": true,
+      "detail": "listbox"
+    },
+    {
+      "name": "the choice is remembered",
+      "pass": true,
+      "detail": "Bengaluru"
+    },
+    {
+      "name": "the server still renders the default",
+      "pass": true,
+      "detail": "so the stored value is a client correction"
+    },
+    {
+      "name": "Escape closes the listbox",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "Escape restores focus to the button",
+      "pass": true,
+      "detail": "listbox"
+    },
+    {
+      "name": "an outside click closes it",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "no panel until asked",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "the panel opens",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "the input holds the placeholder the brief specified",
+      "pass": true,
+      "detail": "project, builder or locality"
+    },
+    {
+      "name": "the input takes focus",
+      "pass": true,
+      "detail": "input"
+    },
+    {
+      "name": "Escape closes the panel",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "and focus returns to the icon",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "the search reaches the results page",
+      "pass": true,
+      "detail": "http://127.0.0.1:3814/search?q=Ivy"
+    },
+    {
+      "name": "and the results are filtered by the term",
+      "pass": true,
+      "detail": "\"Ivy\" -> 1 cards, nonsense -> 0"
+    },
+    {
+      "name": "an empty shortlist draws no badge",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "and says so in the accessible name",
+      "pass": true,
+      "detail": "Shortlist, empty"
+    },
+    {
+      "name": "the header renders the real logo file",
+      "pass": true,
+      "detail": "/brand/kkl-logo.jpg"
+    },
+    {
+      "name": "and no mark is drawn in its place",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "the logo sits at about 34px tall",
+      "pass": true,
+      "detail": "37x36"
+    },
+    {
+      "name": "the shortlist control is in the bar at desktop width",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "at 1000px the bar's button is hidden",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "and the strip still carries List a project",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "the tabs are still a tab group at 1000px",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "Help is still there at 1000px",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "the tab group collapses",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "the hamburger appears",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "the wide button is hidden",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "the bar's shortlist icon is hidden",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "so is Help",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "the drawer carries the tabs",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "the drawer carries the city selector",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "the drawer carries Sign in",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "the drawer carries List a project",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "the drawer carries Shortlist",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "focus moves into the drawer",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "Shift+Tab is trapped",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "Escape closes the drawer",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "and focus returns to the hamburger",
+      "pass": true,
+      "detail": "Menu"
+    },
+    {
+      "name": "a link tap closes the drawer",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "the painted icon button is the approved 42px",
+      "pass": true,
+      "detail": "42"
+    },
+    {
+      "name": "its hit area is 44px",
+      "pass": true,
+      "detail": "all four edges of a 44px box hit the control"
+    },
+    {
+      "name": "drawer rows are at least 44px",
+      "pass": true,
+      "detail": "46px"
+    },
+    {
+      "name": "nothing in the header animates under prefers-reduced-motion",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "a size-adjusted fallback face is emitted",
+      "pass": true,
+      "detail": "4 of 42 @font-face rules"
+    },
+    {
+      "name": "no runtime request to Google Fonts",
+      "pass": true,
+      "detail": "0"
+    }
+  ]
+}

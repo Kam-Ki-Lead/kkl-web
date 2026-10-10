@@ -136,6 +136,16 @@ export type PropertyTransaction = "sale" | "rent";
 
 export type PropertySearchFilters = {
   readonly locationId?: string;
+  /**
+   * Free text from the header's search panel.
+   *
+   * The panel has to reach a filter or it is decoration — the same rule the
+   * homepage card's "Search type" box broke. Matching is over the project
+   * name and the location path, which is what a search record carries;
+   * builder name lives on PropertyDetail, not PropertySummary, so it is not
+   * searchable here. See the delivery note.
+   */
+  readonly text?: string;
   readonly transaction?: PropertyTransaction;
   readonly propertyType?: string;
   readonly configurations?: readonly string[];

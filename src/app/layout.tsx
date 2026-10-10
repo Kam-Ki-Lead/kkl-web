@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Public_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Archivo, Public_Sans, IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { SampleModeBanner } from "@/components/system/sample-mode-banner";
 import "./globals.css";
 
@@ -16,6 +16,22 @@ const publicSans = Public_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-public-sans",
+  display: "swap",
+});
+
+/*
+ * The public header's typeface.
+ *
+ * Self-hosted by next/font, which emits a size-adjusted local fallback, so
+ * the bar does not reflow when the web font arrives — the "no layout shift
+ * while the web font loads" requirement. Loaded as a variable font, so the
+ * 500/600/700 the header uses cost one file rather than three. Scoped to the
+ * header through --font-jakarta; the rest of the application keeps Archivo
+ * and Public Sans.
+ */
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
   display: "swap",
 });
 
@@ -37,7 +53,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${publicSans.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${publicSans.variable} ${plexMono.variable} ${jakarta.variable}`}>
       <body>
         <SampleModeBanner />
         {children}

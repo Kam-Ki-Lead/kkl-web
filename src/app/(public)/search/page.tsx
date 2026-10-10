@@ -36,6 +36,8 @@ function toFilters(params: SearchParams): PropertySearchFilters {
       bhk: one(params.bhk),
       budget: { min: budget.min, max: budget.max },
     }),
+    // `q` is the header search panel's parameter.
+    text: one(params.q)?.trim() || undefined,
     propertyType: one(params.type),
     construction:
       possession === "ready"

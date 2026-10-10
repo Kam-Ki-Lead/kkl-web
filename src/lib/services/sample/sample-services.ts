@@ -81,6 +81,15 @@ function matches(property: PropertySummary, filters: Parameters<PropertyService[
     const wanted = new Set(filters.configurations.map((c) => c.replace(/\D/g, "")));
     if (!property.configurations.some((c) => wanted.has(c))) return false;
   }
+  if (filters.text) {
+    // Case- and accent-insensitive substring over the fields a search record
+    // actually has. An unmatched term returns nothing rather than everything.
+    const needle = filters.text.trim().toLowerCase();
+    if (needle) {
+      const haystack = [property.title, ...property.locationPath].join(" ").toLowerCase();
+      if (!haystack.includes(needle)) return false;
+    }
+  }
   if (filters.transaction && property.transaction !== filters.transaction) return false;
   if (filters.construction && property.construction !== filters.construction) return false;
   if (filters.newLaunchOnly && !property.newLaunch) return false;
