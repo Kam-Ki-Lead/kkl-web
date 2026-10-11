@@ -1,4 +1,9 @@
-import type { BuyerEnquiry, PropertyDetail, PropertySummary } from "@/lib/domain/types";
+import type {
+  BuyerEnquiry,
+  PropertyDetail,
+  PropertyMedia,
+  PropertySummary,
+} from "@/lib/domain/types";
 import type { LocalitySummary } from "@/lib/services/contracts";
 import { reviewCoverFor, reviewGalleryFor } from "./review-imagery";
 import { displayPath, getLocation, isWithin } from "./locations";
@@ -72,6 +77,33 @@ function property(
  * Garia and Sonarpur at the affordable end. It is a plausible distribution,
  * not a market report.
  */
+/**
+ * Project imagery supplied for the review build.
+ *
+ * These are architectural RENDERS, not photographs of finished buildings —
+ * three of the five sit on projects that are still under construction, so a
+ * photograph could not exist. The alt text says so and the card keeps its
+ * "Illustration" badge: a render presented as a photograph of a completed
+ * development is the oldest misrepresentation in this industry, and the
+ * labelling is what keeps this the right side of it.
+ *
+ * Anything without an entry here falls back to the designed no-image state,
+ * which is deliberate — see review-imagery.ts.
+ */
+function supplied(file: string, title: string): PropertyMedia {
+  return {
+    id: `supplied-${file}`,
+    url: `/projects/${file}.webp`,
+    kind: "image",
+    alt: `Artist's impression of ${title}. A render, not a photograph of a completed building.`,
+    // The caption a visitor reads. "Artist's impression" is the industry's
+    // own term and the honest one: three of these projects are still under
+    // construction, so a photograph of them cannot exist. "Supplied for
+    // review" was internal language that had no business on a public card.
+    attribution: "Artist's impression",
+  };
+}
+
 export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   // ---------------------------------------------- New Town & the Action Areas
   property({
@@ -90,6 +122,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
   property({
     id: "p-greenview",
+    coverImage: supplied("greenview-residency", "Greenview Residency"),
     slug: "greenview-residency",
     title: "Greenview Residency",
     locationId: "action-area-ii",
@@ -104,6 +137,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
   property({
     id: "p-lakeshore",
+    coverImage: supplied("lakeshore-heights", "Lakeshore Heights"),
     slug: "lakeshore-heights",
     title: "Lakeshore Heights",
     locationId: "action-area-i",
@@ -179,6 +213,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   // ------------------------------------------------------------- Rajarhat
   property({
     id: "p-sundew",
+    coverImage: supplied("sundew-enclave", "Sundew Enclave"),
     slug: "sundew-enclave",
     title: "Sundew Enclave",
     locationId: "rajarhat",
@@ -224,6 +259,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   // ------------------------------------------------------------ Salt Lake
   property({
     id: "p-riverside",
+    coverImage: supplied("riverside-commons", "Riverside Commons"),
     slug: "riverside-commons",
     title: "Riverside Commons",
     locationId: "salt-lake",
@@ -269,6 +305,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   // ---------------------------------------------------- South Kolkata, premium
   property({
     id: "p-alipore-house",
+    coverImage: supplied("the-alipore-house", "The Alipore House"),
     slug: "the-alipore-house",
     title: "The Alipore House",
     locationId: "alipore",
@@ -591,7 +628,15 @@ export function sampleDetailFor(summary: PropertySummary): PropertyDetail {
     ...summary,
     description:
       "Synthetic sample copy for development and review. A landscaped development within reach of the Biswa Bangla Convention Centre, with a sample flat open on site.",
-    media: reviewGalleryFor(summary.id, summary.title),
+    /*
+     * The card's render leads the gallery when there is one, so the detail
+     * screen opens on the same picture the card showed. Without that, a
+     * property with a supplied render fell back to the stock gallery and the
+     * image changed under somebody who had just clicked it.
+     */
+    media: summary.coverImage
+      ? [summary.coverImage, ...reviewGalleryFor(summary.id, summary.title)]
+      : reviewGalleryFor(summary.id, summary.title),
     floorPlans: [],
     amenities: [
       "Lift",
