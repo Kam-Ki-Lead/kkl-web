@@ -320,6 +320,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
   property({
     id: "p-ballygunge-place",
+    coverImage: supplied("ballygunge-place", "Ballygunge Place"),
     slug: "ballygunge-place",
     title: "Ballygunge Place",
     locationId: "ballygunge",
