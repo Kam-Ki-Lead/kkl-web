@@ -139,6 +139,22 @@ if (OUT) {
   await page.keyboard.press("Escape");
 }
 
+// 8a. The homepage's two rows are different rows.
+//     Both derive from the same ordering, so taking the top of each put the
+//     same three developments under both headings. Titles, not ids, because
+//     a repeat is a repeat to the person reading it.
+const rowTitles = (heading) =>
+  page.$$eval(
+    `section:has(h2:text("${heading}")) article a[href^="/property/"]`,
+    (els) => [...new Set(els.map((e) => e.textContent.trim()).filter((t) => t && !t.startsWith("View")))]);
+const propertyTitles = await rowTitles("Featured properties");
+const projectTitles = await rowTitles("Featured projects");
+is("the properties row is full", propertyTitles.length, 6);
+is("the projects row is full", projectTitles.length, 3);
+const repeated = propertyTitles.filter((t) => projectTitles.includes(t));
+if (repeated.length === 0) ok("the two homepage rows share nothing", projectTitles.join(" | "));
+else bad("the two homepage rows share nothing", `repeated under both headings: ${repeated.join(", ")}`);
+
 // 8b. Location is a dropdown like its neighbours, with a search inside.
 await page.keyboard.press("Escape");
 await page.waitForTimeout(100);
