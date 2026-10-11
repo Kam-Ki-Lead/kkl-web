@@ -211,15 +211,27 @@ const propertyService: PropertyService = {
     const isProject = (p: PropertySummary) =>
       p.newLaunch || p.construction === "under_construction";
 
+    // Six cards: two rows of three on desktop, and enough of a spread that
+    // the price points and both transaction types are visible at a glance.
+    const properties = byFeaturedThenPrice.filter((p) => p.id !== hero?.id).slice(0, 6);
+
+    /*
+     * Projects are the under-construction and newly launched end of the same
+     * inventory — what a builder is selling before it exists.
+     *
+     * Deliberately disjoint from the row above. Both rows derive from the
+     * same ordering, so taking the top of each put Riverside Commons,
+     * Greenview Residency and Sundew Enclave in both: the page showed the
+     * same three developments twice under two different headings. A second
+     * row that repeats the first is not a second row.
+     */
+    const shown = new Set([hero?.id, ...properties.map((p) => p.id)]);
+
     return {
       featuredHero: hero,
-      // Six cards: two rows of three on desktop, and enough of a spread that
-      // the price points and both transaction types are visible at a glance.
-      featuredProperties: byFeaturedThenPrice.filter((p) => p.id !== hero?.id).slice(0, 6),
-      // Projects are the under-construction and newly launched end of the
-      // same inventory — what a builder is selling before it exists.
+      featuredProperties: properties,
       featuredProjects: byFeaturedThenPrice
-        .filter((p) => p.id !== hero?.id && isProject(p))
+        .filter((p) => !shown.has(p.id) && isProject(p))
         .slice(0, 3),
       localities: SAMPLE_LOCALITIES,
       localitiesCovered: SAMPLE_LOCALITIES_COVERED,
