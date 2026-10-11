@@ -139,6 +139,42 @@ if (OUT) {
   await page.keyboard.press("Escape");
 }
 
+// 8b. Location is a dropdown like its neighbours, with a search inside.
+await page.keyboard.press("Escape");
+await page.waitForTimeout(100);
+const loc = `${FORM} input[name="locality"] ~ button[role=combobox]`;
+is("Location is a dropdown, not a bare input", await page.locator(loc).count(), 1);
+is("and reads as unset until something is chosen", (await page.textContent(loc)).trim(), "All of Kolkata");
+await page.click(loc);
+await page.waitForTimeout(250);
+is("its panel carries a search box", await page.locator('input[placeholder="Search a locality"]').count(), 1);
+is("the search box takes focus", await page.evaluate(() => document.activeElement?.getAttribute("placeholder")), "Search a locality");
+const allRows = await page.locator("[role=option]").count();
+is("the everything row leads the list", (await page.textContent("[role=option]")).trim(), "All of Kolkata");
+
+await page.fill('input[placeholder="Search a locality"]', "new town");
+await page.waitForTimeout(400);
+const narrowed = await page.$$eval("[role=option]", (els) => els.map((e) => e.textContent.trim()));
+is("typing narrows the list", narrowed.length < allRows, true);
+is("the locality itself ranks above its sub-localities", narrowed[0].startsWith("New Town"), true);
+is("and the everything row is gone while narrowing", narrowed.some((r) => r === "All of Kolkata"), false);
+checks.push(`INFO  "new town" — ${narrowed.join(" | ")}`);
+
+await page.fill('input[placeholder="Search a locality"]', "zzzznowhere");
+await page.waitForTimeout(400);
+is("a query nothing matches says so", await page.locator("[role=option]").count(), 0);
+
+await page.fill('input[placeholder="Search a locality"]', "salt");
+await page.waitForTimeout(400);
+await page.keyboard.press("Enter");
+await page.waitForTimeout(400);
+is("Enter picks the ranked first option", (await page.textContent(loc)).trim().startsWith("Salt Lake"), true);
+is("the hidden input carries the record id", await page.inputValue(`${FORM} input[name="locality"]`), "salt-lake");
+is("and focus returns to the trigger", await page.evaluate(() => document.activeElement?.getAttribute("role")), "combobox");
+const locWeight = await page.$eval(loc, (el) => Number(getComputedStyle(el).fontWeight));
+is("a chosen locality reads as chosen", locWeight >= 600, true);
+await page.waitForTimeout(400);
+
 // 9. Custom range, reached from the listbox row.
 await page.click(trigger("qty"));
 await page.waitForTimeout(150);
@@ -172,9 +208,12 @@ is("and the trigger shows the range", (await page.textContent(trigger("qty"))).t
 await page.click(`${FORM} button[type=submit]`);
 await page.waitForURL(/\/search\?/, { timeout: 5000 });
 is("every chosen field is sent, and only those",
-  new URL(page.url()).search, "?mode=rent&bhk=4plus&qty=custom&qtyMin=400&qtyMax=800");
+  new URL(page.url()).search,
+  "?locality=salt-lake&mode=rent&bhk=4plus&qty=custom&qtyMin=400&qtyMax=800");
+// Budget is the one field this run never touches, so it is the one that
+// proves an "any" option sends no parameter at all.
 is("an untouched field sends nothing",
-  [...new URL(page.url()).searchParams.keys()].some((k) => k === "locality" || k === "budget"), false);
+  [...new URL(page.url()).searchParams.keys()].includes("budget"), false);
 await ctx.close();
 
 /* --------------------------------------------------------------- phone --- */

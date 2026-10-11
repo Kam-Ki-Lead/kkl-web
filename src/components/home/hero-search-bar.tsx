@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
-import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
+import type { AreaOption } from "@/components/location/area-picker";
+import { LocationDropdown } from "./location-dropdown";
 import { ResultCountDropdown, type DropdownOption } from "./result-count-dropdown";
 import {
   BHK_OPTIONS,
@@ -222,36 +223,14 @@ export function HeroSearchBar({
       ].join(" ")}
     >
       <Field last={false}>
-        <label htmlFor={`${base}-locality`} className="text-[12px] font-bold text-ink">
-          Location
-        </label>
-        {/*
-          The picker brings its own bordered control, which is right everywhere
-          else and wrong inside a pill where four fields next to it have no box
-          at all. Restyled from here rather than in the component: the filter
-          row and the posting forms still want the border. The brand ring on
-          focus is the same one the dropdown triggers use.
-        */}
-        <div
-          className={[
-            "[&_input]:-mx-[8px] [&_input]:h-[32px] [&_input]:w-[calc(100%+16px)] [&_input]:min-h-0",
-            "[&_input]:rounded-[10px] [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-[8px]",
-            "[&_input]:font-medium [&_input]:text-muted [&_input]:outline-none",
-            "[&_input:focus-visible]:bg-brand/[0.07]",
-            "[&_input:focus-visible]:shadow-[0_0_0_2px_var(--color-brand),0_0_0_5px_rgba(120,65,155,0.2)]",
-            "[&_select]:min-h-0 [&_select]:border-0 [&_select]:bg-transparent [&_select]:px-0",
-            "max-[980px]:[&_input]:h-[44px]",
-          ].join(" ")}
-        >
-          <AreaPicker
-            id={`${base}-locality`}
-            name="locality"
-            areas={areas}
-            value={draft.locality}
-            allLabel="All of Kolkata"
-            onSelect={(locality) => set({ locality })}
-          />
-        </div>
+        <LocationDropdown
+          name="locality"
+          label="Location"
+          allLabel="All of Kolkata"
+          areas={areas}
+          value={draft.locality}
+          onChange={(locality) => set({ locality })}
+        />
       </Field>
 
       <Field last={false}>

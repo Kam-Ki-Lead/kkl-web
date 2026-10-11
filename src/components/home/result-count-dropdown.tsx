@@ -26,6 +26,55 @@ import { useEffect, useId, useRef, useState } from "react";
  * without JavaScript — the form still submits, it just submits the defaults.
  */
 
+/**
+ * The trigger's look, shared with the Location dropdown.
+ *
+ * Exported rather than copied so the five fields cannot drift apart. The
+ * behaviours differ — Location searches a service, the other four pick from
+ * a fixed list with counts — but a bar whose fields look like four siblings
+ * and a cousin is the thing that was reported in the first place.
+ */
+export const TRIGGER_CLASS = [
+  "-mx-[8px] flex h-[32px] w-[calc(100%+16px)] cursor-pointer items-center justify-between gap-[6px]",
+  "rounded-[10px] border-0 bg-transparent px-[8px] text-left text-[15px] outline-none",
+  "focus-visible:bg-brand/[0.07] focus-visible:shadow-[0_0_0_2px_var(--color-brand),0_0_0_5px_rgba(120,65,155,0.2)]",
+  "max-[980px]:h-[44px]",
+].join(" ");
+
+/** The open-state ring, applied alongside TRIGGER_CLASS. */
+export const TRIGGER_OPEN_CLASS =
+  "bg-brand/[0.07] shadow-[0_0_0_2px_var(--color-brand),0_0_0_5px_rgba(120,65,155,0.2)]";
+
+/** The floating panel, which opens upward because the bar sits low. */
+export const PANEL_CLASS = [
+  "absolute bottom-[calc(100%+14px)] z-30 min-w-[250px] rounded-[14px] border border-line",
+  "bg-white p-[6px] shadow-[0_16px_40px_rgba(30,15,60,0.28)]",
+  "max-[980px]:static max-[980px]:mt-[10px] max-[980px]:w-auto max-[980px]:min-w-0 max-[980px]:shadow-none",
+].join(" ");
+
+/** One row in a panel. */
+export const OPTION_CLASS =
+  "flex cursor-pointer items-center justify-between gap-[10px] rounded-[9px] px-[12px] py-[10px] text-[15px] max-[980px]:min-h-[44px]";
+
+export function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={`flex-none opacity-60 transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
+    >
+      <path d="m2 4 4 4 4-4" />
+    </svg>
+  );
+}
+
 export type DropdownOption = {
   readonly value: string;
   readonly label: string;
@@ -167,33 +216,15 @@ export function ResultCountDropdown({
         }}
         onKeyDown={onKeyDown}
         className={[
-          "-mx-[8px] flex h-[32px] w-[calc(100%+16px)] cursor-pointer items-center justify-between gap-[6px]",
-          "rounded-[10px] border-0 bg-transparent px-[8px] text-left text-[15px] outline-none",
+          TRIGGER_CLASS,
           chosen ? "font-semibold text-ink" : "font-medium text-muted",
-          // A brand ring rather than the browser's black border, on focus and
-          // while open. The halo is what makes it read as deliberate.
-          "focus-visible:bg-brand/[0.07] focus-visible:shadow-[0_0_0_2px_var(--color-brand),0_0_0_5px_rgba(120,65,155,0.2)]",
-          open ? "bg-brand/[0.07] shadow-[0_0_0_2px_var(--color-brand),0_0_0_5px_rgba(120,65,155,0.2)]" : "",
-          "max-[980px]:h-[44px]",
+          open ? TRIGGER_OPEN_CLASS : "",
         ].join(" ")}
       >
         <span id={valueId} className="overflow-hidden text-ellipsis whitespace-nowrap">
           {display}
         </span>
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-          className={`flex-none opacity-60 transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
-        >
-          <path d="m2 4 4 4 4-4" />
-        </svg>
+        <Chevron open={open} />
       </button>
 
       {open ? (
@@ -201,14 +232,7 @@ export function ResultCountDropdown({
           id={panelId}
           role="listbox"
           aria-labelledby={labelId}
-          className={[
-            "absolute bottom-[calc(100%+14px)] z-30 min-w-[250px] rounded-[14px] border border-line",
-            "bg-white p-[6px] shadow-[0_16px_40px_rgba(30,15,60,0.28)]",
-            alignEnd ? "right-0" : "left-0",
-            // Below 980 the bar is a stack, so a floating panel would cover
-            // the next field. It expands in flow instead.
-            "max-[980px]:static max-[980px]:mt-[10px] max-[980px]:w-auto max-[980px]:min-w-0 max-[980px]:shadow-none",
-          ].join(" ")}
+          className={[PANEL_CLASS, alignEnd ? "right-0" : "left-0"].join(" ")}
         >
           {options.map((option, index) => {
             const isSelected = index === selected;
@@ -224,7 +248,7 @@ export function ResultCountDropdown({
                 onClick={() => choose(index)}
                 onMouseEnter={() => setActive(index)}
                 className={[
-                  "flex cursor-pointer items-center justify-between gap-[10px] rounded-[9px] px-[12px] py-[10px] text-[15px]",
+                  OPTION_CLASS,
                   option.separated ? "relative mt-[8px] before:absolute before:inset-x-[12px] before:-top-[5px] before:h-[1px] before:bg-line" : "",
                   isSelected
                     ? "bg-brand-mist font-bold text-brand"
@@ -234,7 +258,6 @@ export function ResultCountDropdown({
                   // Dimmed, still selectable: zero today is not zero after the
                   // next filter changes, and an unclickable row is a dead end.
                   zero ? "opacity-55" : "",
-                  "max-[980px]:min-h-[44px]",
                 ].join(" ")}
               >
                 <span>{option.label}</span>
