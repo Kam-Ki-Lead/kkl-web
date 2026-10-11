@@ -41,7 +41,32 @@ const img = await page.$eval("section img", (el) => el.getAttribute("src") ?? ""
 is("the hero still renders its own image", img.length > 0 && !img.includes("/images/hero.jpg"), true);
 checks.push(`INFO  hero image src — ${img.slice(0, 90)}`);
 
-// 2. Five fields, one width.
+// 2. The bar sits on the photograph's edge, not below it.
+//    The lift is half the bar's height, so the image's bottom edge should
+//    pass through the bar's middle. Measured rather than assumed, because
+//    the two numbers live in different files and nothing else would notice
+//    them drifting apart.
+const seam = await page.evaluate(() => {
+  const hero = document.querySelector("section").getBoundingClientRect();
+  const bar = document.querySelector('form[action="/search"]').getBoundingClientRect();
+  return { heroBottom: Math.round(hero.bottom), barMiddle: Math.round(bar.top + bar.height / 2), barHeight: Math.round(bar.height) };
+});
+if (Math.abs(seam.heroBottom - seam.barMiddle) <= 1) {
+  ok("the image edge meets the middle of the bar", `edge ${seam.heroBottom}, middle ${seam.barMiddle}`);
+} else {
+  bad("the image edge meets the middle of the bar",
+    `edge at ${seam.heroBottom}, bar middle at ${seam.barMiddle} — the lift should be half the ${seam.barHeight}px bar`);
+}
+
+// 3. The shadow lifts the bar without reading as a band under it.
+const shadow = await page.$eval(FORM, (el) => getComputedStyle(el).boxShadow);
+const alpha = Number((shadow.match(/rgba\([^)]*?,\s*([\d.]+)\)/) ?? [])[1] ?? 1);
+const blur = Number((shadow.match(/(\d+)px\s*$|(\d+)px 0px$/) ?? [])[0]?.replace("px", "") ?? 0);
+is("the shadow is restrained", alpha <= 0.2, true);
+checks.push(`INFO  bar shadow — ${shadow.split(", rgba").pop()}`);
+void blur;
+
+// 4. Five fields, one width.
 const widths = await page.$$eval(`${FORM} > div`, (els) => els.map((e) => Math.round(e.getBoundingClientRect().width)));
 is("the bar has five fields", widths.length, 5);
 const spread = Math.max(...widths) - Math.min(...widths);

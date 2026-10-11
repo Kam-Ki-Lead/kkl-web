@@ -53,13 +53,23 @@ export default async function HomePage() {
       {hero ? <FeaturedHero property={hero} /> : null}
 
       <div className="mx-auto box-content max-w-[1280px] px-[32px] pb-[40px] max-[1060px]:px-[18px]">
-        {/* Lifted onto the banner. Only when there is a banner to lift it onto,
-            and only on desktop — below 900px the banner is a compact panel and
-            an overlap would crowd it. */}
+        {/*
+          Lifted onto the banner, by exactly half the bar's height.
+
+          The bar is 86px tall, so a 43px overlap puts the photograph's bottom
+          edge through the bar's middle — the bar reads as sitting on the
+          seam rather than hanging below it. If the bar's height changes,
+          this number and the hero's `pb` both have to follow; the browser
+          check `the image edge meets the middle of the bar` fails if they
+          drift apart, so this cannot rot quietly.
+
+          Only on desktop: below 900px the banner is a compact panel and an
+          overlap would crowd it.
+        */}
         <div
           className={
             hero
-              ? "relative z-10 -mt-[72px] max-[900px]:mt-[16px]"
+              ? "relative z-10 -mt-[43px] max-[900px]:mt-[16px]"
               : "pt-[20px]"
           }
         >
@@ -231,7 +241,7 @@ function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<R
           clear of the overlap rather than hiding the price behind it. */}
       <div className="absolute inset-0 flex items-center max-[900px]:static">
       <div className="mx-auto box-content w-full max-w-[1280px] px-[32px] max-[1060px]:px-[18px] max-[900px]:px-0">
-      <div className="flex max-w-[54%] flex-col gap-[12px] pb-[72px] max-[900px]:static max-[900px]:max-w-none max-[900px]:gap-[8px] max-[900px]:px-[18px] max-[900px]:py-[20px] max-[900px]:pb-[20px]">
+      <div className="flex max-w-[54%] flex-col gap-[12px] pb-[43px] max-[900px]:static max-[900px]:max-w-none max-[900px]:gap-[8px] max-[900px]:px-[18px] max-[900px]:py-[20px] max-[900px]:pb-[20px]">
         <span className="t-mono text-[11px] tracking-[0.14em] text-[#FAD9A3]">
           FEATURED PROJECT
         </span>

@@ -212,7 +212,11 @@ export function HeroSearchBar({
          half-transparent background it cannot be read against. */
       className={[
         "relative flex items-stretch rounded-[999px] bg-white/95 p-[8px]",
-        "shadow-[0_14px_40px_rgba(20,10,50,0.35)]",
+        // Softer than the reference's 0 14px 40px / 35%. At that strength the
+        // shadow read as a dark band under the bar rather than as lift,
+        // especially now that the bar sits on the photograph's edge instead
+        // of below it.
+        "shadow-[0_8px_24px_rgba(20,10,50,0.18)]",
         "supports-[backdrop-filter:blur(0px)]:bg-white/85 supports-[backdrop-filter:blur(0px)]:backdrop-blur-[14px]",
         "max-[980px]:flex-col max-[980px]:rounded-[22px] max-[980px]:p-[10px]",
       ].join(" ")}
