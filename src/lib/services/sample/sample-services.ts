@@ -183,23 +183,47 @@ const locationService: LocationService = {
 
 /** Every area in the launch city — the list the search pickers offer. */
 const propertyService: PropertyService = {
+  /**
+   * The homepage, derived from the inventory rather than from a list of slugs.
+   *
+   * It used to name three properties and two projects by slug. That made the
+   * shop window independent of the warehouse: the inventory grew from 9 rows
+   * to 32 and the page showed the same three cards, which is exactly what it
+   * looked like — nothing had changed. One of the named slugs had also been
+   * renamed, so the projects row had silently been rendering one card instead
+   * of two for as long as that rename had been in.
+   *
+   * Now the rows are selections over what is actually published, so new
+   * inventory reaches the page without anybody editing this function.
+   */
   async getHomepage(): Promise<HomepageContent> {
-    const bySlug = (slug: string) => live().find((p) => p.slug === slug) ?? null;
-    const hero = bySlug("ivy-court-action-area-i");
+    const published = live();
+    const bySlug = (slug: string) => published.find((p) => p.slug === slug) ?? null;
+    const hero = bySlug("ivy-court-action-area-i") ?? published[0] ?? null;
+
+    // Flagged first, then the rest, so curation still leads — but the row
+    // fills from the inventory instead of ending early when a flag is missing.
+    const byFeaturedThenPrice = [...published].sort((a, b) => {
+      if (a.featured !== b.featured) return a.featured ? -1 : 1;
+      return (b.price.maxInr ?? 0) - (a.price.maxInr ?? 0);
+    });
+
+    const isProject = (p: PropertySummary) =>
+      p.newLaunch || p.construction === "under_construction";
 
     return {
       featuredHero: hero,
-      // The three cards under "Featured properties", in the approved order.
-      featuredProperties: ["greenview-residency", "lakeshore-heights", "sundew-enclave"]
-        .map(bySlug)
-        .filter((p): p is NonNullable<typeof p> => p !== null),
-      // The two wide cards under "Featured projects".
-      featuredProjects: ["orchid-grove", "riverside-commons"]
-        .map(bySlug)
-        .filter((p): p is NonNullable<typeof p> => p !== null),
+      // Six cards: two rows of three on desktop, and enough of a spread that
+      // the price points and both transaction types are visible at a glance.
+      featuredProperties: byFeaturedThenPrice.filter((p) => p.id !== hero?.id).slice(0, 6),
+      // Projects are the under-construction and newly launched end of the
+      // same inventory — what a builder is selling before it exists.
+      featuredProjects: byFeaturedThenPrice
+        .filter((p) => p.id !== hero?.id && isProject(p))
+        .slice(0, 3),
       localities: SAMPLE_LOCALITIES,
       localitiesCovered: SAMPLE_LOCALITIES_COVERED,
-      totalPublishedListings: live().length,
+      totalPublishedListings: published.length,
     };
   },
 

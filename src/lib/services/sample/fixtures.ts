@@ -1,7 +1,7 @@
 import type { BuyerEnquiry, PropertyDetail, PropertySummary } from "@/lib/domain/types";
 import type { LocalitySummary } from "@/lib/services/contracts";
 import { reviewCoverFor, reviewGalleryFor } from "./review-imagery";
-import { displayPath, getLocation, isWithin, FEATURED_AREA_IDS } from "./locations";
+import { displayPath, getLocation, isWithin } from "./locations";
 
 /**
  * Deterministic synthetic fixtures.
@@ -636,17 +636,42 @@ function formatConfigList(configs: readonly string[]): string {
  * featured subset (FEATURED_AREA_IDS), not a list of its own. The search
  * pickers offer every area in the launch city through the location service.
  */
-export const SAMPLE_LOCALITIES: readonly LocalitySummary[] = FEATURED_AREA_IDS.map((id) => {
-  const record = getLocation(id);
-  if (!record) throw new Error(`Featured area ${id} is not a location record.`);
-  return {
-    id,
-    name: record.name,
-    // A locality counts its sub-localities, as the approved grid does: New
-    // Town's figure includes the Action Areas.
-    listingCount: SAMPLE_PROPERTIES.filter((p) => isWithin(p.locationId, id)).length,
-  };
-});
+/**
+ * The browse-by-locality grid: the six localities with the most inventory.
+ *
+ * It used to be a fixed list of six — New Town, Rajarhat, Salt Lake and the
+ * three Action Areas — which was right when those were the only places with
+ * listings. With inventory in twenty-six localities it meant the grid offered
+ * "Action Area II, 1 listing" while Alipore, Ballygunge and Tollygunge were
+ * nowhere on the page. A browse shortcut that ignores most of what there is
+ * to browse is not a shortcut.
+ *
+ * Ranked by count, then alphabetically so the order is stable rather than
+ * depending on the order rows happen to be written in. Sub-localities are
+ * left out: New Town's figure already includes its Action Areas, and listing
+ * both reads as double counting.
+ */
+export const SAMPLE_LOCALITIES: readonly LocalitySummary[] = (() => {
+  const localities = new Set(
+    SAMPLE_PROPERTIES.map((p) => getLocation(p.locationId))
+      .map((record) => (record?.level === "sub_locality" ? record.parentId : record?.id))
+      .filter((id): id is string => Boolean(id)),
+  );
+  return [...localities]
+    .map((id) => {
+      const record = getLocation(id);
+      if (!record) throw new Error(`Area ${id} is not a location record.`);
+      return {
+        id,
+        name: record.name,
+        // A locality counts its sub-localities, as the approved grid does:
+        // New Town's figure includes the Action Areas.
+        listingCount: SAMPLE_PROPERTIES.filter((p) => isWithin(p.locationId, id)).length,
+      };
+    })
+    .sort((a, b) => b.listingCount - a.listingCount || a.name.localeCompare(b.name))
+    .slice(0, 6);
+})();
 
 export const SAMPLE_TOTAL_LISTINGS = SAMPLE_PROPERTIES.length;
 
