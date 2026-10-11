@@ -610,7 +610,7 @@ export function publishBlockers(listing: ListingDraft): readonly PublishBlocker[
 const PORTAL_COUNTERPART: Readonly<Record<string, string>> = {
   "bl-greenview": "p-greenview",
   "bl-lakeshore": "p-lakeshore",
-  "bl-orchid": "p-orchid-grove",
+  "bl-orchid": "p-orchid-square",
 };
 
 export function listSummaries(filter?: { status?: ListingStatus }): readonly ListingSummary[] {

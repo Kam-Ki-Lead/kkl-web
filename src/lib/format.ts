@@ -20,13 +20,37 @@ function trim(value: number): string {
   return String(Number(value.toFixed(decimals)));
 }
 
-export function formatPriceRange(price: PriceRange): string | null {
+/**
+ * A price range, with the unit a rental needs.
+ *
+ * A rent listing's price is a monthly amount, not a capital value. Rendered
+ * without the unit, "₹32,000" beside a two-bedroom flat reads as the asking
+ * price, which is the kind of mistake somebody only notices after they have
+ * made a decision on it.
+ */
+export function formatPriceRange(
+  price: PriceRange,
+  { perMonth = false }: { perMonth?: boolean } = {},
+): string | null {
   const { minInr, maxInr } = price;
   if (minInr === null && maxInr === null) return null;
+  const unit = perMonth ? "/month" : "";
   if (minInr !== null && maxInr !== null) {
-    return minInr === maxInr ? formatInr(minInr) : `${formatInr(minInr)} – ${formatInr(maxInr)}`;
+    const body =
+      minInr === maxInr ? formatInr(minInr) : `${formatInr(minInr)} – ${formatInr(maxInr)}`;
+    return `${body}${unit}`;
   }
-  return minInr !== null ? `${formatInr(minInr)} onwards` : `Up to ${formatInr(maxInr as number)}`;
+  return minInr !== null
+    ? `${formatInr(minInr)}${unit} onwards`
+    : `Up to ${formatInr(maxInr as number)}${unit}`;
+}
+
+/** Shorthand for a listing that knows whether it is a sale or a letting. */
+export function formatListingPrice(listing: {
+  readonly price: PriceRange;
+  readonly transaction: "sale" | "rent";
+}): string | null {
+  return formatPriceRange(listing.price, { perMonth: listing.transaction === "rent" });
 }
 
 /** "2, 3 BHK" */

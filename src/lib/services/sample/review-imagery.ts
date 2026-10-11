@@ -68,10 +68,14 @@ const ASSIGNMENT: Readonly<Record<string, keyof typeof PHOTOS>> = {
   "p-greenview": "a",
   "p-lakeshore": "b",
   "p-sundew": "c",
-  "p-orchid-grove": "d",
-  "p-riverside-commons": "e",
-  "p-palm-meadows": "f",
-  // p-the-pinnacle and p-willow-court intentionally have no photograph.
+  "p-orchid-square": "d",
+  "p-riverside": "e",
+  "p-maple-grove": "f",
+  // Everything else keeps the designed no-image fallback, so the
+  // missing-media state stays visible in review rather than disappearing
+  // the moment imagery is switched on. With the wider inventory that is
+  // most of the list, which is the honest state: these are stand-in
+  // photographs, not photographs of these places.
 };
 
 /** True when the photographs come from the host the baseline names. */

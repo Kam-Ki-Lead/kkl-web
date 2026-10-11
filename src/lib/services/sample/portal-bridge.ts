@@ -29,7 +29,7 @@ import * as enquiryStore from "./enquiry-store";
 const OWNED: Readonly<Record<string, string>> = {
   "bl-greenview": "p-greenview",
   "bl-lakeshore": "p-lakeshore",
-  "bl-orchid": "p-orchid-grove",
+  "bl-orchid": "p-orchid-square",
 };
 
 const OWNED_PROPERTY_IDS = new Set(Object.values(OWNED));

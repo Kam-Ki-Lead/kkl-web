@@ -291,7 +291,7 @@ type SeedLead = Omit<MarketplaceLeadDetail,
  * the masked screens cannot reach it even by mistake — `toMasked` strips it and
  * the type has no field to put it in.
  */
-const SEED_LEADS: readonly SeedLead[] = [
+const HAND_WRITTEN_LEADS: readonly SeedLead[] = [
   {
     id: "L-4471",
     requirement: "3 BHK · ₹1Cr – ₹1.5Cr",
@@ -416,6 +416,100 @@ const SEED_LEADS: readonly SeedLead[] = [
       bestTimeToCall: "Weekday mornings",
     },
   },
+];
+
+/**
+ * The rest of the marketplace.
+ *
+ * SAMPLE, NOT REAL. Four leads above are written out in full because the
+ * detail screens need a complete record to render — the qualification
+ * summary, the channel, the financing line. The rest are generated from this
+ * table so the marketplace has the breadth a marketplace has, without four
+ * hundred lines of near-identical prose.
+ *
+ * Every contact detail is invented and masked, every name is fictional, and
+ * `.invalid` is reserved by RFC 2606 precisely so nothing here can resolve.
+ */
+const MORE: ReadonlyArray<
+  readonly [
+    id: string,
+    area: string,
+    bhk: 1 | 2 | 3 | 4,
+    band: string,
+    score: number,
+    ageDays: number,
+    credits: number,
+    initials: string,
+    sale: boolean,
+  ]
+> = [
+  ["L-4482", "action-area-i", 3, "₹1Cr – ₹1.5Cr", 88, 0, 1_100, "A•• D••", false],
+  ["L-4479", "action-area-ii", 2, "₹60L – ₹80L", 74, 2, 820, "S•••• M••••••", false],
+  ["L-4476", "action-area-iii", 2, "₹40L – ₹60L", 61, 4, 640, "P••••• B•••", false],
+  ["L-4474", "new-town", 1, "₹20L – ₹40L", 55, 6, 420, "T•••• R•••", false],
+  ["L-4470", "new-town", 3, "₹80L – ₹1Cr", 79, 3, 900, "I•••• C••••••••", false],
+  ["L-4466", "rajarhat", 2, "₹40L – ₹60L", 68, 8, 560, "D•••• G•••", true],
+  ["L-4463", "rajarhat", 3, "₹60L – ₹80L", 71, 11, 610, "M••••• H•••••", true],
+  ["L-4461", "salt-lake", 3, "₹1Cr – ₹1.5Cr", 84, 1, 1_050, "N••••• B••••••", false],
+  ["L-4458", "salt-lake", 2, "₹80L – ₹1Cr", 66, 9, 540, "K•••• S••", true],
+  ["L-4455", "ballygunge", 4, "₹2.5Cr+", 91, 1, 1_400, "V••••• A••••••", false],
+  ["L-4452", "alipore", 4, "₹5Cr+", 86, 5, 1_600, "R•••• T•••••", false],
+  ["L-4449", "gariahat", 3, "₹1.5Cr – ₹2Cr", 77, 7, 880, "S••••• D••", false],
+  ["L-4446", "tollygunge", 2, "₹80L – ₹1Cr", 64, 13, 470, "A•••• P•••", true],
+  ["L-4443", "golf-green", 3, "₹60L – ₹1Cr", 59, 16, 390, "B••••• R••", true],
+  ["L-4440", "jadavpur", 1, "₹20L – ₹40L", 52, 19, 300, "C••••• N•••", true],
+  ["L-4437", "garia", 2, "₹40L – ₹60L", 63, 10, 520, "J••••• M•••••", false],
+  ["L-4434", "behala", 2, "₹20L – ₹40L", 57, 22, 260, "L••• H•••••", true],
+  ["L-4431", "sonarpur", 1, "₹20L – ₹40L", 48, 26, 210, "O• P•••••", true],
+  ["L-4428", "lake-town", 3, "₹60L – ₹80L", 70, 12, 580, "U••• K•••", true],
+  ["L-4425", "dum-dum", 2, "₹40L – ₹60L", 60, 14, 450, "E•••• F••••••", true],
+  ["L-4422", "kestopur", 2, "₹40L – ₹60L", 65, 6, 600, "G•••• V••••", false],
+  ["L-4419", "new-alipore", 3, "₹1.5Cr – ₹2Cr", 81, 4, 980, "W•••• Y•••", false],
+  ["L-4416", "park-street", 3, "₹2Cr – ₹2.5Cr", 83, 2, 1_200, "Z••• Q•••••", false],
+  ["L-4413", "kankurgachi", 3, "₹80L – ₹1Cr", 67, 15, 500, "H•••• L•••", true],
+  ["L-4410", "santoshpur", 2, "₹40L – ₹60L", 54, 21, 280, "F•••• O•••", true],
+  ["L-4407", "ultadanga", 2, "₹40L – ₹60L", 58, 18, 330, "Q••• W•••••", true],
+];
+
+const band = (score: number): LeadIntentBand =>
+  score >= 80 ? "hot" : score >= 60 ? "warm" : "mild";
+
+const SEED_LEADS: readonly SeedLead[] = [
+  ...HAND_WRITTEN_LEADS,
+  ...MORE.map(([id, area, bhk, budgetBand, intentScore, ageDays, priceCredits, mask, sale]): SeedLead => ({
+    id,
+    requirement: `${bhk} BHK · ${budgetBand}`,
+    locationId: area,
+    locationPath: displayPath(area),
+    configuration: `${bhk} BHK`,
+    budgetBand,
+    intentBand: band(intentScore),
+    intentScore,
+    // An aged lead goes on sale; a fresh one is listed at its price. The
+    // ageing schedule itself is kkl-backend's, not this fixture's.
+    status: sale ? "on_sale" : "listed",
+    ageDays,
+    priceCredits,
+    originalPriceCredits: sale ? Math.round(priceCredits / 0.8) : null,
+    contactMask: `${mask} · +91 9•••• ••${id.slice(-2)}`,
+    qualification: {
+      summary:
+        `Qualified by call. Looking for a ${bhk} BHK in ${displayPath(area).slice(-1)[0]} ` +
+        `within ${budgetBand}. Consent captured; contact details release on purchase.`,
+      intentScore,
+      consentCaptured: true,
+      channel: intentScore % 2 === 0 ? "Voice call · Bengali" : "WhatsApp · English",
+      timeline: ageDays < 7 ? "Within 3 months" : "3–6 months",
+      purpose: bhk >= 3 ? "End use" : "Investment",
+      financing: intentScore >= 70 ? "Loan pre-approved" : "Loan not yet applied",
+    },
+    contact: {
+      name: `Sample Buyer ${id.slice(-4)}`,
+      phone: `+91 90000 ${id.slice(-5).replace(/\D/g, "").padStart(5, "0")}`,
+      email: `buyer.${id.toLowerCase()}@example.invalid`,
+      bestTimeToCall: ageDays % 2 === 0 ? "Evenings after 6pm" : "Weekday mornings",
+    },
+  })),
 ];
 
 /**

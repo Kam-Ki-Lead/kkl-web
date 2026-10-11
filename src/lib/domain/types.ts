@@ -167,6 +167,15 @@ export type PropertySearchFilters = {
    */
   readonly minLeadsAvailable?: number;
   readonly maxLeadsAvailable?: number;
+  /**
+   * Which scale the budget band is measured on.
+   *
+   * A sale band is a capital value and a rent band a monthly one. Without
+   * this, a ₹32,000/month letting matches "Under ₹50L" and the filter stops
+   * filtering. A band matches only listings whose transaction is on its own
+   * scale.
+   */
+  readonly budgetScale?: "sale" | "rent";
   readonly minBudgetInr?: number;
   readonly maxBudgetInr?: number;
   readonly construction?: PropertySummary["construction"];

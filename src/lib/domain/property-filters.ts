@@ -50,6 +50,42 @@ export const BUDGET_LABELS: Readonly<Record<string, string>> = Object.freeze({
 });
 
 /**
+ * Monthly bands, for lettings.
+ *
+ * A rent listing's price is a monthly amount. Matched against the capital
+ * bands above, every flat in Kolkata is "Under ₹50L" — true, meaningless,
+ * and the filter silently stops filtering. So rent has its own scale, and a
+ * band only ever matches listings on the scale it belongs to.
+ */
+export const BUDGET_RENT: Readonly<Record<string, Band>> = Object.freeze({
+  "u20k": [0, 20_000],
+  "20k-40k": [20_000, 40_000],
+  "40k-75k": [40_000, 75_000],
+  "75kplus": [75_000, null],
+});
+
+export const BUDGET_RENT_LABELS: Readonly<Record<string, string>> = Object.freeze({
+  "u20k": "Under ₹20,000",
+  "20k-40k": "₹20,000–₹40,000",
+  "40k-75k": "₹40,000–₹75,000",
+  "75kplus": "₹75,000+",
+});
+
+/** Which scale a budget band is measured on. */
+export type BudgetScale = "sale" | "rent";
+
+/** The bands on offer for a mode. Rent gets monthly ones; everything else capital. */
+export function budgetBandsFor(mode: string | undefined): {
+  scale: BudgetScale;
+  bands: Readonly<Record<string, Band>>;
+  labels: Readonly<Record<string, string>>;
+} {
+  return mode === "rent"
+    ? { scale: "rent", bands: BUDGET_RENT, labels: BUDGET_RENT_LABELS }
+    : { scale: "sale", bands: BUDGET, labels: BUDGET_LABELS };
+}
+
+/**
  * The quantity presets, generated from one step.
  *
  * Change `QTY_STEP` or `QTY_BANDS` and the keys, the labels and the server's
@@ -157,6 +193,8 @@ export type ParsedFilters = {
   readonly mode?: "buy" | "rent";
   readonly bhk?: (typeof BHK_VALUES)[number];
   readonly budget?: Band;
+  /** Which scale `budget` is measured on; a band matches only its own scale. */
+  readonly budgetScale?: BudgetScale;
   readonly qty?: Band;
 };
 
@@ -239,6 +277,7 @@ export function parseFilters(
     mode?: "buy" | "rent";
     bhk?: (typeof BHK_VALUES)[number];
     budget?: Band;
+    budgetScale?: BudgetScale;
     qty?: Band;
   } = {};
 
@@ -264,9 +303,14 @@ export function parseFilters(
 
   const budget = readOne(query, "budget");
   if (budget) {
-    const band = BUDGET[budget];
+    // Which scale applies is decided by the mode, so ?mode=rent&budget=20k-40k
+    // is a monthly band and ?budget=1cr-2cr is a capital one. A key from the
+    // wrong scale is refused rather than quietly matching nothing.
+    const { scale, bands } = budgetBandsFor(f.mode);
+    const band = bands[budget];
     if (!band) throw bad("invalid budget");
     f.budget = band;
+    f.budgetScale = scale;
   }
 
   const qty = readOne(query, "qty");
@@ -327,6 +371,7 @@ export function toPropertySearchFilters(f: ParsedFilters): PropertySearchFilters
     minBedrooms: f.bhk === "4plus" ? BHK_PLUS_FROM : undefined,
     minBudgetInr: f.budget?.[0],
     maxBudgetInr: f.budget?.[1] ?? undefined,
+    budgetScale: f.budgetScale,
     minLeadsAvailable: f.qty?.[0],
     maxLeadsAvailable: f.qty?.[1] ?? undefined,
   };
@@ -441,12 +486,25 @@ export function toSql(
 export const FACET_KEYS = Object.freeze(["mode", "bhk", "budget", "qty"] as const);
 export type FacetKey = (typeof FACET_KEYS)[number];
 
-export const FACET_OPTIONS: Readonly<Record<FacetKey, readonly string[]>> = Object.freeze({
-  mode: MODE_VALUES,
-  bhk: BHK_VALUES,
-  budget: Object.freeze(Object.keys(BUDGET)),
-  qty: Object.freeze(Object.keys(QTY)),
-});
+/**
+ * The options each dropdown offers.
+ *
+ * Budget depends on the mode, because its bands are on a different scale for
+ * a letting. Everything else is fixed.
+ */
+export function facetOptionsFor(mode: string | undefined): Readonly<Record<FacetKey, readonly string[]>> {
+  return {
+    mode: MODE_VALUES,
+    bhk: BHK_VALUES,
+    budget: Object.keys(budgetBandsFor(mode).bands),
+    qty: Object.keys(QTY),
+  };
+}
+
+/** The signed-out default: capital budget bands. */
+export const FACET_OPTIONS: Readonly<Record<FacetKey, readonly string[]>> = Object.freeze(
+  facetOptionsFor(undefined),
+);
 
 /**
  * One dropdown's counting job.
@@ -478,8 +536,10 @@ export function withFacetOption(f: ParsedFilters, facet: FacetKey, key: string):
       return { ...base, mode: key as "buy" | "rent" };
     case "bhk":
       return { ...base, bhk: key as (typeof BHK_VALUES)[number] };
-    case "budget":
-      return { ...base, budget: BUDGET[key] };
+    case "budget": {
+      const { scale, bands } = budgetBandsFor(f.mode);
+      return { ...base, budget: bands[key], budgetScale: scale };
+    }
     case "qty":
       return { ...base, qty: QTY[key] };
     default:
@@ -495,10 +555,11 @@ export function withFacetOption(f: ParsedFilters, facet: FacetKey, key: string):
  * pass per group, which is the shape `COUNT(*) FILTER (WHERE …)` takes.
  */
 export function facetGroups(f: ParsedFilters): readonly FacetGroup[] {
+  const options = facetOptionsFor(f.mode);
   return FACET_KEYS.map((key) => ({
     key,
     base: toPropertySearchFilters(withoutFacet(f, key)),
-    options: FACET_OPTIONS[key].map((option) => ({
+    options: options[key].map((option) => ({
       key: option,
       filters: toPropertySearchFilters(withFacetOption(f, key, option)),
     })),

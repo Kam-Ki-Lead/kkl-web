@@ -14,6 +14,8 @@ import {
   inBand,
   FACET_KEYS,
   FACET_OPTIONS,
+  budgetBandsFor,
+  facetOptionsFor,
   facetGroups,
   facetResponse,
   facetSql,
@@ -223,6 +225,48 @@ describe('the property filter', { concurrency: false }, () => {
     refused({ budget: 'cheap' }, /invalid budget/);
   });
 
+  // ------------------------------------------------- budget has two scales --
+
+  test('rent gets monthly bands, everything else capital ones', () => {
+    // A letting's price is a monthly amount. Against the capital bands every
+    // flat in Kolkata is "Under ₹50L" — true, useless, and the filter
+    // silently stops filtering.
+    assert.equal(budgetBandsFor('rent').scale, 'rent');
+    assert.equal(budgetBandsFor('buy').scale, 'sale');
+    assert.equal(budgetBandsFor(undefined).scale, 'sale');
+    assert.deepEqual(budgetBandsFor('rent').bands['20k-40k'], [20_000, 40_000]);
+    assert.deepEqual(budgetBandsFor('buy').bands['1cr-2cr'], [10_000_000, 20_000_000]);
+  });
+
+  test('a band is read on the scale its mode implies', () => {
+    const rent = parseFilters(q({ mode: 'rent', budget: '20k-40k' }));
+    assert.deepEqual(rent.budget, [20_000, 40_000]);
+    assert.equal(rent.budgetScale, 'rent');
+
+    const sale = parseFilters(q({ mode: 'buy', budget: '1cr-2cr' }));
+    assert.deepEqual(sale.budget, [10_000_000, 20_000_000]);
+    assert.equal(sale.budgetScale, 'sale');
+  });
+
+  test('a band from the wrong scale is refused, not quietly matched', () => {
+    refused({ mode: 'rent', budget: '1cr-2cr' }, /invalid budget/);
+    refused({ mode: 'buy', budget: '20k-40k' }, /invalid budget/);
+    refused({ budget: '20k-40k' }, /invalid budget/, 'and rent bands need rent');
+  });
+
+  test('the scale reaches the service, so a letting cannot match a capital band', () => {
+    const filters = toPropertySearchFilters(parseFilters(q({ mode: 'buy', budget: 'u50l' })));
+    assert.equal(filters.budgetScale, 'sale');
+    assert.equal(filters.maxBudgetInr, 5_000_000);
+  });
+
+  test('the budget dropdown offers the bands its mode uses', () => {
+    assert.deepEqual(facetOptionsFor('rent').budget, ['u20k', '20k-40k', '40k-75k', '75kplus']);
+    assert.deepEqual(facetOptionsFor('buy').budget, ['u50l', '50l-1cr', '1cr-2cr', '2crplus']);
+    assert.deepEqual(facetOptionsFor('rent').bhk, facetOptionsFor('buy').bhk,
+      'and the other dropdowns are unaffected');
+  });
+
   test('budget bands are inclusive and the top one is open', () => {
     assert.equal(inBand(5_000_000, BUDGET.u50l), true, 'the boundary belongs to both');
     assert.equal(inBand(5_000_000, BUDGET['50l-1cr']), true);
@@ -274,6 +318,7 @@ describe('the property filter', { concurrency: false }, () => {
       mode: 'buy',
       bhk: '4plus',
       budget: [10_000_000, 20_000_000],
+      budgetScale: 'sale',
       qty: [500, 1000],
     });
 

@@ -2,7 +2,7 @@ import { FeaturedLeads } from "@/components/home/featured-leads";
 import { LeadSale } from "@/components/home/lead-sale";
 import Link from "next/link";
 import { getServices } from "@/lib/services";
-import { formatPriceRange } from "@/lib/format";
+import { formatListingPrice } from "@/lib/format";
 import { PropertyCard, ProjectCard } from "@/components/property/property-card";
 import { PropertyImage } from "@/components/property/property-image";
 import { HeroSearchBar } from "@/components/home/hero-search-bar";
@@ -150,7 +150,7 @@ export default async function HomePage() {
             <SectionHeader
               title="Browse by locality"
               level="page"
-              subtitle={`${home.totalPublishedListings} listings across ${spellSmallNumber(home.localities.length)} localities`}
+              subtitle={`${home.totalPublishedListings} listings across ${spellSmallNumber(home.localitiesCovered)} localities`}
             />
             <div className="grid grid-cols-3 gap-[12px] max-[900px]:grid-cols-2">
               {home.localities.map((locality) => (
@@ -195,7 +195,7 @@ export default async function HomePage() {
 }
 
 function FeaturedHero({ property }: { property: NonNullable<Awaited<ReturnType<ReturnType<typeof getServices>["properties"]["getHomepage"]>>["featuredHero"]> }) {
-  const price = formatPriceRange(property.price);
+  const price = formatListingPrice(property);
 
   const summaryLine = [
     `${property.configurations.join(", ")} BHK`,

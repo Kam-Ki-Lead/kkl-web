@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getServices, ServiceError } from "@/lib/services";
 import type { PropertyDetail } from "@/lib/domain/types";
-import { formatInr, formatPriceRange } from "@/lib/format";
+import { formatInr, formatListingPrice } from "@/lib/format";
 import { PropertyImage } from "@/components/property/property-image";
 import { Card, InsetPanel } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default async function PropertyDetailPage({
 }) {
   const { slug } = await params;
   const property = await load(slug);
-  const price = formatPriceRange(property.price);
+  const price = formatListingPrice(property);
   const ready = property.construction === "ready_to_move";
 
   return (

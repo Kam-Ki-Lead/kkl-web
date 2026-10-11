@@ -6,7 +6,7 @@ import { PropertyCard } from "@/components/property/property-card";
 import { SearchFilters, SearchSort } from "@/components/search/search-filters";
 import { propertySearchFilters } from "@/lib/domain/property-search-query";
 import {
-  BUDGET,
+  budgetBandsFor,
   FilterError,
   parseFilters,
   toPropertySearchFilters,
@@ -55,9 +55,12 @@ function barFilters(params: SearchParams): PropertySearchFilters | null {
     if (params[key] !== undefined) present[key] = params[key];
   }
   // `budget` is shared: the bar sends a band token, the filter row sends a
-  // label. Only a token belongs to the bar's reading.
+  // label. Only a token belongs to the bar's reading — and which tokens are
+  // valid depends on the mode, because a letting's bands are monthly. Looking
+  // only in the sale bands dropped `?mode=rent&budget=20k-40k` on the floor,
+  // so the page returned every letting while the button said six.
   const budget = one(params.budget);
-  if (budget && BUDGET[budget]) present.budget = budget;
+  if (budget && budgetBandsFor(one(params.mode)).bands[budget]) present.budget = budget;
   // `locality` is shared too, and means the same thing in both, so it is left
   // to the legacy reading rather than parsed twice.
 

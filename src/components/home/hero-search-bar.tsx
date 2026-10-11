@@ -7,11 +7,11 @@ import { LocationDropdown } from "./location-dropdown";
 import { ResultCountDropdown, type DropdownOption } from "./result-count-dropdown";
 import {
   BHK_OPTIONS,
-  BUDGET_LABELS,
   FACET_KEYS,
   MODE_OPTIONS,
   QTY_CUSTOM,
   QTY_OPTIONS,
+  budgetBandsFor,
   type FacetKey,
 } from "@/lib/domain/property-filters";
 
@@ -46,10 +46,20 @@ import {
  * does — see the note on `minLeadsAvailable` in types.ts.
  */
 
-const BUDGET_OPTIONS: ReadonlyArray<{ value: string; label: string }> = Object.freeze([
-  { value: "", label: "Any budget" },
-  ...Object.entries(BUDGET_LABELS).map(([value, label]) => ({ value, label })),
-]);
+/**
+ * The budget options for a mode.
+ *
+ * A letting's price is monthly, so Rent gets monthly bands. Without that, a
+ * ₹32,000/month flat matches "Under ₹50L" along with every other letting in
+ * the city, and the filter quietly stops filtering.
+ */
+function budgetOptionsFor(mode: string): ReadonlyArray<{ value: string; label: string }> {
+  const { labels } = budgetBandsFor(mode || undefined);
+  return [
+    { value: "", label: "Any budget" },
+    ...Object.entries(labels).map(([value, label]) => ({ value, label })),
+  ];
+}
 
 /** Matches the server's rule exactly: whole numbers, at most nine digits. */
 const WHOLE = /^\d{1,9}$/;
@@ -240,7 +250,10 @@ export function HeroSearchBar({
           value={draft.mode}
           options={MODE_OPTIONS}
           counts={countsFor("mode")}
-          onChange={(mode) => set({ mode })}
+          /* Changing the mode changes what a budget band means, so a band
+             chosen on the other scale is cleared rather than carried over as
+             a key the server would refuse. */
+          onChange={(mode) => set({ mode, budget: "" })}
         />
       </Field>
 
@@ -260,7 +273,7 @@ export function HeroSearchBar({
           name="budget"
           label="Budget"
           value={draft.budget}
-          options={BUDGET_OPTIONS}
+          options={budgetOptionsFor(draft.mode)}
           counts={countsFor("budget")}
           onChange={(budget) => set({ budget })}
         />

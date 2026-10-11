@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PropertySummary } from "@/lib/domain/types";
-import { formatConfigurations, formatPriceRange } from "@/lib/format";
+import { formatConfigurations, formatListingPrice } from "@/lib/format";
 import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { PropertyImage } from "./property-image";
@@ -19,7 +19,7 @@ export function PropertyCard({
   /** "link" on the homepage, "buttons" in search results — both are approved. */
   actions?: "link" | "buttons";
 }) {
-  const price = formatPriceRange(property.price);
+  const price = formatListingPrice(property);
   const locality = property.locationPath.slice(-2).join(", ");
   const area = property.areaSummary;
 
@@ -131,7 +131,7 @@ function ShortlistButton({ propertyTitle }: { propertyTitle: string }) {
 
 /** The wide, horizontal variant used by "Featured projects" on the homepage. */
 export function ProjectCard({ property }: { property: PropertySummary }) {
-  const price = formatPriceRange(property.price);
+  const price = formatListingPrice(property);
   const locality = property.locationPath.slice(-2).join(", ");
   const ready = property.construction === "ready_to_move";
 

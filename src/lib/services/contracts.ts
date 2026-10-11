@@ -130,7 +130,16 @@ export type HomepageContent = {
   readonly featuredHero: PropertySummary | null;
   readonly featuredProperties: readonly PropertySummary[];
   readonly featuredProjects: readonly PropertySummary[];
+  /** The localities the browse grid offers — a selection, not the coverage. */
   readonly localities: readonly LocalitySummary[];
+  /**
+   * How many distinct localities the published inventory actually sits in.
+   *
+   * Separate from `localities.length`, which is the size of the grid. The
+   * homepage subtitle used the grid's length and read "32 listings across six
+   * localities" once the inventory grew past the six it features.
+   */
+  readonly localitiesCovered: number;
   readonly totalPublishedListings: number;
 };
 

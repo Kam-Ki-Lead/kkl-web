@@ -41,6 +41,7 @@ import { buyerEnquiriesForBuilder, livePortalProperties } from "./portal-bridge"
 import {
   SAMPLE_ENQUIRIES,
   SAMPLE_LOCALITIES,
+  SAMPLE_LOCALITIES_COVERED,
   sampleDetailFor,
 } from "./fixtures";
 import {
@@ -110,6 +111,12 @@ function matches(property: PropertySummary, filters: Parameters<PropertyService[
   if (filters.construction && property.construction !== filters.construction) return false;
   if (filters.newLaunchOnly && !property.newLaunch) return false;
   if (filters.reraOnly && !property.reraRegistered) return false;
+  if (filters.budgetScale) {
+    // A capital band never matches a letting, and a monthly band never
+    // matches a sale. Both are the same `price` field on different scales.
+    const scale = property.transaction === "rent" ? "rent" : "sale";
+    if (scale !== filters.budgetScale) return false;
+  }
   if (filters.maxBudgetInr !== undefined) {
     const low = property.price.minInr;
     if (low !== null && low > filters.maxBudgetInr) return false;
@@ -191,6 +198,7 @@ const propertyService: PropertyService = {
         .map(bySlug)
         .filter((p): p is NonNullable<typeof p> => p !== null),
       localities: SAMPLE_LOCALITIES,
+      localitiesCovered: SAMPLE_LOCALITIES_COVERED,
       totalPublishedListings: live().length,
     };
   },
