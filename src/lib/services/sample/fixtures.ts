@@ -152,6 +152,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
   property({
     id: "p-eco-crest",
+    coverImage: supplied("eco-crest-action-area-iii", "Eco Crest, Action Area III"),
     slug: "eco-crest-action-area-iii",
     title: "Eco Crest, Action Area III",
     locationId: "action-area-iii",
@@ -364,6 +365,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   }),
   property({
     id: "p-lake-gardens-villas",
+    coverImage: supplied("lake-gardens-villas", "Lake Gardens Villas"),
     slug: "lake-gardens-villas",
     title: "Lake Gardens Villas",
     locationId: "lake-gardens",
@@ -380,6 +382,7 @@ export const SAMPLE_PROPERTIES: readonly PropertySummary[] = [
   // ----------------------------------------------------- South, mid and value
   property({
     id: "p-tollygunge-park",
+    coverImage: supplied("tollygunge-park", "Tollygunge Park"),
     slug: "tollygunge-park",
     title: "Tollygunge Park",
     locationId: "tollygunge",
