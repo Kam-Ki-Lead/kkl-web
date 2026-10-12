@@ -3,7 +3,8 @@ import { LeadSale } from "@/components/home/lead-sale";
 import Link from "next/link";
 import { getServices } from "@/lib/services";
 import { formatListingPrice } from "@/lib/format";
-import { PropertyCard, ProjectCard } from "@/components/property/property-card";
+import { ProjectCard } from "@/components/property/property-card";
+import { PropertyPhotoCard } from "@/components/property/property-photo-card";
 import { PropertyImage } from "@/components/property/property-image";
 import { HeroSearchBar } from "@/components/home/hero-search-bar";
 import { Card, SectionHeader } from "@/components/ui/card";
@@ -105,9 +106,14 @@ export default async function HomePage() {
               }
             />
             {home.featuredProperties.length > 0 ? (
-              <div className="grid grid-cols-3 gap-[18px] max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
+              /* The photo-overlay row's own breakpoints: three up, two from
+                 980px, one from 640px. They are wider than the white cards'
+                 900/560 because these cards are taller than they are wide —
+                 at 900px two of them are already narrower than their own
+                 price line. */
+              <div className="grid grid-cols-3 gap-[20px] max-[980px]:grid-cols-2 max-[640px]:grid-cols-1">
                 {home.featuredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
+                  <PropertyPhotoCard key={property.id} property={property} />
                 ))}
               </div>
             ) : (

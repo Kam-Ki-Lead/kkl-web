@@ -143,10 +143,13 @@ if (OUT) {
 //     Both derive from the same ordering, so taking the top of each put the
 //     same three developments under both headings. Titles, not ids, because
 //     a repeat is a repeat to the person reading it.
+// The card's heading, not a link inside it: on the photo-overlay cards the
+// name is plain text and the whole card is one link whose accessible name
+// comes from its aria-label, so there is no link text left to read.
 const rowTitles = (heading) =>
   page.$$eval(
-    `section:has(h2:text("${heading}")) article a[href^="/property/"]`,
-    (els) => [...new Set(els.map((e) => e.textContent.trim()).filter((t) => t && !t.startsWith("View")))]);
+    `section:has(h2:text("${heading}")) article h3`,
+    (els) => [...new Set(els.map((e) => e.textContent.trim()).filter(Boolean))]);
 const propertyTitles = await rowTitles("Featured properties");
 const projectTitles = await rowTitles("Featured projects");
 is("the properties row is full", propertyTitles.length, 6);

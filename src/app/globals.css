@@ -66,6 +66,15 @@
   --color-warning: #8a4a08;
   --color-danger: #b3261e;
 
+  /* The same two statuses, read off a photograph instead of off white.
+     --color-success and --color-warning are chosen to clear 4.5:1 on a white
+     card; on the dark gradient of a photo-overlay card they are the darker
+     colour and fall under 2:1. These are the same hues lifted until they
+     clear 4.5:1 the other way round — 11.2:1 and 11.0:1 on the gradient's
+     deepest stop. They are for text over a photograph and nowhere else. */
+  --color-success-on-photo: #7ce3b0;
+  --color-warning-on-photo: #ffc46b;
+
   /* Rail foregrounds — C-03. Inactive items sit above 7:1 on their rail. */
   --color-rail-seller-label: #d4c4e4;
   /* A-02's rail is ink with a dimmer muted text than the other two consoles.
@@ -119,6 +128,53 @@
   --radius-card: 12px;
   --radius-control: 8px;
   --radius-pill: 999px;
+  --radius-photo-card: 22px;
+}
+
+/*
+ * The two scrims on a photo-overlay card.
+ *
+ * Every stop is --color-ink (#12182b) at a different alpha — the navy the rest
+ * of the page sets text in, not a new colour. They are written out in rgba
+ * rather than composed with color-mix() so that a browser without
+ * relative-colour support still draws them: if a scrim fails to paint, white
+ * text lands on a bare photograph, which is the one failure this card cannot
+ * survive.
+ *
+ * WHY TWO
+ *
+ * The reference draws one gradient across the card and puts the dark end at
+ * 80% of its height. That works at the reference's card width (~390px), where
+ * the text block is a third of the card. In the real page this row shares its
+ * width with the 320px rail, so a card is 277px across, the two chips wrap, and
+ * the text block grows to two thirds of the card — up where a card-height
+ * gradient is still transparent. Measured over the actual renders, the price
+ * sat at 1.2:1.
+ *
+ * So readability is not left to the card's height. --kkl-photo-scrim is the
+ * vignette: it darkens the top so the "Featured" pill and the credit read, and
+ * clears. --kkl-photo-scrim-block is anchored to the text block itself and
+ * ramps in PIXELS, so whatever the block's height, every pixel of text sits at
+ * 0.70 or deeper. 0.70 is where white clears 4.5:1 over the brightest pixel any
+ * of the real renders puts behind the text (7.7:1 over it, in fact; the ramp's
+ * own 34px is empty padding).
+ *
+ * `scripts/verify-featured-photo-cards.mjs` composites both layers over the
+ * real photographs, per text element, and fails under 4.5:1 — so these numbers
+ * cannot be loosened quietly.
+ */
+:root {
+  --kkl-photo-scrim: linear-gradient(
+    180deg,
+    rgba(18, 24, 43, 0.28) 0%,
+    rgba(18, 24, 43, 0) 34%
+  );
+  --kkl-photo-scrim-block: linear-gradient(
+    180deg,
+    rgba(18, 24, 43, 0) 0,
+    rgba(18, 24, 43, 0.7) 34px,
+    rgba(18, 24, 43, 0.94) 100%
+  );
 }
 
 /*
