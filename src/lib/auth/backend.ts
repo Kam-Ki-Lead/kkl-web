@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { cookies } from "next/headers";
 import { ServiceError } from "@/lib/services/contracts";
+import { hasDemoSession } from "@/lib/auth/demo-session";
 import { isFrameworkSignal } from "@/lib/services/backend/session";
 import { authBackendBaseUrl } from "@/lib/services/backend/config";
 import {
@@ -254,7 +255,10 @@ export async function refreshSession(): Promise<boolean> {
 
 export async function hasBrowserSession(): Promise<boolean> {
   const jar = await cookies();
-  return Boolean(jar.get(ACCESS_COOKIE)?.value || jar.get(REFRESH_COOKIE)?.value);
+  if (jar.get(ACCESS_COOKIE)?.value || jar.get(REFRESH_COOKIE)?.value) return true;
+  // The review-only demo sign-in, which carries no credential and is refused
+  // outright on any server that is not showing sample fixtures.
+  return hasDemoSession();
 }
 
 async function accessToken(): Promise<string | null> {

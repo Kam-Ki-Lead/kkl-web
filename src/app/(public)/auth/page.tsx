@@ -4,6 +4,8 @@ import { authStoreKind } from "@/lib/services/backend/config";
 import { pendingVerificationMobile } from "@/app/actions/enquiry";
 import { OtpForm } from "@/components/auth/otp-form";
 import { Card } from "@/components/ui/card";
+import { DEMO_MOBILE } from "@/lib/auth/demo-access";
+import { demoSignInAllowed } from "@/lib/auth/demo-session";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -38,6 +40,17 @@ export default async function AuthPage({
           simulated={authStoreKind() !== "backend" && runtimeConfig.isSampleMode}
         />
       </Card>
+
+      {/* Review only. `demoSignInAllowed()` is false on any server reading the
+          real backend or declaring itself production, so this note cannot
+          appear — and the shortcut cannot work — where it would matter. */}
+      {demoSignInAllowed() ? (
+        <p className="t-caption mt-[14px] rounded-[10px] border border-line bg-tint px-[14px] py-[10px] text-body">
+          <strong className="text-ink">Review shortcut.</strong> {DEMO_MOBILE} signs in
+          straight away, with no code. Any other number goes to the code step, where any six
+          digits except 000000 are accepted and nothing is verified against anything.
+        </p>
+      ) : null}
 
       <p className="t-caption mt-[14px] text-muted">
         A buyer account tracks your own enquiries and shortlist. It never gives access to

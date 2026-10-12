@@ -28,6 +28,7 @@ import {
   headerSearchHref,
   readCityId,
   shortlistBadge,
+  accountLink,
 } from "@/lib/domain/site-header";
 
 /**
@@ -145,6 +146,11 @@ function HeaderView({
   const pathname = usePathname();
   const router = useRouter();
   const nav = navProp ?? headerNav(buyLeadsHref(signedIn));
+  /* `signInHref` still overrides, for a caller that wants a specific target;
+     otherwise the control follows the session. */
+  const account = signInHref === "/auth"
+    ? accountLink(signedIn)
+    : { href: signInHref, label: "Sign in" };
 
   const [cityOpen, setCityOpen] = useState(false);
   const [cityActive, setCityActive] = useState(0);
@@ -477,7 +483,7 @@ function HeaderView({
             <Link href={helpHref} className={styles.onlyMid}>
               Help
             </Link>
-            <Link href={signInHref}>Sign in</Link>
+            <Link href={account.href}>{account.label}</Link>
           </nav>
         </div>
       </div>
@@ -641,12 +647,12 @@ function HeaderView({
             : null}
 
           <Link
-            href={signInHref}
+            href={account.href}
             className={styles.drawerItem}
             onClick={() => setDrawerOpen(false)}
-            aria-current={pathname.startsWith(signInHref) ? "page" : undefined}
+            aria-current={pathname.startsWith(account.href) ? "page" : undefined}
           >
-            Sign in
+            {account.label}
           </Link>
 
           <Link

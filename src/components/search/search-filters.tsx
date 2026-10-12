@@ -1,8 +1,15 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { AreaPicker, type AreaOption } from "@/components/location/area-picker";
+import type { AreaOption } from "@/components/location/area-picker";
 import { FilterChip } from "@/components/ui/chip";
+import { LocationDropdown } from "@/components/home/location-dropdown";
+import {
+  BAR_CLASS,
+  ResultCountDropdown,
+  barFieldClass,
+  type DropdownOption,
+} from "@/components/home/result-count-dropdown";
 
 /**
  * P-02 filters.
@@ -14,14 +21,29 @@ import { FilterChip } from "@/components/ui/chip";
  * narrows a result set" — C-05.
  */
 
-const TYPES = ["Any type", "Apartment", "Villa", "Plot", "Commercial"];
-const BHK = ["Any BHK", "1 BHK", "2 BHK", "3 BHK", "4 BHK"];
-const BUDGETS: ReadonlyArray<{ label: string; min?: number; max?: number }> = [
-  { label: "Any budget" },
-  { label: "Up to ₹50L", max: 5_000_000 },
-  { label: "Up to ₹1Cr", max: 10_000_000 },
-  { label: "Up to ₹1.5Cr", max: 15_000_000 },
-  { label: "₹1.5Cr and above", min: 15_000_000 },
+/* The same values this page has always filtered on, in the shape the shared
+   dropdown takes. "" is the unset row in every one of them, which is what the
+   bar draws in muted type until something is chosen. */
+const TRANSACTION_OPTIONS: readonly DropdownOption[] = [
+  { value: "", label: "Buy or rent", count: null },
+  { value: "sale", label: "Buy", count: null },
+  { value: "rent", label: "Rent", count: null },
+];
+const TYPE_OPTIONS: readonly DropdownOption[] = [
+  { value: "", label: "Any type", count: null },
+  ...["Apartment", "Villa", "Plot", "Commercial"].map((label) => ({ value: label, label, count: null })),
+];
+const BHK_OPTIONS: readonly DropdownOption[] = [
+  { value: "", label: "Any BHK", count: null },
+  ...["1", "2", "3", "4"].map((n) => ({ value: n, label: `${n} BHK`, count: null })),
+];
+const BUDGET_OPTIONS: readonly DropdownOption[] = [
+  { value: "", label: "Any budget", count: null },
+  ...["Up to ₹50L", "Up to ₹1Cr", "Up to ₹1.5Cr", "₹1.5Cr and above"].map((label) => ({
+    value: label,
+    label,
+    count: null,
+  })),
 ];
 const POSSESSION: ReadonlyArray<{ key: string; label: string }> = [
   { key: "ready", label: "Ready to move" },
@@ -55,9 +77,6 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
     router.push(q.size ? `/search?${q}` : "/search");
   }
 
-  const localityName =
-    areas.find((l) => l.id === current.locality)?.label ?? null;
-
   const appliedChips: ReadonlyArray<{ label: string; clear: Partial<typeof current> }> = [
     ...(current.transaction
       ? [{
@@ -83,79 +102,80 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
       : []),
   ];
 
+  const dropdown = (
+    name: string,
+    label: string,
+    value: string,
+    options: readonly DropdownOption[],
+    onChange: (next: string) => void,
+    alignEnd = false,
+  ) => (
+    <ResultCountDropdown
+      name={name}
+      label={label}
+      value={value}
+      options={options}
+      /* No counts here. The homepage's bar can afford a facet request per
+         keystroke because it is one request for the whole page; this bar
+         changes the result set on every choice, so a count beside each option
+         would be a second round trip for a number the results below already
+         show. */
+      counts={null}
+      /* A value the URL carries that this list does not hold — "Projects"
+         links here with `type=project` — is shown as it is rather than read
+         as unset. The field and the applied chip then say the same thing;
+         before this the field said "Any type" beside a chip saying
+         "project". */
+      displayOverride={
+        value !== "" && !options.some((o) => o.value === value) ? value : undefined
+      }
+      alignEnd={alignEnd}
+      placement="down"
+      onChange={onChange}
+    />
+  );
+
   return (
     <div>
-      <div className="grid grid-cols-4 gap-[14px] max-[900px]:grid-cols-2 max-[560px]:grid-cols-1">
-        <Field id="f-locality" label="Location">
-          {/* Searchable over the launch city's area records (CR05); the URL
-              carries the record id. */}
-          <AreaPicker
-            id="f-locality"
+      {/* The same bar as the homepage's — see BAR_CLASS. It navigates on every
+          change rather than submitting, so it is a div with no button, but a
+          person moving between the two should not notice a different control
+          set. */}
+      <div className={BAR_CLASS}>
+        <div className={barFieldClass(false)}>
+          <LocationDropdown
             name="locality"
+            label="Location"
+            allLabel="All of Kolkata"
             areas={areas}
             value={current.locality}
-            allLabel="All of Kolkata"
-            onSelect={(id) => update({ locality: id })}
+            placement="down"
+            onChange={(locality) => update({ locality })}
           />
-        </Field>
+        </div>
 
-        <Field id="f-buy-rent" label="Buy or rent">
-          <select
-            id="f-buy-rent"
-            value={current.transaction}
-            onChange={(e) => update({ transaction: e.target.value })}
-            className={selectClass}
-          >
-            <option value="">Buy or rent</option>
-            <option value="sale">Buy</option>
-            <option value="rent">Rent</option>
-          </select>
-        </Field>
+        <div className={barFieldClass(false)}>
+          {dropdown("transaction", "Buy or rent", current.transaction, TRANSACTION_OPTIONS,
+            (transaction) => update({ transaction }))}
+        </div>
 
-        <Field id="f-type" label="Property type">
-          <select
-            id="f-type"
-            value={current.type}
-            onChange={(e) => update({ type: e.target.value })}
-            className={selectClass}
-          >
-            {TYPES.map((t) => (
-              <option key={t}>{t}</option>
-            ))}
-          </select>
-        </Field>
+        <div className={barFieldClass(false)}>
+          {dropdown("type", "Property type", current.type === "Any type" ? "" : current.type,
+            TYPE_OPTIONS, (type) => update({ type: type || "Any type" }))}
+        </div>
 
-        <Field id="f-bhk" label="BHK">
-          <select
-            id="f-bhk"
-            value={current.bhk}
-            onChange={(e) => update({ bhk: e.target.value })}
-            className={selectClass}
-          >
-            {BHK.map((b) => (
-              <option key={b} value={b === "Any BHK" ? "" : b.replace(/\D/g, "")}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <div className={barFieldClass(false)}>
+          {dropdown("bhk", "BHK", current.bhk, BHK_OPTIONS, (bhk) => update({ bhk }))}
+        </div>
 
-        <Field id="f-budget" label="Budget">
-          <select
-            id="f-budget"
-            value={current.budget}
-            onChange={(e) => update({ budget: e.target.value })}
-            className={selectClass}
-          >
-            {BUDGETS.map((b) => (
-              <option key={b.label}>{b.label}</option>
-            ))}
-          </select>
-        </Field>
+        <div className={barFieldClass(true)}>
+          {dropdown("budget", "Budget", current.budget === "Any budget" ? "" : current.budget,
+            BUDGET_OPTIONS, (budget) => update({ budget: budget || "Any budget" }), true)}
+        </div>
       </div>
 
-      <div className="mt-[14px] flex flex-wrap items-center gap-[10px]">
-        <span className="text-[14px] text-muted">Possession:</span>
+      <div className="mt-[16px] flex flex-wrap items-center gap-[10px]">
+        <span className="text-[14px] font-semibold text-muted">Possession</span>
         {POSSESSION.map((p) => {
           const on = current.possession === p.key;
           return (
@@ -164,29 +184,32 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
               type="button"
               aria-pressed={on}
               onClick={() => update({ possession: on ? "" : p.key })}
-              className={`min-h-[44px] rounded-full border-[1.5px] px-[16px] text-[14px] font-semibold ${
+              className={[
+                "min-h-[44px] rounded-full border px-[16px] text-[14px] font-semibold",
+                "focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-saffron",
                 on
                   ? "border-brand bg-brand text-white"
-                  : "border-control-border bg-white text-body"
-              }`}
+                  : "border-line bg-white text-ink hover:border-brand",
+              ].join(" ")}
             >
               {p.label}
             </button>
           );
         })}
-      </div>
 
-      <div className="mt-[14px] flex flex-wrap items-center gap-[10px] rounded-[10px] border border-line bg-tint px-[16px] py-[12px]">
-        <span className="t-label text-body">Applied:</span>
-        {appliedChips.length === 0 ? (
-          <span className="t-caption text-muted">
-            {localityName ? "No filters beyond location" : "No filters applied"}
-          </span>
-        ) : (
-          appliedChips.map((chip) => (
-            <FilterChip key={chip.label} label={chip.label} onRemove={() => update(chip.clear)} />
-          ))
-        )}
+        {/* C-05: applied filters stay visible, and removable, so nothing
+            narrows the results without saying so. On the same line as the
+            possession pills now — a separate panel for "No filters applied"
+            was a box that said nothing. */}
+        {appliedChips.length > 0 ? (
+          <>
+            <span aria-hidden="true" className="h-[24px] w-[1px] bg-line" />
+            {appliedChips.map((chip) => (
+              <FilterChip key={chip.label} label={chip.label} onRemove={() => update(chip.clear)} />
+            ))}
+          </>
+        ) : null}
+
         {appliedChips.length > 0 || current.locality ? (
           <button
             type="button"
@@ -197,32 +220,6 @@ export function SearchFilters({ areas }: { areas: readonly AreaOption[] }) {
           </button>
         ) : null}
       </div>
-    </div>
-  );
-}
-
-const selectClass =
-  "min-h-[48px] w-full cursor-pointer rounded-[8px] border border-control-border bg-white px-[13px] text-[15px] text-ink";
-
-function Field({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: string;
-  children: React.ReactNode;
-}) {
-  /* P-02 renders these labels at 13px where P-01 renders the same role at
-     14px — an inconsistency inside the approved baseline, recorded in
-     visual-differences.md. The 14px step is kept; the colour is the defect
-     (body #2A3250, not ink). */
-  return (
-    <div className="flex flex-col gap-[6px]">
-      <label htmlFor={id} className="t-label text-body">
-        {label}
-      </label>
-      {children}
     </div>
   );
 }

@@ -12,9 +12,10 @@ import {
 import {
   Chevron,
   OPTION_CLASS,
-  PANEL_CLASS,
   TRIGGER_CLASS,
   TRIGGER_OPEN_CLASS,
+  panelClass,
+  type PanelPlacement,
 } from "./result-count-dropdown";
 
 /**
@@ -58,6 +59,7 @@ export function LocationDropdown({
   allLabel,
   areas,
   value,
+  placement = "up",
   onChange,
 }: {
   name: string;
@@ -68,6 +70,8 @@ export function LocationDropdown({
   areas: readonly Area[];
   /** A location-record id, or "" for the whole city. */
   value: string;
+  /** Which way the panel opens. See PANEL_CLASS in result-count-dropdown. */
+  placement?: PanelPlacement;
   onChange: (next: string) => void;
 }) {
   const base = useId().replace(/[^a-zA-Z0-9_-]/g, "");
@@ -243,7 +247,7 @@ export function LocationDropdown({
       </button>
 
       {open ? (
-        <div className={[PANEL_CLASS, "left-0"].join(" ")}>
+        <div className={[panelClass(placement), "left-0"].join(" ")}>
           <label htmlFor={searchId} className="sr-only">
             Search areas in Kolkata
           </label>

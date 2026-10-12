@@ -115,6 +115,20 @@ export function buyLeadsHref(signedIn: boolean): string {
   return signedIn ? BUY_LEADS_CONSOLE : BUY_LEADS_PUBLIC;
 }
 
+/**
+ * The account control in the utility strip and the drawer.
+ *
+ * It said "Sign in" whether or not anybody was signed in, which is a link that
+ * lies to half the people who read it. Same cookie read as `buyLeadsHref`: not
+ * an authorisation, just what the control should say.
+ */
+export const ACCOUNT_SIGNED_OUT = { href: "/auth", label: "Sign in" } as const;
+export const ACCOUNT_SIGNED_IN = { href: "/account", label: "My account" } as const;
+
+export function accountLink(signedIn: boolean): { readonly href: string; readonly label: string } {
+  return signedIn ? ACCOUNT_SIGNED_IN : ACCOUNT_SIGNED_OUT;
+}
+
 const under = (pathname: string, route: string) =>
   pathname === route || pathname.startsWith(`${route}/`);
 

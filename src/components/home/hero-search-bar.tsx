@@ -4,7 +4,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
 import type { AreaOption } from "@/components/location/area-picker";
 import { LocationDropdown } from "./location-dropdown";
-import { ResultCountDropdown, type DropdownOption } from "./result-count-dropdown";
+import {
+  BAR_CLASS,
+  ResultCountDropdown,
+  barFieldClass,
+  type DropdownOption,
+} from "./result-count-dropdown";
 import {
   BHK_OPTIONS,
   FACET_KEYS,
@@ -220,17 +225,12 @@ export function HeroSearchBar({
       /* The glass: a translucent surface over the banner, blurred, with the
          shadow doing the lifting. `supports` keeps the surface opaque where
          backdrop-filter is unavailable, so the text never sits on a
-         half-transparent background it cannot be read against. */
-      className={[
-        "relative flex items-stretch rounded-[999px] bg-white/95 p-[8px]",
-        // Softer than the reference's 0 14px 40px / 35%. At that strength the
-        // shadow read as a dark band under the bar rather than as lift,
-        // especially now that the bar sits on the photograph's edge instead
-        // of below it.
-        "shadow-[0_8px_24px_rgba(20,10,50,0.18)]",
-        "supports-[backdrop-filter:blur(0px)]:bg-white/85 supports-[backdrop-filter:blur(0px)]:backdrop-blur-[14px]",
-        "max-[980px]:flex-col max-[980px]:rounded-[22px] max-[980px]:p-[10px]",
-      ].join(" ")}
+         half-transparent background it cannot be read against.
+
+         Shared with the search page's bar — see BAR_CLASS. The shadow is
+         softer than the reference's 0 14px 40px / 35%: at that strength it
+         read as a dark band under the bar rather than as lift. */
+      className={BAR_CLASS}
     >
       <Field last={false}>
         <LocationDropdown
@@ -395,19 +395,7 @@ export function HeroSearchBar({
  * instead of pushing its neighbours out of the bar.
  */
 function Field({ children, last }: { children: React.ReactNode; last: boolean }) {
-  return (
-    <div
-      className={[
-        "relative flex min-w-0 flex-1 basis-0 flex-col gap-[2px] px-[18px] py-[8px]",
-        last ? "" : "border-r border-line",
-        "max-[1100px]:px-[12px]",
-        "max-[980px]:flex-none max-[980px]:border-r-0 max-[980px]:border-b max-[980px]:border-line",
-        "max-[980px]:px-[12px] max-[980px]:py-[10px]",
-      ].join(" ")}
-    >
-      {children}
-    </div>
-  );
+  return <div className={barFieldClass(last)}>{children}</div>;
 }
 
 function NumberField({

@@ -45,12 +45,58 @@ export const TRIGGER_CLASS = [
 export const TRIGGER_OPEN_CLASS =
   "bg-brand/[0.07] shadow-[0_0_0_2px_var(--color-brand),0_0_0_5px_rgba(120,65,155,0.2)]";
 
-/** The floating panel, which opens upward because the bar sits low. */
+/**
+ * The bar itself, and one of its fields.
+ *
+ * Shared because two bars that look alike by coincidence stop looking alike
+ * the first time one of them is touched. The homepage's sits on the hero
+ * photograph and submits; the search page's sits on the page background and
+ * navigates on every change. Everything else about them is the same, and that
+ * sameness lives here.
+ */
+export const BAR_CLASS = [
+  "relative flex items-stretch rounded-[999px] bg-white/95 p-[8px]",
+  "shadow-[0_8px_24px_rgba(20,10,50,0.18)]",
+  "supports-[backdrop-filter:blur(0px)]:bg-white/85 supports-[backdrop-filter:blur(0px)]:backdrop-blur-[14px]",
+  "max-[980px]:flex-col max-[980px]:rounded-[22px] max-[980px]:p-[10px]",
+].join(" ");
+
+export function barFieldClass(last: boolean): string {
+  return [
+    "relative flex min-w-0 flex-1 basis-0 flex-col gap-[2px] px-[18px] py-[8px]",
+    last ? "" : "border-r border-line",
+    "max-[1100px]:px-[12px]",
+    "max-[980px]:flex-none max-[980px]:border-r-0 max-[980px]:border-b max-[980px]:border-line",
+    "max-[980px]:px-[12px] max-[980px]:py-[10px]",
+  ].join(" ");
+}
+
+/**
+ * The floating panel.
+ *
+ * Upward by default, because the homepage's bar sits low on the hero and a
+ * panel below it would open off the fold. The search page's bar sits at the
+ * top of the page, where upward would open off the screen entirely — so it
+ * passes `placement="down"`.
+ */
 export const PANEL_CLASS = [
   "absolute bottom-[calc(100%+14px)] z-30 min-w-[250px] rounded-[14px] border border-line",
   "bg-white p-[6px] shadow-[0_16px_40px_rgba(30,15,60,0.28)]",
   "max-[980px]:static max-[980px]:mt-[10px] max-[980px]:w-auto max-[980px]:min-w-0 max-[980px]:shadow-none",
 ].join(" ");
+
+export const PANEL_DOWN_CLASS = [
+  "absolute top-[calc(100%+14px)] z-30 min-w-[250px] rounded-[14px] border border-line",
+  "bg-white p-[6px] shadow-[0_16px_40px_rgba(30,15,60,0.28)]",
+  "max-[980px]:static max-[980px]:mt-[10px] max-[980px]:w-auto max-[980px]:min-w-0 max-[980px]:shadow-none",
+].join(" ");
+
+export type PanelPlacement = "up" | "down";
+
+/** The panel classes for a placement. */
+export function panelClass(placement: PanelPlacement): string {
+  return placement === "down" ? PANEL_DOWN_CLASS : PANEL_CLASS;
+}
 
 /** One row in a panel. */
 export const OPTION_CLASS =
@@ -94,6 +140,8 @@ export function ResultCountDropdown({
   displayOverride,
   /** Right-aligns the panel, for the last field in the bar. */
   alignEnd = false,
+  /** Which way the panel opens. See PANEL_CLASS. */
+  placement = "up",
   onChange,
   children,
 }: {
@@ -104,6 +152,7 @@ export function ResultCountDropdown({
   counts: Record<string, number | null> | null;
   displayOverride?: string;
   alignEnd?: boolean;
+  placement?: PanelPlacement;
   onChange: (next: string) => void;
   /** A popover anchored to this field, e.g. the custom range inputs. */
   children?: React.ReactNode;
@@ -232,7 +281,7 @@ export function ResultCountDropdown({
           id={panelId}
           role="listbox"
           aria-labelledby={labelId}
-          className={[PANEL_CLASS, alignEnd ? "right-0" : "left-0"].join(" ")}
+          className={[panelClass(placement), alignEnd ? "right-0" : "left-0"].join(" ")}
         >
           {options.map((option, index) => {
             const isSelected = index === selected;

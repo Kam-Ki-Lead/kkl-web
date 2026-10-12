@@ -10,6 +10,12 @@ import {
   localIndianMobile,
   safeNext,
 } from "@/lib/auth/contract";
+import { isDemoMobile } from "@/lib/auth/demo-access";
+import {
+  demoSignInAllowed,
+  endDemoSession,
+  startDemoSession,
+} from "@/lib/auth/demo-session";
 import {
   clearChallenge,
   exchangeCode,
@@ -74,6 +80,16 @@ export async function requestCode(_previous: OtpState, formData: FormData): Prom
         mobile,
         error: "Verification is not available yet. Please try again later.",
       };
+    }
+    /*
+     * The review number signs in here, with no code step at all — see
+     * demo-session.ts for the three conditions that have to hold, and for why
+     * the cookie it writes is not a credential. Every other number still goes
+     * to the code step and still authenticates nobody.
+     */
+    if (isDemoMobile(mobile) && demoSignInAllowed()) {
+      await startDemoSession();
+      redirect(safeNext(String(formData.get("next") ?? "")));
     }
     return { step: "code", mobile };
   }
@@ -154,6 +170,9 @@ export async function verifyCode(previous: OtpState, formData: FormData): Promis
 
 /** Ends this session, or every session, then returns to sign-in. */
 export async function signOut(formData: FormData): Promise<void> {
+  // Unconditional: a stale demo cookie on a server that no longer allows one
+  // is ignored by `hasDemoSession`, but there is no reason to leave it behind.
+  await endDemoSession();
   if (authStoreKind() === "backend") {
     try {
       await revokeSession(formData.get("everywhere") === "1");

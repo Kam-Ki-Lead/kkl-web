@@ -1,6 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  accountLink,
   BUY_LEADS_CONSOLE,
   BUY_LEADS_PUBLIC,
   CITIES,
@@ -197,5 +198,12 @@ describe('the header', { concurrency: false }, () => {
     const value = new URLSearchParams(href.split('?')[1]).get('q');
     assert.equal(value, 'a&b=c#d /e', 'and comes back out intact');
     assert.equal(href.includes('#'), false, 'nothing escapes into the fragment');
+  });
+
+  test('the account control follows the session rather than always saying "Sign in"', () => {
+    // It said "Sign in" to somebody already signed in, which is a link that
+    // lies to half the people who read it.
+    assert.deepEqual(accountLink(false), { href: '/auth', label: 'Sign in' });
+    assert.deepEqual(accountLink(true), { href: '/account', label: 'My account' });
   });
 });
