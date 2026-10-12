@@ -18,7 +18,10 @@ const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3811';
 const CASES = [
   { context: 'page title', path: '/property/greenview-residency', text: 'Greenview Residency', size: 34, weight: '800', style: '.t-title' },
   { context: 'public section heading', path: '/', text: 'Featured properties', size: 26, weight: '700', style: '.t-section-title' },
-  { context: 'public section heading', path: '/', text: 'Browse by locality', size: 26, weight: '700', style: '.t-section-title' },
+  // The locality section is now a pill cloud with its own display heading, at
+  // the 36px the brief for it specified rather than the 26px the other section
+  // headings draw. Measured at 1440, where clamp(26px, 4vw, 36px) is 36.
+  { context: 'pill-cloud section heading', path: '/', text: 'Popular localities', size: 36, weight: '700', style: 'locality-pills' },
   // Scoped to the header: "Dashboard" and "My properties" are also rail
   // links, and an unscoped search finds the rail's 15px copy first.
   { context: 'console header title', path: '/seller', text: 'Dashboard', size: 22, weight: '700', style: '.t-console-title', within: 'header' },
@@ -27,11 +30,19 @@ const CASES = [
   { context: 'console panel heading', path: '/seller', text: 'New leads matching your areas', size: 18, weight: '700', style: '.t-panel-title' },
   { context: 'console panel heading', path: '/builder', text: 'Recent enquiries on your listings', size: 18, weight: '700', style: '.t-panel-title' },
   { context: 'console panel heading', path: '/admin', text: 'Needs attention', size: 18, weight: '700', style: '.t-panel-title' },
-  { context: 'listing card title', path: '/', text: 'Greenview Residency', size: 18, weight: '700', style: '.t-panel-title' },
+  // The white listing card now lives on the search results, not the homepage:
+  // P-01's featured row was restyled into photo-overlay cards, whose brief sets
+  // the name at 17px. Both are recorded, each measured where it is drawn.
+  { context: 'listing card title', path: '/search', text: 'Greenview Residency', size: 18, weight: '700', style: '.t-panel-title' },
+  { context: 'photo-overlay card name', path: '/', text: 'Greenview Residency', size: 17, weight: '700', style: 'property-photo-card' },
   { context: 'card title', path: '/seller', text: 'Credits', size: 17, weight: '700', style: '.t-card-title' },
 ];
 
-const browser = await chromium.launch();
+// KKL_CHROME names the browser binary when the environment has one outside
+// Playwright's own download directory, as the other verify scripts do.
+const browser = await chromium.launch(
+  process.env.KKL_CHROME ? { executablePath: process.env.KKL_CHROME } : {},
+);
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
 const page = await ctx.newPage();
 let failures = 0;

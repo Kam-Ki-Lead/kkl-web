@@ -7,6 +7,7 @@ import { ProjectRow } from "@/components/property/project-row";
 import { PropertyPhotoCard } from "@/components/property/property-photo-card";
 import { PropertyImage } from "@/components/property/property-image";
 import { HeroSearchBar } from "@/components/home/hero-search-bar";
+import { LocalityPills } from "@/components/home/locality-pills";
 import { Card, SectionHeader } from "@/components/ui/card";
 import { ButtonLink, AccentButtonLink } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/states";
@@ -161,29 +162,12 @@ export default async function HomePage() {
             </div>
           </section>
 
-          <section className="mb-[32px]">
-            <SectionHeader
-              title="Browse by locality"
-              level="page"
-              subtitle={`${home.totalPublishedListings} listings across ${spellSmallNumber(home.localitiesCovered)} localities`}
-            />
-            <div className="grid grid-cols-3 gap-[12px] max-[900px]:grid-cols-2">
-              {home.localities.map((locality) => (
-                <Link
-                  key={locality.id}
-                  href={`/search?locality=${locality.id}`}
-                  className="rounded-[10px] border border-line bg-tint px-[16px] py-[14px] hover:border-brand"
-                >
-                  <span className="block font-[family-name:var(--font-heading)] text-[16px] font-bold tracking-[-0.01em] text-ink">
-                    {locality.name}
-                  </span>
-                  <span className="t-caption text-muted">
-                    {locality.listingCount} {locality.listingCount === 1 ? "listing" : "listings"}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
+          <LocalityPills
+            localities={home.localities}
+            totalListings={home.totalPublishedListings}
+            totalLocalities={home.localitiesCovered}
+            subtitle={`${home.totalPublishedListings} listings across ${spellSmallNumber(home.localitiesCovered)} localities`}
+          />
         </div>
 
         <aside className="flex flex-col gap-[16px]">
