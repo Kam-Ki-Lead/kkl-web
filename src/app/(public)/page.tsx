@@ -8,6 +8,7 @@ import { PropertyPhotoCard } from "@/components/property/property-photo-card";
 import { PropertyImage } from "@/components/property/property-image";
 import { HeroSearchBar } from "@/components/home/hero-search-bar";
 import { LocalityPills } from "@/components/home/locality-pills";
+import { SHOW_POPULAR_LOCALITIES } from "@/lib/domain/locality-pills";
 import { Card, SectionHeader } from "@/components/ui/card";
 import { ButtonLink, AccentButtonLink } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/states";
@@ -162,12 +163,15 @@ export default async function HomePage() {
             </div>
           </section>
 
-          <LocalityPills
-            localities={home.localities}
-            totalListings={home.totalPublishedListings}
-            totalLocalities={home.localitiesCovered}
-            subtitle={`${home.totalPublishedListings} listings across ${spellSmallNumber(home.localitiesCovered)} localities`}
-          />
+          {/* Hidden for now — see SHOW_POPULAR_LOCALITIES. */}
+          {SHOW_POPULAR_LOCALITIES ? (
+            <LocalityPills
+              localities={home.localities}
+              totalListings={home.totalPublishedListings}
+              totalLocalities={home.localitiesCovered}
+              subtitle={`${home.totalPublishedListings} listings across ${spellSmallNumber(home.localitiesCovered)} localities`}
+            />
+          ) : null}
         </div>
 
         <aside className="flex flex-col gap-[16px]">

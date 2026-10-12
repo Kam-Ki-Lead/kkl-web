@@ -18,10 +18,9 @@ const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:3811';
 const CASES = [
   { context: 'page title', path: '/property/greenview-residency', text: 'Greenview Residency', size: 34, weight: '800', style: '.t-title' },
   { context: 'public section heading', path: '/', text: 'Featured properties', size: 26, weight: '700', style: '.t-section-title' },
-  // The locality section is now a pill cloud with its own display heading, at
-  // the 36px the brief for it specified rather than the 26px the other section
-  // headings draw. Measured at 1440, where clamp(26px, 4vw, 36px) is 36.
-  { context: 'pill-cloud section heading', path: '/', text: 'Popular localities', size: 36, weight: '700', style: 'locality-pills' },
+  // The locality pill cloud is hidden for now (SHOW_POPULAR_LOCALITIES), so its
+  // 36px heading is not on any screen to measure. Its case comes back with it.
+  { context: 'public section heading', path: '/', text: 'Featured projects', size: 26, weight: '700', style: '.t-section-title' },
   // Scoped to the header: "Dashboard" and "My properties" are also rail
   // links, and an unscoped search finds the rail's 15px copy first.
   { context: 'console header title', path: '/seller', text: 'Dashboard', size: 22, weight: '700', style: '.t-console-title', within: 'header' },

@@ -77,6 +77,20 @@ const ctx = await browser.newContext({ viewport: { width: 1280, height: 1000 }, 
 const page = await ctx.newPage();
 await page.addInitScript(inPage);
 await page.goto(B, { waitUntil: "networkidle" });
+
+/*
+ * The section is behind SHOW_POPULAR_LOCALITIES, which is off at the client's
+ * request. With it off there is nothing to measure, so this reports that and
+ * stops — rather than failing, which would read as the component being broken,
+ * or passing silently, which would hide that the checks are not running.
+ */
+if ((await page.locator(SECTION).count()) === 0) {
+  console.log('SKIP  the pill cloud is hidden by SHOW_POPULAR_LOCALITIES — 0 of its checks ran');
+  console.log('      Turn the flag on in src/lib/domain/locality-pills.ts to run them again.');
+  await browser.close();
+  process.exit(0);
+}
+
 await page.locator(SECTION).scrollIntoViewIfNeeded();
 await page.waitForTimeout(400);
 

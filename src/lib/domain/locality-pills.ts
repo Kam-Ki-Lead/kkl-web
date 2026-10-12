@@ -9,6 +9,15 @@ import type { LocalitySummary } from "@/lib/services/contracts";
  * apart.
  */
 
+/**
+ * Whether the homepage draws the section at all.
+ *
+ * Off for now, at the client's request. The section, its tests and its browser
+ * checks are all intact behind this one flag — turning it back on is this line
+ * and nothing else, which is why the section was not deleted.
+ */
+export const SHOW_POPULAR_LOCALITIES = false;
+
 /** The section's heading. One constant, so renaming it is one edit. */
 export const POPULAR_LOCALITIES_HEADING = "Popular localities";
 
