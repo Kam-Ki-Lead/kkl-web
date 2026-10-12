@@ -44,6 +44,16 @@ export const DEMO_MOBILE = "8971741611";
 /** The variable that turns the shortcut on where it is not on by default. */
 export const DEMO_SIGNIN_ENV = "KKL_DEMO_SIGNIN";
 
+/**
+ * Where a demo sign-in lands.
+ *
+ * The public site, not /account. A demo session holds no backend token, so
+ * every account screen asks the API as the account, is refused, and redirects
+ * back to sign-in — which is what /account did, leaving the shortcut looking
+ * like it had done nothing.
+ */
+export const DEMO_LANDING = "/";
+
 export type DemoAccessInputs = {
   /** True when screens are rendering sample fixtures rather than real data. */
   readonly sampleData: boolean;

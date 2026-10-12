@@ -1,6 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  DEMO_LANDING,
   DEMO_MOBILE,
   DEMO_SIGNIN_ENV,
   demoSignInIsAllowed,
@@ -116,5 +117,15 @@ describe('the review sign-in shortcut', { concurrency: false }, () => {
 
   test('the number is the one that was asked for', () => {
     assert.equal(DEMO_MOBILE, '8971741611');
+  });
+
+  test('it lands on the public site, not on an account screen', () => {
+    // /account reads from kkl-backend as the account. A demo session has no
+    // token, so that read is refused and redirects back to sign-in — which is
+    // what happened: the shortcut appeared to do nothing and landed on a
+    // blank bounce at /auth?next=%2Faccount.
+    assert.equal(DEMO_LANDING, '/');
+    assert.equal(DEMO_LANDING.startsWith('/account'), false);
+    assert.equal(DEMO_LANDING.startsWith('/seller'), false);
   });
 });

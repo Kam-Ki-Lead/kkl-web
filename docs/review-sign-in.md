@@ -44,7 +44,32 @@ Staging is the fourth row: `KKL_ENV=review`, `KKL_DATA_SOURCE=sample`,
 ## What it actually does
 
 `requestCode` recognises the number before it reaches either the sample branch
-or the backend call, writes a cookie, and redirects. There is no code step.
+or the backend call, writes a cookie, and redirects to the homepage. There is
+no code step.
+
+## What it does NOT do, on a server wired to kkl-backend
+
+**It does not open the account screens.** This is the important limit, and it
+is not a bug to be fixed in kkl-web.
+
+A demo session holds no backend token, because it is not a credential. Every
+screen under `/account` (and the Seller console) reads from kkl-backend *as the
+account*; that read is refused, and `redirectForAuth` sends the visitor back to
+`/auth`. Landing on `/account` therefore produced an immediate bounce to
+`/auth?next=%2Faccount` and the shortcut looked like it had done nothing — which
+is why `DEMO_LANDING` is the homepage and not the requested `next`.
+
+So on staging the shortcut gives you **a signed-in public site**: the header
+says "My account", "Buy leads" points at the console rather than the brochure,
+and anything rendered from sample fixtures works. It does not give you a
+working account area.
+
+Getting that needs a real session, which only kkl-backend can issue — a test
+account whose code is fixed, or a one-time-code provider configured for the
+staging environment. Both are kkl-backend decisions.
+
+On a fully sample server there is no such limit: nothing calls a backend, so
+everything renders.
 
 The cookie (`kkl_demo_session`) is **not an access token**:
 

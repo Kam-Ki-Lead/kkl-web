@@ -53,6 +53,7 @@ if (EXPECT === "on") {
   await page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 20000 });
   const took = Date.now() - started;
   is("the number signs in with no code step", page.url().includes("/auth"), false);
+  is("and lands on the public site, not an account screen", new URL(page.url()).pathname, "/");
   // The backend address points at a closed port. Reaching it would time out;
   // this returns immediately, which is the evidence that it was never called.
   is("without waiting on the backend it was never going to reach", took < 6000, true);

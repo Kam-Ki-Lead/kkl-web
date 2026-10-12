@@ -163,6 +163,9 @@ await page.locator('button[type="submit"]').first().click();
 await page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 20000 });
 await page.waitForLoadState("networkidle");
 is("the number signs in with no code step", page.url().includes("/auth"), false);
+// The public site, not /account: a demo session holds no backend token, so an
+// account screen would refuse the read and bounce straight back to sign-in.
+is("and lands on the public site", new URL(page.url()).pathname, "/");
 info(`landed on ${new URL(page.url()).pathname}`);
 
 await page.goto(B, { waitUntil: "networkidle" });

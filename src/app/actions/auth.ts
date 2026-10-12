@@ -10,7 +10,7 @@ import {
   localIndianMobile,
   safeNext,
 } from "@/lib/auth/contract";
-import { isDemoMobile } from "@/lib/auth/demo-access";
+import { DEMO_LANDING, isDemoMobile } from "@/lib/auth/demo-access";
 import {
   demoSignInAllowed,
   endDemoSession,
@@ -86,7 +86,20 @@ export async function requestCode(_previous: OtpState, formData: FormData): Prom
    */
   if (isDemoMobile(mobile) && demoSignInAllowed()) {
     await startDemoSession();
-    redirect(safeNext(String(formData.get("next") ?? "")));
+    /*
+     * The homepage, never the requested `next`.
+     *
+     * `safeNext("")` defaults to /account, and on a server whose account
+     * screens read from kkl-backend — which is the server this shortcut exists
+     * for — /account asks the API as the account, has no token to ask with,
+     * and redirects straight back to /auth?next=%2Faccount. The shortcut
+     * appeared to do nothing and landed on a blank bounce.
+     *
+     * Every `next` worth defaulting to is behind that same read, so this does
+     * not try to pick a better one. A demo session is a signed-in PUBLIC site,
+     * and the homepage is the honest landing for it.
+     */
+    redirect(DEMO_LANDING);
   }
 
   if (authStoreKind() !== "backend") {
