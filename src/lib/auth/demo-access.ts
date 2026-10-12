@@ -18,22 +18,31 @@
  *
  * THE GATE
  *
- * Three independent conditions, all of which must hold:
+ * Production refuses it. Always, whatever else is set, with no override — and
+ * on its own line below rather than inside a boolean expression, so no later
+ * change can bury it in an `||`.
  *
- *   1. The data source is `sample`. On a server reading the real backend the
- *      shortcut is off, whatever else is set.
- *   2. `KKL_AUTH` is not `backend`. A server doing real sign-in does not also
- *      offer a bypass.
- *   3. The deployment does not declare itself production.
+ * Below production the shortcut exists in one of two situations:
  *
- * `assertDeploymentSafe()` already refuses production + sample outright, so (1)
- * alone would do. (2) and (3) are here because an auth bypass is the one place
- * where "one guard was enough" is not a defence anybody wants to make
- * afterwards.
+ *   - A sample build that is not doing real sign-in. There is nothing to
+ *     bypass: that build already accepts any six digits.
+ *   - A deployment that switched it on deliberately with `KKL_DEMO_SIGNIN`.
+ *     This is how staging gets it. Staging signs in through kkl-backend and
+ *     has no one-time-code provider configured, so without this there is no
+ *     way into a signed-in screen at all.
+ *
+ * The opt-in is its own variable rather than a relaxation of the first case,
+ * so that turning the shortcut on is a decision somebody made and can be read
+ * off the environment — not a side effect of how the rest of the server
+ * happens to be configured. A server that does not set it behaves exactly as
+ * it did before this existed.
  */
 
 /** The demo number, as a person types it. */
 export const DEMO_MOBILE = "8971741611";
+
+/** The variable that turns the shortcut on where it is not on by default. */
+export const DEMO_SIGNIN_ENV = "KKL_DEMO_SIGNIN";
 
 export type DemoAccessInputs = {
   /** True when screens are rendering sample fixtures rather than real data. */
@@ -42,14 +51,30 @@ export type DemoAccessInputs = {
   readonly authBackend: boolean;
   /** True when the deployment declares itself production. */
   readonly production: boolean;
+  /** True when `KKL_DEMO_SIGNIN` turns the shortcut on explicitly. */
+  readonly optIn: boolean;
 };
 
 export function demoSignInIsAllowed({
   sampleData,
   authBackend,
   production,
+  optIn,
 }: DemoAccessInputs): boolean {
-  return sampleData && !authBackend && !production;
+  if (production) return false;
+  return optIn || (sampleData && !authBackend);
+}
+
+/**
+ * Whether the variable's value turns it on.
+ *
+ * An explicit affirmative only. An empty string, "0", "false" or "off" — all
+ * of which a deployment dashboard will cheerfully store when somebody meant to
+ * remove the variable — leave the shortcut off.
+ */
+export function readDemoSignInOptIn(value: string | undefined): boolean {
+  const text = (value ?? "").trim().toLowerCase();
+  return text === "on" || text === "1" || text === "true" || text === "yes";
 }
 
 /** True for the demo number, however it was typed. */

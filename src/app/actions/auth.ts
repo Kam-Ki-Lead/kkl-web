@@ -73,6 +73,22 @@ export async function requestCode(_previous: OtpState, formData: FormData): Prom
     return { step: "mobile", mobile: String(formData.get("mobile") ?? "").replace(/\D/g, ""), error: "Enter a 10-digit Indian mobile number." };
   }
 
+  /*
+   * The review number signs in here, with no code step at all.
+   *
+   * Ahead of the branch below, not inside it, because the server this is for
+   * — staging — has sign-in switched to kkl-backend and no one-time-code
+   * provider configured, so the branch below would ask a real API to send a
+   * code it cannot send. `demoSignInAllowed()` is what decides whether this
+   * runs; see demo-access.ts for the rule and for why the cookie it writes is
+   * not a credential. Every other number falls through, and on a server where
+   * the shortcut is off this number does too.
+   */
+  if (isDemoMobile(mobile) && demoSignInAllowed()) {
+    await startDemoSession();
+    redirect(safeNext(String(formData.get("next") ?? "")));
+  }
+
   if (authStoreKind() !== "backend") {
     if (!runtimeConfig.isSampleMode) {
       return {
@@ -80,16 +96,6 @@ export async function requestCode(_previous: OtpState, formData: FormData): Prom
         mobile,
         error: "Verification is not available yet. Please try again later.",
       };
-    }
-    /*
-     * The review number signs in here, with no code step at all — see
-     * demo-session.ts for the three conditions that have to hold, and for why
-     * the cookie it writes is not a credential. Every other number still goes
-     * to the code step and still authenticates nobody.
-     */
-    if (isDemoMobile(mobile) && demoSignInAllowed()) {
-      await startDemoSession();
-      redirect(safeNext(String(formData.get("next") ?? "")));
     }
     return { step: "code", mobile };
   }

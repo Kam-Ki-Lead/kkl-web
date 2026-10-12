@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
 import { runtimeConfig } from "@/lib/config/runtime";
 import { authStoreKind } from "@/lib/services/backend/config";
-import { DEMO_MOBILE, demoSignInIsAllowed } from "@/lib/auth/demo-access";
+import {
+  DEMO_MOBILE,
+  DEMO_SIGNIN_ENV,
+  demoSignInIsAllowed,
+  readDemoSignInOptIn,
+} from "@/lib/auth/demo-access";
 
 /**
  * The cookie behind the review sign-in shortcut, and the one place that reads
@@ -23,6 +28,10 @@ export function demoSignInAllowed(): boolean {
     sampleData: runtimeConfig.isSampleMode,
     authBackend: authStoreKind() === "backend",
     production: runtimeConfig.deploymentEnv === "production",
+    // Read from the process on every call, deliberately without a
+    // NEXT_PUBLIC_ prefix: a value frozen into the bundle at build time would
+    // keep a shortcut alive on a server that had since turned it off.
+    optIn: readDemoSignInOptIn(process.env[DEMO_SIGNIN_ENV]),
   });
 }
 
