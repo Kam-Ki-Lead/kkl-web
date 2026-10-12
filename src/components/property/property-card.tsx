@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { PropertySummary } from "@/lib/domain/types";
 import { formatConfigurations, formatListingPrice } from "@/lib/format";
-import { Chip } from "@/components/ui/chip";
 import { ButtonLink } from "@/components/ui/button";
 import { PropertyImage } from "./property-image";
 
@@ -126,57 +125,5 @@ function ShortlistButton({ propertyTitle }: { propertyTitle: string }) {
     >
       <span aria-hidden="true">♡</span>
     </Link>
-  );
-}
-
-/** The wide, horizontal variant used by "Featured projects" on the homepage. */
-export function ProjectCard({ property }: { property: PropertySummary }) {
-  const price = formatListingPrice(property);
-  const locality = property.locationPath.slice(-2).join(", ");
-  const ready = property.construction === "ready_to_move";
-
-  return (
-    <article className="flex overflow-hidden rounded-[12px] border border-line bg-white max-[560px]:flex-col">
-      <div className="relative w-[172px] flex-none self-stretch max-[560px]:w-full">
-        <PropertyImage
-          media={property.coverImage}
-          fill
-          label={`${property.title} — photograph pending`}
-          className="max-[560px]:aspect-[4/3]"
-        />
-        <ShortlistButton propertyTitle={property.title} />
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col p-[14px]">
-        <span className="self-start">
-          {property.newLaunch ? (
-            <Chip tone="neutral">New launch</Chip>
-          ) : (
-            <Chip tone={ready ? "success" : "warning"}>
-              {ready ? "Ready to move" : "Under construction"}
-            </Chip>
-          )}
-        </span>
-        <h3 className="t-panel-title mt-[8px] text-ink">
-          <Link href={`/property/${property.slug}`} className="hover:text-brand">
-            {property.title}
-          </Link>
-        </h3>
-        <p className="t-caption mt-[2px] text-muted">{locality}</p>
-        <p className="mt-[8px] text-[15px] text-body">
-          {formatConfigurations(property.configurations)} apartments
-          {property.areaSummary ? ` · ${property.areaSummary}` : ""}
-        </p>
-        {/* The wide project card leads its price at 20px/800 on P-01. */}
-        {price ? (
-          <p className="mt-[8px] font-[family-name:var(--font-heading)] text-[20px] font-extrabold leading-[1.2] tracking-[-0.025em] text-ink">
-            {price}
-          </p>
-        ) : null}
-        {property.possession ? (
-          <p className="text-[14px] text-muted">Possession {property.possession}</p>
-        ) : null}
-      </div>
-    </article>
   );
 }

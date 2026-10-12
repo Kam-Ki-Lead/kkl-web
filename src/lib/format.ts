@@ -53,6 +53,22 @@ export function formatListingPrice(listing: {
   return formatPriceRange(listing.price, { perMonth: listing.transaction === "rent" });
 }
 
+/**
+ * "₹16,500 – ₹34,000/month" -> the rate, and the unit to set smaller beside it.
+ *
+ * Split rather than reformatted, so the number is exactly what
+ * `formatListingPrice` produced — including the "onwards" and "Up to" forms,
+ * whose tail rides along with the unit. Shared, because two cards parsing the
+ * same string two ways is how they stop agreeing.
+ */
+export function splitPricePerMonth(price: string | null): { main: string; perMonth: string } {
+  if (!price) return { main: "", perMonth: "" };
+  const at = price.indexOf("/month");
+  return at === -1
+    ? { main: price, perMonth: "" }
+    : { main: price.slice(0, at), perMonth: price.slice(at) };
+}
+
 /** "2, 3 BHK" */
 export function formatConfigurations(configurations: readonly string[]): string {
   if (configurations.length === 0) return "";

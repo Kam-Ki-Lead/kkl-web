@@ -3,7 +3,7 @@ import { LeadSale } from "@/components/home/lead-sale";
 import Link from "next/link";
 import { getServices } from "@/lib/services";
 import { formatListingPrice } from "@/lib/format";
-import { ProjectCard } from "@/components/property/property-card";
+import { ProjectRow } from "@/components/property/project-row";
 import { PropertyPhotoCard } from "@/components/property/property-photo-card";
 import { PropertyImage } from "@/components/property/property-image";
 import { HeroSearchBar } from "@/components/home/hero-search-bar";
@@ -145,9 +145,10 @@ export default async function HomePage() {
                 </Link>
               }
             />
-            <div className="grid grid-cols-2 gap-[18px] max-[900px]:grid-cols-1">
+            {/* One column, always: these are list rows, not tiles. */}
+            <div className="grid gap-[20px]">
               {home.featuredProjects.map((property) => (
-                <ProjectCard key={property.id} property={property} />
+                <ProjectRow key={property.id} property={property} />
               ))}
             </div>
           </section>

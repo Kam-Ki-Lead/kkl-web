@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { PropertySummary } from "@/lib/domain/types";
-import { formatConfigurations, formatListingPrice } from "@/lib/format";
+import { formatConfigurations, formatListingPrice, splitPricePerMonth } from "@/lib/format";
 import { PropertyImage } from "./property-image";
+import { AreaIcon, ArrowIcon, BedIcon, HeartIcon, PinIcon } from "./icons";
 
 /**
  * C-06, photo-overlay treatment — the "Featured properties" row on P-01.
@@ -32,7 +33,7 @@ import { PropertyImage } from "./property-image";
  */
 export function PropertyPhotoCard({ property }: { property: PropertySummary }) {
   const price = formatListingPrice(property);
-  const { main, perMonth } = splitPerMonth(price);
+  const { main, perMonth } = splitPricePerMonth(price);
   const locality = property.locationPath.slice(-2).join(", ");
   const bhk = formatConfigurations(property.configurations);
   const area = property.areaSummary;
@@ -193,21 +194,6 @@ export function PropertyPhotoCard({ property }: { property: PropertySummary }) {
 const CHIP =
   "inline-flex items-center gap-[6px] rounded-[8px] bg-white/16 px-[8px] py-[5px] text-[12px] font-semibold backdrop-blur-[8px]";
 
-/**
- * "₹16,500 – ₹34,000/month" -> the rate, and the unit set smaller beside it.
- *
- * Split rather than reformatted, so the number is still exactly what
- * `formatListingPrice` produced — including the "onwards" and "Up to" forms,
- * whose tail rides along with the unit.
- */
-function splitPerMonth(price: string | null): { main: string; perMonth: string } {
-  if (!price) return { main: "", perMonth: "" };
-  const at = price.indexOf("/month");
-  return at === -1
-    ? { main: price, perMonth: "" }
-    : { main: price.slice(0, at), perMonth: price.slice(at) };
-}
-
 function ConstructionLine({ property }: { property: PropertySummary }) {
   const ready = property.construction === "ready_to_move";
 
@@ -259,40 +245,3 @@ function ShortlistHeart({ title }: { title: string }) {
     </Link>
   );
 }
-
-/* -- icons -------------------------------------------------------------- */
-
-const ICON = "h-[16px] w-[16px] flex-none";
-
-function icon(path: React.ReactNode, extra = "") {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className={`${ICON} ${extra}`}
-    >
-      {path}
-    </svg>
-  );
-}
-
-const HeartIcon = () => icon(<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />);
-const PinIcon = () =>
-  icon(
-    <>
-      <path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" />
-      <circle cx="12" cy="9.5" r="2.5" />
-    </>,
-  );
-const BedIcon = () => icon(<path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" />);
-const AreaIcon = () => icon(<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />);
-const ArrowIcon = () =>
-  icon(
-    <path d="M5 12h14M13 6l6 6-6 6" />,
-    "transition-transform duration-200 group-hover:translate-x-[3px] motion-reduce:transition-none motion-reduce:group-hover:translate-x-0",
-  );
