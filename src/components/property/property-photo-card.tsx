@@ -97,12 +97,12 @@ export function PropertyPhotoCard({ property }: { property: PropertySummary }) {
       {/*
         The card's shape, as a floor rather than a fixed height.
 
-        80% of the width, not the 110% this started at. The row runs the full
+        92% of the width, not the 110% this started at. The row runs the full
         frame now rather than sharing it with the 320px rail, so a card is
         ~413px across instead of ~277px; at 110% that is a 454px-tall card,
         which is a poster rather than a card and pushes the next section off
-        the first screen. 80% holds the height near where it was while the
-        card takes the width.
+        the first screen. 92% is the 80% that replaced it, raised by the 15%
+        that was asked for: a 380px card at the row's full width.
 
         A floor, because `aspect-ratio` would pin the height and a listing
         whose text runs long then either rides up over the credit or is
@@ -113,7 +113,7 @@ export function PropertyPhotoCard({ property }: { property: PropertySummary }) {
 
         Zero width, so it takes part in no other sizing.
       */}
-      <span aria-hidden="true" className="col-start-1 row-span-2 row-start-1 w-0 pt-[80%]" />
+      <span aria-hidden="true" className="col-start-1 row-span-2 row-start-1 w-0 pt-[92%]" />
 
       {/* The text block carries its own scrim, ramping in pixels from its own
           top edge, so the contrast does not depend on how tall the content
