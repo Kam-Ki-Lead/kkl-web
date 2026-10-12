@@ -82,8 +82,12 @@ export default async function HomePage() {
 
         <LeadSale />
 
-        <div className="mt-[28px] grid grid-cols-[1fr_320px] items-start gap-[24px] max-[1060px]:grid-cols-1">
-        <div>
+        {/* FULL WIDTH.
+            The lead row and the featured properties run the whole frame; the
+            role sidebar starts lower down, beside "Featured projects". Three
+            photo-overlay cards across 1280px rather than across 936px is the
+            reason the cards are a wider shape than they were. */}
+        <div className="mt-[28px]">
           <FeaturedLeads />
 
           <section className="mb-[32px]">
@@ -130,7 +134,11 @@ export default async function HomePage() {
               </StateMessage>
             )}
           </section>
+        </div>
 
+        {/* From here down the role sidebar runs alongside. */}
+        <div className="grid grid-cols-[1fr_320px] items-start gap-[24px] max-[1060px]:grid-cols-1">
+        <div>
           <section className="mb-[32px]">
             <SectionHeader
               title="Featured projects"

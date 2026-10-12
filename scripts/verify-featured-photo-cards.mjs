@@ -525,10 +525,10 @@ for (const [width, columns] of [[1280, 3], [768, 2], [390, 1]]) {
   });
   is(`at ${width}px the row is ${columns} across`, seen.perRow, columns);
   is(`at ${width}px nothing scrolls sideways`, seen.scrollable, false);
-  // 1 : 1.1 is a floor, not a fixed height — a card whose text runs long takes
+  // 1 : 0.8 is a floor, not a fixed height — a card whose text runs long takes
   // the room rather than clipping it, so the test is "no shorter than", and
   // the cards beside it match.
-  is(`at ${width}px the card is no shorter than 1:1.1`, seen.ratio <= 0.91, true);
+  is(`at ${width}px the card is no shorter than 1:0.8`, seen.ratio <= 1.251, true);
   is(`at ${width}px the cards in a row are one height`, seen.heights.length, 1);
   is(`at ${width}px the corner is 22px`, seen.radius, "22px");
   is(`at ${width}px the gap is 20px`, seen.gap, "20px");

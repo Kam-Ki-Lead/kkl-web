@@ -95,18 +95,25 @@ export function PropertyPhotoCard({ property }: { property: PropertySummary }) {
       />
 
       {/*
-        The 1 : 1.1 shape, as a floor rather than a fixed height.
+        The card's shape, as a floor rather than a fixed height.
 
-        `aspect-[1/1.1]` would pin the height, and a listing whose text runs
-        long then either rides up over the credit or is clipped at the bottom —
-        a rent range wraps to two lines and both happened. This spacer spans
-        both rows and is 110% of the card's width tall, so the card is that
-        tall OR as tall as its content needs, whichever is more, and the grid
-        row stretches its neighbours to match.
+        80% of the width, not the 110% this started at. The row runs the full
+        frame now rather than sharing it with the 320px rail, so a card is
+        ~413px across instead of ~277px; at 110% that is a 454px-tall card,
+        which is a poster rather than a card and pushes the next section off
+        the first screen. 80% holds the height near where it was while the
+        card takes the width.
+
+        A floor, because `aspect-ratio` would pin the height and a listing
+        whose text runs long then either rides up over the credit or is
+        clipped at the bottom — a rent range wraps to two lines and both
+        happened. This spacer spans both rows, so the card is this tall OR as
+        tall as its content needs, whichever is more, and the grid row
+        stretches its neighbours to match.
 
         Zero width, so it takes part in no other sizing.
       */}
-      <span aria-hidden="true" className="col-start-1 row-span-2 row-start-1 w-0 pt-[110%]" />
+      <span aria-hidden="true" className="col-start-1 row-span-2 row-start-1 w-0 pt-[80%]" />
 
       {/* The text block carries its own scrim, ramping in pixels from its own
           top edge, so the contrast does not depend on how tall the content
