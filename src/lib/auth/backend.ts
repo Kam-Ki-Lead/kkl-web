@@ -1,7 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { cookies } from "next/headers";
 import { ServiceError } from "@/lib/services/contracts";
-import { hasDemoSession } from "@/lib/auth/demo-session";
 import { isFrameworkSignal } from "@/lib/services/backend/session";
 import { authBackendBaseUrl } from "@/lib/services/backend/config";
 import {
@@ -253,12 +252,27 @@ export async function refreshSession(): Promise<boolean> {
   return true;
 }
 
+/**
+ * Whether this browser holds a session that can call kkl-backend.
+ *
+ * A TOKEN, and nothing else. The review demo cookie is deliberately not
+ * counted here, and must not be: callers use this as the precondition for
+ * calling the backend as the account, so a cookie that cannot authenticate
+ * passing this test sends them into a call that is refused.
+ *
+ * It did, briefly, and the result was a reload cycle on every page: the
+ * header's shortlist read passed this guard, called the backend with no
+ * token, was refused, and `callWithBrowserSession` turned that refusal into
+ * a `redirect("/auth…")` — thrown from inside the public LAYOUT, so every
+ * page redirected to /auth, which renders the same layout, which redirected
+ * again.
+ *
+ * The demo session is presentation only. `hasDemoSession()` is read directly
+ * by the one place that needs it.
+ */
 export async function hasBrowserSession(): Promise<boolean> {
   const jar = await cookies();
-  if (jar.get(ACCESS_COOKIE)?.value || jar.get(REFRESH_COOKIE)?.value) return true;
-  // The review-only demo sign-in, which carries no credential and is refused
-  // outright on any server that is not showing sample fixtures.
-  return hasDemoSession();
+  return Boolean(jar.get(ACCESS_COOKIE)?.value || jar.get(REFRESH_COOKIE)?.value);
 }
 
 async function accessToken(): Promise<string | null> {

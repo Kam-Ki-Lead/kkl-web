@@ -79,11 +79,33 @@ The cookie (`kkl_demo_session`) is **not an access token**:
 - `hasDemoSession()` re-checks the gate on every read, so a cookie set on a
   server that allows the shortcut and carried to one that does not is ignored.
 
-It makes `hasBrowserSession()` true, which is what the public header reads to
-decide whether to say "Sign in" or "My account", and where "Buy leads" points.
-It is not authorisation: kkl-backend still authorises every request, and a
-demo session holds no token to send, so anything that genuinely calls the
-backend as an account will refuse it.
+It changes **one** thing: the public header's account control, read in
+`(public)/layout.tsx`, and only on a server whose account screens are not
+backend-gated. Nothing else in the application may consult it.
+
+That restriction is not stylistic. `hasBrowserSession()` is the precondition
+callers use before calling kkl-backend *as the account*; a cookie that cannot
+authenticate must never pass it. It did, briefly, and the result was a
+navigation loop on every page: the header's shortlist read passed the guard,
+called the backend with no token, was refused, and `callWithBrowserSession`
+turned that refusal into `redirect("/auth…")` — thrown from inside the
+**layout**, so every page went to /auth, which renders the same layout, which
+went again. Nothing cleared the cookie, so it never ended.
+
+A stale *refresh* cookie does not do this, because `/auth/refresh` clears the
+session on its way past. The demo cookie was the only state in the application
+that could report a session with neither an access nor a refresh token, which
+is why this bug belonged to it alone.
+
+`scripts/verify-no-session-loop.mjs` pins the guard's body and walks the public
+pages in a browser under four cookie states, counting navigations. It uses a
+browser because the header is inside a Suspense boundary: the response is 200
+and the redirect travels in the RSC stream for the client router to perform, so
+curl sees a healthy page and no redirect at all.
+
+It is not authorisation: kkl-backend still authorises every request, and a demo
+session holds no token to send, so anything that genuinely calls the backend as
+an account will refuse it.
 
 Every other number is unaffected — it goes to the code step exactly as before,
 and on a sample build is still authenticated against nothing.
