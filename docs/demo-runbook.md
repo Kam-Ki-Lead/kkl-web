@@ -43,6 +43,25 @@ It writes four accounts and nothing else — no leads, no listings, no wallet.
 | Builder | `builder@<domain>` | builder | `/builder` |
 | Admin | `admin@<domain>` | **staff** | `/admin` |
 
+### And once more: put content on the consoles
+
+Four accounts with nothing behind them show empty states. This fills them:
+
+```bash
+npm run seed:locations
+npm run seed:verification
+npm run seed:demo -- --reason "client demo, <date>" --domain review.yourdomain.com
+```
+
+Everything it writes is prefixed `[DEMO]` and appears that way on screen.
+`kkl-backend/docs/demo-content.md` lists exactly what it creates, and the open
+decisions it does and does not step past.
+
+**Buy Leads will still be empty**, and that is not a seeding problem: a lead is
+only sellable with recorded consent (Q-6), and no code path in kkl-backend
+grants it. Demonstrate that screen in sample mode, or answer Q-6. The same doc
+has the options.
+
 The Admin row creates a **staff** account. That is the point of it and it is
 the one thing here worth being deliberate about: whoever holds that password
 can open the Admin console. Rotate it when the review is over —
