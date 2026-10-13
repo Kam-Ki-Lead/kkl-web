@@ -87,11 +87,23 @@ export default async function AuthPage({
           rather than offering a sign-in that leads nowhere. */}
       {demoSignInWorks() ? <DemoAccounts /> : null}
       {demoSignInAllowed() && !demoConsolesWork() ? (
+        /*
+         * `KKL_DEMO_SIGNIN` is set on a deployment that reads from the API,
+         * where the cookie shortcut it switches on opens nothing. The note
+         * exists so that whoever set the variable is told why it did not
+         * appear, rather than being left to guess.
+         *
+         * It points at the form above, not at a sample build. When this was
+         * written there was no other way in and "go and run it on a laptop"
+         * was the only honest advice; now the form directly above it signs
+         * into this deployment for real, and sending somebody elsewhere from
+         * a page that works would be the wrong answer twice over.
+         */
         <p className="t-caption mt-[14px] rounded-[10px] border border-warning/40 bg-chip-warning-bg px-[12px] py-[10px] text-chip-warning-fg">
-          The review accounts are switched on for this deployment, but its account screens
-          read from the API and a review session carries no API token — so they would open
-          nothing. Run the four-console walkthrough on a build serving sample fixtures
-          (docs/review-sign-in.md).
+          KKL_DEMO_SIGNIN is set on this deployment, but the one-click review accounts it
+          switches on carry no API token, and these account screens read from the API — so
+          they are not shown. Use the email address and password above, which signs in to
+          this deployment for real. The variable can be removed.
         </p>
       ) : null}
 
