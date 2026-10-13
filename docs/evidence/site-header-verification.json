@@ -1,10 +1,10 @@
 {
   "revisions": {
-    "web": "241b826",
+    "web": "c0b08ee",
     "backend": "fa3e208",
     "voice": "943340e"
   },
-  "base": "http://127.0.0.1:3814",
+  "base": "http://127.0.0.1:3828",
   "checks": [
     {
       "name": "the header really is in Plus Jakarta Sans",
@@ -224,7 +224,7 @@
     {
       "name": "the search reaches the results page",
       "pass": true,
-      "detail": "http://127.0.0.1:3814/search?q=Ivy"
+      "detail": "http://127.0.0.1:3828/search?q=Ivy"
     },
     {
       "name": "and the results are filtered by the term",

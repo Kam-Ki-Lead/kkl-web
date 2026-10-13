@@ -1,11 +1,13 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  DEMO_LANDING,
+  DEMO_ACCOUNTS,
   DEMO_MOBILE,
   DEMO_SIGNIN_ENV,
+  accountForRole,
+  demoAccountFor,
   demoSignInIsAllowed,
-  isDemoMobile,
+  readDemoRole,
   readDemoSignInOptIn,
 } from '../src/lib/auth/demo-access.ts';
 
@@ -106,26 +108,60 @@ describe('the review sign-in shortcut', { concurrency: false }, () => {
     }
   });
 
-  test('the number is matched however it is typed, and nothing else is', () => {
+  test('a number is matched however it is typed, and nothing else is', () => {
     for (const typed of ['8971741611', '+91 89717 41611', '91-8971741611', '89717 41611']) {
-      assert.equal(isDemoMobile(typed), true, typed);
+      assert.equal(demoAccountFor(typed)?.role, 'buyer', typed);
     }
     for (const other of ['8971741612', '897174161', '9971741611', '', '1234567890']) {
-      assert.equal(isDemoMobile(other), false, other);
+      assert.equal(demoAccountFor(other), null, other);
     }
   });
 
-  test('the number is the one that was asked for', () => {
+  test('the number asked for first still works, and signs in as the Buyer', () => {
     assert.equal(DEMO_MOBILE, '8971741611');
+    assert.equal(demoAccountFor(DEMO_MOBILE)?.role, 'buyer');
   });
 
-  test('it lands on the public site, not on an account screen', () => {
-    // /account reads from kkl-backend as the account. A demo session has no
-    // token, so that read is refused and redirects back to sign-in — which is
-    // what happened: the shortcut appeared to do nothing and landed on a
-    // blank bounce at /auth?next=%2Faccount.
-    assert.equal(DEMO_LANDING, '/');
-    assert.equal(DEMO_LANDING.startsWith('/account'), false);
-    assert.equal(DEMO_LANDING.startsWith('/seller'), false);
+  test('there is one account per console, and each has its own number', () => {
+    assert.deepEqual(
+      DEMO_ACCOUNTS.map((a) => a.role),
+      ['buyer', 'seller', 'builder', 'admin'],
+    );
+    const numbers = DEMO_ACCOUNTS.flatMap((a) => [a.mobile, ...(a.also ?? [])]);
+    assert.equal(new Set(numbers).size, numbers.length, 'two accounts share a number');
+    for (const account of DEMO_ACCOUNTS) {
+      for (const number of [account.mobile, ...(account.also ?? [])]) {
+        assert.match(number, /^[6-9]\d{9}$/, account.role);
+        assert.equal(demoAccountFor(number)?.role, account.role, number);
+      }
+    }
+    // The Buyer screens are rendered from this fixture, so its own number
+    // reaches the Buyer too, even though the page shows the asked-for one.
+    assert.equal(demoAccountFor('9830041288')?.role, 'buyer');
+  });
+
+  test('each account lands on its own console, never on somebody else\'s', () => {
+    // The bug this pins: every account landed on one place. A Builder sent to
+    // the Buyer's /account is in the wrong room, and the first attempt sent
+    // all four to /account — which then bounced to a blank /auth?next=%2Faccount.
+    assert.deepEqual(
+      DEMO_ACCOUNTS.map((a) => a.landing),
+      ['/account', '/seller', '/builder', '/admin'],
+    );
+    for (const account of DEMO_ACCOUNTS) {
+      assert.equal(accountForRole(account.role).landing, account.landing);
+      assert.match(account.landing, /^\/[a-z]/, 'a landing must be a path on this site');
+    }
+  });
+
+  test('the landing comes from the table, never from the request', () => {
+    // A bypass whose destination is a form field is a redirect anybody can
+    // aim. `readDemoRole` is the only way in, and it only knows four words.
+    for (const role of ['buyer', 'seller', 'builder', 'admin']) {
+      assert.equal(readDemoRole(role), role);
+    }
+    for (const junk of [undefined, '', 'staff', 'BUYER', '/admin', 'https://example.com', '../admin']) {
+      assert.equal(readDemoRole(junk), null, JSON.stringify(junk));
+    }
   });
 });

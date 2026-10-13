@@ -3,8 +3,7 @@ import { SiteHeader, SiteHeaderFallback } from "@/components/layout/site-header"
 import { PublicFooter } from "@/components/layout/public-footer";
 import { headerShortlistCount } from "@/lib/services/backend/buyer-records";
 import { hasBrowserSession } from "@/lib/auth/backend";
-import { hasDemoSession } from "@/lib/auth/demo-session";
-import { profileStoreKind } from "@/lib/services/backend/config";
+import { demoSession } from "@/lib/auth/demo-session";
 
 async function Header() {
   const shortlist = await headerShortlistCount();
@@ -19,14 +18,15 @@ async function Header() {
    * may actually see.
    *
    * The review demo session counts here — and ONLY here, because it holds no
-   * token. On a server whose account screens read from kkl-backend it does
-   * not count at all: those screens would refuse it and bounce to sign-in, so
-   * a header saying "My account" would be pointing at a door that does not
-   * open. That server's demo session gets a signed-out header, which is the
-   * honest reading of what it can do.
+   * token. `demoSession()` is already null on every server where the shortcut
+   * is off or where the consoles it signs in to could not open it, so there is
+   * no server on which this header claims a session that leads nowhere.
+   *
+   * The account control goes to THAT account's console — a signed-in Builder
+   * sent to the Buyer's /account is in the wrong room.
    */
-  const demo = profileStoreKind() !== "backend" && (await hasDemoSession());
-  const signedIn = (await hasBrowserSession()) || demo;
+  const demo = await demoSession();
+  const signedIn = (await hasBrowserSession()) || demo !== null;
   // A guest, or a shortlist that could not be read, has no count to show.
   // The badge is a number somebody will act on, so an unknown one draws
   // nothing rather than a placeholder.
@@ -34,6 +34,8 @@ async function Header() {
     <SiteHeader
       shortlistCount={shortlist.kind === "count" ? shortlist.total : 0}
       signedIn={signedIn}
+      accountHref={demo?.landing}
+      accountLabel={demo ? demo.label : undefined}
     />
   );
 }

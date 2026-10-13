@@ -10,9 +10,9 @@ import {
   localIndianMobile,
   safeNext,
 } from "@/lib/auth/contract";
-import { DEMO_LANDING, isDemoMobile } from "@/lib/auth/demo-access";
+import { accountForRole, demoAccountFor, readDemoRole } from "@/lib/auth/demo-access";
 import {
-  demoSignInAllowed,
+  demoSignInWorks,
   endDemoSession,
   startDemoSession,
 } from "@/lib/auth/demo-session";
@@ -74,32 +74,30 @@ export async function requestCode(_previous: OtpState, formData: FormData): Prom
   }
 
   /*
-   * The review number signs in here, with no code step at all.
+   * A review account signs in here, with no code step at all, and lands on its
+   * own console.
    *
-   * Ahead of the branch below, not inside it, because the server this is for
-   * — staging — has sign-in switched to kkl-backend and no one-time-code
+   * Ahead of the branch below, not inside it, because the server this is for —
+   * staging — has sign-in switched to kkl-backend and no one-time-code
    * provider configured, so the branch below would ask a real API to send a
    * code it cannot send. `demoSignInAllowed()` is what decides whether this
    * runs; see demo-access.ts for the rule and for why the cookie it writes is
    * not a credential. Every other number falls through, and on a server where
-   * the shortcut is off this number does too.
+   * the shortcut is off these numbers do too.
+   *
+   * The landing is the account's own console, never the requested `next`:
+   * `safeNext("")` defaults to /account, which is the Buyer's console and the
+   * wrong room for three of the four.
+   *
+   * `demoSignInWorks()` is both halves of the question — allowed here, and
+   * able to open the console it signs in to. Where it is false these numbers
+   * fall through like any other, which is what sends staging to the real code
+   * path.
    */
-  if (isDemoMobile(mobile) && demoSignInAllowed()) {
-    await startDemoSession();
-    /*
-     * The homepage, never the requested `next`.
-     *
-     * `safeNext("")` defaults to /account, and on a server whose account
-     * screens read from kkl-backend — which is the server this shortcut exists
-     * for — /account asks the API as the account, has no token to ask with,
-     * and redirects straight back to /auth?next=%2Faccount. The shortcut
-     * appeared to do nothing and landed on a blank bounce.
-     *
-     * Every `next` worth defaulting to is behind that same read, so this does
-     * not try to pick a better one. A demo session is a signed-in PUBLIC site,
-     * and the homepage is the honest landing for it.
-     */
-    redirect(DEMO_LANDING);
+  const demo = demoAccountFor(mobile);
+  if (demo && demoSignInWorks()) {
+    await startDemoSession(demo);
+    redirect(demo.landing);
   }
 
   if (authStoreKind() !== "backend") {
@@ -185,6 +183,23 @@ export async function verifyCode(previous: OtpState, formData: FormData): Promis
   }
 
   redirect(destination);
+}
+
+/**
+ * One review account, straight in.
+ *
+ * The role is a key into the fixed table in demo-access.ts, never a path or a
+ * destination from the form — a bypass whose landing page comes out of a
+ * request body is a redirect anybody can aim. Refuses outright wherever the
+ * shortcut is off, by doing nothing at all.
+ */
+export async function demoAccountSignIn(formData: FormData): Promise<void> {
+  if (!demoSignInWorks()) return;
+  const role = readDemoRole(String(formData.get("role") ?? ""));
+  if (!role) return;
+  const account = accountForRole(role);
+  await startDemoSession(account);
+  redirect(account.landing);
 }
 
 /** Ends this session, or every session, then returns to sign-in. */

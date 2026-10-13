@@ -163,9 +163,11 @@ await page.locator('button[type="submit"]').first().click();
 await page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 20000 });
 await page.waitForLoadState("networkidle");
 is("the number signs in with no code step", page.url().includes("/auth"), false);
-// The public site, not /account: a demo session holds no backend token, so an
-// account screen would refuse the read and bounce straight back to sign-in.
-is("and lands on the public site", new URL(page.url()).pathname, "/");
+// This server reads everything from fixtures, so the Buyer's own console
+// opens. On a server whose screens read from kkl-backend as the account it
+// would not — that session holds no token — and the landing is the public
+// site instead. See verify-demo-accounts.mjs for all four.
+is("and lands on the Buyer's console", new URL(page.url()).pathname, "/account");
 info(`landed on ${new URL(page.url()).pathname}`);
 
 await page.goto(B, { waitUntil: "networkidle" });
@@ -177,7 +179,12 @@ const cookies = await ctx.cookies();
 const demo = cookies.find((c) => c.name === "kkl_demo_session");
 is("the session cookie is the demo one", Boolean(demo), true);
 is("it is httpOnly", demo?.httpOnly, true);
-is("it carries no token, only the number it stands for", demo?.value, DEMO);
+is("it carries no token, only the role it stands for", demo?.value, "buyer");
+is(
+  "and not the number that was typed",
+  demo?.value.includes(DEMO),
+  false,
+);
 is(
   "and no access or refresh token was written",
   cookies.some((c) => /access|refresh/i.test(c.name)),

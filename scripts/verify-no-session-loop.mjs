@@ -52,7 +52,12 @@ const PAGES = ["/", "/search", "/brokers", "/auth"];
  */
 const STATES = [
   { name: "no cookies", cookies: [] },
-  { name: "a demo session", cookies: [{ name: "kkl_demo_session", value: "8971741611" }] },
+  { name: "a demo session", cookies: [{ name: "kkl_demo_session", value: "buyer" }] },
+  // A session written on a server that allows the shortcut, carried to one
+  // that does not, and a value that is not a role at all. Both are ignored,
+  // and "ignored" must mean rendered, not redirected.
+  { name: "an admin demo session", cookies: [{ name: "kkl_demo_session", value: "admin" }] },
+  { name: "a demo session holding junk", cookies: [{ name: "kkl_demo_session", value: "8971741611" }] },
   { name: "a stale refresh token", cookies: [{ name: "kkl_refresh", value: "stale" }] },
   { name: "a junk access token", cookies: [{ name: "kkl_access", value: "not-a-real-token" }] },
 ];

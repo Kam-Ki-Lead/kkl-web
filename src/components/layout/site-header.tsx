@@ -70,6 +70,10 @@ export type SiteHeaderProps = {
   readonly listProjectHref?: string;
   readonly helpHref?: string;
   readonly signInHref?: string;
+  /** Where the account control goes when signed in. Defaults to /account. */
+  readonly accountHref?: string;
+  /** What it says when signed in. Defaults to "My account". */
+  readonly accountLabel?: string;
   /** Called after a city is chosen and stored, for callers that refetch. */
   readonly onCityChange?: (cityId: string) => void;
 };
@@ -140,6 +144,8 @@ function HeaderView({
   listProjectHref = "/builders",
   helpHref = "/support",
   signInHref = "/auth",
+  accountHref,
+  accountLabel,
   onCityChange,
   query,
 }: SiteHeaderProps & { query: QueryLike | null }) {
@@ -149,7 +155,7 @@ function HeaderView({
   /* `signInHref` still overrides, for a caller that wants a specific target;
      otherwise the control follows the session. */
   const account = signInHref === "/auth"
-    ? accountLink(signedIn)
+    ? accountLink(signedIn, accountHref, accountLabel)
     : { href: signInHref, label: "Sign in" };
 
   const [cityOpen, setCityOpen] = useState(false);

@@ -1,32 +1,51 @@
 /**
- * The review sign-in shortcut, against a server shaped like staging.
+ * The review sign-in shortcut, against the servers that must refuse it.
  *
  * The gate is unit-tested exhaustively. This is the half a unit test cannot
- * see: that on a server doing real sign-in through kkl-backend, the number
- * signs in WITHOUT the backend being involved at all — and that the same
- * server with the opt-in removed refuses it and falls through to the real
- * code path.
+ * see: whether the shortcut is *offered* and whether it *acts*, on a running
+ * server shaped like the deployment in question.
  *
- * Point it at a backend that does not exist. That is the point: if the
- * shortcut ever started depending on the API, this check would hang or error
- * instead of signing in, which is exactly the regression worth catching.
+ * Three configurations, all local, none deployed:
  *
- *   KKL_ENV=review KKL_DATA_SOURCE=sample KKL_AUTH=backend \
- *   KKL_BACKEND_BASE_URL=http://127.0.0.1:1 KKL_DEMO_SIGNIN=on \
- *     npx next start -p 3826
- *   KKL_BASE_URL=http://127.0.0.1:3826 KKL_EXPECT=on \
- *     PLAYWRIGHT=./node_modules/playwright-core node scripts/verify-demo-signin-gate.mjs
+ *   off, not opted in — sign-in switched to kkl-backend, no KKL_DEMO_SIGNIN.
+ *     The numbers must fall through to the real code path, which here cannot
+ *     send a code and says so.
  *
- * Signs in only as the review number, which is synthetic, and touches no
- * deployed environment.
+ *       KKL_ENV=development KKL_DATA_SOURCE=sample KKL_AUTH=backend \
+ *       KKL_BACKEND_BASE_URL=http://127.0.0.1:1 npx next start -p 3826
+ *       KKL_BASE_URL=http://127.0.0.1:3826 KKL_EXPECT=off \
+ *         PLAYWRIGHT=./node_modules/playwright-core node scripts/verify-demo-signin-gate.mjs
+ *
+ *   off, opted in — the same server with KKL_DEMO_SIGNIN=on. It must STILL
+ *     refuse, because its console screens read the signed-in profile from the
+ *     API and a review session carries no token for that read: pointed at one,
+ *     they rendered a header, a footer and an empty middle. The opt-in cannot
+ *     override that, and the page says which build does open them. Add
+ *     KKL_OPTED=on so this run checks for that sentence.
+ *
+ *   on — a build serving sample fixtures, where the consoles do open.
+ *
+ *       KKL_ENV=development KKL_DATA_SOURCE=sample npx next start -p 3828
+ *       KKL_BASE_URL=http://127.0.0.1:3828 KKL_EXPECT=on \
+ *         PLAYWRIGHT=./node_modules/playwright-core node scripts/verify-demo-signin-gate.mjs
+ *
+ * The refusing servers point at a backend that does not exist. That is the
+ * point: if the shortcut ever started depending on the API, this check would
+ * hang or error instead of refusing cleanly.
+ *
+ * Signs in only as the review accounts, which are synthetic, and touches no
+ * deployed environment. All four accounts are walked by
+ * verify-demo-accounts.mjs.
  */
 import { createRequire } from "node:module";
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT ?? "playwright");
 const B = process.env.KKL_BASE_URL ?? "http://127.0.0.1:3826";
 const CHROME = process.env.KKL_CHROME ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
-/** "on" when this server opted in, "off" when it did not. */
+/** "on" when the shortcut must work on this server, "off" when it must not. */
 const EXPECT = process.env.KKL_EXPECT === "on" ? "on" : "off";
+/** "on" when this server set KKL_DEMO_SIGNIN, which changes what "off" says. */
+const OPTED = process.env.KKL_OPTED === "on";
 const DEMO = "8971741611";
 
 const checks = [];
@@ -53,16 +72,16 @@ if (EXPECT === "on") {
   await page.waitForURL((url) => !url.pathname.startsWith("/auth"), { timeout: 20000 });
   const took = Date.now() - started;
   is("the number signs in with no code step", page.url().includes("/auth"), false);
-  is("and lands on the public site, not an account screen", new URL(page.url()).pathname, "/");
-  // The backend address points at a closed port. Reaching it would time out;
-  // this returns immediately, which is the evidence that it was never called.
-  is("without waiting on the backend it was never going to reach", took < 6000, true);
+  is("and lands on the Buyer's own console", new URL(page.url()).pathname, "/account");
+  // Nothing was asked of any API, so this returns in milliseconds rather than
+  // waiting on a request.
+  is("without waiting on a backend at all", took < 6000, true);
   info(`signed in in ${took}ms, landed on ${new URL(page.url()).pathname}`);
 
   const cookie = (await ctx.cookies()).find((c) => c.name === "kkl_demo_session");
   is("a demo session exists", Boolean(cookie), true);
   is("it is httpOnly", cookie?.httpOnly, true);
-  is("and carries no token, only the number it stands for", cookie?.value, DEMO);
+  is("and carries no token, only the role it stands for", cookie?.value, "buyer");
   is(
     "no access or refresh token was written",
     (await ctx.cookies()).some((c) => /access|refresh/i.test(c.name)),
@@ -72,12 +91,12 @@ if (EXPECT === "on") {
   await page.goto(B, { waitUntil: "networkidle" });
   is(
     "the header reflects the session",
-    /My account/.test(await page.evaluate(() => document.querySelector("header").innerText)),
+    /Buyer|My account/.test(await page.evaluate(() => document.querySelector("header").innerText)),
     true,
   );
 } else {
-  // The opt-in is absent, so this server must treat the number like any other
-  // and go to the real code path — which here cannot send a code, and says so.
+  // This server must treat the number like any other and go to the real code
+  // path — which here cannot send a code, and says so.
   await page.waitForTimeout(4000);
   is("the number does not sign in", page.url().includes("/auth"), true);
   is(
@@ -91,7 +110,16 @@ if (EXPECT === "on") {
     /code|provider|try again/i.test(text),
     true,
   );
-  info(`refused on ${new URL(page.url()).pathname}`);
+  if (OPTED) {
+    // The opt-in IS set here, so somebody deliberately switched the shortcut
+    // on and must be told why it is not there — not left guessing.
+    is(
+      "the page explains that the opt-in cannot open these consoles",
+      /read from the API|sample fixtures/i.test(text),
+      true,
+    );
+  }
+  info(`refused on ${new URL(page.url()).pathname}${OPTED ? " (opted in)" : ""}`);
 }
 
 await browser.close();
@@ -99,5 +127,5 @@ await browser.close();
 const failed = checks.filter((c) => c.startsWith("FAIL"));
 console.log(checks.join("\n"));
 const total = checks.filter((c) => !c.startsWith("INFO")).length;
-console.log(`\n${total - failed.length}/${total} checks passed (opt-in ${EXPECT})`);
+console.log(`\n${total - failed.length}/${total} checks passed (shortcut ${EXPECT}${OPTED ? ", opted in" : ""})`);
 process.exit(failed.length === 0 ? 0 : 1);

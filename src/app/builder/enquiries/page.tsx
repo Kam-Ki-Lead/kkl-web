@@ -79,7 +79,16 @@ export default async function BuilderEnquiriesPage({
     }
     throw error;
   }
-  const mode = access.selectedMode;
+  /*
+   * Looked up once, and allowed to come back empty.
+   *
+   * The mode is typed as one of three names, and a service that sent a fourth —
+   * or an old one — used to take this screen out with a 500 on `.title`. That
+   * is exactly what happened: a sample fixture kept the pre-rename "included"
+   * and B-16 answered 500 on every sample build. A rule nobody can name reads
+   * the same as no rule chosen, which this screen already says well.
+   */
+  const copy = access.selectedMode ? MODE_COPY[access.selectedMode] : undefined;
 
   return (
     <BuilderShell title="Enquiries" subtitle="Buyers who contacted you about your listings">
@@ -181,10 +190,10 @@ export default async function BuilderEnquiriesPage({
             when nothing is, it says that rather than picking one to show. */}
         <Card className="border-[#F3DFB4] bg-[#FFF7E8] p-[18px]">
           <h2 className="t-card-title text-ink">
-            {mode === null ? access.label : `Showing ${MODE_COPY[mode].title}`}
+            {copy ? `Showing ${copy.title}` : access.label}
           </h2>
           <p className="t-body mt-[6px] text-body">
-            {mode === null ? (
+            {copy === undefined ? (
               <>
                 Three rules are on the table and none has been confirmed: contact details
                 included at no extra charge, included through a subscription, or unlocked
@@ -193,7 +202,7 @@ export default async function BuilderEnquiriesPage({
               </>
             ) : (
               <>
-                {MODE_COPY[mode].detail} This is a design proposal, not a stated rule.
+                {copy.detail} This is a design proposal, not a stated rule.
               </>
             )}
           </p>

@@ -4,8 +4,8 @@ import { authStoreKind } from "@/lib/services/backend/config";
 import { pendingVerificationMobile } from "@/app/actions/enquiry";
 import { OtpForm } from "@/components/auth/otp-form";
 import { Card } from "@/components/ui/card";
-import { DEMO_MOBILE } from "@/lib/auth/demo-access";
-import { demoSignInAllowed } from "@/lib/auth/demo-session";
+import { DemoAccounts } from "@/components/auth/demo-accounts";
+import { demoConsolesWork, demoSignInAllowed, demoSignInWorks } from "@/lib/auth/demo-session";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -41,14 +41,19 @@ export default async function AuthPage({
         />
       </Card>
 
-      {/* Review only. `demoSignInAllowed()` is false on any server reading the
-          real backend or declaring itself production, so this note cannot
-          appear — and the shortcut cannot work — where it would matter. */}
-      {demoSignInAllowed() ? (
-        <p className="t-caption mt-[14px] rounded-[10px] border border-line bg-tint px-[14px] py-[10px] text-body">
-          <strong className="text-ink">Review shortcut.</strong> {DEMO_MOBILE} signs in
-          straight away, with no code. Any other number goes to the code step, where any six
-          digits except 000000 are accepted and nothing is verified against anything.
+      {/* Review only, and only where it works. `demoSignInAllowed()` is false
+          on any server declaring itself production, and on a backend-connected
+          one that has not opted in. `demoConsolesWork()` is false where the
+          account screens read from kkl-backend, because a session with no
+          token cannot open them — there the note below replaces the buttons
+          rather than offering a sign-in that leads nowhere. */}
+      {demoSignInWorks() ? <DemoAccounts /> : null}
+      {demoSignInAllowed() && !demoConsolesWork() ? (
+        <p className="t-caption mt-[14px] rounded-[10px] border border-warning/40 bg-chip-warning-bg px-[12px] py-[10px] text-chip-warning-fg">
+          The review accounts are switched on for this deployment, but its account screens
+          read from the API and a review session carries no API token — so they would open
+          nothing. Run the four-console walkthrough on a build serving sample fixtures
+          (docs/review-sign-in.md).
         </p>
       ) : null}
 

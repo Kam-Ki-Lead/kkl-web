@@ -381,7 +381,18 @@ function freshState() {
     /** enquiry id -> true, under alternative B only. */
     unlocked: new Set<string>(),
     unlockTokens: new Map<string, string>(),
-    contactAccess: "included" as ContactAccessMode,
+    /*
+     * `satisfies` first, THEN the widening cast. "included" used to be one of
+     * two alternatives here; Q-2a's third candidate split it into
+     * included_free and included_with_subscription, and the bare
+     * `as ContactAccessMode` this value carried let the dead name survive the
+     * rename. B-16 looks its copy up by this key, found nothing, and answered
+     * 500 on every sample build — the second screen a Builder demo opens.
+     * The cast is still needed, because this field is reassigned below and an
+     * annotated const narrows back to its literal; `satisfies` is what makes
+     * the next rename fail the typecheck instead of a screen.
+     */
+    contactAccess: ("included_free" satisfies ContactAccessMode) as ContactAccessMode,
     openingBalance: SEED_CREDIT_OPENING,
     ledger: withRunningBalance(seedLedgerEntries(), SEED_CREDIT_OPENING),
     listingSequence: 0,

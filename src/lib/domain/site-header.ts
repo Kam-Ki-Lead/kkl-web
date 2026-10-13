@@ -125,8 +125,18 @@ export function buyLeadsHref(signedIn: boolean): string {
 export const ACCOUNT_SIGNED_OUT = { href: "/auth", label: "Sign in" } as const;
 export const ACCOUNT_SIGNED_IN = { href: "/account", label: "My account" } as const;
 
-export function accountLink(signedIn: boolean): { readonly href: string; readonly label: string } {
-  return signedIn ? ACCOUNT_SIGNED_IN : ACCOUNT_SIGNED_OUT;
+export function accountLink(
+  signedIn: boolean,
+  /** The console this session actually works in, when it is not the Buyer's. */
+  href?: string,
+  /** What that console is called, so a Builder is not offered "My account". */
+  label?: string,
+): { readonly href: string; readonly label: string } {
+  if (!signedIn) return ACCOUNT_SIGNED_OUT;
+  return {
+    href: href ?? ACCOUNT_SIGNED_IN.href,
+    label: label ?? ACCOUNT_SIGNED_IN.label,
+  };
 }
 
 const under = (pathname: string, route: string) =>
