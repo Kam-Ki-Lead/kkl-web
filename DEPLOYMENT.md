@@ -89,11 +89,18 @@ resolved in the platform's favour.
 
 ## What this deployment cannot do
 
-- **Sign anybody in.** `KKL_AUTH=backend` sends the code request to
+- **Send a one-time code.** `KKL_AUTH=backend` sends the code request to
   kkl-backend, and kkl-backend has no one-time-code provider (Q-7). The screen
-  reports that codes cannot be sent. This is the decision that needs an answer
-  before a tester can get past the first screen; see
+  reports that codes cannot be sent. Q-7 still needs an answer; see
   `../kkl-backend/docs/staging/runbook.md`.
+
+  It is no longer what stops a tester getting past the first screen. An email
+  address and a password sign in to the same account and issue the same
+  session, and that path needs no provider because it sends nothing. The
+  accounts are seeded once by an operator —
+  `npm run seed:review-accounts` in kkl-backend — and `docs/demo-runbook.md`
+  has the steps. See `../kkl-backend/docs/password-sign-in.md` for what it
+  does and does not change.
 - **Take a payment.** No Razorpay credentials, and the live call is not
   implemented (Q-5).
 - **Show a photograph.** `next.config.ts` permits no remote image pattern.

@@ -12,7 +12,7 @@
  * its row.
  */
 
-export type AuthStage = "code" | "verify" | "refresh";
+export type AuthStage = "code" | "verify" | "refresh" | "password";
 
 export type AuthErrorBody = {
   error?: unknown;
@@ -84,9 +84,16 @@ export function interpretAuthResponse(
     : undefined;
 
   if (status === 429 || body.code === "rate_limited") {
-    const base = sentence(body, "Too many codes were requested for this number.");
+    // The API's own sentence is preferred and almost always present; these
+    // fallbacks are what a caller sees when it is not, and a sentence about
+    // codes on the password form would be a lie about which limit was hit.
+    const base = sentence(body, stage === "password"
+      ? "Too many sign-in attempts for this address."
+      : "Too many codes were requested for this number.");
     const message = retryAfterSeconds !== undefined && !base.includes(String(retryAfterSeconds))
-      ? `${base} You can request another code in ${retryAfterSeconds} seconds.`
+      ? stage === "password"
+        ? `${base} You can try again in ${retryAfterSeconds} seconds.`
+        : `${base} You can request another code in ${retryAfterSeconds} seconds.`
       : base;
     return { kind: "rate_limited", message, ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}) };
   }
@@ -100,6 +107,16 @@ export function interpretAuthResponse(
 
   if (status === 422) {
     return { kind: "invalid", message: sentence(body, "That value was not accepted.") };
+  }
+
+  if (status === 401 && stage === "password") {
+    // One sentence for all three reasons the API refuses, because the API
+    // deliberately does not say which: an account-enumeration oracle is not
+    // something a frontend gets to add back.
+    return {
+      kind: "invalid_code",
+      message: sentence(body, "That email address and password do not match an account."),
+    };
   }
 
   if (status === 401 && stage === "refresh") {

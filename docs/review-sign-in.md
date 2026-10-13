@@ -1,5 +1,15 @@
 # The review sign-in: four accounts, no code
 
+> **There is now a real way in.** An email address and a password opens a
+> genuine kkl-backend session, works on any deployment wired to the API —
+> staging included — and shows that deployment's real records. See
+> `docs/demo-runbook.md` and `kkl-backend/docs/password-sign-in.md`.
+>
+> What follows is the frontend shortcut: a cookie, for a laptop with no API.
+> It is still the quickest way to walk the four consoles on a sample build,
+> and it still opens nothing on a deployment that reads from the API.
+
+
 Four synthetic accounts sign in with one click and no one-time code, each
 landing on its own console.
 

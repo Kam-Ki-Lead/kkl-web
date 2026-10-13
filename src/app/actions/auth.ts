@@ -11,6 +11,7 @@ import {
   safeNext,
 } from "@/lib/auth/contract";
 import { accountForRole, demoAccountFor, readDemoRole } from "@/lib/auth/demo-access";
+import { consoleFor } from "@/lib/auth/landing";
 import {
   demoSignInWorks,
   endDemoSession,
@@ -19,6 +20,7 @@ import {
 import {
   clearChallenge,
   exchangeCode,
+  exchangePassword,
   readChallenge,
   requestAuthCode,
   revokeSession,
@@ -179,6 +181,81 @@ export async function verifyCode(previous: OtpState, formData: FormData): Promis
     if (error instanceof ServiceError) {
       return { step: "code", mobile, error: error.message, delivery: previous.delivery };
     }
+    throw error;
+  }
+
+  redirect(destination);
+}
+
+/**
+ * The second way in: an email address and a password.
+ *
+ * WHY IT IS HERE
+ * The one-time code cannot be delivered on this deployment — no provider is
+ * configured (Q-7) — so the form above correctly refuses rather than
+ * pretending. This path needs no provider: nothing is sent.
+ *
+ * It is a server action for the same reason `otpStep` is: the password must
+ * never exist in a URL. A form that degraded to a GET would put it in the
+ * address bar, in history, in the server's access log and in the referrer of
+ * the next request. A server action posts it, this function hands it to the
+ * API, and nothing keeps it afterwards.
+ *
+ * `next` is followed the way the code path follows it, through `safeNext`,
+ * which only accepts a path on this site.
+ */
+export type PasswordState = {
+  readonly email: string;
+  readonly error?: string;
+};
+
+export async function passwordSignIn(
+  _previous: PasswordState,
+  formData: FormData,
+): Promise<PasswordState> {
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  // Kept raw as well as sanitised, because "nothing asked for a destination"
+  // and "something asked for /account" are different situations and
+  // `safeNext` turns the first into the second.
+  const requested = String(formData.get("next") ?? "").trim();
+  const next = safeNext(requested);
+
+  // Checked here so an empty submission does not spend a request, and
+  // deliberately the only thing checked here: every other judgement about
+  // these two values belongs to the API, which is the only side that knows
+  // what is true.
+  if (!email || !password) {
+    return { email, error: "Enter your email address and password." };
+  }
+
+  if (authStoreKind() !== "backend") {
+    return {
+      email,
+      error: "Password sign-in needs the configured API. This deployment is not using it.",
+    };
+  }
+
+  const result = await exchangePassword(email, password);
+  if (!result.ok) {
+    // The API's own sentence. It does not say whether the address has an
+    // account, and this must not add that back by handling the cases
+    // differently.
+    return { email, error: result.problem.message };
+  }
+
+  await writeSession(result.session);
+
+  let destination: string;
+  try {
+    destination = next === ENQUIRY_CONFIRM
+      ? await withIssuedAccess(result.session.accessToken, () => confirmEnquiryDestination())
+      // Nothing asked for a page, so this account lands in its own console.
+      // A Broker put on the Buyer's /account is in the wrong room, and that
+      // is where every role landed before this line existed.
+      : requested === "" ? consoleFor(result.role) : next;
+  } catch (error) {
+    if (error instanceof ServiceError) return { email, error: error.message };
     throw error;
   }
 

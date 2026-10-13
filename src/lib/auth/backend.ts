@@ -7,6 +7,7 @@ import {
   interpretAuthResponse,
   type AuthErrorBody,
   type AuthProblem,
+  type AuthStage,
 } from "@/lib/auth/contract";
 import {
   ACCESS_COOKIE,
@@ -91,7 +92,7 @@ async function readBody(response: Response): Promise<AuthErrorBody & Record<stri
 async function postAuth(
   path: string,
   body: unknown,
-  stage: "code" | "verify" | "refresh",
+  stage: AuthStage,
 ): Promise<{ ok: true; status: number; body: Record<string, unknown> } | { ok: false; problem: AuthProblem }> {
   let baseUrl: string;
   try {
@@ -226,6 +227,38 @@ export async function exchangeCode(
  * Run `fn` with the access token that was just issued, before the cookie
  * written in this action is visible to a later `cookies().get`.
  */
+/**
+ * The second way in: an email address and a password, exchanged for a session.
+ *
+ * No challenge and no local state — the browser holds nothing between the
+ * form and the session, which is the whole reason this path exists on a
+ * deployment that cannot deliver a code.
+ *
+ * The password is in a POST body to the API and is never written to a cookie,
+ * a log line or a redirect. It is not kept after this call returns, and a
+ * failure carries the API's own sentence, which deliberately does not say
+ * whether the address has an account.
+ */
+export async function exchangePassword(
+  email: string,
+  password: string,
+): Promise<
+  | { ok: true; session: IssuedSession; role: string | null }
+  | { ok: false; problem: AuthProblem }
+> {
+  const result = await postAuth("/v1/auth/sessions/password", { email, password }, "password");
+  if (!result.ok) return result;
+  const session = issuedFrom(result.body as SessionResponse);
+  if (!session) return { ok: false, problem: UNAVAILABLE };
+  // The role the API says this session has, used only to choose a landing
+  // page when nothing asked for one. Read from the response, never from the
+  // request, and not trusted for anything else: the API authorises every
+  // call regardless of what this says.
+  const account = (result.body as { account?: { role?: unknown } }).account;
+  const role = typeof account?.role === "string" ? account.role : null;
+  return { ok: true, session, role };
+}
+
 export function withIssuedAccess<T>(accessToken: string, fn: () => Promise<T>): Promise<T> {
   return justIssued.run(accessToken, fn);
 }

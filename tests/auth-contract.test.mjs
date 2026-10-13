@@ -80,3 +80,45 @@ test("session cookies are httpOnly and the two tokens are different cookies", ()
   assert.notEqual(ACCESS_COOKIE, REFRESH_COOKIE);
 });
 
+
+test("a password refusal says the same thing however it failed", () => {
+  // The API refuses three different situations with one sentence — no
+  // account, no password set, wrong password — and the frontend must not
+  // handle them into three different messages. An account-enumeration oracle
+  // is not something a frontend gets to add back.
+  const api = "That email address and password do not match an account.";
+  for (const body of [
+    { error: api, code: "unauthorized" },
+    { error: api, code: "unauthorized", field: "password" },
+  ]) {
+    const refused = interpretAuthResponse(401, body, "password");
+    assert.equal(refused?.kind, "invalid_code");
+    assert.equal(refused?.message, api);
+  }
+
+  // And the fallback, for a response that carried no sentence at all, is
+  // about this form rather than about a code that was never sent.
+  const bare = interpretAuthResponse(401, {}, "password");
+  assert.match(bare?.message ?? "", /email address and password/);
+  assert.equal(/code/i.test(bare?.message ?? ""), false);
+});
+
+test("a password rate limit is not described as a code being resent", () => {
+  const limited = interpretAuthResponse(429, { retryAfterSeconds: 90 }, "password");
+  assert.equal(limited?.kind, "rate_limited");
+  assert.equal(limited?.retryAfterSeconds, 90);
+  assert.match(limited?.message ?? "", /try again in 90 seconds/);
+  assert.equal(/request another code/i.test(limited?.message ?? ""), false);
+
+  // The code form's own wording is unchanged.
+  const code = interpretAuthResponse(429, { retryAfterSeconds: 90 }, "code");
+  assert.match(code?.message ?? "", /request another code in 90 seconds/);
+});
+
+test("a suspended account is still reported as suspended on the password form", () => {
+  const suspended = interpretAuthResponse(403, {
+    error: "This account is suspended. Contact support.",
+    code: "account_suspended",
+  }, "password");
+  assert.equal(suspended?.kind, "suspended");
+});

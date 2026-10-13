@@ -87,8 +87,9 @@ const WALK = {
 };
 
 const checks = [];
-const is = (n, a, e) =>
-  checks.push(`${a === e ? "PASS" : "FAIL"}  ${n} — ${JSON.stringify(a)}${a === e ? "" : ` (expected ${JSON.stringify(e)})`}`);
+// Each check here is one line built from three facts, so this script pushes
+// its own rather than using the `is(name, actual, expected)` the other
+// scripts share.
 const info = (d) => checks.push(`INFO  ${d}`);
 
 const browser = await chromium.launch({ executablePath: CHROME });
