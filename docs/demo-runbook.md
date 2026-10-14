@@ -54,6 +54,11 @@ npm run seed:demo -- --reason "client demo, <date>" --domain review.yourdomain.c
 ```
 
 Everything it writes is prefixed `[DEMO]` and appears that way on screen.
+
+On a deployment where Exotel is configured it writes no qualification runs: a
+voice run dials, and this command is run to fill screens, not to telephone
+anybody. Place a real call deliberately, one lead at a time, with
+`npm run start:run -- --confirm` in kkl-backend.
 `kkl-backend/docs/demo-content.md` lists exactly what it creates, and the open
 decisions it does and does not step past.
 
