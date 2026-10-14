@@ -117,10 +117,24 @@ export default async function AdminVoicePage() {
           )}
 
           <Card className="p-[18px]">
-            <h2 className="t-card-title text-ink">Start a non-dispatched run</h2>
+            <h2 className="t-card-title text-ink">Start a run on the fixture lead</h2>
             <p className="t-body mt-[6px] text-body">
-              Creates a run on the synthetic fixture lead. Without Exotel the call stays{" "}
-              <span className="t-mono">not_configured</span>. This does not dial.
+              Creates a run on one hardcoded synthetic lead — not a lead you added, and not
+              one you can choose here. Without Exotel the call stays{" "}
+              <span className="t-mono">not_configured</span>.
+            </p>
+            {/*
+              This used to say "This does not dial", which was true only while no
+              provider was configured. `startRun` with channel voice calls `dial()`;
+              on a deployment with Exotel configured and live calling authorised that
+              telephones a real handset and is charged for. A reassurance that stops
+              being true is worse than no reassurance, because it is read instead of
+              the configuration.
+            */}
+            <p className="t-caption mt-[6px] rounded-[10px] border border-warning/40 bg-chip-warning-bg px-[12px] py-[10px] text-chip-warning-fg">
+              Where Exotel is configured and live calling is authorised, this places a real
+              call. To call a lead you added, use <span className="t-mono">npm run start:run</span>
+              {" "}in kkl-backend, which names the number and asks before it dials.
             </p>
             {syntheticSet ? (
               <StartQualificationRunForm
